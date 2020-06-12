@@ -22,21 +22,21 @@ hook.Add("StartCommand","Persona_ControlBotAI",function(bot,cmd)
 		return
 	end
 	if SERVER then
-		if !IsValid(bot:GetStand()) then
+		if !IsValid(bot:GetPersona()) then
 			local tbl = {}
-			for stando,v in pairs(JOJO_STANDS) do
+			for stando,v in pairs(PERSONA) do
 				table.insert(tbl,stando)
 			end
 			local persona = tbl[math.random(1,#tbl)]
-			bot:SetStand(persona)
-			local ent = ents.Create("prop_stand_" .. persona)
-			ent:SetModel(JOJO_STANDS[persona].Model)
+			bot:SetPersona(persona)
+			local ent = ents.Create("prop_persona_" .. persona)
+			ent:SetModel(PERSONA[persona].Model)
 			ent:SetPos(bot:GetPos())
 			ent:SetAngles(bot:GetAngles())
 			ent:Spawn()
-			bot:SetStandEntity(ent)
+			bot:SetPersonaEntity(ent)
 			ent.User = bot
-			ent.Stand = bot:GetStandName()
+			ent.Persona = bot:GetPersonaName()
 			ent:DoIdle()
 			ent:OnSummoned(bot)
 			return
@@ -45,10 +45,10 @@ hook.Add("StartCommand","Persona_ControlBotAI",function(bot,cmd)
 	local ent = bot.Persona_Enemy
 	local dist = ent:GetPos():Distance(bot:GetPos())
 	cmd:SetViewAngles(((ent:GetPos() +ent:OBBCenter()) -bot:GetShootPos()):GetNormalized():Angle())
-	if dist > bot:GetStand().Bot_StopDistance then
+	if dist > bot:GetPersona().Bot_StopDistance then
 		cmd:SetForwardMove(bot:GetWalkSpeed())
 	end
-	for ind,val in pairs(bot:GetStand().Bot_Buttons) do
+	for ind,val in pairs(bot:GetPersona().Bot_Buttons) do
 		local buttons = val.but
 		local vDist = val.dist
 		local chance = val.chance
