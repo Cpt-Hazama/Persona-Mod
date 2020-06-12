@@ -1,0 +1,17 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/makoto/body"
+	"$bumpmap" "models/cpthazama/persona5/makoto/body_n"
+	"$phongexponenttexture" "models/cpthazama/persona5/makoto/body_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0.005"
+	"$phongfresnelranges"	"[1 0.9 0.9]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "1"
+	"$rimmask" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}

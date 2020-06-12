@@ -1,0 +1,21 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/johanna/johanna"
+	"$bumpmap" "models/cpthazama/persona5/johanna/johanna_n"
+	"$phongexponenttexture" "models/cpthazama/persona5/johanna/johanna_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0.1"
+	"$phongfresnelranges"	"[1 1 1]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "1"
+	"$rimmask" "1"
+
+	"$envmap" "models/cpthazama/persona5/johanna/envmap"
+	"$envmaptint" "[0.001 0.001 0.001]"
+	"$envmapfresnel" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}

@@ -1,0 +1,39 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/magatsuizanagi/magatsuizanagi"
+	"$bumpmap" "models/cpthazama/persona5/magatsuizanagi/magatsuizanagi_n"
+	"$phongexponenttexture" "models/cpthazama/persona5/magatsuizanagi/magatsuizanagi_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0.1"
+	"$phongfresnelranges"	"[1 0.9 0.9]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "1"
+	"$rimmask" "1"
+
+	$detail	"models/cpthazama/persona5/magatsuizanagi/magatsuizanagi_flow3"
+	$detailscale "6"
+	$detailblendfactor "0.5"
+	$detailblendmode "2"
+
+	"Proxies"
+	{
+		"Sine"
+		{
+			"resultvar"	"$detailblendfactor"
+			"sineperiod" 5
+			"sinemin" 0.5
+			"sinemax" 0.9
+		}
+		"TextureScroll"
+		{
+			"texturescrollvar"	"$detailtexturetransform"
+			"texturescrollrate"	0.04
+			"texturescrollangle" 100
+		}
+	}
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}
