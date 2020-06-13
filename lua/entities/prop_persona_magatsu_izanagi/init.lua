@@ -296,6 +296,8 @@ function ENT:OnSummoned(ply)
 	self.InstaKillStyle = 0
 
 	self.Damage = 400
+	
+	self:SetNWString("SpecialAttack","Ziodyne")
 
 	local v = {forward=-200,right=80,up=50}
 	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))

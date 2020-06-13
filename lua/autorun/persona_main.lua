@@ -28,6 +28,14 @@ function PLY:SetPersona(persona)
 	self:SetNWString("PersonaName",persona)
 end
 
+function PLY:SetSP(sp)
+	self:SetNWInt("Persona_SP",sp)
+end
+
+function PLY:GetSP()
+	return self:GetNWInt("Persona_SP")
+end
+
 function PLY:GetPersonaName()
 	return self:GetNWString("PersonaName")
 end
@@ -58,6 +66,10 @@ function Persona_CSound(ply,snd,vol,pit)
 end
 
 if SERVER then
+	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
+		ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
+	end)
+
 	-- local wep = "weapon_persona_nothing"
 	local wep = "weapon_jojo_nothing"
 	hook.Add("Think","Persona_Think",function()
@@ -78,6 +90,19 @@ if SERVER then
 				end
 			end
 		end
+	end)
+
+	hook.Add("EntityTakeDamage","Persona_ModifyPlayerDMG",function(ply,dmginfo)
+		if ply:IsPlayer() then
+			local dmgtype = dmginfo:GetDamageType()
+			local dmg = dmginfo:GetDamage()
+			local persona = ply:GetPersona()
+
+			if IsValid(persona) && persona.HandleDamage then
+				return persona:HandleDamage(dmg,dmgtype,dmginfo)
+			end
+		end
+		-- return true -- Prevents all damage
 	end)
 
 	local function summon_persona(ply)
@@ -110,6 +135,72 @@ if SERVER then
 end
 
 if CLIENT then
+	surface.CreateFont("Persona",{
+		font = "Trebuchet24",
+		extended = false,
+		size = 35,
+		weight = 500,
+		blursize = 0,
+		scanlines = 0,
+		antialias = true,
+		underline = false,
+		italic = false,
+		strikeout = false,
+		symbol = false,
+		rotary = false,
+		shadow = false,
+		additive = false,
+		outline = true,
+	})
+
+	hook.Add("HUDPaint","Persona_HUD",function()
+		local ply = LocalPlayer()
+		local persona = ply:GetNWEntity("PersonaEntity")
+
+		if !IsValid(persona) then return end
+		
+		local sp = ply:GetSP()
+
+		local corners = 1
+		local posX = 250
+		local posY = 160
+		local len = 225
+		local height = 125
+		local color = Color(50,50,50,255)
+		draw.RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,color)
+		
+		-- local text = ply:GetPersonaName()
+		-- local posX = 200
+		-- local posY = 160
+		-- local color = Color(200,0,255,255)
+		-- draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
+		
+		local text = "SP:"
+		local posX = 235
+		local posY = 150
+		local color = Color(200,0,255,255)
+		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
+		
+		local text = sp
+		local posX = 185
+		local posY = 150
+		local color = Color(200,0,255,255)
+		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
+		
+		local text = "Persona Card:"
+		local posX = 235
+		local posY = 120
+		local color = Color(0,100,255,255)
+		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
+		
+		local text = persona:GetNWString("SpecialAttack")
+		if text == nil or text == "" then text = "N/A" end
+		local posX = 235
+		local posY = 85
+		local color = Color(0,100,255,255)
+		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
+	end)
+
 	hook.Add("ShouldDrawLocalPlayer","Persona_DrawPlayer",function(ply)
 		if IsValid(ply:GetNWEntity("PersonaEntity")) then return true end
 	end)

@@ -15,6 +15,11 @@ PERSONA["magatsu_izanagi"].Model = "models/cpthazama/persona5/persona/magatsu_iz
 PERSONA["magatsu_izanagi"].Aura = "jojo_aura_red"
 PERSONA["magatsu_izanagi"].Name = "Magatsu-Izanagi"
 
+PERSONA["izanagi_okami"] = {}
+PERSONA["izanagi_okami"].Model = "models/cpthazama/persona5/persona/izanagi_no_okami.mdl"
+PERSONA["izanagi_okami"].Aura = "jojo_aura_gold"
+PERSONA["izanagi_okami"].Name = "Izanagi-no-Okami"
+
 game.AddParticles("particles/magatsu_izanagi.pcf")
 local pParticleList = {
 	"fo4_libertyprime_impact",

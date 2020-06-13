@@ -106,6 +106,8 @@ function ENT:OnSummoned(ply)
 	self.DamageBuild = 300
 	
 	self:SetSkin(1)
+	
+	self:SetNWString("SpecialAttack","Ziodyne")
 
 	local v = {forward=-200,right=80,up=50}
 	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))

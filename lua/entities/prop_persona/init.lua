@@ -213,6 +213,14 @@ function ENT:DoIdle()
 	self:PlayAnimation("idle",1,1)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:TakeSP(sp)
+	self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,999))
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:TakeHP(hp)
+	self.User:SetHealth(self.User:Health() -hp)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AddLoop(snd,sndlevel)
 	local lp = CreateSound(self,snd)
 	lp:SetSoundLevel(sndlevel)
