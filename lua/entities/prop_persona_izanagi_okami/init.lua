@@ -93,6 +93,8 @@ function ENT:PersonaControls(ply,persona)
 			proj:SetPos(self:GetPos() +self:OBBCenter() +tb[i])
 			proj:SetAngles(IsValid(self:UserTrace().Entity) && (self:UserTrace().Entity:GetPos() +self:UserTrace().Entity:OBBCenter() -proj:GetPos()):Angle() or (self:UserTrace().HitPos -self:GetPos() +self:OBBCenter()):Angle())
 			proj:Spawn()
+			proj:SetOwner(self.User)
+			proj:SetPhysicsAttacker(self.User)
 			proj:EmitSound("cpthazama/persona5/skills/0338.wav")
 			
 			if IsValid(proj:GetPhysicsObject()) then
@@ -141,6 +143,11 @@ function ENT:OnSummoned(ply)
 
 	local v = {forward=-200,right=80,up=110}
 	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnKilledEnemy(ent)
+	self.User:SetSP(self.User:GetMaxSP())
+	self.User:SetHealth(self.User:GetMaxHealth())
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

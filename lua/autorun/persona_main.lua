@@ -46,8 +46,16 @@ function PLY:SetSP(sp)
 	self:SetNWInt("Persona_SP",sp)
 end
 
+function PLY:SetMaxSP(spm)
+	self:SetNWInt("Persona_SPMax",spm)
+end
+
 function PLY:GetSP()
 	return self:GetNWInt("Persona_SP")
+end
+
+function PLY:GetMaxSP()
+	return self:GetNWInt("Persona_SPMax")
 end
 
 function PLY:GetPersonaName()
@@ -90,7 +98,8 @@ end
 if SERVER then
 	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
 		ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
-		ply:SetMaxHealth(ply:GetMaxHealth() or 100)
+		ply:SetMaxSP(ply:GetSP())
+		ply:SetMaxHealth(100)
 	end)
 
 	local wep = "weapon_jojo_nothing"
@@ -98,6 +107,9 @@ if SERVER then
 		for _,v in pairs(player.GetAll()) do
 			if v:Health() > v:GetMaxHealth() then
 				v:SetMaxHealth(v:Health())
+			end
+			if v:GetSP() > v:GetMaxSP() then
+				v:SetMaxSP(v:GetSP())
 			end
 			if IsValid(v:GetPersona()) then
 				if !v:HasWeapon(wep) then

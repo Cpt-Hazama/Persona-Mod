@@ -366,6 +366,26 @@ function ENT:SoundTimer(t,ent,snd)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnKilledEnemy(ent) end
+---------------------------------------------------------------------------------------------------------------------------------------------
+hook.Add("OnNPCKilled","Persona_NPCKilled",function(ent,killer,weapon)
+	if killer:IsPlayer() then
+		local persona = killer:GetPersona()
+		if IsValid(persona) then
+			persona:OnKilledEnemy(ent)
+		end
+	end
+end)
+---------------------------------------------------------------------------------------------------------------------------------------------
+hook.Add("PlayerDeath","Persona_PlayerKilled",function(ent,killer,weapon)
+	if killer:IsPlayer() && killer != ent then
+		local persona = killer:GetPersona()
+		if IsValid(persona) then
+			persona:OnKilledEnemy(ent)
+		end
+	end
+end)
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:WhenRemoved() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRemove()
