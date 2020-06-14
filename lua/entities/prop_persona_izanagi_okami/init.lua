@@ -65,7 +65,7 @@ function ENT:PersonaControls(ply,persona)
 				end)
 			end
 		elseif self:GetCard() == "Concentrate" then
-			if !self.IsConcentrating && self:GetTask() != "TASK_PLAY_ANIMATION" then
+			if self.User:GetSP() > self.CurrentCardCost && !self.IsConcentrating && self:GetTask() != "TASK_PLAY_ANIMATION" then
 				self:SetTask("TASK_PLAY_ANIMATION")
 				self:PlayAnimation("myriad_pre",1)
 				self:TakeSP(self.CurrentCardCost)
@@ -85,7 +85,7 @@ function ENT:PersonaControls(ply,persona)
 				end)
 			end
 		elseif self:GetCard() == "Heat Riser" then
-			if CurTime() > self.HeatRiserT && self:GetTask() != "TASK_PLAY_ANIMATION" then
+			if self.User:GetSP() > self.CurrentCardCost && CurTime() > self.HeatRiserT && self:GetTask() != "TASK_PLAY_ANIMATION" then
 				self:SetTask("TASK_PLAY_ANIMATION")
 				self:PlayAnimation("myriad_pre",1)
 				self:TakeSP(self.CurrentCardCost)
@@ -105,7 +105,7 @@ function ENT:PersonaControls(ply,persona)
 				end)
 			end
 		elseif self:GetCard() == "Salvation" then
-			if self:GetTask() != "TASK_PLAY_ANIMATION" then
+			if self.User:GetSP() > self.CurrentCardCost && self:GetTask() != "TASK_PLAY_ANIMATION" then
 				self:SetTask("TASK_PLAY_ANIMATION")
 				self:PlayAnimation("myriad_pre",1)
 				self:TakeSP(self.CurrentCardCost)
