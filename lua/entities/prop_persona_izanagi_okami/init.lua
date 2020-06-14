@@ -5,16 +5,6 @@ ENT.Bot_StopDistance = 100
 ENT.Bot_Buttons = {
 	[1] = {but={IN_ATTACK},dist=100,chance=1},
 }
-/*
-		--== Attacks ==--
-	Myriad Truths	40 SP	Heavy Almighty damage to all foes.
-	Victory Cry	Auto	Fully recover HP and SP after killing something.
-	Angelic Grace	Auto	Double evasion against all magical damage except Hama/Mudo/Almighty.
-	Concentrate	15 SP	Next Myriad Truths attack inflicts 2.5x damage.
-	Heat Riser	30 SP	Buff attack, defense and agility for 1 minute.
-	Salvation	48 SP	Fully restore HP and cure all non-special ailments.
-	Almighty Boost	Auto	Strengthen Almighty attacks by 25%.
-*/
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)
@@ -40,17 +30,17 @@ function ENT:PersonaControls(ply,persona)
 			self:TakeHP(self.User:GetMaxHealth() *0.08)
 			timer.Simple(0.8,function()
 				if IsValid(self) then
-					self:MeleeAttackCode(self.Damage,450,60)
+					self:MeleeAttackCode(self.HeatRiserT > CurTime() && self.Damage *1.5 or self.Damage,450,60)
 				end
 			end)
 			timer.Simple(1.65,function()
 				if IsValid(self) then
-					self:MeleeAttackCode(self.Damage,450,100)
+					self:MeleeAttackCode(self.HeatRiserT > CurTime() && self.Damage *1.5 or self.Damage,450,100)
 				end
 			end)
 			timer.Simple(1.7,function()
 				if IsValid(self) then
-					self:MeleeAttackCode(self.Damage /6,2500,160)
+					self:MeleeAttackCode(self.HeatRiserT > CurTime() && self.Damage /6 *1.5 or self.Damage /6,2500,160)
 				end
 			end)
 			timer.Simple(self:GetSequenceDuration(self,"atk_cross_slash"),function()
@@ -61,18 +51,90 @@ function ENT:PersonaControls(ply,persona)
 		end
 	end
 	if rmb then
-		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" then
-			self:SetTask("TASK_PLAY_ANIMATION")
-			self:PlayAnimation("myriad_pre",1)
-			self:TakeSP(self.CurrentCardCost)
-			ply:EmitSound("cpthazama/persona5/joker/0009.wav")
-			self:TakeSP(40)
-			timer.Simple(self:GetSequenceDuration(self,"myriad_pre"),function()
-				if IsValid(self) then
-					self.IsArmed = true
-					self:PlayAnimation("myriad_pre_idle",1,1)
-				end
-			end)
+		if self:GetCard() == "Myriad Truths" then 
+			if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" then
+				self:SetTask("TASK_PLAY_ANIMATION")
+				self:PlayAnimation("myriad_pre",1)
+				self:TakeSP(self.CurrentCardCost)
+				ply:EmitSound("cpthazama/persona5/joker/0009.wav")
+				timer.Simple(self:GetSequenceDuration(self,"myriad_pre"),function()
+					if IsValid(self) then
+						self.IsArmed = true
+						self:PlayAnimation("myriad_pre_idle",1,1)
+					end
+				end)
+			end
+		elseif self:GetCard() == "Concentrate" then
+			if !self.IsConcentrating && self:GetTask() != "TASK_PLAY_ANIMATION" then
+				self:SetTask("TASK_PLAY_ANIMATION")
+				self:PlayAnimation("myriad_pre",1)
+				self:TakeSP(self.CurrentCardCost)
+				timer.Simple(self:GetSequenceDuration(self,"myriad_pre"),function()
+					if IsValid(self) then
+						self:PlayAnimation("myriad",1)
+						self.IsConcentrating = true
+						self.User:ChatPrint("Next Myriad Truths attack inflicts 2.5x damage!")
+						self:EmitSound("cpthazama/persona5/skills/0434.wav",85)
+						timer.Simple(self:GetSequenceDuration(self,"myriad"),function()
+							if IsValid(self) then
+								self:SetTask("TASK_IDLE")
+								self:DoIdle()
+							end
+						end)
+					end
+				end)
+			end
+		elseif self:GetCard() == "Heat Riser" then
+			if CurTime() > self.HeatRiserT && self:GetTask() != "TASK_PLAY_ANIMATION" then
+				self:SetTask("TASK_PLAY_ANIMATION")
+				self:PlayAnimation("myriad_pre",1)
+				self:TakeSP(self.CurrentCardCost)
+				timer.Simple(self:GetSequenceDuration(self,"myriad_pre"),function()
+					if IsValid(self) then
+						self:PlayAnimation("myriad",1)
+						self.HeatRiserT = CurTime() +60
+						self:EmitSound("cpthazama/persona5/skills/0361.wav",85)
+						self.User:ChatPrint("Buffed melee attacks for 1 minute!")
+						timer.Simple(self:GetSequenceDuration(self,"myriad"),function()
+							if IsValid(self) then
+								self:SetTask("TASK_IDLE")
+								self:DoIdle()
+							end
+						end)
+					end
+				end)
+			end
+		elseif self:GetCard() == "Salvation" then
+			if self:GetTask() != "TASK_PLAY_ANIMATION" then
+				self:SetTask("TASK_PLAY_ANIMATION")
+				self:PlayAnimation("myriad_pre",1)
+				self:TakeSP(self.CurrentCardCost)
+				timer.Simple(self:GetSequenceDuration(self,"myriad_pre"),function()
+					if IsValid(self) then
+						self:PlayAnimation("myriad",1)
+						self.User:SetHealth(self.User:GetMaxHealth())
+						self.User:ChatPrint("Restored HP!")
+						self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+						timer.Simple(self:GetSequenceDuration(self,"myriad"),function()
+							if IsValid(self) then
+								self:SetTask("TASK_IDLE")
+								self:DoIdle()
+							end
+						end)
+					end
+				end)
+			end
+		end
+	end
+	if r && CurTime() > self.NextCardSwitchT then
+		if self:GetCard() == "Myriad Truths" then
+			self:SetCard("Concentrate")
+		elseif self:GetCard() == "Concentrate" then
+			self:SetCard("Heat Riser")
+		elseif self:GetCard() == "Heat Riser" then
+			self:SetCard("Salvation")
+		elseif self:GetCard() == "Salvation" then
+			self:SetCard("Myriad Truths")
 		end
 	end
 	if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && !rmb && CurTime() > self.TimeToRange then
@@ -93,6 +155,8 @@ function ENT:PersonaControls(ply,persona)
 			proj:SetPos(self:GetPos() +self:OBBCenter() +tb[i])
 			proj:SetAngles(IsValid(self:UserTrace().Entity) && (self:UserTrace().Entity:GetPos() +self:UserTrace().Entity:OBBCenter() -proj:GetPos()):Angle() or (self:UserTrace().HitPos -self:GetPos() +self:OBBCenter()):Angle())
 			proj:Spawn()
+			proj.DirectDamage = 100 *(self.IsConcentrating && 2.5 or 1)
+			proj.DirectDamage = proj.DirectDamage *1.25 // Automatic boost
 			proj:SetOwner(self.User)
 			proj:SetPhysicsAttacker(self.User)
 			proj:EmitSound("cpthazama/persona5/skills/0338.wav")
@@ -100,6 +164,7 @@ function ENT:PersonaControls(ply,persona)
 			if IsValid(proj:GetPhysicsObject()) then
 				proj:GetPhysicsObject():SetVelocity(IsValid(self:UserTrace().Entity) && (self:UserTrace().Entity:GetPos() +self:UserTrace().Entity:OBBCenter() -proj:GetPos()) *5000 or (self:UserTrace().HitPos -proj:GetPos()) *5000)
 			end
+			if i == 9 && self.IsConcentrating then self.IsConcentrating = false end
 		end
 		self.TimeToRange = CurTime() +self:GetSequenceDuration(self,"myriad") +0.2
 		timer.Simple(self:GetSequenceDuration(self,"myriad"),function()
@@ -135,10 +200,16 @@ function ENT:OnSummoned(ply)
 	self.StandDistance = 393.7 *10 -- 100 meters
 	self.TimeToRange = CurTime() +2
 	self.IsArmed = false
+	
+	self.IsConcentrating = false
+	self.HeatRiserT = CurTime()
 
 	self.Damage = 2500
 
 	self:AddCard("Myriad Truths",40,false)
+	self:AddCard("Concentrate",15,false)
+	self:AddCard("Heat Riser",30,false)
+	self:AddCard("Salvation",48,false)
 	self:SetCard("Myriad Truths",40)
 
 	local v = {forward=-200,right=80,up=110}
