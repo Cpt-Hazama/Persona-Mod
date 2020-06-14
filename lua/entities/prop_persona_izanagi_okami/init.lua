@@ -5,6 +5,16 @@ ENT.Bot_StopDistance = 100
 ENT.Bot_Buttons = {
 	[1] = {but={IN_ATTACK},dist=100,chance=1},
 }
+/*
+		--== Attacks ==--
+	Myriad Truths	40 SP	Heavy Almighty damage to all foes.
+	Victory Cry	Auto	Fully recover HP and SP after killing something.
+	Angelic Grace	Auto	Double evasion against all magical damage except Hama/Mudo/Almighty.
+	Concentrate	15 SP	Next Myriad Truths attack inflicts 2.5x damage.
+	Heat Riser	30 SP	Buff attack, defense and agility for 1 minute.
+	Salvation	48 SP	Fully restore HP and cure all non-special ailments.
+	Almighty Boost	Auto	Strengthen Almighty attacks by 25%.
+*/
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)
@@ -17,14 +27,17 @@ function ENT:PersonaControls(ply,persona)
 			self:DoIdle()
 		end
 	end
+	if self.IsArmed then
+		self:FacePlayerAim(ply)
+	end
 	if lmb then
-		if self:GetTask() != "TASK_ATTACK" && !self.IsArmed then
+		if self.User:Health() > self.User:GetMaxHealth() *0.08 && self:GetTask() != "TASK_ATTACK" && !self.IsArmed then
 			self:SetTask("TASK_ATTACK")
 			self:PlayAnimation("atk_cross_slash",1)
 			ply:EmitSound("cpthazama/persona5/joker/0011.wav",85)
 			self:FindTarget(ply)
 			self:SetAngles(self.User:GetAngles())
-			self:TakeHP(self.User:Health() *0.08)
+			self:TakeHP(self.User:GetMaxHealth() *0.08)
 			timer.Simple(0.8,function()
 				if IsValid(self) then
 					self:MeleeAttackCode(self.Damage,450,60)
@@ -48,9 +61,10 @@ function ENT:PersonaControls(ply,persona)
 		end
 	end
 	if rmb then
-		if !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" then
+		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" then
 			self:SetTask("TASK_PLAY_ANIMATION")
 			self:PlayAnimation("myriad_pre",1)
+			self:TakeSP(self.CurrentCardCost)
 			ply:EmitSound("cpthazama/persona5/joker/0009.wav")
 			self:TakeSP(40)
 			timer.Simple(self:GetSequenceDuration(self,"myriad_pre"),function()
@@ -63,6 +77,28 @@ function ENT:PersonaControls(ply,persona)
 	end
 	if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && !rmb && CurTime() > self.TimeToRange then
 		self:PlayAnimation("myriad",1)
+		local tb = {
+			[1] = self:GetUp() *350,
+			[2] = self:GetUp() *310 +self:GetRight() *50,
+			[3] = self:GetUp() *270 +self:GetRight() *100,
+			[4] = self:GetUp() *230 +self:GetRight() *150,
+			[5] = self:GetUp() *190 +self:GetRight() *200,
+			[6] = self:GetUp() *310 +self:GetRight() *-50,
+			[7] = self:GetUp() *270 +self:GetRight() *-100,
+			[8] = self:GetUp() *230 +self:GetRight() *-150,
+			[9] = self:GetUp() *190 +self:GetRight() *-200,
+		}
+		for i = 1,9 do
+			local proj = ents.Create("obj_vj_per_okamiblast")
+			proj:SetPos(self:GetPos() +self:OBBCenter() +tb[i])
+			proj:SetAngles(IsValid(self:UserTrace().Entity) && (self:UserTrace().Entity:GetPos() +self:UserTrace().Entity:OBBCenter() -proj:GetPos()):Angle() or (self:UserTrace().HitPos -self:GetPos() +self:OBBCenter()):Angle())
+			proj:Spawn()
+			proj:EmitSound("cpthazama/persona5/skills/0338.wav")
+			
+			if IsValid(proj:GetPhysicsObject()) then
+				proj:GetPhysicsObject():SetVelocity(IsValid(self:UserTrace().Entity) && (self:UserTrace().Entity:GetPos() +self:UserTrace().Entity:OBBCenter() -proj:GetPos()) *5000 or (self:UserTrace().HitPos -proj:GetPos()) *5000)
+			end
+		end
 		self.TimeToRange = CurTime() +self:GetSequenceDuration(self,"myriad") +0.2
 		timer.Simple(self:GetSequenceDuration(self,"myriad"),function()
 			if IsValid(self) then
@@ -99,10 +135,11 @@ function ENT:OnSummoned(ply)
 	self.IsArmed = false
 
 	self.Damage = 2500
-	
-	self:SetNWString("SpecialAttack","Myriad Truths")
 
-	local v = {forward=-200,right=80,up=50}
+	self:AddCard("Myriad Truths",40,false)
+	self:SetCard("Myriad Truths",40)
+
+	local v = {forward=-200,right=80,up=110}
 	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------

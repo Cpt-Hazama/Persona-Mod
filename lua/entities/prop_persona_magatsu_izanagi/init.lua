@@ -42,10 +42,41 @@ function ENT:PersonaControls(ply,persona)
 			end)
 		end
 	end
+	-- if rmb then
+		-- if self.InstaKillStage > 0 then return end
+		if self:GetCard() == "Maziodyne" then self:Maziodyne(ply,persona,rmb) end
+		if self:GetCard() == "Yomi Drop" then self:InstaKill(ply,persona,rmb) end
+	-- end
+	if r && CurTime() > self.NextCardSwitchT then
+		if self:GetCard() == "Maziodyne" then
+			self:SetCard("Yomi Drop")
+		else
+			self:SetCard("Maziodyne")
+		end
+	end
+	if self.InstaKillStage == 1 then
+		self:MoveToPos(self:GetPos() +Vector(0,0,-5),1.25)
+	end
+	if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
+		self.InstaKillTarget:SetPos(self.InstaKillTargetPos +Vector(0,0,-(self.InstaKillTarget:OBBMaxs().z /2)))
+		if self.InstaKillTarget:IsNPC() then
+			self.InstaKillTarget:StopMoving()
+			self.InstaKillTarget:StopMoving()
+			self.InstaKillTarget:ClearSchedule()
+			-- self.InstaKillTarget:ResetSequence(-1)
+			self.InstaKillTarget:ResetSequence(ACT_IDLE)
+		end
+		SafeRemoveEntity(self.InstaKillTarget:GetActiveWeapon())
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Maziodyne(ply,persona,rmb)
+	local rmb = ply:KeyDown(IN_ATTACK2)
 	if rmb then
 		if self.InstaKillStage > 0 then return end
-		if !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" && CurTime() > self.RechargeT then
+		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" && CurTime() > self.RechargeT then
 			self.DamageBuild = 250
+			self:TakeSP(self.CurrentCardCost)
 			self:SetTask("TASK_PLAY_ANIMATION")
 			self:PlayAnimation("atk_magatsu_mandala_pre",1)
 			ply:EmitSound("cpthazama/persona5/adachi/vo/curse.wav")
@@ -56,42 +87,47 @@ function ENT:PersonaControls(ply,persona)
 				end
 			end)
 		end
-	end
-	if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && !rmb && CurTime() > self.TimeToMazionga then
-		self:MeleeAttackCode(1000,2500,180,false)
-		self:PlayAnimation("atk_magatsu_mandala",1,1)
-		self.TimeToMazionga = CurTime() +3.5
-		self:EmitSound("beams/beamstart5.wav",90)
-		local tbl = {
-			"cpthazama/persona5/adachi/vo/blast.wav",
-			"cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",
-			"cpthazama/vox/adachi/kill/vbtl_pad_0#122 (pad166_0).wav"
-		}
-		ply:EmitSound(VJ_PICK(tbl))
-		for a = 1,5 do
-			for i = 1,20 do
-				timer.Simple(i *0.15,function()
-					if IsValid(self) then
-						self:MagatsuMandala(a,30000)
-					end
-				end)
+		if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && CurTime() > self.TimeToMazionga then
+			self:MeleeAttackCode(1000,2500,180,false)
+			self:PlayAnimation("atk_magatsu_mandala",1,1)
+			self.TimeToMazionga = CurTime() +3.5
+			self:EmitSound("beams/beamstart5.wav",90)
+			local tbl = {
+				"cpthazama/persona5/adachi/vo/blast.wav",
+				"cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",
+				"cpthazama/vox/adachi/kill/vbtl_pad_0#122 (pad166_0).wav"
+			}
+			ply:EmitSound(VJ_PICK(tbl))
+			for a = 1,5 do
+				for i = 1,20 do
+					timer.Simple(i *0.15,function()
+						if IsValid(self) then
+							self:MagatsuMandala(a,30000)
+						end
+					end)
+				end
 			end
+			timer.Simple(3,function()
+				if IsValid(self) then
+					self.RechargeT = CurTime() +5
+					self.IsArmed = false
+					self:DoIdle()
+				end
+			end)
 		end
-		timer.Simple(3,function()
-			if IsValid(self) then
-				self.RechargeT = CurTime() +30
-				self.IsArmed = false
-				self:DoIdle()
-			end
-		end)
 	end
-	if r then
-		if CurTime() > self.NextInstaKillT && self:GetTask() == "TASK_IDLE" && self.InstaKillStage == 0 then
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:InstaKill(ply,persona,rmb)
+	if rmb then
+		if self.InstaKillStage > 0 then return end
+		if self.User:GetSP() > self.CurrentCardCost && CurTime() > self.NextInstaKillT && self:GetTask() == "TASK_IDLE" && self.InstaKillStage == 0 then
 			self:SetTask("TASK_PLAY_ANIMATION")
 			self:PlayAnimation("atk_magatsu_mandala_pre",1)
 			self.InstaKillStage = 1
 			self.InstaKillTarget = NULL
 			self.NextInstaKillT = CurTime() +20
+			self:TakeSP(self.CurrentCardCost)
 
 			local style = math.random(1,2)
 			local dur1 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_start0" .. style .. ".wav")
@@ -228,20 +264,6 @@ function ENT:PersonaControls(ply,persona)
 			self:SoundTimer(dur1 +dur2 +dur3 +delay +dur4 -1,ply,"cpthazama/persona5/adachi/vo/instakill_end0" .. style .. ".wav")
 		end
 	end
-	if self.InstaKillStage == 1 then
-		self:MoveToPos(self:GetPos() +Vector(0,0,-5),1.25)
-	end
-	if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
-		self.InstaKillTarget:SetPos(self.InstaKillTargetPos +Vector(0,0,-(self.InstaKillTarget:OBBMaxs().z /2)))
-		if self.InstaKillTarget:IsNPC() then
-			self.InstaKillTarget:StopMoving()
-			self.InstaKillTarget:StopMoving()
-			self.InstaKillTarget:ClearSchedule()
-			-- self.InstaKillTarget:ResetSequence(-1)
-			self.InstaKillTarget:ResetSequence(ACT_IDLE)
-		end
-		SafeRemoveEntity(self.InstaKillTarget:GetActiveWeapon())
-	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MagatsuMandala(att,dist)
@@ -296,8 +318,10 @@ function ENT:OnSummoned(ply)
 	self.InstaKillStyle = 0
 
 	self.Damage = 400
-	
-	self:SetNWString("SpecialAttack","Ziodyne")
+
+	self:AddCard("Maziodyne",22,false)
+	self:AddCard("Yomi Drop",100,false)
+	self:SetCard("Maziodyne")
 
 	local v = {forward=-200,right=80,up=50}
 	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))

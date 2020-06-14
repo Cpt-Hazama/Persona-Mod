@@ -1,3 +1,17 @@
+DMG_P_ICE = 1000
+DMG_P_EARTH = 1001
+DMG_P_WIND = 1002
+DMG_P_GRAVITY = 1003
+DMG_P_NUCLEAR = 1004
+DMG_P_EXPEL = 1005
+DMG_P_DEATH = 1006
+DMG_P_MIRACLE = 1007
+DMG_P_FORCE = 1008
+DMG_P_TECH = 1009
+DMG_P_ALMIGHTY = 1010
+DMG_P_PSI = 1011
+DMG_P_ELEC = 1012
+
 if SERVER then
 	util.AddNetworkString("persona_csound")
 end
@@ -48,6 +62,14 @@ function PLY:GetPersona()
 	return self:GetNWEntity("Persona")
 end
 
+function PLY:SetMaxHealth(mhp)
+	self:SetNWInt("MaxHealth",mhp)
+end
+
+function PLY:GetMaxHealth()
+	return self:GetNWInt("MaxHealth")
+end
+
 function PLY:GetNextPersonaSummonT()
 	return self:GetNWInt("PersonaSummonT") or 0
 end
@@ -68,12 +90,16 @@ end
 if SERVER then
 	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
 		ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
+		ply:SetMaxHealth(ply:GetMaxHealth() or 100)
 	end)
 
 	-- local wep = "weapon_persona_nothing"
 	local wep = "weapon_jojo_nothing"
 	hook.Add("Think","Persona_Think",function()
 		for _,v in pairs(player.GetAll()) do
+			if v:Health() > v:GetMaxHealth() then
+				v:SetMaxHealth(v:Health())
+			end
 			if IsValid(v:GetPersona()) then
 				if !v:HasWeapon(wep) then
 					v:Give(wep)
@@ -163,10 +189,11 @@ if CLIENT then
 
 		local corners = 1
 		local posX = 250
-		local posY = 160
+		local posY = 175
 		local len = 225
-		local height = 125
+		local height = 140
 		local color = Color(50,50,50,255)
+		local boxHeight = posY
 		draw.RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,color)
 		
 		-- local text = ply:GetPersonaName()
@@ -175,28 +202,43 @@ if CLIENT then
 		-- local color = Color(200,0,255,255)
 		-- draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
 		
+			--== SP ==--
 		local text = "SP:"
 		local posX = 235
-		local posY = 150
+		local posY = boxHeight
 		local color = Color(200,0,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
 		
 		local text = sp
 		local posX = 185
-		local posY = 150
+		local posY = boxHeight
 		local color = Color(200,0,255,255)
+		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
+		
+			--== Req. ==--
+		local text = "Cost:"
+		local usesHP = persona:GetNWBool("SpecialAttackUsesHP")
+		local textF = usesHP && "HP " .. text or "SP " .. text
+		local posX = 235
+		local posY = boxHeight -35
+		local color = usesHP && Color(33,200,0,255) or Color(200,0,255,255)
+		draw.SimpleText(textF,"Persona",ScrW() -posX,ScrH() -posY,color)
+		
+		local text = persona:GetNWInt("SpecialAttackCost")
+		local posX = 120
+		local posY = boxHeight -35
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
 		
 		local text = "Persona Card:"
 		local posX = 235
-		local posY = 120
+		local posY = boxHeight -65
 		local color = Color(0,100,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
 		
 		local text = persona:GetNWString("SpecialAttack")
 		if text == nil or text == "" then text = "N/A" end
 		local posX = 235
-		local posY = 85
+		local posY = boxHeight -100
 		local color = Color(0,100,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
 	end)

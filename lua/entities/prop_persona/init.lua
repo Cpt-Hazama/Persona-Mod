@@ -29,6 +29,8 @@ function ENT:Initialize()
 
 	self.Loops = {}
 	self.Flexes = {}
+	
+	self.NextCardSwitchT = CurTime()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
@@ -213,6 +215,28 @@ function ENT:DoIdle()
 	self:PlayAnimation("idle",1,1)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:AddCard(name,req,isHP)
+	self.Cards = self.Cards or {}
+	self.Cards[name] = {}
+	self.Cards[name].Cost = req
+	self.Cards[name].UsesHP = isHP
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SetCard(name)
+	if self.Cards[name] then
+		self:SetNWString("SpecialAttack",name)
+		self:SetNWInt("SpecialAttackCost",self.Cards[name].Cost)
+		self:SetNWBool("SpecialAttackUsesHP",self.Cards[name].UsesHP or false)
+		self.CurrentCardCost = self.Cards[name].Cost
+		self.CurrentCardUsesHP = self.Cards[name].UsesHP
+	end
+	self.NextCardSwitchT = CurTime() +1
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetCard()
+	return self:GetNWString("SpecialAttack")
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeSP(sp)
 	self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,999))
 end
@@ -237,6 +261,16 @@ function ENT:DoGesture(seq,speed)
 	local gest = self:AddGestureSequence(self:LookupSequence(seq))
 	self:SetLayerPriority(gest,2)
 	self:SetLayerPlaybackRate(gest,speed)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:UserTrace()
+	local tracedata = {}
+	tracedata.start = self.User:EyePos()
+	tracedata.endpos = self.User:GetEyeTrace().HitPos
+	tracedata.filter = {self.User,self}
+	local tr = util.TraceLine(tracedata)
+
+	return tr
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:FindTarget(ply)

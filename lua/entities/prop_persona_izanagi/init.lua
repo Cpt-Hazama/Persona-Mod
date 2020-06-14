@@ -48,10 +48,11 @@ function ENT:PersonaControls(ply,persona)
 		end
 	end
 	if rmb then
-		if !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" then
+		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" then
 			self.DamageBuild = 250
 			self:SetTask("TASK_PLAY_ANIMATION")
 			self:PlayAnimation("atk_mazionga_pre",1)
+			self:TakeSP(self.CurrentCardCost)
 			ply:EmitSound("cpthazama/persona5/joker/0009.wav")
 			timer.Simple(self:GetSequenceDuration(self,"atk_mazionga_pre"),function()
 				if IsValid(self) then
@@ -101,7 +102,8 @@ function ENT:OnSummoned(ply)
 	self.Damage = 750
 	self.DamageBuild = 250
 	
-	self:SetNWString("SpecialAttack","Ziodyne")
+	self:AddCard("Zionga",8,false)
+	self:SetCard("Zionga",8)
 
 	local v = {forward=-200,right=80,up=50}
 	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
