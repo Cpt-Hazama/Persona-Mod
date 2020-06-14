@@ -94,7 +94,7 @@ function ENT:PersonaControls(ply,persona)
 						self:PlayAnimation("myriad",1)
 						self.HeatRiserT = CurTime() +60
 						self:EmitSound("cpthazama/persona5/skills/0361.wav",85)
-						self.User:ChatPrint("Buffed melee attacks for 1 minute!")
+						self.User:ChatPrint("Buffed melee attacks and evasion for 1 minute!")
 						timer.Simple(self:GetSequenceDuration(self,"myriad"),function()
 							if IsValid(self) then
 								self:SetTask("TASK_IDLE")
@@ -177,6 +177,10 @@ function ENT:PersonaControls(ply,persona)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleDamage(dmg,dmgtype,dmginfo)
+	-- if math.random(1,100) < (self.HeatRiserT > CurTime() && 65) or 45 then // OP af
+		-- self.User:ChatPrint("Evaded Attack!")
+		-- return true
+	-- end
 	dmginfo:ScaleDamage(0.025) // Okami has the highest resistance to all damage types in Persona
 	return false
 end

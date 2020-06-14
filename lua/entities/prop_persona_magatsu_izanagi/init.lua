@@ -17,7 +17,7 @@ function ENT:PersonaControls(ply,persona)
 			self:DoIdle()
 		end
 	end
-	self:SetSkin(CurTime() > self.RechargeT && 0 or 1)
+	-- self:SetSkin(CurTime() > self.RechargeT && 0 or 1)
 	if lmb then
 		if self.InstaKillStage > 0 then return end
 		if self:GetTask() != "TASK_ATTACK" && !self.IsArmed then
@@ -31,7 +31,7 @@ function ENT:PersonaControls(ply,persona)
 			for _,v in pairs(t) do
 				timer.Simple(v,function()
 					if IsValid(self) then
-						self:MeleeAttackCode(self.Damage,210,70)
+						self:MeleeAttackCode(self.HeatRiserT > CurTime() && self.Damage *1.5 or self.Damage,210,70)
 					end
 				end)
 			end
@@ -42,15 +42,46 @@ function ENT:PersonaControls(ply,persona)
 			end)
 		end
 	end
-	-- if rmb then
+	if rmb then
 		-- if self.InstaKillStage > 0 then return end
-		if self:GetCard() == "Maziodyne" then self:Maziodyne(ply,persona,rmb) end
-		if self:GetCard() == "Yomi Drop" then self:InstaKill(ply,persona,rmb) end
-	-- end
+		if self:GetCard() == "Maziodyne" then
+			self:Maziodyne(ply,persona,rmb)
+		elseif self:GetCard() == "Heat Riser" then
+			if self.InstaKillStage > 0 then return end
+			if self.User:GetSP() > self.CurrentCardCost && CurTime() > self.HeatRiserT && self:GetTask() != "TASK_PLAY_ANIMATION" then
+				self:SetTask("TASK_PLAY_ANIMATION")
+				self:TakeSP(self.CurrentCardCost)
+				self:PlayAnimation("atk_magatsu_mandala_pre",1)
+				timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_pre"),function()
+					if IsValid(self) then
+						self:PlayAnimation("atk_magatsu_mandala",0.4,1)
+						self.HeatRiserT = CurTime() +60
+						self:EmitSound("cpthazama/persona5/skills/0361.wav",85)
+						self.User:ChatPrint("Buffed melee attacks and evasion for 1 minute!")
+						timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala") +(self:GetSequenceDuration(self,"atk_magatsu_mandala") *0.4),function()
+							if IsValid(self) then
+								self:PlayAnimation("atk_magatsu_mandala_end",1)
+								timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_end"),function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		elseif self:GetCard() == "Yomi Drop" then
+			self:InstaKill(ply,persona,rmb)
+		end
+	end
 	if r && CurTime() > self.NextCardSwitchT then
 		if self:GetCard() == "Maziodyne" then
+			self:SetCard("Heat Riser")
+		elseif self:GetCard() == "Heat Riser" then
 			self:SetCard("Yomi Drop")
-		else
+		elseif self:GetCard() == "Yomi Drop" then
 			self:SetCard("Maziodyne")
 		end
 	end
@@ -316,10 +347,12 @@ function ENT:OnSummoned(ply)
 	self.IsArmed = false
 	self.InstaKillStage = 0
 	self.InstaKillStyle = 0
+	self.HeatRiserT = CurTime()
 
 	self.Damage = 400
 
 	self:AddCard("Maziodyne",22,false)
+	self:AddCard("Heat Riser",30,false)
 	self:AddCard("Yomi Drop",100,false)
 	self:SetCard("Maziodyne")
 
