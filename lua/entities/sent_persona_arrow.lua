@@ -21,14 +21,14 @@ end
 if !(SERVER) then return end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Initialize()
-	self:SetModel("models/cpthazama/jojo/arrow.mdl")
+	self:SetModel("models/props_combine/breenclock.mdl")
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
 
 	self:SetCollisionBounds(Vector(10,10,5),Vector(-10,-10,0))
-	self:SetPos(self:GetPos() +Vector(0,0,10))
+	timer.Simple(0,function() self:SetPos(self:GetPos() +Vector(0,0,10)) self:GetPhysicsObject():Wake() end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PhysicsCollide(data,phys)

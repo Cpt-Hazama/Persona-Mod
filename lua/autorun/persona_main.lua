@@ -93,8 +93,7 @@ if SERVER then
 		ply:SetMaxHealth(ply:GetMaxHealth() or 100)
 	end)
 
-	-- local wep = "weapon_persona_nothing"
-	local wep = "weapon_jojo_nothing"
+	local wep = "weapon_persona_nothing"
 	hook.Add("Think","Persona_Think",function()
 		for _,v in pairs(player.GetAll()) do
 			if v:Health() > v:GetMaxHealth() then
