@@ -105,6 +105,7 @@ function ENT:DefaultPersonaControls(ply,persona)
 			local ent = ply:GetEyeTrace().Entity
 			if IsValid(ent) && (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != persona)) then
 				ply.Persona_EyeTarget = ent
+				self.User:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
 			end
 		end
 	end
@@ -197,7 +198,7 @@ function ENT:Think()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RequestAura(ply,aura)
-	self:EmitSound("cpthazama/persona5/persona_disapper.wav",65,120)
+	self:EmitSound("cpthazama/persona5/misc/00118.wav",75,100)
 	if math.random(1,self.AuraChance) == 1 then ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin")) end
 	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
 	local fx = EffectData()
@@ -238,10 +239,12 @@ function ENT:GetCard()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeSP(sp)
+	if self.User:HasGodMode() then return end
 	self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,999))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeHP(hp)
+	if self.User:HasGodMode() then return end
 	self.User:SetHealth(self.User:Health() -hp)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -263,7 +266,18 @@ function ENT:DoGesture(seq,speed)
 	self:SetLayerPlaybackRate(gest,speed)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:UserTrace()
+function ENT:UserTrace(maxDist)
+	if maxDist then
+		local tracedata = {}
+		tracedata.start = self.User:EyePos()
+		tracedata.endpos = self.User:EyePos() +self.User:EyeAngles():Forward() *maxDist
+		tracedata.filter = {self.User,self}
+		local tr = util.TraceLine(tracedata)
+		
+		-- util.ParticleTracerEx("Weapon_Combine_Ion_Cannon_Beam",tr.StartPos,tr.HitPos,false,self.User:EntIndex(),0)
+
+		return tr
+	end
 	local tracedata = {}
 	tracedata.start = self.User:EyePos()
 	tracedata.endpos = self.User:GetEyeTrace().HitPos
@@ -338,7 +352,7 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 					end
 					hitentity = true
 					table.insert(hitEnts,v)
-					if snd then v:EmitSound("punch.wav",math.random(60,72),math.random(100,120)) end
+					if snd then v:EmitSound("cpthazama/persona5/misc/00051.wav",math.random(60,72),math.random(100,120)) end
 					
 					-- if v:GetClass() == "prop_physics" then
 						local phys = v:GetPhysicsObject()

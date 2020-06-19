@@ -11,6 +11,7 @@ DMG_P_TECH = 1009
 DMG_P_ALMIGHTY = 1010
 DMG_P_PSI = 1011
 DMG_P_ELEC = 1012
+DMG_P_CURSE = 1013
 
 if SERVER then
 	util.AddNetworkString("persona_csound")
@@ -343,5 +344,17 @@ local pParticleList = {
 	"jojo_aura_red",
 	"jojo_aura_silver",
 	"jojo_aura_yellow",
+}
+for _,v in ipairs(pParticleList) do PrecacheParticleSystem(v) end
+
+game.AddParticles("particles/persona_fx.pcf")
+local pParticleList = {
+	"persona_fx_dmg_death",
+	"persona_fx_dmg_elec",
+	"persona_fx_dmg_fear",
+	"persona_fx_dmg_ice",
+	"persona_fx_dmg_miracle",
+	"persona_fx_dmg_nuclear",
+	"persona_fx_dmg_psi",
 }
 for _,v in ipairs(pParticleList) do PrecacheParticleSystem(v) end
