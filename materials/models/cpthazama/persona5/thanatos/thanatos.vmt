@@ -1,0 +1,39 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/thanatos/thanatos"
+	"$bumpmap" "models/cpthazama/persona5/thanatos/thanatos_n"
+	"$phongexponenttexture" "models/cpthazama/persona5/thanatos/thanatos_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0.1"
+	"$phongfresnelranges"	"[1 0.9 0.9]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "1"
+	"$rimmask" "1"
+
+	$detail	"models/cpthazama/persona5/thanatos/flow"
+	$detailscale "2"
+	$detailblendfactor "0.5"
+	$detailblendmode "2"
+
+	"Proxies"
+	{
+		"Sine"
+		{
+			"resultvar"	"$detailblendfactor"
+			"sineperiod" 8
+			"sinemin" 0.5
+			"sinemax" 1.1
+		}
+		"TextureScroll"
+		{
+			"texturescrollvar"	"$detailtexturetransform"
+			"texturescrollrate"	0.05
+			"texturescrollangle" 90
+		}
+	}
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}

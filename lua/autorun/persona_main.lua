@@ -194,16 +194,54 @@ if CLIENT then
 		local ply = LocalPlayer()
 		local persona = ply:GetNWEntity("PersonaEntity")
 
-		if !IsValid(persona) then return end
+		if !IsValid(persona) then
+			if ply.PersonaRender then
+				ply.PersonaRender:Remove()
+			end
+			if ply.PersonaRenderBackground then
+				ply.PersonaRenderBackground:Remove()
+			end
+			return
+		end
+
+		local posX = 250
+		local posY = 355
+		local len = 225
+		local height = 175
+		
+		-- if !IsValid(ply.PersonaRender) && !IsValid(ply.PersonaRenderBackground) then
+			-- ply.PersonaRenderBackground = vgui.Create("DPanel",ply)
+			-- ply.PersonaRenderBackground:SetPos(ScrW() -posX,ScrH() -posY)
+			-- ply.PersonaRenderBackground:SetSize(len,height)
+
+			-- ply.PersonaRender = vgui.Create("DModelPanel",ply)
+			-- ply.PersonaRender:SetPos(ScrW() -posX,ScrH() -posY)
+			-- ply.PersonaRender:SetSize(len,height)
+			-- ply.PersonaRender:SetModel(persona:GetModel())
+			-- ply.PersonaRender:SetCamPos(Vector(100,100,300))
+			-- ply.PersonaRender:SetLookAt(Vector(0,0,80))
+			-- ply.PersonaRender:SetAnimated(true)
+			-- function ply.PersonaRender:LayoutEntity(Entity)
+				-- if (self.bAnimated) then
+					-- self:RunAnimation()
+				-- end
+			-- end
+		-- else
+			-- ply.PersonaRender:SetAnimSpeed(persona:GetPlaybackRate())
+			-- ply.PersonaRender:SetFOV(20)
+			-- ply.PersonaRender:SetCamPos(Vector(120,60,90))
+			-- ply.PersonaRender:SetLookAt(Vector(0,-20,180))
+		-- end
 		
 		local sp = ply:GetSP()
 
 		local corners = 1
 		local posX = 250
-		local posY = 175
+		local posY = 170
 		local len = 225
 		local height = 140
 		local color = Color(50,50,50,255)
+		local boxX = posX
 		local boxHeight = posY
 		draw.RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,color)
 		
@@ -215,13 +253,13 @@ if CLIENT then
 		
 			--== SP ==--
 		local text = "SP:"
-		local posX = 235
+		local posX = boxX -15
 		local posY = boxHeight
 		local color = Color(200,0,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
 		
 		local text = sp
-		local posX = 185
+		local posX = boxX -65
 		local posY = boxHeight
 		local color = Color(200,0,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
@@ -230,25 +268,25 @@ if CLIENT then
 		local text = "Cost:"
 		local usesHP = persona:GetNWBool("SpecialAttackUsesHP")
 		local textF = usesHP && "HP " .. text or "SP " .. text
-		local posX = 235
+		local posX = boxX -15
 		local posY = boxHeight -35
 		local color = usesHP && Color(33,200,0,255) or Color(200,0,255,255)
 		draw.SimpleText(textF,"Persona",ScrW() -posX,ScrH() -posY,color)
 		
 		local text = persona:GetNWInt("SpecialAttackCost")
-		local posX = 120
+		local posX = boxX -130
 		local posY = boxHeight -35
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
 		
 		local text = "Persona Card:"
-		local posX = 235
+		local posX = boxX -15
 		local posY = boxHeight -65
 		local color = Color(0,100,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
 		
 		local text = persona:GetNWString("SpecialAttack")
 		if text == nil or text == "" then text = "N/A" end
-		local posX = 235
+		local posX = boxX -15
 		local posY = boxHeight -100
 		local color = Color(0,100,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)

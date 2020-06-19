@@ -1,0 +1,8 @@
+"UnlitGeneric"
+{
+	"$basetexture" 			"particle/cpthazama/jojo/aura03"
+	"$vertexalpha" 			1
+	"$vertexcolor" 			1
+	"$additive" 			1
+	"$translucent" 			1
+}

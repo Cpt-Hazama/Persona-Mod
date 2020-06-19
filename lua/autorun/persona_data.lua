@@ -15,10 +15,20 @@ PERSONA["magatsu_izanagi"].Model = "models/cpthazama/persona5/persona/magatsu_iz
 PERSONA["magatsu_izanagi"].Aura = "jojo_aura_red"
 PERSONA["magatsu_izanagi"].Name = "Magatsu-Izanagi"
 
+PERSONA["magatsu_izanagi_p4"] = {}
+PERSONA["magatsu_izanagi_p4"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi.mdl"
+PERSONA["magatsu_izanagi_p4"].Aura = "jojo_aura_orange"
+PERSONA["magatsu_izanagi_p4"].Name = "Magatsu-Izanagi (Classic)"
+
 PERSONA["izanagi_okami"] = {}
 PERSONA["izanagi_okami"].Model = "models/cpthazama/persona5/persona/izanagi_no_okami.mdl"
 PERSONA["izanagi_okami"].Aura = "jojo_aura_gold"
 PERSONA["izanagi_okami"].Name = "Izanagi-no-Okami"
+
+PERSONA["thanatos"] = {}
+PERSONA["thanatos"].Model = "models/cpthazama/persona5/persona/thanatos.mdl"
+PERSONA["thanatos"].Aura = "jojo_aura_black"
+PERSONA["thanatos"].Name = "Thanatos"
 
 game.AddParticles("particles/magatsu_izanagi.pcf")
 local pParticleList = {

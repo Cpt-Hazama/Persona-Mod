@@ -1,0 +1,17 @@
+"UnlitGeneric"
+{
+	"$basetexture" 			"particle/cpthazama/jojo/aura"
+	"$vertexalpha" 			1
+	"$vertexcolor" 			1
+	"$additive" 			1
+	"$translucent" 			1
+	"Proxies"
+	{
+		"AnimatedTexture"
+		{
+			"animatedtexturevar" "$basetexture"
+			"animatedtextureframenumvar" "$frame"
+			"animatedtextureframerate" 15
+		}
+	}
+}
