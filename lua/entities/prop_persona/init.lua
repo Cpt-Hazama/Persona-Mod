@@ -408,12 +408,17 @@ function ENT:Curse(ent,t,dmg)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Fear(ent,t)
+	local prevDisp = ent:Disposition(self.User) != D_FR && ent:Disposition(self.User) or D_NU
 	ent.Persona_DMG_Fear = CurTime() +t
 	ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
+	ent:AddEntityRelationship(self.User,D_FR,99)
 	timer.Simple(t,function()
 		if IsValid(ent) then
 			if CurTime() > ent.Persona_DMG_Fear then
 				ent:StopParticles()
+				if IsValid(self) && IsValid(self.User) then
+					ent:AddEntityRelationship(self.User,prevDisp,99)
+				end
 			end
 		end
 	end)
