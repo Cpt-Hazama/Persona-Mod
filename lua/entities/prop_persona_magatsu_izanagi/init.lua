@@ -5,6 +5,17 @@ ENT.Bot_StopDistance = 100
 ENT.Bot_Buttons = {
 	[1] = {but={IN_ATTACK},dist=100,chance=1},
 }
+ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB,DMG_P_FEAR)
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnHitEntity(hitEnts,dmginfo)
+	-- if dmginfo:GetDamageType() == DMG_P_FEAR then
+		for _,v in pairs(hitEnts) do
+			if IsValid(v) && v:Health() > 0 then
+				self:Fear(v,15)
+			end
+		end
+	-- end
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)
@@ -311,7 +322,7 @@ function ENT:MagatsuMandala(att,dist)
 			dmginfo:SetDamage(5)
 			dmginfo:SetAttacker(self.User)
 			dmginfo:SetInflictor(self)
-			dmginfo:SetDamageType(bit.bor(DMG_DISSOLVE,DMG_ENERGYBEAM))
+			dmginfo:SetDamageType(bit.bor(DMG_DISSOLVE,DMG_ENERGYBEAM,DMG_P_ELEC))
 			dmginfo:SetDamagePosition(tr.Entity:NearestPoint(tr.HitPos))
 			tr.Entity:TakeDamageInfo(dmginfo)
 		end

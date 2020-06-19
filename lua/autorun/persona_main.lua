@@ -12,6 +12,7 @@ DMG_P_ALMIGHTY = 1010
 DMG_P_PSI = 1011
 DMG_P_ELEC = 1012
 DMG_P_CURSE = 1013
+DMG_P_FEAR = 1014
 
 if SERVER then
 	util.AddNetworkString("persona_csound")
@@ -130,11 +131,14 @@ if SERVER then
 		end
 	end)
 
-	hook.Add("EntityTakeDamage","Persona_ModifyPlayerDMG",function(ply,dmginfo)
-		if ply:IsPlayer() then
+	hook.Add("EntityTakeDamage","Persona_ModifyPlayerDMG",function(ent,dmginfo)
+		if ent.Persona_DMG_Fear && ent.Persona_DMG_Fear > CurTime() then
+			dmginfo:ScaleDamage(1.6)
+		end
+		if ent:IsPlayer() then
 			local dmgtype = dmginfo:GetDamageType()
 			local dmg = dmginfo:GetDamage()
-			local persona = ply:GetPersona()
+			local persona = ent:GetPersona()
 
 			if IsValid(persona) && persona.HandleDamage then
 				return persona:HandleDamage(dmg,dmgtype,dmginfo)

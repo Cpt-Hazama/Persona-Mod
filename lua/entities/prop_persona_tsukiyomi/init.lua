@@ -6,6 +6,16 @@ ENT.Bot_Buttons = {
 	[1] = {but={IN_ATTACK},dist=100,chance=1},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnHitEntity(hitEnts,dmginfo)
+	if dmginfo:GetDamageType() == DMG_P_CURSE then
+		for _,v in pairs(hitEnts) do
+			if IsValid(v) && v:Health() > 0 then
+				self:Curse(v,10,5)
+			end
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Teleport()
 	self:SetTask("TASK_PLAY_ANIMATION")
 	self:PlayAnimation("range_start",1)
@@ -15,7 +25,6 @@ function ENT:Teleport()
 
 	timer.Simple(self:GetSequenceDuration(self,"range_start"),function()
 		if IsValid(self) then
-
 			local bloodeffect = EffectData()
 			bloodeffect:SetOrigin(self:GetPos() +self:OBBCenter())
 			bloodeffect:SetScale(225)
@@ -150,12 +159,12 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 	local hitentity = false
 	local hitEnts = {}
 	local snd = snd or true
+	local doactualdmg = DamageInfo()
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
 			if (v != self && v != self.User) && (((v:IsNPC() or (v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
 				if (self:GetForward():Dot((Vector(v:GetPos().x,v:GetPos().y,0) - Vector(self:GetPos().x,self:GetPos().y,0)):GetNormalized()) > math.cos(math.rad(rad))) then
 					if snd == 1 then
-						local doactualdmg = DamageInfo()
 						doactualdmg:SetDamage(dmg)
 						doactualdmg:SetDamageType(DMG_P_CURSE)
 						doactualdmg:SetInflictor(self)
@@ -189,7 +198,7 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 		end
 	end
 	if hitentity then
-		if self.CustomOnHitEntity then self:CustomOnHitEntity(hitEnts) end
+		if self.CustomOnHitEntity then self:CustomOnHitEntity(hitEnts,doactualdmg) end
 	else
 		self:EmitSound("npc/zombie/claw_miss1.wav",math.random(50,65),math.random(100,125))
 		if self.CustomOnMissEntity then self:CustomOnMissEntity() end

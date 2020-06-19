@@ -13,6 +13,7 @@ PERSONA_TASKS["TASK_DEATH"] = 6
 PERSONA_TASKS["TASK_RETURN"] = 7
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.AuraChance = 2
+ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Initialize()
 	self:SetSolid(SOLID_OBB)
@@ -336,13 +337,13 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 	local hitentity = false
 	local hitEnts = {}
 	local snd = snd or true
+	local doactualdmg = DamageInfo()
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
 			if (v != self && v != self.User) && (((v:IsNPC() or (v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
 				if (self:GetForward():Dot((Vector(v:GetPos().x,v:GetPos().y,0) - Vector(self:GetPos().x,self:GetPos().y,0)):GetNormalized()) > math.cos(math.rad(rad))) then
-					local doactualdmg = DamageInfo()
 					doactualdmg:SetDamage(dmg)
-					doactualdmg:SetDamageType(bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB))
+					doactualdmg:SetDamageType(self.DamageTypes)
 					doactualdmg:SetDamageForce(self:GetForward() *((doactualdmg:GetDamage() +100) *70))
 					doactualdmg:SetInflictor(self)
 					doactualdmg:SetAttacker(self.User)
@@ -365,7 +366,7 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 		end
 	end
 	if hitentity then
-		if self.CustomOnHitEntity then self:CustomOnHitEntity(hitEnts) end
+		if self.CustomOnHitEntity then self:CustomOnHitEntity(hitEnts,doactualdmg) end
 	else
 		self:EmitSound("npc/zombie/claw_miss1.wav",math.random(50,65),math.random(100,125))
 		if self.CustomOnMissEntity then self:CustomOnMissEntity() end
@@ -381,6 +382,42 @@ function ENT:SoundTimer(t,ent,snd)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnKilledEnemy(ent) end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Curse(ent,t,dmg)
+	ent.Persona_DMG_Curse = CurTime() +t
+	ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
+	for i = 1, t do
+		timer.Simple(i,function()
+			if IsValid(ent) then
+				local dmginfo = DamageInfo()
+				dmginfo:SetDamage(dmg)
+				dmginfo:SetDamageType(DMG_P_CURSE)
+				dmginfo:SetInflictor(IsValid(self) && self or ent)
+				dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
+				ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)
+			end
+		end)
+	end
+	timer.Simple(t,function()
+		if IsValid(ent) then
+			if CurTime() > ent.Persona_DMG_Curse then
+				ent:StopParticles()
+			end
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Fear(ent,t)
+	ent.Persona_DMG_Fear = CurTime() +t
+	ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
+	timer.Simple(t,function()
+		if IsValid(ent) then
+			if CurTime() > ent.Persona_DMG_Fear then
+				ent:StopParticles()
+			end
+		end
+	end)
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 hook.Add("OnNPCKilled","Persona_NPCKilled",function(ent,killer,weapon)
 	if killer:IsPlayer() then
