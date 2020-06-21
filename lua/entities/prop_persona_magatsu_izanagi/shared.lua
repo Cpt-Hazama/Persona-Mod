@@ -11,8 +11,22 @@ ENT.Spawnable = false
 ENT.AdminOnly = false
 ENT.AutomaticFrameAdvance = true
 ---------------------------------------------------------------------------------------------------------------------------------------------
--- if CLIENT then
-	-- function ENT:Think()
+if CLIENT then
+	function ENT:Think()
+		if IsValid(self) then
+			local ent = self
+			hook.Add("HUDPaint","Persona_HUD_MagatsuIzanagi_FX",function()
+				local ply = LocalPlayer()
+				local persona = ply:GetNWEntity("PersonaEntity")
+				
+				if persona == ent && IsValid(persona) && persona:GetCritical() then
+					local background = surface.GetTextureID("hud/persona/critical_adachi")
+					surface.SetTexture(background)
+					surface.SetDrawColor(255,255,255,255)
+					surface.DrawTexturedRectRotated(ScrW() *0.5,ScrH() *0.5,ScrW(),ScrH() *0.4,0)
+				end
+			end)
+		end
 		-- if IsValid(self) then
 			-- hook.Add("HUDPaint","Persona_HUD_MagatsuIzanagi",function()
 				-- local ply = LocalPlayer()
@@ -65,5 +79,5 @@ ENT.AutomaticFrameAdvance = true
 		-- else
 			-- hook.Remove("HUDPaint","Persona_HUD_MagatsuIzanagi")
 		-- end
-	-- end
--- end
+	end
+end

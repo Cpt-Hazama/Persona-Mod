@@ -18,6 +18,10 @@ if SERVER then
 	util.AddNetworkString("Persona_SetName")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SetupDataTables()
+	self:NetworkVar("Bool",0,"Critical")
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetFeedName(name,class)
 	net.Start("Persona_SetName")
 		net.WriteString(name)

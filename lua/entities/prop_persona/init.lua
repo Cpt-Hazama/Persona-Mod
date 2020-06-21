@@ -27,11 +27,23 @@ function ENT:Initialize()
 	self.CurrentSideAng = self:GetAngles().z
 	
 	self.NextDamageUserT = 0
+	
+	self:SetCritical(false)
 
 	self.Loops = {}
 	self.Flexes = {}
 	
 	self.NextCardSwitchT = CurTime()
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DoCritical(t)
+	self:SetCritical(true)
+	self.User:EmitSound("cpthazama/persona5/misc/00015_streaming.wav",0.2)
+	timer.Simple(t,function()
+		if IsValid(self) then
+			self:SetCritical(false)
+		end
+	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
@@ -342,7 +354,7 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 		for _,v in pairs(FindEnts) do
 			if (v != self && v != self.User) && (((v:IsNPC() or (v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
 				if (self:GetForward():Dot((Vector(v:GetPos().x,v:GetPos().y,0) - Vector(self:GetPos().x,self:GetPos().y,0)):GetNormalized()) > math.cos(math.rad(rad))) then
-					doactualdmg:SetDamage(dmg)
+					doactualdmg:SetDamage(self:GetCritical() && dmg *2 or dmg)
 					doactualdmg:SetDamageType(self.DamageTypes)
 					doactualdmg:SetDamageForce(self:GetForward() *((doactualdmg:GetDamage() +100) *70))
 					doactualdmg:SetInflictor(self)
@@ -398,7 +410,7 @@ function ENT:Curse(ent,t,dmg)
 			end
 		end)
 	end
-	timer.Simple(t,function()
+	timer.Simple(t +0.15,function()
 		if IsValid(ent) then
 			if CurTime() > ent.Persona_DMG_Curse then
 				ent:StopParticles()
@@ -412,7 +424,7 @@ function ENT:Fear(ent,t)
 	ent.Persona_DMG_Fear = CurTime() +t
 	ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 	ent:AddEntityRelationship(self.User,D_FR,99)
-	timer.Simple(t,function()
+	timer.Simple(t +0.15,function()
 		if IsValid(ent) then
 			if CurTime() > ent.Persona_DMG_Fear then
 				ent:StopParticles()

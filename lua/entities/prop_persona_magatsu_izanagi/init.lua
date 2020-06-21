@@ -34,6 +34,7 @@ function ENT:PersonaControls(ply,persona)
 		if self:GetTask() != "TASK_ATTACK" && !self.IsArmed then
 			self:SetTask("TASK_ATTACK")
 			self:PlayAnimation("ghostly_wail_noXY",1)
+			if math.random(1,5) == 1 then self:DoCritical(1) end
 			ply:EmitSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
 			self:FindTarget(ply)
 			-- self:SetPos(self.User:GetPos() +self.User:GetForward() *60)
@@ -122,6 +123,7 @@ function ENT:Maziodyne(ply,persona,rmb)
 			self:SetTask("TASK_PLAY_ANIMATION")
 			self:PlayAnimation("atk_magatsu_mandala_pre",1)
 			ply:EmitSound("cpthazama/persona5/adachi/vo/curse.wav")
+			if math.random(1,2) == 1 then self:DoCritical(1) end
 			timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_pre"),function()
 				if IsValid(self) then
 					self.IsArmed = true
@@ -170,6 +172,7 @@ function ENT:InstaKill(ply,persona,rmb)
 			self.InstaKillTarget = NULL
 			self.NextInstaKillT = CurTime() +20
 			self:TakeSP(self.CurrentCardCost)
+			self:DoCritical(1)
 
 			local style = math.random(1,2)
 			local dur1 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_start0" .. style .. ".wav")
@@ -319,7 +322,7 @@ function ENT:MagatsuMandala(att,dist)
 		sound.Play("ambient/energy/weld" .. math.random(1,2) .. ".wav",tr.HitPos,90)
 		if tr.Entity && tr.Entity:Health() && tr.Entity:Health() > 0 then
 			local dmginfo = DamageInfo()
-			dmginfo:SetDamage(5)
+			dmginfo:SetDamage(self:GetCritical() && 5 *2 or 5)
 			dmginfo:SetAttacker(self.User)
 			dmginfo:SetInflictor(self)
 			dmginfo:SetDamageType(bit.bor(DMG_DISSOLVE,DMG_ENERGYBEAM,DMG_P_ELEC))
@@ -359,6 +362,8 @@ function ENT:OnSummoned(ply)
 	self.InstaKillStage = 0
 	self.InstaKillStyle = 0
 	self.HeatRiserT = CurTime()
+	
+	self:SetCritical(false)
 
 	self.Damage = 400
 
