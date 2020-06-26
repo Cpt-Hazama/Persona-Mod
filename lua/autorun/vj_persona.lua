@@ -16,18 +16,33 @@ if VJExists == true then
 
 	local vCat = "Persona"
 	VJ.AddCategoryInfo(vCat,{Icon = "vj_icons/persona.png"})
+	
+	/*
+		Characters with the wild card ability:
+		- Ren
+		- Caroline
+		- Justine
+		- Lavenza
+		- Akechi
+
+		- Yu
+		- Elizabeth
+		- Margaret
+	*/
 
 		-- Persona 5 - Protagonists --
+	VJ.AddNPC("Ren Amamiya","npc_vj_per_ren",vCat) -- Persona: Arsène and Satanael
 	VJ.AddNPC("Makoto Niijima","npc_vj_per_makoto",vCat) -- Johanna
 	VJ.AddNPC("Ann Takamaki","npc_vj_per_ann",vCat) -- Carmen
 	VJ.AddNPC("Caroline","npc_vj_per_caroline",vCat) -- Shiisaa
 	VJ.AddNPC("Justine","npc_vj_per_justine",vCat) -- Sudama
-	VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat) -- Thor
-	
+	VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat) -- Persona: Thor, Berith and Atavaka | Theme: Rivers in The Desert
+
 		-- Persona 5 - Antagonists --
 	VJ.AddNPC("Kamoshida (Shadow)","npc_vj_per_kamoshida",vCat)
 	VJ.AddNPC("Madarame (Shadow)","npc_vj_per_madarame",vCat)
 	VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCat)
+	VJ.AddNPC("Goro Akechi","npc_vj_per_akechi",vCat) -- Persona: Loki and Hereward
 	
 		-- Persona 4 - Protagonists --
 	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami
