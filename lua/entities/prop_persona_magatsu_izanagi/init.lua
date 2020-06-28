@@ -369,6 +369,7 @@ function ENT:OnSummoned(ply)
 
 	self:AddCard("Maziodyne",22,false)
 	self:AddCard("Heat Riser",30,false)
+	self:AddCard("Magatsu Mandala",30,false)
 	self:AddCard("Yomi Drop",100,false)
 	self:SetCard("Maziodyne")
 

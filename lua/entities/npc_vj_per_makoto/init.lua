@@ -22,6 +22,7 @@ ENT.HullType = HULL_HUMAN
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_PHANTOMTHIEVES"}
 ENT.PlayerFriendly = true
+ENT.FriendsWithAllPlayerAllies = true
 
 ENT.BloodColor = "Red"
 
@@ -37,9 +38,24 @@ ENT.AnimTbl_Death = {ACT_DIESIMPLE}
 ENT.DeathCorpseEntityClass = "prop_vj_animatable"
 
 ENT.SoundTbl_FootStep = {}
-ENT.SoundTbl_Idle = {}
-ENT.SoundTbl_Alert = {}
-ENT.SoundTbl_BeforeMeleeAttack = {}
+ENT.SoundTbl_Alert = {
+	"cpthazama/persona5/makoto/0001.wav",
+	"cpthazama/persona5/makoto/0002.wav",
+	"cpthazama/persona5/makoto/0004.wav",
+	"cpthazama/persona5/makoto/0005.wav",
+	"cpthazama/persona5/makoto/0010.wav",
+	"cpthazama/persona5/makoto/0012.wav",
+	"cpthazama/persona5/makoto/0086.wav",
+	"cpthazama/persona5/makoto/0087.wav",
+}
+ENT.SoundTbl_BeforeMeleeAttack = {
+	"cpthazama/persona5/makoto/0033.wav",
+	"cpthazama/persona5/makoto/0032.wav",
+	"cpthazama/persona5/makoto/0037.wav",
+	"cpthazama/persona5/makoto/0038.wav",
+	"cpthazama/persona5/makoto/0048.wav",
+	"cpthazama/persona5/makoto/0078.wav",
+}
 ENT.SoundTbl_Pain = {
 	"cpthazama/persona5/makoto/0091.wav",
 	"cpthazama/persona5/makoto/0092.wav",
@@ -61,6 +77,13 @@ ENT.SoundTbl_Pain = {
 	"cpthazama/persona5/makoto/0114.wav",
 	"cpthazama/persona5/makoto/0115.wav",
 	"cpthazama/persona5/makoto/0116.wav",
+	"cpthazama/persona5/makoto/0013.wav",
+	"cpthazama/persona5/makoto/0015.wav",
+	"cpthazama/persona5/makoto/0121.wav",
+	"cpthazama/persona5/makoto/0122.wav",
+	"cpthazama/persona5/makoto/0123.wav",
+	"cpthazama/persona5/makoto/0124.wav",
+	"cpthazama/persona5/makoto/0125.wav",
 }
 ENT.SoundTbl_Death = {
 	"cpthazama/persona5/makoto/0103.wav",
@@ -70,12 +93,83 @@ ENT.SoundTbl_Death = {
 	"cpthazama/persona5/makoto/0117.wav",
 	"cpthazama/persona5/makoto/0118.wav",
 }
+ENT.SoundTbl_OnKilledEnemy = {
+	"cpthazama/persona5/makoto/0059.wav",
+	"cpthazama/persona5/makoto/0062.wav",
+	"cpthazama/persona5/makoto/0089.wav",
+	"cpthazama/persona5/makoto/0090.wav",
+	"cpthazama/persona5/makoto/0205.wav",
+	"cpthazama/persona5/makoto/0208.wav",
+}
+ENT.SoundTbl_Dodge = {
+	"cpthazama/persona5/makoto/0126.wav",
+	"cpthazama/persona5/makoto/0127.wav",
+	"cpthazama/persona5/makoto/0128.wav",
+	"cpthazama/persona5/makoto/0129.wav",
+	"cpthazama/persona5/makoto/0130.wav",
+}
+ENT.SoundTbl_Persona = {
+	"cpthazama/persona5/makoto/0198.wav",
+	"cpthazama/persona5/makoto/0236.wav",
+	"cpthazama/persona5/makoto/0237.wav",
+	"cpthazama/persona5/makoto/0238.wav",
+	"cpthazama/persona5/makoto/0239.wav",
+	"cpthazama/persona5/makoto/0240.wav",
+	"cpthazama/persona5/makoto/0241.wav",
+}
+ENT.SoundTbl_PersonaAttack = {
+	"cpthazama/persona5/makoto/0199.wav",
+}
 ENT.SoundTbl_GetUp = {
 	"cpthazama/persona5/makoto/0155.wav",
 	"cpthazama/persona5/makoto/0159.wav",
 }
+ENT.SoundTbl_FollowPlayer = {
+	"cpthazama/persona5/makoto/0234.wav",
+	"cpthazama/persona5/makoto/0235.wav",
+}
+ENT.SoundTbl_UnFollowPlayer = {
+	"cpthazama/persona5/makoto/0218.wav",
+	"cpthazama/persona5/makoto/0220.wav",
+	"cpthazama/persona5/makoto/0224.wav",
+	"cpthazama/persona5/makoto/0229.wav",
+	"cpthazama/persona5/makoto/0230.wav",
+}
+ENT.SoundTbl_MoveOutOfPlayersWay = {
+	"cpthazama/persona5/makoto/0225.wav",
+}
+ENT.SoundTbl_IdleDialogue = {
+	"cpthazama/persona5/makoto/0209.wav",
+	"cpthazama/persona5/makoto/0215.wav",
+}
+ENT.SoundTbl_IdleDialogueAnswer = {
+	"cpthazama/persona5/makoto/0232.wav",
+	"cpthazama/persona5/makoto/0231.wav",
+	"cpthazama/persona5/makoto/0230.wav",
+	"cpthazama/persona5/makoto/0229.wav",
+	"cpthazama/persona5/makoto/0218.wav",
+	"cpthazama/persona5/makoto/0204.wav",
+	"cpthazama/persona5/makoto/0203.wav",
+	"cpthazama/persona5/makoto/0202.wav",
+	"cpthazama/persona5/makoto/0196.wav",
+}
 
 ENT.GeneralSoundPitch1 = 100
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnTakeDamage_BeforeDamage(dmginfo,hitgroup)
+	local dmg = dmginfo:GetDamage()
+	local dmgtype = dmginfo:GetDamageType()
+	
+	if dmgtype == self.Stats.WK then
+		dmginfo:ScaleDamage(2)
+	end
+	if dmgtype == self.Stats.STR then
+		dmginfo:ScaleDamage(0.35)
+	end
+	if dmgtype == self.Stats.NUL then
+		dmginfo:SetDamage(0)
+	end
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()
 	self:SetHealth((GetConVarNumber("vj_npc_allhealth") > 0) and GetConVarNumber("vj_npc_allhealth") or self:VJ_GetDifficultyValue(self.Stats.HP))
@@ -87,6 +181,12 @@ function ENT:CustomOnInitialize()
 	self.MouthDistance = 0
 	self.NextMouthMoveT = 0
 	self.NextNumChangeT = 0
+	
+	self:CapabilitiesAdd(bit.bor(CAP_ANIMATEDFACE))
+	self:CapabilitiesAdd(bit.bor(CAP_TURN_HEAD))
+	self:CapabilitiesAdd(bit.bor(CAP_OPEN_DOORS))
+	self:CapabilitiesAdd(bit.bor(CAP_AUTO_DOORS))
+	self:CapabilitiesAdd(bit.bor(CAP_USE))
 	
 	local max,min = self:GetCollisionBounds()
 end
@@ -109,6 +209,11 @@ end
 function ENT:CustomOnThink()
 	self.AnimTbl_IdleStand = {self.MetaVerseMode && ACT_IDLE_ANGRY or ACT_IDLE}
 	self.AnimTbl_Run = {self.MetaVerseMode && ACT_RUN_STIMULATED or ACT_RUN}
+
+	-- if self.FollowingPlayer && !IsValid(self:GetEnemy()) then
+		-- self:DoPoseParameterLooking(false,self.FollowPlayer_Entity)
+	-- end
+
 	if IsValid(self:GetEnemy()) then
 		if self.MetaVerseMode == false then
 			if CurTime() > self.NextMetaChangeT then
@@ -178,6 +283,57 @@ function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
 			timer.Simple(0.2,function() SafeRemoveEntity(GetCorpse) if IsValid(e) then e:SetNoDraw(false) end end)
 		end
 	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DoPoseParameterLooking(ResetPoses,ovEnt)
+	if self.HasPoseParameterLooking == false then return end
+	ResetPoses = ResetPoses or false
+	//self:VJ_GetAllPoseParameters(true)
+	local ent = NULL
+	if self.VJ_IsBeingControlled == true then ent = self.VJ_TheController else ent = self:GetEnemy() end
+	if ovEnt then
+		ent = ovEnt
+		ResetPoses = false
+	end
+	local p_enemy = 0 -- Pitch
+	local y_enemy = 0 -- Yaw
+	local r_enemy = 0 -- Roll
+	if IsValid(ent) && ResetPoses == false then
+		local enemy_pos = false
+		if self.VJ_IsBeingControlled == true then
+			//enemy_pos = self.VJ_TheController:GetEyeTrace().HitPos
+			local gettr = util.GetPlayerTrace(self.VJ_TheController) -- Get the player's trace
+			local tr = util.TraceLine({start = gettr.start, endpos = gettr.endpos, filter = {self, self.VJ_TheController}}) -- Apply the filter to it (The player and the NPC)
+			enemy_pos = tr.HitPos
+		else
+			enemy_pos = ent:GetPos() + ent:OBBCenter()
+		end
+		if enemy_pos == false then return end
+		local self_ang = self:GetAngles()
+		local enemy_ang = (enemy_pos - (self:GetPos() + self:OBBCenter())):Angle()
+		p_enemy = math.AngleDifference(enemy_ang.p, self_ang.p)
+		if self.PoseParameterLooking_InvertPitch == true then p_enemy = -p_enemy end
+		y_enemy = math.AngleDifference(enemy_ang.y, self_ang.y)
+		if self.PoseParameterLooking_InvertYaw == true then y_enemy = -y_enemy end
+		r_enemy = math.AngleDifference(enemy_ang.z, self_ang.z)
+		if self.PoseParameterLooking_InvertRoll == true then r_enemy = -r_enemy end
+	elseif self.PoseParameterLooking_CanReset == false then -- Should it reset its pose parameters if there is no enemies?
+		return
+	end
+	
+	self:CustomOn_PoseParameterLookingCode(p_enemy, y_enemy, r_enemy)
+	
+	local ang_app = math.ApproachAngle
+	local names = self.PoseParameterLooking_Names
+	for x = 1, #names.pitch do
+		self:SetPoseParameter(names.pitch[x], ang_app(self:GetPoseParameter(names.pitch[x]), p_enemy, self.PoseParameterLooking_TurningSpeed))
+	end
+	for x = 1, #names.yaw do
+		self:SetPoseParameter(names.yaw[x], ang_app(self:GetPoseParameter(names.yaw[x]), y_enemy, self.PoseParameterLooking_TurningSpeed))
+	end
+	for x = 1, #names.roll do
+		self:SetPoseParameter(names.roll[x], ang_app(self:GetPoseParameter(names.roll[x]), r_enemy, self.PoseParameterLooking_TurningSpeed))
+	end
 end
 /*-----------------------------------------------
 	*** Copyright (c) 2012-2019 by Cpt. Hazama, All rights reserved. ***
