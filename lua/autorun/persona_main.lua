@@ -13,6 +13,7 @@ DMG_P_PSI = 1011
 DMG_P_ELEC = 1012
 DMG_P_CURSE = 1013
 DMG_P_FEAR = 1014
+DMG_P_PHYS = 1015
 
 if SERVER then
 	util.AddNetworkString("persona_csound")
@@ -95,6 +96,65 @@ function Persona_CSound(ply,snd,vol,pit)
 		net.WriteFloat(vol or 75)
 		net.WriteFloat(pit or 100)
 	net.Send(ply)
+end
+
+local NPC = FindMetaTable("NPC")
+
+function NPC:Alive()
+	return self:Health() > 0
+end
+
+function NPC:GetPersona()
+	return self:GetNWEntity("PersonaEntity")
+end
+
+function NPC:SetPersonaEntity(ent)
+	self:SetNWEntity("PersonaEntity",ent)
+	ent.User = self
+end
+
+function NPC:SetSP(sp)
+	self:SetNWInt("Persona_SP",sp)
+end
+
+function NPC:SetMaxSP(spm)
+	self:SetNWInt("Persona_SPMax",spm)
+end
+
+function NPC:GetSP()
+	return self:GetNWInt("Persona_SP")
+end
+
+function NPC:GetMaxSP()
+	return self:GetNWInt("Persona_SPMax")
+end
+
+function NPC:HasGodMode()
+	return self.GodMode
+end
+
+function NPC:SummonPersona(persona)
+	local personaEntity = self:GetPersona()
+	if !IsValid(personaEntity) then
+		local class = "prop_persona_" .. persona
+		local ent = ents.Create(class)
+		ent:SetModel(ent.Model)
+		ent:SetPos(ent:GetSpawnPosition(self) or self:GetPos())
+		ent:SetAngles(self:GetAngles())
+		ent:Spawn()
+		self:SetPersonaEntity(ent)
+		ent:RequestAura(ent,ent.Aura)
+		ent.User = self
+		-- ent.Persona = self:GetPersonaName()
+		ent:DoIdle()
+		ent:OnSummoned(self)
+		ent:SetFeedName(ent.Name,class)
+	else
+		if !personaEntity.IsFlinching then
+			personaEntity:SetTask("TASK_RETURN")
+			personaEntity:OnRequestDisappear(self)
+		end
+	end
 end
 
 if SERVER then

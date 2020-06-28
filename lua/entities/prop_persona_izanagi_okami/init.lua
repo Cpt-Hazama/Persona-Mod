@@ -201,7 +201,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
 	ply:EmitSound("cpthazama/persona5/joker/0009.wav")
-	self.StandDistance = 393.7 *10 -- 100 meters
+	self.PersonaDistance = 393.7 *10 -- 100 meters
 	self.TimeToRange = CurTime() +2
 	self.IsArmed = false
 	

@@ -352,7 +352,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
 	ply:EmitSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
-	self.StandDistance = 393.7 *4 -- 40 meters
+	self.PersonaDistance = 393.7 *4 -- 40 meters
 	self.TimeToMazionga = CurTime() +2
 	self.RechargeT = CurTime()
 	self.NextInstaKillT = CurTime()

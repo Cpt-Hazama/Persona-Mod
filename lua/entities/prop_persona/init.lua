@@ -111,21 +111,23 @@ function ENT:ControlPersonaMovement(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DefaultPersonaControls(ply,persona)
-	if ply:KeyReleased(IN_WALK) then
-		if IsValid(ply.Persona_EyeTarget) then
-			ply.Persona_EyeTarget = NULL
-		else
-			local ent = ply:GetEyeTrace().Entity
-			if IsValid(ent) && (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != persona)) then
-				ply.Persona_EyeTarget = ent
-				self.User:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+	if ply:IsPlayer() then
+		if ply:KeyReleased(IN_WALK) then
+			if IsValid(ply.Persona_EyeTarget) then
+				ply.Persona_EyeTarget = NULL
+			else
+				local ent = ply:GetEyeTrace().Entity
+				if IsValid(ent) && (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != persona)) then
+					ply.Persona_EyeTarget = ent
+					self.User:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+				end
 			end
 		end
+		if IsValid(ply.Persona_EyeTarget) then
+			ply:SetEyeAngles(LerpAngle(0.5,ply:EyeAngles(),((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetShootPos()):Angle()))
+		end
 	end
-	if IsValid(ply.Persona_EyeTarget) then
-		ply:SetEyeAngles(LerpAngle(0.5,ply:EyeAngles(),((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetShootPos()):Angle()))
-	end
-	if ply:GetPos():Distance(self:GetPos()) > self.StandDistance && CurTime() > self.NextDamageUserT then
+	if ply:GetPos():Distance(self:GetPos()) > self.PersonaDistance && CurTime() > self.NextDamageUserT then
 		self.User:TakeDamage(1 *(ply:GetPos():Distance(self:GetPos()) /100),self.User,self.User)
 		self.NextDamageUserT = CurTime() +0.25
 	end
@@ -134,42 +136,46 @@ function ENT:DefaultPersonaControls(ply,persona)
 		self:SetPos(self:GetIdlePosition(ply))
 		self:SetColor(Color(255,255,255,150))
 		self:FacePlayerAim(self.User)
-		
-		local w = ply:KeyDown(IN_FORWARD)
-		local a = ply:KeyDown(IN_MOVELEFT)
-		local d = ply:KeyDown(IN_MOVERIGHT)
-		local s = ply:KeyDown(IN_BACK)
-		local ang = self.User:GetAngles()
-		if !w && !a && !d && !s then
+
+		if ply:IsPlayer() then
+			local w = ply:KeyDown(IN_FORWARD)
+			local a = ply:KeyDown(IN_MOVELEFT)
+			local d = ply:KeyDown(IN_MOVERIGHT)
+			local s = ply:KeyDown(IN_BACK)
+			local ang = self.User:GetAngles()
+			if !w && !a && !d && !s then
+				self:SetAngles(self.User:GetAngles())
+			end
+			if w then
+				if self.CurrentForwardAng != 15 then
+					self.CurrentForwardAng = self.CurrentForwardAng +1
+				end
+			elseif s then
+				if self.CurrentForwardAng != -15 then
+					self.CurrentForwardAng = self.CurrentForwardAng -1
+				end
+			else
+				if self.CurrentForwardAng != 0 then
+					self.CurrentForwardAng = (self.CurrentForwardAng > 0 && self.CurrentForwardAng -1) or self.CurrentForwardAng +1
+				end
+			end
+			if a then
+				if self.CurrentSideAng != -8 then
+					self.CurrentSideAng = self.CurrentSideAng -1
+				end
+			elseif d then
+				if self.CurrentSideAng != 8 then
+					self.CurrentSideAng = self.CurrentSideAng +1
+				end
+			else
+				if self.CurrentSideAng != 0 then
+					self.CurrentSideAng = (self.CurrentSideAng > 0 && self.CurrentSideAng -1) or self.CurrentSideAng +1
+				end
+			end
+			self:SetAngles(Angle(self.CurrentForwardAng,ang.y,self.CurrentSideAng))
+		else
 			self:SetAngles(self.User:GetAngles())
 		end
-		if w then
-			if self.CurrentForwardAng != 15 then
-				self.CurrentForwardAng = self.CurrentForwardAng +1
-			end
-		elseif s then
-			if self.CurrentForwardAng != -15 then
-				self.CurrentForwardAng = self.CurrentForwardAng -1
-			end
-		else
-			if self.CurrentForwardAng != 0 then
-				self.CurrentForwardAng = (self.CurrentForwardAng > 0 && self.CurrentForwardAng -1) or self.CurrentForwardAng +1
-			end
-		end
-		if a then
-			if self.CurrentSideAng != -8 then
-				self.CurrentSideAng = self.CurrentSideAng -1
-			end
-		elseif d then
-			if self.CurrentSideAng != 8 then
-				self.CurrentSideAng = self.CurrentSideAng +1
-			end
-		else
-			if self.CurrentSideAng != 0 then
-				self.CurrentSideAng = (self.CurrentSideAng > 0 && self.CurrentSideAng -1) or self.CurrentSideAng +1
-			end
-		end
-		self:SetAngles(Angle(self.CurrentForwardAng,ang.y,self.CurrentSideAng))
 	elseif self:GetTask() == "TASK_ATTACK" then
 		if !IsValid(self.Target) then self:FindTarget(ply) end
 		self:FaceTarget()
@@ -301,12 +307,16 @@ function ENT:UserTrace(maxDist)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:FindTarget(ply)
-	local tracedata = {}
-	tracedata.start = ply:EyePos()
-	tracedata.endpos = ply:GetEyeTrace().HitPos
-	tracedata.filter = {ply,self}
-	local tr = util.TraceLine(tracedata)
-	local ent = tr.Entity
+	if ply:IsPlayer() then
+		local tracedata = {}
+		tracedata.start = ply:EyePos()
+		tracedata.endpos = ply:GetEyeTrace().HitPos
+		tracedata.filter = {ply,self}
+		local tr = util.TraceLine(tracedata)
+		local ent = tr.Entity
+	else
+		ent = ply:GetEnemy()
+	end
 	
 	self.Target = IsValid(ent) && (ent:IsNPC() or ent:IsPlayer()) && ent
 end
@@ -325,18 +335,20 @@ function ENT:FacePlayerAim(ply)
 		return
 	end
 
-	local tracedata = {}
-	tracedata.start = ply:EyePos()
-	tracedata.endpos = ply:GetEyeTrace().HitPos
-	tracedata.filter = {ply,self}
-	local tr = util.TraceLine(tracedata)
+	if ply:IsPlayer() then
+		local tracedata = {}
+		tracedata.start = ply:EyePos()
+		tracedata.endpos = ply:GetEyeTrace().HitPos
+		tracedata.filter = {ply,self}
+		local tr = util.TraceLine(tracedata)
 
-	local ang = self:GetAngles()
-	self:SetAngles(Angle(ang.x,(tr.HitPos -self:GetPos()):Angle().y,ang.z))
-	self:SetPoseParameter("aim_pitch",ply:GetPoseParameter("aim_pitch"))
-	self:SetPoseParameter("aim_yaw",ply:GetPoseParameter("aim_yaw"))
-	self:SetPoseParameter("head_pitch",ply:GetPoseParameter("head_pitch"))
-	self:SetPoseParameter("head_yaw",ply:GetPoseParameter("head_yaw"))
+		local ang = self:GetAngles()
+		self:SetAngles(Angle(ang.x,(tr.HitPos -self:GetPos()):Angle().y,ang.z))
+		self:SetPoseParameter("aim_pitch",ply:GetPoseParameter("aim_pitch"))
+		self:SetPoseParameter("aim_yaw",ply:GetPoseParameter("aim_yaw"))
+		self:SetPoseParameter("head_pitch",ply:GetPoseParameter("head_pitch"))
+		self:SetPoseParameter("head_yaw",ply:GetPoseParameter("head_yaw"))
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
@@ -459,9 +471,9 @@ function ENT:WhenRemoved() end
 function ENT:OnRemove()
 	if IsValid(self.User) then
 		self.User:SetNWVector("Persona_CustomPos",Vector(0,0,0))
+		self.User:StopParticles()
 	end
 	self:StopParticles()
-	self.User:StopParticles()
 	self:WhenRemoved()
 	for _,v in pairs(self.Loops) do
 		if v then

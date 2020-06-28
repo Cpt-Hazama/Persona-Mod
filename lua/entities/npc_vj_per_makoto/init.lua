@@ -18,6 +18,7 @@ ENT.Stats = {
 	STR = DMG_CURSE,
 	NUL = DMG_NUCLEAR,
 }
+ENT.Evasion = 45
 ENT.HullType = HULL_HUMAN
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_PHANTOMTHIEVES"}
@@ -169,6 +170,13 @@ function ENT:CustomOnTakeDamage_BeforeDamage(dmginfo,hitgroup)
 	if dmgtype == self.Stats.NUL then
 		dmginfo:SetDamage(0)
 	end
+	
+	if dmginfo:GetDamage() > 0 then
+		if math.random(1,100) <= self.Evasion then
+			self:VJ_ACT_PLAYACTIVITY("dodge",true,false,true)
+			dmginfo:SetDamage(0)
+		end
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()
@@ -188,7 +196,10 @@ function ENT:CustomOnInitialize()
 	self:CapabilitiesAdd(bit.bor(CAP_AUTO_DOORS))
 	self:CapabilitiesAdd(bit.bor(CAP_USE))
 	
-	local max,min = self:GetCollisionBounds()
+	-- local max,min = self:GetCollisionBounds()
+	
+	self:SetSP(self.Stats.SP)
+	self:SetMaxSP(self.Stats.SP)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnPlayCreateSound(SoundData,SoundFile)
@@ -206,13 +217,64 @@ function ENT:CustomOnAcceptInput(key,activator,caller,data)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PersonaThink(persona,enemy,dist)
+	if IsValid(enemy) && self:Visible(enemy) then
+		if dist < 2000 && dist > 500 then
+			if persona:GetTask() == "TASK_IDLE" then
+				persona:Freila(self,enemy)
+			end
+		elseif dist <= 500 then
+			if persona:GetTask() == "TASK_IDLE" then
+				persona:VajraBlast(self,enemy)
+			end
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
-	self.AnimTbl_IdleStand = {self.MetaVerseMode && ACT_IDLE_ANGRY or ACT_IDLE}
-	self.AnimTbl_Run = {self.MetaVerseMode && ACT_RUN_STIMULATED or ACT_RUN}
+	local idle = self.MetaVerseMode && ACT_IDLE_ANGRY or ACT_IDLE
+	local run = self.MetaVerseMode && ACT_RUN_STIMULATED or ACT_RUN
+	
+	if self:Health() <= self:GetMaxHealth() *0.3 then
+		idle = ACT_IDLE_STIMULATED
+	end
+	if IsValid(self:GetPersona()) then
+		idle = VJ_SequenceToActivity(self,"persona_idle")
+		if self.PreparedToAttack then
+			idle = VJ_SequenceToActivity(self,"persona_attack_start_idle")
+		end
+	end
+
+	self.AnimTbl_IdleStand = {idle}
+	self.AnimTbl_Run = {run}
 
 	-- if self.FollowingPlayer && !IsValid(self:GetEnemy()) then
 		-- self:DoPoseParameterLooking(false,self.FollowPlayer_Entity)
 	-- end
+	
+	self.DisableChasingEnemy = IsValid(self:GetPersona())
+	if self.DisableChasingEnemy then
+		if self:IsMoving() then
+			self:StopMoving()
+			self:ClearSchedule()
+		end
+	end
+	
+	if self.MetaVerseMode then
+		if !IsValid(self:GetPersona()) then
+			if IsValid(self:GetEnemy()) then
+				self:SummonPersona("johanna")
+				ParticleEffectAttach("jojo_aura_blue_light",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+			end
+		elseif IsValid(self:GetPersona()) then
+			self:SetBodygroup(1,0)
+			if !IsValid(self:GetEnemy()) then
+				self:SummonPersona("johanna")
+				self:SetBodygroup(1,1)
+			end
+			self:PersonaThink(self:GetPersona(),self:GetEnemy(),self:VJ_GetNearestPointToEntityDistance(self:GetEnemy()))
+		end
+	end
 
 	if IsValid(self:GetEnemy()) then
 		if self.MetaVerseMode == false then

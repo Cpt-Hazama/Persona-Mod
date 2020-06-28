@@ -17,7 +17,7 @@ if CLIENT then
 		self.SmokeEffect1:SetStartSize(20)
 		self.SmokeEffect1:SetEndSize(5)
 		self.SmokeEffect1:SetRoll(math.Rand(-0.2,0.2))
-		self.SmokeEffect1:SetColor(255,229,0)
+		self.SmokeEffect1:SetColor(0,255,255)
 		self.Emitter:Finish()
 	end
 end

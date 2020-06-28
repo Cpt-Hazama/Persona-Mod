@@ -8,7 +8,7 @@ include("shared.lua")
 ENT.Model = {"models/weapons/w_missile_launch.mdl"} -- The models it should spawn with | Picks a random one from the table
 ENT.DoesDirectDamage = true -- Should it do a direct damage when it hits something?
 ENT.DirectDamage = 100 -- How much damage should it do when it hits something
-ENT.DirectDamageType = DMG_P_ALMIGHTY -- Damage type
+ENT.DirectDamageType = DMG_P_NUCLEAR -- Damage type
 ENT.DecalTbl_DeathDecals = {}
 ENT.SoundTbl_OnCollide = {"cpthazama/persona5/skills/0230.wav"}
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ function ENT:CustomOnInitialize()
 	self:DrawShadow(false)
 
 	self.StartGlow1 = ents.Create( "env_sprite" )
-	self.StartGlow1:SetKeyValue( "rendercolor","255 229 0" )
+	self.StartGlow1:SetKeyValue( "rendercolor","0 255 255" )
 	self.StartGlow1:SetKeyValue( "GlowProxySize","2.0" )
 	self.StartGlow1:SetKeyValue( "HDRColorScale","1.0" )
 	self.StartGlow1:SetKeyValue( "renderfx","14" )
@@ -48,7 +48,7 @@ function ENT:CustomOnInitialize()
 	self.StartLight1:SetKeyValue("distance", "200")
 	self.StartLight1:SetLocalPos(self:GetPos())
 	self.StartLight1:SetLocalAngles( self:GetAngles() )
-	self.StartLight1:Fire("Color", "255 229 0")
+	self.StartLight1:Fire("Color", "0 255 255")
 	self.StartLight1:SetParent(self)
 	self.StartLight1:Spawn()
 	self.StartLight1:Activate()
