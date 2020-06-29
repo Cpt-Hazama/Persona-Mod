@@ -6,12 +6,12 @@
 
 	"$phong"				"1"
 	"$phongboost"			"0.1"
-	"$phongfresnelranges"	"[0.1 0.1 0.1]"
+	"$phongfresnelranges"	"[0.25 0.25 0.25]"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"
 	"$rimlightboost" "1"
 	"$rimmask" "1"
 
-	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+	//"$lightwarptexture" "models/cpthazama/persona5/warp2"
 }

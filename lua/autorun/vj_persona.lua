@@ -42,7 +42,7 @@ if VJExists == true then
 	VJ.AddNPC("Kamoshida (Shadow)","npc_vj_per_kamoshida",vCat)
 	VJ.AddNPC("Madarame (Shadow)","npc_vj_per_madarame",vCat)
 	VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCat)
-	VJ.AddNPC("Goro Akechi","npc_vj_per_akechi",vCat) -- Persona: Loki and Hereward
+	VJ.AddNPC("Goro Akechi","npc_vj_per_akechi",vCat) -- Persona: Loki and Hereward | Theme: Reincarnation (I'll Face Myself)
 	
 		-- Persona 4 - Protagonists --
 	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami
