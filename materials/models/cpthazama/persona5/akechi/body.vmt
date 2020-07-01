@@ -4,14 +4,15 @@
 	"$bumpmap" "models/cpthazama/persona5/akechi/body_n"
 	"$phongexponenttexture" "models/cpthazama/persona5/akechi/body_s"
 
-	"$phong"				"0"
-	"$phongboost"			"0.1"
-	"$phongfresnelranges"	"[1 0.9 0.9]"
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[1 0 0]"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"
-	"$rimlightboost" "1"
+	"$rimlightboost" "200"
 	"$rimmask" "1"
 
-	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+	"$lightwarptexture" "models/cpthazama/persona5/cel_red"
 }

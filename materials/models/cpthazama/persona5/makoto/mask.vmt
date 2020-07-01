@@ -6,16 +6,17 @@
 
 	"$phong"				"1"
 	"$phongboost"			"0.1"
-	"$phongfresnelranges"	"[1 0.9 0.9]"
+	"$phongfresnelranges"	"[1 1 1]"
+	"$phongtint"			"[0 0.15 1]"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"
-	"$rimlightboost" "1"
+	"$rimlightboost" "200"
 	"$rimmask" "1"
 
 	"$envmap" "models/cpthazama/persona5/makoto/envmap"
 	"$envmaptint" "[0.001 0.001 0.001]"
 	"$envmapfresnel" "1"
 
-	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+	"$lightwarptexture" "models/cpthazama/persona5/cel_blue"
 }

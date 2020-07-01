@@ -156,6 +156,22 @@ ENT.SoundTbl_IdleDialogueAnswer = {
 }
 
 ENT.GeneralSoundPitch1 = 100
+
+util.AddNetworkString("vj_persona_hud_makoto")
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Controller_Initialize(ply)
+    net.Start("vj_persona_hud_makoto")
+		net.WriteBool(false)
+		net.WriteEntity(self)
+    net.Send(ply)
+
+	function self.VJ_TheControllerEntity:CustomOnStopControlling()
+		net.Start("vj_persona_hud_makoto")
+			net.WriteBool(true)
+			net.WriteEntity(self)
+		net.Send(ply)
+	end
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnTakeDamage_BeforeDamage(dmginfo,hitgroup)
 	local dmg = dmginfo:GetDamage()
@@ -218,6 +234,24 @@ function ENT:CustomOnAcceptInput(key,activator,caller,data)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaThink(persona,enemy,dist)
+	if self.VJ_IsBeingControlled then
+		local ply = self.VJ_TheController
+		local lmb = ply:KeyDown(IN_ATTACK)
+		local rmb = ply:KeyDown(IN_ATTACK2)
+		local r = ply:KeyDown(IN_RELOAD)
+		
+		if lmb then
+			if persona:GetTask() == "TASK_IDLE" then
+				persona:VajraBlast(self,enemy)
+			end
+		end
+		if rmb then
+			if persona:GetTask() == "TASK_IDLE" then
+				persona:Freila(self,enemy)
+			end
+		end
+		return
+	end
 	if IsValid(enemy) && self:Visible(enemy) then
 		if dist < 2000 && dist > 500 then
 			if persona:GetTask() == "TASK_IDLE" then
@@ -239,10 +273,10 @@ function ENT:CustomOnThink()
 		idle = ACT_IDLE_STIMULATED
 	end
 	if IsValid(self:GetPersona()) then
-		idle = VJ_SequenceToActivity(self,"persona_idle")
-		if self.PreparedToAttack then
+		-- idle = VJ_SequenceToActivity(self,"persona_idle")
+		-- if self.PreparedToAttack then
 			idle = VJ_SequenceToActivity(self,"persona_attack_start_idle")
-		end
+		-- end
 	end
 
 	self.AnimTbl_IdleStand = {idle}

@@ -10,6 +10,14 @@ function ENT:GetAttackPosition()
 	return self.AttackPosition or self:GetPos() +self:OBBCenter()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetSpawnPosition(ply)
+	return ply:GetPos()
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetIdlePosition(ply)
+	return ply:GetPos()
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnHitEntity(entities,dmginfo)
 	for _,v in pairs(entities) do
 		if IsValid(v) then

@@ -5,17 +5,18 @@
 	"$phongexponenttexture" "models/cpthazama/persona5/tsukiyomi/tsukiyomi_s"
 
 	"$phong"				"1"
-	"$phongboost"			"1"
-	"$phongfresnelranges"	"[2 2 2]"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[1 0 0]"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"
-	"$rimlightboost" "1"
+	"$rimlightboost" "200"
 	"$rimmask" "1"
 
 	"$envmap" "models/cpthazama/persona5/tsukiyomi/reflection"
 	"$envmaptint" "[0.02 0.02 0.02]"
 	"$envmapfresnel" "1"
 
-	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+	"$lightwarptexture" "models/cpthazama/persona5/cel_red"
 }

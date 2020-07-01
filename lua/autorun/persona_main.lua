@@ -108,9 +108,14 @@ function NPC:GetPersona()
 	return self:GetNWEntity("PersonaEntity")
 end
 
-function NPC:SetPersonaEntity(ent)
+function NPC:SetPersonaEntity(ent,name)
 	self:SetNWEntity("PersonaEntity",ent)
+	self:SetNWString("PersonaName",name)
 	ent.User = self
+end
+
+function NPC:GetPersonaName()
+	return self:GetNWString("PersonaName")
 end
 
 function NPC:SetSP(sp)
@@ -142,7 +147,7 @@ function NPC:SummonPersona(persona)
 		ent:SetPos(ent:GetSpawnPosition(self) or self:GetPos())
 		ent:SetAngles(self:GetAngles())
 		ent:Spawn()
-		self:SetPersonaEntity(ent)
+		self:SetPersonaEntity(ent,persona)
 		ent:RequestAura(ent,ent.Aura)
 		ent.User = self
 		-- ent.Persona = self:GetPersonaName()
