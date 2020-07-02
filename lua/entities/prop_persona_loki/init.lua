@@ -30,15 +30,15 @@ function ENT:CustomOnHitEntity(entities,dmginfo)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Laevateinn(owner,enemy)
-	if self.User:Health() > self.User:GetMaxHealth() *0.25 && self:GetTask() != "TASK_ATTACK" then
+	if /*self.User:Health() > self.User:GetMaxHealth() *0.25 &&*/ self:GetTask() != "TASK_ATTACK" then
 		self:SetTask("TASK_ATTACK")
 		owner:VJ_ACT_PLAYACTIVITY("persona_attack",true,false,false)
 		VJ_CreateSound(owner,owner.SoundTbl_PersonaAttack,80)
 		self:PlayAnimation("attack",1)
 		self.Target = enemy
 		self:SetAngles(self.User:GetAngles())
-		self:TakeHP(self.User:GetMaxHealth() *0.25)
-		timer.Simple(0.8,function()
+		-- self:TakeHP(self.User:GetMaxHealth() *0.25)
+		timer.Simple(1.65,function()
 			if IsValid(self) && IsValid(enemy) then
 				self.AttackPosition = enemy:GetPos()
 				self:MeleeAttackCode(200,150,180)

@@ -52,6 +52,8 @@ if VJExists == true then
 		-- Persona 4 - Antagonists -- 
 	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi",vCat) -- Magatsu-Izanagi
 
+	VJ.AddClientConVar("vj_persona_music",1)
+
 -- !!!!!! DON'T TOUCH ANYTHING BELOW THIS !!!!!! -------------------------------------------------------------------------------------------------------------------------
 	AddCSLuaFile(AutorunFile)
 	VJ.AddAddonProperty(AddonName,AddonType)

@@ -294,7 +294,7 @@ function ENT:CustomOnThink()
 		end
 	end
 	
-	if self.MetaVerseMode then
+	if self.MetaVerseMode && self:Health() > 0 then
 		if !IsValid(self:GetPersona()) then
 			if IsValid(self:GetEnemy()) then
 				self:SummonPersona("johanna")

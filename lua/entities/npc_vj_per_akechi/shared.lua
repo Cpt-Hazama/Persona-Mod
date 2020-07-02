@@ -48,15 +48,20 @@ if CLIENT then
 	
 	function ENT:Think()
 		local ply = LocalPlayer()
+		if GetConVarNumber("vj_persona_music") == 0 then
+			if ply.VJ_Persona_Theme then ply.VJ_Persona_Theme:Stop() end
+		end
 		if ply.VJ_Persona_ThemeT == nil then ply.VJ_Persona_ThemeT = 0 end
 		if ply.VJ_Persona_Theme == nil or ply.VJ_Persona_ThemeT < CurTime() then
 			if ply.VJ_Persona_Theme then ply.VJ_Persona_Theme:Stop() end
-			ply.VJ_Persona_ThemeTrack = "cpthazama/persona5/music/boss_akechi.mp3"
-			ply.VJ_Persona_Theme = CreateSound(ply,ply.VJ_Persona_ThemeTrack)
-			ply.VJ_Persona_Theme:SetSoundLevel(0)
-			ply.VJ_Persona_Theme:ChangeVolume(60)
-			ply.VJ_Persona_Theme:Play()
-			ply.VJ_Persona_ThemeT = CurTime() +318
+			if GetConVarNumber("vj_persona_music") == 1 then
+				ply.VJ_Persona_ThemeTrack = "cpthazama/persona5/music/boss_akechi.mp3"
+				ply.VJ_Persona_Theme = CreateSound(ply,ply.VJ_Persona_ThemeTrack)
+				ply.VJ_Persona_Theme:SetSoundLevel(0)
+				ply.VJ_Persona_Theme:ChangeVolume(60)
+				ply.VJ_Persona_Theme:Play()
+				ply.VJ_Persona_ThemeT = CurTime() +318
+			end
 		end
 	end
 	

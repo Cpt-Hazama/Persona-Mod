@@ -141,7 +141,8 @@ function ENT:CustomOnInitialize()
 	self:SetHealth((GetConVarNumber("vj_npc_allhealth") > 0) and GetConVarNumber("vj_npc_allhealth") or self:VJ_GetDifficultyValue(self.Stats.HP))
 	self.SP = self.Stats.SP
 	
-	self.MetaVerseMode = false
+	self.MetaVerseMode = true
+	self.PreparedToAttack = false
 	
 	self.NextMetaChangeT = CurTime() +1
 	self.MouthDistance = 0
@@ -178,17 +179,48 @@ function ENT:CustomOnAcceptInput(key,activator,caller,data)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaThink(persona,enemy,dist)
-	-- if IsValid(enemy) && self:Visible(enemy) then
-		-- if dist < 2000 && dist > 500 then
+	if self.VJ_IsBeingControlled then
+		local ply = self.VJ_TheController
+		local lmb = ply:KeyDown(IN_ATTACK)
+		local rmb = ply:KeyDown(IN_ATTACK2)
+		local r = ply:KeyDown(IN_RELOAD)
+		
+		if lmb then
+			if !self.PreparedToAttack && persona:GetTask() == "TASK_IDLE" then
+				self.PreparedToAttack = true
+				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,true)
+				timer.Simple(self:DecideAnimationLength("persona_attack_start",false),function()
+					if IsValid(self) && IsValid(persona) && IsValid(enemy) then
+						if persona:GetTask() == "TASK_IDLE" then
+							persona:Laevateinn(self,enemy)
+							self.PreparedToAttack = false
+						end
+					end
+				end)
+			end
+		end
+		return
+	end
+	if IsValid(enemy) && self:Visible(enemy) then
+		-- if dist < 2000 && dist > 700 then
 			-- if persona:GetTask() == "TASK_IDLE" then
 				-- persona:Freila(self,enemy)
 			-- end
-		-- elseif dist <= 500 then
-			-- if persona:GetTask() == "TASK_IDLE" then
-				-- persona:VajraBlast(self,enemy)
-			-- end
-		-- end
-	-- end
+		/*else*/if dist <= 700 then
+			if !self.PreparedToAttack && persona:GetTask() == "TASK_IDLE" then
+				self.PreparedToAttack = true
+				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,true)
+				timer.Simple(self:DecideAnimationLength("persona_attack_start",false),function()
+					if IsValid(self) && IsValid(persona) && IsValid(enemy) then
+						if persona:GetTask() == "TASK_IDLE" then
+							persona:Laevateinn(self,enemy)
+							self.PreparedToAttack = false
+						end
+					end
+				end)
+			end
+		end
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
@@ -215,16 +247,29 @@ function ENT:CustomOnThink()
 		end
 	end
 	
-	if self.MetaVerseMode then
+	if self.MetaVerseMode && self:Health() > 0 then
 		self:SetPoseParameter("angry",0.6)
 		if !IsValid(self:GetPersona()) then
-			if IsValid(self:GetEnemy()) then
+			if self.VJ_IsBeingControlled then
+				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
+				if jump then
+					self:SummonPersona("loki")
+					ParticleEffectAttach("jojo_aura_red",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+				end
+			end
+			if IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
 				self:SummonPersona("loki")
 				ParticleEffectAttach("jojo_aura_red",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 			end
 		elseif IsValid(self:GetPersona()) then
 			-- self:SetBodygroup(1,0)
-			if !IsValid(self:GetEnemy()) then
+			if self.VJ_IsBeingControlled then
+				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
+				if jump then
+					self:SummonPersona("loki")
+				end
+			end
+			if !IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
 				self:SummonPersona("loki")
 				-- self:SetBodygroup(1,1)
 			end
@@ -234,29 +279,25 @@ function ENT:CustomOnThink()
 		self:SetPoseParameter("angry",0)
 	end
 
-	if IsValid(self:GetEnemy()) then
-		if self.MetaVerseMode == false then
-			if CurTime() > self.NextMetaChangeT then
-				self.MetaVerseMode = true
-				self.NextMetaChangeT = CurTime() +5
-				-- self:SetModel("models/cpthazama/persona5/akechi.mdl")
-				-- self:SetBodygroup(1,1)
-			end
-		else
-			self.NextMetaChangeT = CurTime() +5
-		end
-	else
-		if self.MetaVerseMode then
-			if CurTime() > self.NextMetaChangeT then
-				self.MetaVerseMode = false
-				self.NextMetaChangeT = CurTime() +2
-				-- self:SetModel("models/cpthazama/persona5/akechi_normal.mdl")
-				-- self:SetBodygroup(1,0)
-			end
-		else
-			self.NextMetaChangeT = CurTime() +2
-		end
-	end
+	-- if IsValid(self:GetEnemy()) then
+		-- if self.MetaVerseMode == false then
+			-- if CurTime() > self.NextMetaChangeT then
+				-- self.MetaVerseMode = true
+				-- self.NextMetaChangeT = CurTime() +5
+			-- end
+		-- else
+			-- self.NextMetaChangeT = CurTime() +5
+		-- end
+	-- else
+		-- if self.MetaVerseMode then
+			-- if CurTime() > self.NextMetaChangeT then
+				-- self.MetaVerseMode = false
+				-- self.NextMetaChangeT = CurTime() +2
+			-- end
+		-- else
+			-- self.NextMetaChangeT = CurTime() +2
+		-- end
+	-- end
 	if CurTime() < self.NextMouthMoveT then
 		if CurTime() > self.NextNumChangeT then
 			self.MouthDistance = math.Rand(0,1)
