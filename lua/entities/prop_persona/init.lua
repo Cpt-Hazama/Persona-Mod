@@ -134,7 +134,7 @@ function ENT:DefaultPersonaControls(ply,persona)
 	if self:GetTask() == "TASK_IDLE" then
 		-- self:MoveToPos(self.User:GetPos() +self.User:GetForward() *150,2)
 		self:SetPos(self:GetIdlePosition(ply))
-		self:SetColor(Color(255,255,255,150))
+		-- self:SetColor(Color(255,255,255,150))
 		self:FacePlayerAim(self.User)
 
 		if ply:IsPlayer() then
@@ -180,7 +180,7 @@ function ENT:DefaultPersonaControls(ply,persona)
 		if !IsValid(self.Target) then self:FindTarget(ply) end
 		self:FaceTarget()
 	else
-		self:SetColor(Color(255,255,255,255))
+		-- self:SetColor(Color(255,255,255,255))
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
