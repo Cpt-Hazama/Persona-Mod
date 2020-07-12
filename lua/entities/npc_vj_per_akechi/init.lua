@@ -248,7 +248,7 @@ function ENT:CustomOnThink()
 	end
 	
 	if self.MetaVerseMode && self:Health() > 0 then
-		self:SetPoseParameter("angry",0.6)
+		self:SetPoseParameter("anger",0.6)
 		if !IsValid(self:GetPersona()) then
 			if self.VJ_IsBeingControlled then
 				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
@@ -276,7 +276,7 @@ function ENT:CustomOnThink()
 			self:PersonaThink(self:GetPersona(),self:GetEnemy(),self:VJ_GetNearestPointToEntityDistance(self:GetEnemy()))
 		end
 	else
-		self:SetPoseParameter("angry",0)
+		self:SetPoseParameter("anger",0)
 	end
 
 	-- if IsValid(self:GetEnemy()) then

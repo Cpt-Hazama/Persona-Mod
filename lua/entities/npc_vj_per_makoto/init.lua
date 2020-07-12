@@ -271,6 +271,9 @@ function ENT:CustomOnThink()
 	
 	if self:Health() <= self:GetMaxHealth() *0.3 then
 		idle = ACT_IDLE_STIMULATED
+		self:SetPoseParameter("hurt",0.625)
+	else
+		self:SetPoseParameter("hurt",0)
 	end
 	if IsValid(self:GetPersona()) then
 		-- idle = VJ_SequenceToActivity(self,"persona_idle")
@@ -295,19 +298,57 @@ function ENT:CustomOnThink()
 	end
 	
 	if self.MetaVerseMode && self:Health() > 0 then
+		self:SetPoseParameter("serious",1)
 		if !IsValid(self:GetPersona()) then
-			if IsValid(self:GetEnemy()) then
+			if self.VJ_IsBeingControlled then
+				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
+				if jump then
+					self:SummonPersona("johanna")
+					self:StopMoving()
+					self:ClearSchedule()
+					self:GetPersona():SetTask("TASK_PLAY_ANIMATION")
+					self:GetPersona():PlayAnimation("summon",1)
+					self:SetPos(self:GetPos() +self:GetForward() *-20)
+					self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,false)
+					timer.Simple(1.35,function()
+						if IsValid(self) && IsValid(self:GetPersona()) then
+							self:GetPersona():DoIdle()
+						end
+					end)
+					ParticleEffectAttach("jojo_aura_blue_light",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+				end
+			end
+			if IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
 				self:SummonPersona("johanna")
+				self:StopMoving()
+				self:ClearSchedule()
+				self:GetPersona():SetTask("TASK_PLAY_ANIMATION")
+				self:GetPersona():PlayAnimation("summon",1)
+				self:SetPos(self:GetPos() +self:GetForward() *-20)
+				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,false)
+				timer.Simple(1.35,function()
+					if IsValid(self) && IsValid(self:GetPersona()) then
+						self:GetPersona():DoIdle()
+					end
+				end)
 				ParticleEffectAttach("jojo_aura_blue_light",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 			end
 		elseif IsValid(self:GetPersona()) then
 			self:SetBodygroup(1,0)
-			if !IsValid(self:GetEnemy()) then
+			if self.VJ_IsBeingControlled then
+				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
+				if jump then
+					self:SummonPersona("johanna")
+				end
+			end
+			if !IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
 				self:SummonPersona("johanna")
 				self:SetBodygroup(1,1)
 			end
 			self:PersonaThink(self:GetPersona(),self:GetEnemy(),self:VJ_GetNearestPointToEntityDistance(self:GetEnemy()))
 		end
+	else
+		self:SetPoseParameter("serious",0)
 	end
 
 	if IsValid(self:GetEnemy()) then
