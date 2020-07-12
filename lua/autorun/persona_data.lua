@@ -35,6 +35,11 @@ PERSONA["tsukiyomi"].Model = "models/cpthazama/persona5/persona/tsukiyomi.mdl"
 PERSONA["tsukiyomi"].Aura = "jojo_aura_red"
 PERSONA["tsukiyomi"].Name = "Tsukiyomi"
 
+PERSONA["satanael"] = {}
+PERSONA["satanael"].Model = "models/cpthazama/persona5/persona/satanael.mdl"
+PERSONA["satanael"].Aura = "jojo_aura_blue"
+PERSONA["satanael"].Name = "Satanael"
+
 game.AddParticles("particles/magatsu_izanagi.pcf")
 local pParticleList = {
 	"fo4_libertyprime_impact",
