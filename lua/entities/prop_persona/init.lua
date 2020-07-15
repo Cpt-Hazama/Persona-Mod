@@ -13,6 +13,7 @@ PERSONA_TASKS["TASK_DEATH"] = 6
 PERSONA_TASKS["TASK_RETURN"] = 7
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.AuraChance = 2
+ENT.IdleSpeed = 1
 ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Initialize()
@@ -232,7 +233,7 @@ function ENT:OnRequestDisappear(ply) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoIdle()
 	self:SetTask("TASK_IDLE")
-	self:PlayAnimation("idle",1,1)
+	self:PlayAnimation("idle",self.IdleSpeed,1)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AddCard(name,req,isHP)

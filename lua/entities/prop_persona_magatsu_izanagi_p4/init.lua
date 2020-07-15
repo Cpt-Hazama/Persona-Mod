@@ -5,6 +5,7 @@ ENT.Bot_StopDistance = 100
 ENT.Bot_Buttons = {
 	[1] = {but={IN_ATTACK},dist=100,chance=1},
 }
+ENT.IdleSpeed = 2
 ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB,DMG_P_FEAR)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
@@ -154,7 +155,7 @@ end
 function ENT:DoIdle()
 	self:SetTask("TASK_IDLE")
 	self.CurrentIdle = self.User:Crouching() && "low_hp" or "idle"
-	self:PlayAnimation(self.CurrentIdle,1,1)
+	self:PlayAnimation(self.CurrentIdle,self.IdleSpeed,1)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()

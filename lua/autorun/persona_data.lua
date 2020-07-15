@@ -17,7 +17,7 @@ PERSONA["magatsu_izanagi"].Name = "Magatsu-Izanagi"
 
 PERSONA["magatsu_izanagi_p4"] = {}
 PERSONA["magatsu_izanagi_p4"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi.mdl"
-PERSONA["magatsu_izanagi_p4"].Aura = "jojo_aura_orange"
+PERSONA["magatsu_izanagi_p4"].Aura = "jojo_aura_red"
 PERSONA["magatsu_izanagi_p4"].Name = "Magatsu-Izanagi (Classic)"
 
 PERSONA["izanagi_okami"] = {}
