@@ -58,6 +58,8 @@ function ENT:PersonaControls(ply,persona)
 		-- if self.InstaKillStage > 0 then return end
 		if self:GetCard() == "Maziodyne" then
 			self:Maziodyne(ply,persona,rmb)
+		elseif self:GetCard() == "Evil Smile" then
+			self:EvilSmile(ply,persona,rmb)
 		elseif self:GetCard() == "Heat Riser" then
 			if self.InstaKillStage > 0 then return end
 			if self.User:GetSP() > self.CurrentCardCost && CurTime() > self.HeatRiserT && self:GetTask() != "TASK_PLAY_ANIMATION" then
@@ -92,6 +94,8 @@ function ENT:PersonaControls(ply,persona)
 		if self:GetCard() == "Maziodyne" then
 			self:SetCard("Heat Riser")
 		elseif self:GetCard() == "Heat Riser" then
+			self:SetCard("Evil Smile")
+		elseif self:GetCard() == "Evil Smile" then
 			self:SetCard("Yomi Drop")
 		elseif self:GetCard() == "Yomi Drop" then
 			self:SetCard("Maziodyne")
@@ -311,15 +315,46 @@ function ENT:InstaKill(ply,persona,rmb)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:EvilSmile(ply,persona,rmb)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	if self.InstaKillStage > 0 then
+		return
+	end
+	if self.User:GetSP() > self.CurrentCardCost && self:GetTask() != "TASK_PLAY_ANIMATION" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		self:PlayAnimation("evileye",1)
+		ply:EmitSound("cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",72)
+		timer.Simple(0.6,function()
+			if IsValid(self) then
+				if !IsValid(ply.Persona_EyeTarget) then
+					return
+				end
+				self:Fear(ply.Persona_EyeTarget,15)
+				ply:ChatPrint("Target is now feared!")
+			end
+		end)
+		timer.Simple(self:GetSequenceDuration(self,"evileye"),function()
+			if IsValid(self) then
+				self:SetTask("TASK_IDLE")
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MagatsuMandala(att,dist)
 	local pos = self:GetAttachment(att).Pos
 	local tr = util.TraceLine({
 		start = pos,
 		endpos = pos +self:GetForward() *dist,
 	})
+	self:EmitSound("cpthazama/persona5/adachi/elec_charge.wav",75)
 	if tr.Hit then
 		util.ParticleTracerEx("fo4_libertyprime_laser",pos,tr.HitPos,false,self:EntIndex(),att)
-		sound.Play("ambient/energy/weld" .. math.random(1,2) .. ".wav",tr.HitPos,90)
+		sound.Play("cpthazama/persona5/adachi/elec.wav",tr.HitPos,90)
 		if tr.Entity && tr.Entity:Health() && tr.Entity:Health() > 0 then
 			local dmginfo = DamageInfo()
 			dmginfo:SetDamage(self:GetCritical() && 5 *2 or 5)
@@ -370,6 +405,7 @@ function ENT:OnSummoned(ply)
 	self:AddCard("Maziodyne",22,false)
 	self:AddCard("Heat Riser",30,false)
 	self:AddCard("Magatsu Mandala",30,false)
+	self:AddCard("Evil Smile",12,false)
 	self:AddCard("Yomi Drop",100,false)
 	self:SetCard("Maziodyne")
 

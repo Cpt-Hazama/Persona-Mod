@@ -437,6 +437,7 @@ function ENT:Fear(ent,t)
 	ent.Persona_DMG_Fear = CurTime() +t
 	ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 	ent:AddEntityRelationship(self.User,D_FR,99)
+	ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
 	timer.Simple(t +0.15,function()
 		if IsValid(ent) then
 			if CurTime() > ent.Persona_DMG_Fear then
