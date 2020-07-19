@@ -397,6 +397,8 @@ if CLIENT then
 	end)
 end
 
+game.AddParticles("particles/magatsu_izanagi.pcf")
+
 game.AddParticles("particles/jojo_aura.pcf")
 local pParticleList = {
 	"jojo_aura",

@@ -150,7 +150,7 @@ function ENT:Maziodyne(ply,persona,rmb)
 				for i = 1,20 do
 					timer.Simple(i *0.15,function()
 						if IsValid(self) then
-							self:MagatsuMandala(a,30000)
+							self:MaziodyneAttack(a,30000)
 						end
 					end)
 				end
@@ -345,7 +345,7 @@ function ENT:EvilSmile(ply,persona,rmb)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:MagatsuMandala(att,dist)
+function ENT:MaziodyneAttack(att,dist)
 	local pos = self:GetAttachment(att).Pos
 	local tr = util.TraceLine({
 		start = pos,
@@ -353,7 +353,7 @@ function ENT:MagatsuMandala(att,dist)
 	})
 	self:EmitSound("cpthazama/persona5/adachi/elec_charge.wav",75)
 	if tr.Hit then
-		util.ParticleTracerEx("fo4_libertyprime_laser",pos,tr.HitPos,false,self:EntIndex(),att)
+		util.ParticleTracerEx("fo4_libertyprime_laser",pos,tr.HitPos,false,self:EntIndex(),att) // maziodyne_blue
 		sound.Play("cpthazama/persona5/adachi/elec.wav",tr.HitPos,90)
 		if tr.Entity && tr.Entity:Health() && tr.Entity:Health() > 0 then
 			local dmginfo = DamageInfo()

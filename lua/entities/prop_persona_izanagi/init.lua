@@ -18,12 +18,12 @@ function ENT:PersonaControls(ply,persona)
 		end
 	end
 	if lmb then
-		if self:GetTask() != "TASK_ATTACK" && !self.IsArmed then
+		if self:GetTask() == "TASK_IDLE" && !self.IsArmed then
 			self:SetTask("TASK_ATTACK")
 			self:PlayAnimation("atk_cross_slash",1)
 			ply:EmitSound("cpthazama/persona5/joker/0011.wav",85)
 			self:FindTarget(ply)
-			self:SetPos(self.User:GetPos() +self.User:GetForward() *60)
+			-- self:SetPos(self.User:GetPos() +self.User:GetForward() *60)
 			self:SetAngles(self.User:GetAngles())
 			-- timer.Simple(SoundDuration("cpthazama/persona5/joker/0011.wav"),function()
 				-- if IsValid(self) then
@@ -48,7 +48,7 @@ function ENT:PersonaControls(ply,persona)
 		end
 	end
 	if rmb then
-		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" then
+		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() == "TASK_IDLE" then
 			self.DamageBuild = 250
 			self:SetTask("TASK_PLAY_ANIMATION")
 			self:PlayAnimation("atk_mazionga_pre",1)
@@ -70,12 +70,44 @@ function ENT:PersonaControls(ply,persona)
 		self:PlayAnimation("atk_mazionga",1)
 		ply:EmitSound("cpthazama/persona5/joker/0012.wav",85)
 		self.TimeToMazionga = CurTime() +self:GetSequenceDuration(self,"atk_mazionga") +0.2
+		for a = 1,5 do
+			for i = 1,5 do
+				timer.Simple(i *0.15,function()
+					if IsValid(self) then
+						self:MaziodyneAttack(a,30000)
+					end
+				end)
+			end
+		end
 		timer.Simple(self:GetSequenceDuration(self,"atk_mazionga"),function()
 			if IsValid(self) then
+				self.RechargeT = CurTime() +5
 				self.IsArmed = false
 				self:DoIdle()
 			end
 		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MaziodyneAttack(att,dist)
+	local pos = self:GetAttachment(att).Pos
+	local tr = util.TraceLine({
+		start = pos,
+		endpos = pos +self:GetForward() *dist,
+	})
+	self:EmitSound("cpthazama/persona5/adachi/elec_charge.wav",75)
+	if tr.Hit then
+		util.ParticleTracerEx("maziodyne_blue",pos,tr.HitPos,false,self:EntIndex(),att)
+		sound.Play("cpthazama/persona5/adachi/elec.wav",tr.HitPos,90)
+		if tr.Entity && tr.Entity:Health() && tr.Entity:Health() > 0 then
+			local dmginfo = DamageInfo()
+			dmginfo:SetDamage(self:GetCritical() && 5 *2 or 5)
+			dmginfo:SetAttacker(self.User)
+			dmginfo:SetInflictor(self)
+			dmginfo:SetDamageType(bit.bor(DMG_DISSOLVE,DMG_ENERGYBEAM,DMG_P_ELEC))
+			dmginfo:SetDamagePosition(tr.Entity:NearestPoint(tr.HitPos))
+			tr.Entity:TakeDamageInfo(dmginfo)
+		end
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
