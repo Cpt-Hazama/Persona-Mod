@@ -15,7 +15,7 @@ ENT.Stats = {
 	AGI = 85,
 	LUC = 69,
 	WK = DMG_PSY,
-	STR = DMG_CURSE,
+	STR = DMG_P_CURSE,
 	NUL = DMG_NUCLEAR,
 }
 ENT.Evasion = 45

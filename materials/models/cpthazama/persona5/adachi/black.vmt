@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/adachi/black"
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}

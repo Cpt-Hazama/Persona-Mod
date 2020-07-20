@@ -14,9 +14,9 @@ ENT.Stats = {
 	END = 43,
 	AGI = 50,
 	LUC = 45,
-	WK = DMG_BLESS,
-	STR = DMG_CURSE,
-	NUL = DMG_CURSE,
+	WK = DMG_P_BLESS,
+	STR = DMG_P_CURSE,
+	NUL = DMG_P_CURSE,
 }
 ENT.Evasion = 30
 ENT.HullType = HULL_HUMAN

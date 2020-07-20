@@ -68,7 +68,7 @@ function ENT:PersonaControls(ply,persona)
 	if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && !rmb && CurTime() > self.TimeToMazionga then
 		self:MeleeAttackCode(self.DamageBuild,2500,180,false)
 		self:PlayAnimation("atk_mazionga",1)
-		ply:EmitSound("cpthazama/persona5/joker/0012.wav",85)
+		-- ply:EmitSound("cpthazama/persona5/joker/0012.wav",85)
 		self.TimeToMazionga = CurTime() +self:GetSequenceDuration(self,"atk_mazionga") +0.2
 		for a = 1,5 do
 			for i = 1,5 do

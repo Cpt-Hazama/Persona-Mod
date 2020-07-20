@@ -5,6 +5,9 @@ ENT.Bot_StopDistance = 100
 ENT.Bot_Buttons = {
 	[1] = {but={IN_ATTACK},dist=100,chance=1},
 }
+ENT.Model = "models/cpthazama/persona5/persona/magatsu_izanagi.mdl"
+ENT.Name = "Magatsu-Izanagi"
+ENT.Aura = "jojo_aura_red"
 ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB,DMG_P_FEAR)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnHitEntity(hitEnts,dmginfo)
@@ -17,7 +20,67 @@ function ENT:CustomOnHitEntity(hitEnts,dmginfo)
 	-- end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Maziodyne_NPC(ply,enemy)
+	local rmb = true
+	if rmb then
+		if self.InstaKillStage > 0 then return end
+		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" && CurTime() > self.RechargeT then
+			self.DamageBuild = 250
+			self:TakeSP(self.CurrentCardCost)
+			self:SetTask("TASK_PLAY_ANIMATION")
+			self:PlayAnimation("atk_magatsu_mandala_pre",1)
+			VJ_CreateSound(ply,"cpthazama/persona5/adachi/vo/curse.wav")
+			if math.random(1,2) == 1 then self:DoCritical(1) end
+			timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_pre"),function()
+				if IsValid(self) then
+					self.IsArmed = true
+					self:PlayAnimation("atk_magatsu_mandala_pre_idle",1,1)
+					timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_pre_idle"),function()
+						if IsValid(self) then
+							if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && CurTime() > self.TimeToMazionga then
+								self:PlayAnimation("atk_magatsu_mandala",1,1)
+								self.TimeToMazionga = CurTime() +3.5
+								self:EmitSound("beams/beamstart5.wav",90)
+								local tbl = {
+									"cpthazama/persona5/adachi/vo/blast.wav",
+									"cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",
+									"cpthazama/vox/adachi/kill/vbtl_pad_0#122 (pad166_0).wav"
+								}
+								VJ_CreateSound(ply,VJ_PICK(tbl))
+								for a = 1,5 do
+									for i = 1,20 do
+										timer.Simple(i *0.15,function()
+											if IsValid(self) then
+												self:MaziodyneAttack(a,30000)
+											end
+										end)
+									end
+								end
+								timer.Simple(3,function()
+									if IsValid(self) then
+										self.RechargeT = CurTime() +5
+										self.IsArmed = false
+										self:DoIdle()
+									end
+								end)
+							end
+						end
+					end)
+				end
+			end)
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PersonaControls_NPC(ply,persona)
+
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
+	if ply:IsNPC() then
+		self:PersonaControls_NPC(ply,persona)
+		return
+	end
 	local lmb = ply:KeyDown(IN_ATTACK)
 	local rmb = ply:KeyDown(IN_ATTACK2)
 	local r = ply:KeyDown(IN_RELOAD)
@@ -369,7 +432,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoIdle()
 	self:SetTask("TASK_IDLE")
-	self.CurrentIdle = self.User:Crouching() && "low_hp" or "idle"
+	self.CurrentIdle = self.User:IsPlayer() && self.User:Crouching() && "low_hp" or "idle"
 	self:PlayAnimation(self.CurrentIdle,1,1)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -378,16 +441,25 @@ function ENT:GetAttackPosition()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
-	return ply:GetPos() +ply:GetForward() *(ply:Crouching() && -10 or -50) +ply:GetRight() *(ply:Crouching() && -10 or 0)
+	if ply:IsPlayer() then
+		return ply:GetPos() +ply:GetForward() *(ply:Crouching() && -10 or -50) +ply:GetRight() *(ply:Crouching() && -10 or 0)
+	else
+		return ply:GetPos() +ply:GetForward() *-50
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetIdlePosition(ply)
-	return ply:GetPos() +ply:GetForward() *(ply:Crouching() && -10 or -50) +ply:GetRight() *(ply:Crouching() && -10 or 0)
+	if ply:IsPlayer() then
+		return ply:GetPos() +ply:GetForward() *(ply:Crouching() && -10 or -50) +ply:GetRight() *(ply:Crouching() && -10 or 0)
+	else
+		return ply:GetPos() +ply:GetForward() *-50
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	ply:EmitSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
-	self.PersonaDistance = 393.7 *4 -- 40 meters
+	if ply:IsPlayer() then ply:EmitSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav") end
+	self:SetModel(self.Model)
+	self.PersonaDistance = 999999999 -- 40 meters
 	self.TimeToMazionga = CurTime() +2
 	self.RechargeT = CurTime()
 	self.NextInstaKillT = CurTime()
