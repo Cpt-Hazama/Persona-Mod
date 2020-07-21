@@ -37,9 +37,9 @@ function ENT:Maziodyne_NPC(ply,enemy)
 					self:PlayAnimation("atk_magatsu_mandala_pre_idle",1,1)
 					timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_pre_idle"),function()
 						if IsValid(self) then
-							if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && CurTime() > self.TimeToMazionga then
+							if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed then
 								self:PlayAnimation("atk_magatsu_mandala",1,1)
-								self.TimeToMazionga = CurTime() +3.5
+								-- self.TimeToMazionga = CurTime() +3.5
 								self:EmitSound("beams/beamstart5.wav",90)
 								local tbl = {
 									"cpthazama/persona5/adachi/vo/blast.wav",
@@ -199,7 +199,7 @@ function ENT:Maziodyne(ply,persona,rmb)
 			end)
 		end
 		if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && CurTime() > self.TimeToMazionga then
-			self:MeleeAttackCode(1000,2500,180,false)
+			-- self:MeleeAttackCode(1000,2500,180,false)
 			self:PlayAnimation("atk_magatsu_mandala",1,1)
 			self.TimeToMazionga = CurTime() +3.5
 			self:EmitSound("beams/beamstart5.wav",90)

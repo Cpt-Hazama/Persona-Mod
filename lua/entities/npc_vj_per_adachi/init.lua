@@ -248,15 +248,16 @@ function ENT:PersonaThink(persona,enemy,dist)
 	end
 	if IsValid(enemy) && self:Visible(enemy) then
 		if dist <= 2500 then
-			if !self.PreparedToAttack && persona:GetTask() == "TASK_IDLE" then
+			if !self.PreparedToAttack && persona:GetTask() == "TASK_IDLE" && CurTime() > persona.RechargeT then
 				self.PreparedToAttack = true
 				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,true)
+				if persona:GetTask() == "TASK_IDLE" then
+					persona:Maziodyne_NPC(self,enemy)
+					self.PreparedToAttack = false
+				end
 				timer.Simple(self:DecideAnimationLength("persona_attack_start",false),function()
-					if IsValid(self) && IsValid(persona) && IsValid(enemy) then
-						if persona:GetTask() == "TASK_IDLE" then
-							persona:Maziodyne_NPC(self,enemy)
-							self.PreparedToAttack = false
-						end
+					if IsValid(self) then
+						self.PreparedToAttack = false
 					end
 				end)
 			end
@@ -282,6 +283,7 @@ function ENT:CustomOnThink()
 	self.AnimTbl_IdleStand = {idle}
 
 	self.DisableChasingEnemy = IsValid(self:GetPersona())
+	self.ConstantlyFaceEnemy = IsValid(self:GetPersona())
 	if self.DisableChasingEnemy then
 		if self:IsMoving() then
 			self:StopMoving()
