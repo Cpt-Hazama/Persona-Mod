@@ -7,8 +7,14 @@ ENT.Purpose 		= ""
 ENT.Instructions 	= ""
 ENT.Category		= "NPC"
 
+ENT.VJ_PersonaNPC = true
+
 if CLIENT then
 	local lerp_hp = 0
+	
+	function ENT:ToggleTheme()
+		print("A")
+	end
 
 	net.Receive("vj_persona_hud_adachi",function(len,pl)
 		local delete = net.ReadBool()

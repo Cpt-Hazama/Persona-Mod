@@ -14,12 +14,23 @@ DMG_P_ELEC = 1012
 DMG_P_CURSE = 1013
 DMG_P_FEAR = 1014
 DMG_P_PHYS = 1015
+DMG_P_GUN = 1016
+
+DMG_P_MINISCULE = 10
+DMG_P_LIGHT = 25
+DMG_P_MEDIUM = 50
+DMG_P_HEAVY = 100
+DMG_P_SEVERE = 175
+DMG_P_COLOSSAL = 300
 
 if SERVER then
 	util.AddNetworkString("persona_csound")
 end
 
 if CLIENT then
+	CreateClientConVar("persona_hud_x","350",false,false)
+	CreateClientConVar("persona_hud_y","170",false,false)
+
 	net.Receive("persona_csound",function(len,pl)
 		local ply = net.ReadEntity()
 		local snd = net.ReadString()
@@ -155,7 +166,7 @@ function NPC:SummonPersona(persona)
 		ent:OnSummoned(self)
 		ent:SetFeedName(ent.Name,class)
 	else
-		if !personaEntity.IsFlinching then
+		if personaEntity:GetTask() != "TASK_RETURN" then
 			personaEntity:SetTask("TASK_RETURN")
 			personaEntity:OnRequestDisappear(self)
 		end
@@ -198,15 +209,37 @@ if SERVER then
 
 	hook.Add("EntityTakeDamage","Persona_ModifyPlayerDMG",function(ent,dmginfo)
 		if ent.Persona_DMG_Fear && ent.Persona_DMG_Fear > CurTime() then
-			dmginfo:ScaleDamage(1.6)
+			dmginfo:ScaleDamage(1.5)
+		end
+		if ent.Persona_DebilitateT && ent.Persona_DebilitateT > CurTime() then
+			dmginfo:ScaleDamage(1.5)
+		end
+		if ent.GetPersona && IsValid(ent:GetPersona()) then
+			if ent:GetPersona().HeatRiserT > CurTime() then
+				dmginfo:ScaleDamage(0.5)
+			end
 		end
 		if ent:IsPlayer() then
 			local dmgtype = dmginfo:GetDamageType()
 			local dmg = dmginfo:GetDamage()
 			local persona = ent:GetPersona()
 
-			if IsValid(persona) && persona.HandleDamage then
-				return persona:HandleDamage(dmg,dmgtype,dmginfo)
+			if IsValid(persona) then
+				if persona.Stats then
+					local stats = persona.Stats
+					if VJ_HasValue(stats.WK,dmgtype) then
+						dmginfo:ScaleDamage(2)
+					end
+					if VJ_HasValue(stats.RES,dmgtype) then
+						dmginfo:ScaleDamage(0.25)
+					end
+					if VJ_HasValue(stats.NUL,dmgtype) then
+						dmginfo:SetDamage(0)
+					end
+				end
+				if persona.HandleDamage then
+					return persona:HandleDamage(dmg,dmgtype,dmginfo)
+				end
 			end
 		end
 		-- return true -- Prevents all damage
@@ -231,9 +264,11 @@ if SERVER then
 				ply:SetNWEntity("PersonaEntity",ent)
 				ent:SetFeedName(PERSONA[ply:GetPersonaName()].Name,class)
 			else
-				if !persona.IsFlinching then
-					persona:SetTask("TASK_RETURN")
-					persona:OnRequestDisappear(ply)
+				if persona:GetTask() == "TASK_IDLE" then
+					if !persona.IsFlinching then
+						persona:SetTask("TASK_RETURN")
+						persona:OnRequestDisappear(ply)
+					end
 				end
 			end
 		end
@@ -243,7 +278,7 @@ end
 
 if CLIENT then
 	surface.CreateFont("Persona",{
-		font = "Trebuchet24",
+		font = "p5hatty",
 		extended = false,
 		size = 35,
 		weight = 500,
@@ -304,13 +339,15 @@ if CLIENT then
 		-- end
 		
 		local sp = ply:GetSP()
+		local target = ply:GetNWEntity("Persona_Target")
 
 		local corners = 1
-		local posX = 250
-		local posY = 170
-		local len = 225
-		local height = 140
-		local color = Color(50,50,50,255)
+		local posX = GetConVarNumber("persona_hud_x") or 350
+		local posY = GetConVarNumber("persona_hud_y") or 170
+		local len = 325
+		local height = 150
+		local colM = 35
+		local color = Color(colM,colM,colM,255)
 		local boxX = posX
 		local boxHeight = posY
 		draw.RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,color)
@@ -324,42 +361,69 @@ if CLIENT then
 			--== SP ==--
 		local text = "SP:"
 		local posX = boxX -15
-		local posY = boxHeight
+		local posY = boxHeight -5
 		local color = Color(200,0,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
-		
+
 		local text = sp
-		local posX = boxX -65
-		local posY = boxHeight
+		local posX = boxX -75
+		local posY = boxHeight -5
 		local color = Color(200,0,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
-		
+
 			--== Req. ==--
 		local text = "Cost:"
 		local usesHP = persona:GetNWBool("SpecialAttackUsesHP")
 		local textF = usesHP && "HP " .. text or "SP " .. text
 		local posX = boxX -15
-		local posY = boxHeight -35
+		local posY = boxHeight -40
 		local color = usesHP && Color(33,200,0,255) or Color(200,0,255,255)
 		draw.SimpleText(textF,"Persona",ScrW() -posX,ScrH() -posY,color)
-		
+
 		local text = persona:GetNWInt("SpecialAttackCost")
-		local posX = boxX -130
-		local posY = boxHeight -35
+		if usesHP then
+			text = math.Round(ply:GetMaxHealth() *(text *0.01))
+		end
+		local posX = boxX -160
+		local posY = boxHeight -40
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
-		
-		local text = "Persona Card:"
+
+		local text = "Skill Card"
 		local posX = boxX -15
-		local posY = boxHeight -65
+		local posY = boxHeight -75
 		local color = Color(0,100,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
-		
+
 		local text = persona:GetNWString("SpecialAttack")
-		if text == nil or text == "" then text = "N/A" end
+		if text == nil or text == "" then text = "BLANK" end
 		local posX = boxX -15
-		local posY = boxHeight -100
+		local posY = boxHeight -110
 		local color = Color(0,100,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
+
+		local icon = persona:GetNWString("SpecialAttackIcon")
+		local matIcon = Material("hud/persona/png/hud_" .. icon .. ".png")
+		local posX = boxX -192
+		local posY = boxHeight -75
+		local len = 100
+		local height = 35
+		surface.SetMaterial(matIcon)
+		surface.SetDrawColor(Color(255,255,255,255))
+		surface.DrawTexturedRect(ScrW() -posX,ScrH() -posY,len,height)
+
+		if IsValid(target) then
+			local icon = persona:GetNWString("SpecialAttackIcon")
+			local matIcon = Material("hud/persona/crosshair")
+			local posX = boxX -192
+			local posY = boxHeight -75
+			local size = 450
+			local offset = 225
+			-- local entPos = target:LocalToWorld(target:OBBMaxs()):ToScreen()
+			local entPos = (target:GetPos() +target:OBBCenter()):ToScreen()
+			surface.SetMaterial(matIcon)
+			surface.SetDrawColor(Color(255,255,255,255))
+			surface.DrawTexturedRect(entPos.x -offset,entPos.y -offset,size,size)
+		end
 	end)
 
 	hook.Add("ShouldDrawLocalPlayer","Persona_DrawPlayer",function(ply)
@@ -397,6 +461,19 @@ if CLIENT then
 	end)
 end
 
+if CLIENT then
+	hook.Add("AddToolMenuTabs","Persona_MainMenuIcon",function()
+		spawnmenu.AddToolTab("Persona","Persona","vj_icons/persona16.png")
+	end)
+	hook.Add("PopulateToolMenu","Persona_MainMenu",function()
+		spawnmenu.AddToolMenuOption("Persona","Main Settings","HUD","HUD","","",function(Panel)
+				Panel:AddControl("Label",{Text = "Default: X = 350 Y = 170"})
+				Panel:AddControl("Slider",{Label = "Box X Position",Command = "persona_hud_x",Min = 0,Max = 1920})
+				Panel:AddControl("Slider",{Label = "Box Y Position",Command = "persona_hud_y",Min = 0,Max = 1080})
+		end,{})
+	end)
+end
+
 game.AddParticles("particles/magatsu_izanagi.pcf")
 
 game.AddParticles("particles/jojo_aura.pcf")
@@ -427,5 +504,14 @@ local pParticleList = {
 	"persona_fx_dmg_miracle",
 	"persona_fx_dmg_nuclear",
 	"persona_fx_dmg_psi",
+}
+for _,v in ipairs(pParticleList) do PrecacheParticleSystem(v) end
+
+game.AddParticles("particles/persona_support_fx.pcf")
+local pParticleList = {
+	"vj_per_skill_atk",
+	"vj_per_skill_def",
+	"vj_per_skill_evasion",
+	"vj_per_skill_heatriser",
 }
 for _,v in ipairs(pParticleList) do PrecacheParticleSystem(v) end

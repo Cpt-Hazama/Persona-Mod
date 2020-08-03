@@ -1,5 +1,6 @@
 AddCSLuaFile("shared.lua")
 include("shared.lua")
+include("skills.lua")
 ---------------------------------------------------------------------------------------------------------------------------------------------
 PERSONA_TASKS = {}
 PERSONA_TASKS["TASK_NONE"] = -1
@@ -12,6 +13,28 @@ PERSONA_TASKS["TASK_MOVE_TO_POSITION"] = 5
 PERSONA_TASKS["TASK_DEATH"] = 6
 PERSONA_TASKS["TASK_RETURN"] = 7
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.Animations = {}
+ENT.Animations["idle"] = "idle"
+ENT.Animations["idle_low"] = "low_hp"
+ENT.Animations["melee"] = "attack"
+ENT.Animations["range_start"] = "range_pre"
+ENT.Animations["range_start_idle"] = "range_pre_idle"
+ENT.Animations["range"] = "range"
+ENT.Animations["range_idle"] = "range_loop"
+ENT.Animations["range_end"] = "range_end"
+---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.Stats = {
+	LVL = 1, -- Innate level
+	STR = 1, -- Effectiveness of phys. attacks
+	MAG = 1, -- Effectiveness of magic. attacks
+	END = 1, -- Effectiveness of defense
+	AGI = 1, -- Effectiveness of hit and evasion rates
+	LUC = 1, -- Chance of getting a critical
+	WK = {},
+	RES = {},
+	NUL = {},
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.AuraChance = 2
 ENT.IdleSpeed = 1
 ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB)
@@ -20,6 +43,7 @@ function ENT:Initialize()
 	self:SetSolid(SOLID_OBB)
 	self:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 	self:SetRenderMode(RENDERMODE_TRANSADD)
+	self:DrawShadow(false)
 	
 	self.CurrentTask = "TASK_NONE"
 	self.CurrentTaskID = -1
@@ -27,9 +51,19 @@ function ENT:Initialize()
 	self.CurrentForwardAng = self:GetAngles().x
 	self.CurrentSideAng = self:GetAngles().z
 	
+	self.CurrentMeleeSkill = nil
+	self.CurrentMeleeSkillCost = 0
+
+	self.CurrentIdle = "idle"
+	
 	self.NextDamageUserT = 0
 	
 	self:SetCritical(false)
+	self.HeatRiserT = CurTime()
+	self.FocusedT = CurTime()
+	self.ChargedT = CurTime()
+	self.HasChaosParticle = false
+	self.ChaosT = CurTime()
 
 	self.Loops = {}
 	self.Flexes = {}
@@ -113,14 +147,25 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DefaultPersonaControls(ply,persona)
 	if ply:IsPlayer() then
+		ply:SetNWEntity("Persona_Target",ply.Persona_EyeTarget)
 		if ply:KeyReleased(IN_WALK) then
 			if IsValid(ply.Persona_EyeTarget) then
 				ply.Persona_EyeTarget = NULL
+				ply:EmitSound("cpthazama/persona5/misc/00019.wav",70,100)
 			else
 				local ent = ply:GetEyeTrace().Entity
-				if IsValid(ent) && (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != persona)) then
-					ply.Persona_EyeTarget = ent
-					self.User:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+				if IsValid(ent) then
+					if (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != persona)) then
+						ply.Persona_EyeTarget = ent
+						ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+					end
+				else
+					local ents = self:FindEnemies(ply:GetPos(),2000)
+					local ent = VJ_PICK(ents)
+					if IsValid(ent) then
+						ply.Persona_EyeTarget = ent
+						ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+					end
 				end
 			end
 		end
@@ -128,14 +173,12 @@ function ENT:DefaultPersonaControls(ply,persona)
 			ply:SetEyeAngles(LerpAngle(0.5,ply:EyeAngles(),((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetShootPos()):Angle()))
 		end
 	end
-	if ply:GetPos():Distance(self:GetPos()) > self.PersonaDistance && CurTime() > self.NextDamageUserT then
-		self.User:TakeDamage(1 *(ply:GetPos():Distance(self:GetPos()) /100),self.User,self.User)
-		self.NextDamageUserT = CurTime() +0.25
-	end
 	if self:GetTask() == "TASK_IDLE" then
-		-- self:MoveToPos(self.User:GetPos() +self.User:GetForward() *150,2)
+		self.CurrentIdle = self.User:IsPlayer() && self.User:Crouching() && "idle_low" or "idle"
+		if self:GetSequenceName(self:GetSequence()) != self.Animations[self.CurrentIdle] then
+			self:DoIdle()
+		end
 		self:SetPos(self:GetIdlePosition(ply))
-		-- self:SetColor(Color(255,255,255,150))
 		self:FacePlayerAim(self.User)
 
 		if ply:IsPlayer() then
@@ -185,6 +228,83 @@ function ENT:DefaultPersonaControls(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PersonaCards(lmb,rmb,r)
+	local ply = self.User
+	local persona = self
+	local melee = self.CurrentMeleeSkill
+	if lmb then
+		if melee == "Heaven's Blade" then
+			self:HeavensBlade(ply,persona)
+		elseif melee == "Cross Slash" then
+			self:CrossSlash(ply,persona)
+		elseif melee == "Ghastly Wail" then
+			self:GhostlyWail(ply)
+		elseif melee == "Laevateinn" then
+			self:Laevateinn(ply,ply.Persona_EyeTarget)
+		elseif melee == "One-shot Kill" then
+			self:OneShotKill(ply,persona)
+		elseif melee == "Riot Gun" then
+			self:RiotGun(ply,persona)
+		elseif melee == "Vorpal Blade" then
+			self:VorpalBlade(ply,persona)
+		end
+	end
+	if rmb then // Time for spaghet code
+		if self:GetCard() == "Myriad Truths" then 
+			self:MyriadTruths(ply,persona)
+		elseif self:GetCard() == "Maziodyne" then
+			self:Maziodyne(ply,persona,rmb)
+		elseif self:GetCard() == "Mazionga" then
+			self:Mazionga(ply,persona,rmb)
+		elseif self:GetCard() == "Evil Smile" then
+			self:EvilSmile(ply,persona,rmb)
+		elseif self:GetCard() == "Teleport" then
+			self:Teleport(ply,persona)
+		elseif self:GetCard() == "Charge" then
+			self:Charge(ply,persona)
+		elseif self:GetCard() == "Concentrate" then
+			self:Concentrate(ply,persona)
+		elseif self:GetCard() == "Heat Riser" then
+			self:HeatRiser(ply,persona)
+		elseif self:GetCard() == "Salvation" then
+			self:Salvation(ply,persona)
+		elseif self:GetCard() == "Debilitate" then
+			self:Debilitate(ply,persona)
+		elseif self:GetCard() == "Eigaon" then
+			self:Eigaon(ply,persona)
+		elseif self:GetCard() == "Maeigaon" then
+			self:Maeigaon(ply,persona)
+		elseif self:GetCard() == "Garu" then
+			self:Garu(ply,persona)
+		elseif self:GetCard() == "Garudyne" then
+			self:Garudyne(ply,persona)
+		elseif self:GetCard() == "Magarudyne" then
+			self:Magarudyne(ply,persona)
+		elseif self:GetCard() == "Megidolaon" then
+			self:Megidolaon(ply,ply.Persona_EyeTarget)
+		elseif self:GetCard() == "Call of Chaos" then
+			self:CallOfChaos(ply,persona)
+		elseif self:GetCard() == "Laevateinn" then
+			self.CurrentMeleeSkill = "Laevateinn"
+		elseif self:GetCard() == "Heaven's Blade" then
+			self.CurrentMeleeSkill = "Heaven's Blade"
+		elseif self:GetCard() == "Cross Slash" then
+			self.CurrentMeleeSkill = "Cross Slash"
+		elseif self:GetCard() == "Ghastly Wail" then
+			self.CurrentMeleeSkill = "Ghastly Wail"
+		elseif self:GetCard() == "One-shot Kill" then
+			self.CurrentMeleeSkill = "One-shot Kill"
+		elseif self:GetCard() == "Riot Gun" then
+			self.CurrentMeleeSkill = "Riot Gun"
+		elseif self:GetCard() == "Vorpal Blade" then
+			self.CurrentMeleeSkill = "Vorpal Blade"
+		end
+	end
+	if r && CurTime() > self.NextCardSwitchT then
+		self:CycleCards()
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Think()
 	if IsValid(self.User) then
 		if !self.User:Alive() then
@@ -203,6 +323,20 @@ function ENT:Think()
 				SafeRemoveEntity(self)
 			end
 			return
+		end
+		if self.HasChaosParticle then
+			if CurTime() > self.ChaosT then
+				self.HasChaosParticle = false
+				self.User:StopParticles()
+				self:CreateAura(self.User)
+				if !self.CurrentCardUsesHP then
+					self.CurrentCardCost = self.CurrentCardCost /2
+				end
+				self:SetNWInt("SpecialAttackCost",self.CurrentCardCost)
+			end
+		end
+		if self.User:IsPlayer() then
+			self:PersonaCards(self.User:KeyDown(IN_ATTACK),self.User:KeyDown(IN_ATTACK2),self.User:KeyDown(IN_RELOAD))
 		end
 		self:PersonaControls(self.User,self.Stand)
 		if self.ControlType == 2 then
@@ -233,25 +367,80 @@ function ENT:OnRequestDisappear(ply) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoIdle()
 	self:SetTask("TASK_IDLE")
-	self:PlayAnimation("idle",self.IdleSpeed,1)
+	self.IdleAnimation = self.Animations[self.CurrentIdle]
+	self:PlayAnimation(self.IdleAnimation,self.IdleSpeed,1)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:AddCard(name,req,isHP)
+function ENT:AddCard(name,req,isHP,icon)
+	self.CardTable = self.CardTable or {}
+	self.CardTable[#self.CardTable +1] = {Name=name,Cost=req,UsesHP=isHP,Icon=(icon or "unknown")}
+
 	self.Cards = self.Cards or {}
 	self.Cards[name] = {}
 	self.Cards[name].Cost = req
 	self.Cards[name].UsesHP = isHP
+	self.Cards[name].Icon = icon or "unknown"
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:SetCard(name)
-	if self.Cards[name] then
-		self:SetNWString("SpecialAttack",name)
-		self:SetNWInt("SpecialAttackCost",self.Cards[name].Cost)
-		self:SetNWBool("SpecialAttackUsesHP",self.Cards[name].UsesHP or false)
-		self.CurrentCardCost = self.Cards[name].Cost
-		self.CurrentCardUsesHP = self.Cards[name].UsesHP
+function ENT:GetMeleeCost()
+	return (self.CurrentMeleeSkillCost *0.01)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SetMeleeCard(name,cost)
+	self.CurrentMeleeSkill = name
+	self.CurrentMeleeSkillCost = cost
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CycleCards()
+	local index = self.CurrentCardID
+	local finalIndex = index +1
+	local target = self.CardTable[finalIndex]
+	if finalIndex > #self.CardTable then
+		target = self.CardTable[1]
+		finalIndex = 1
 	end
-	self.NextCardSwitchT = CurTime() +1
+	
+	self.User:EmitSound("cpthazama/persona5/misc/00042.wav",45)
+
+	self:SetActiveCard(target.Name,target.Cost,target.UsesHP,target.Icon,finalIndex)
+	self.NextCardSwitchT = CurTime() +0.2
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SetActiveCard(name,cost,useHP,icon,index)
+	cost = (!useHP && self.ChaosT > CurTime()) && cost *2 or cost
+	self:SetNWString("SpecialAttack",name)
+	self:SetNWInt("SpecialAttackCost",cost)
+	self:SetNWBool("SpecialAttackUsesHP",useHP or false)
+	self:SetNWString("SpecialAttackIcon",icon or "unknown")
+	self.CurrentCardCost = cost
+	self.CurrentCardUsesHP = useHP
+	self.CurrentCardID = index
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SetCard(name,isMelee)
+	self.NextCardSwitchT = CurTime() +0.35
+	if isMelee then
+		for index,v in ipairs(self.CardTable) do
+			if v.Name == name then
+				self:SetMeleeCard(name,v.Cost)
+				break
+			end
+		end
+		return
+	end
+	for index,v in ipairs(self.CardTable) do
+		if v.Name == name then
+			self:SetActiveCard(v.Name,v.Cost,v.UsesHP,v.Icon,index)
+			break
+		end
+	end
+	-- if self.Cards[name] then
+		-- self:SetNWString("SpecialAttack",name)
+		-- self:SetNWInt("SpecialAttackCost",self.Cards[name].Cost)
+		-- self:SetNWBool("SpecialAttackUsesHP",self.Cards[name].UsesHP or false)
+		-- self.CurrentCardCost = self.Cards[name].Cost
+		-- self.CurrentCardUsesHP = self.Cards[name].UsesHP
+	-- end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetCard()
@@ -352,33 +541,86 @@ function ENT:FacePlayerAim(ply)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:AdditionalInput(dmg,type)
+	dmg = self:GetCritical() && dmg *1.25 or dmg
+	dmg = self.HeatRiserT > CurTime() && dmg *1.5 or dmg
+	dmg = self.ChaosT > CurTime() && dmg *3 or dmg
+	if type == 1 then -- Physical
+		dmg = self.ChargedT > CurTime() && dmg *2 or dmg
+		dmg = (dmg *self.Stats.STR) /6
+	elseif type == 2 then -- Magic
+		dmg = self.FocusedT > CurTime() && dmg *2 or dmg
+		dmg = (dmg *self.Stats.MAG) /6
+	end
+	return dmg
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnMissedEnemy(ent)
+	print("MISSED")
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
 	return self:GetPos() +self:OBBCenter()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:FindEnemies(pos,dist)
+	local FindEnts = ents.FindInSphere(pos,dist)
+	local foundEnts = {}
+	if FindEnts != nil then
+		for _,v in pairs(FindEnts) do
+			if (v != self && v != self.User) && ((v:IsNPC() or (v:IsPlayer() && v:Alive()))) then
+				table.insert(foundEnts,v)
+			end
+		end
+	end
+	return foundEnts
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DealDamage(ent,dmg,dmgtype,type)
+	dmg = self:AdditionalInput(dmg,type or 1)
+	local doactualdmg = DamageInfo()
+	doactualdmg:SetDamage(dmg)
+	doactualdmg:SetDamageType(dmgtype)
+	doactualdmg:SetInflictor(self)
+	doactualdmg:SetAttacker(self.User)
+	doactualdmg:SetDamagePosition(ent:NearestPoint(self:GetAttackPosition()))
+	ent:TakeDamageInfo(doactualdmg,self.User)
+	if ent:IsPlayer() then
+		ent:ViewPunch(Angle(math.random(-1,1) *dmg,math.random(-1,1) *dmg,math.random(-1,1) *dmg))
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 	local AttackDist = dmgdist
-	local FindEnts = ents.FindInSphere(self:GetAttackPosition(),AttackDist)
+	local attackPos = self:GetAttackPosition()
+	local FindEnts = ents.FindInSphere(attackPos,AttackDist)
 	local hitentity = false
 	local hitEnts = {}
 	local snd = snd or true
 	local doactualdmg = DamageInfo()
+	local agility = self.Stats.AGI
+	dmg = self:AdditionalInput(dmg,1)
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
 			if (v != self && v != self.User) && (((v:IsNPC() or (v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
 				if (self:GetForward():Dot((Vector(v:GetPos().x,v:GetPos().y,0) - Vector(self:GetPos().x,self:GetPos().y,0)):GetNormalized()) > math.cos(math.rad(rad))) then
-					doactualdmg:SetDamage(self:GetCritical() && dmg *2 or dmg)
-					doactualdmg:SetDamageType(self.DamageTypes)
+					-- if math.random(1,100) > agility then
+						-- self:OnMissedEnemy(v)
+						-- return
+					-- end
+					doactualdmg:SetDamage(dmg)
+					doactualdmg:SetDamageType(snd != nil && type(snd) == "number" && snd or self.DamageTypes or DMG_P_PHYSICAL)
 					doactualdmg:SetDamageForce(self:GetForward() *((doactualdmg:GetDamage() +100) *70))
 					doactualdmg:SetInflictor(self)
 					doactualdmg:SetAttacker(self.User)
+					doactualdmg:SetDamagePosition(v:NearestPoint(attackPos))
 					v:TakeDamageInfo(doactualdmg,self.User)
 					if v:IsPlayer() then
 						v:ViewPunch(Angle(math.random(-1,1) *dmg,math.random(-1,1) *dmg,math.random(-1,1) *dmg))
 					end
 					hitentity = true
 					table.insert(hitEnts,v)
-					if snd then v:EmitSound("cpthazama/persona5/misc/00051.wav",math.random(60,72),math.random(100,120)) end
+					if snd && type(snd) == "string" then v:EmitSound("cpthazama/persona5/misc/00051.wav",math.random(60,72),math.random(100,120)) end
 					
 					-- if v:GetClass() == "prop_physics" then
 						local phys = v:GetPhysicsObject()
@@ -398,6 +640,14 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CreateAura(ply)
+	ParticleEffectAttach(PERSONA[ply:GetPersonaName()].Aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DoChat(text)
+	if self.User:IsPlayer() then self.User:ChatPrint(text) end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SoundTimer(t,ent,snd)
 	timer.Simple(t,function()
 		if IsValid(ent) then
@@ -407,6 +657,73 @@ function ENT:SoundTimer(t,ent,snd)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnKilledEnemy(ent) end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MegidolaonEffect(ent,dmg)
+	local dmg = dmg or 9999
+	local m = ents.Create("prop_vj_animatable")
+	m:SetModel("models/cpthazama/persona5/effects/megidolaon.mdl")
+	m:SetPos(ent:GetPos())
+	m:Spawn()
+	m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+	m:ResetSequence("idle")
+	m:SetModelScale(100,5)
+	VJ_CreateSound(m,"cpthazama/persona5/skills/megidolaon.wav",150)
+	-- m:EmitSound("PERSONA_MEGIDOLAON")
+	local Light = ents.Create("light_dynamic")
+	Light:SetKeyValue("brightness","7")
+	Light:SetKeyValue("distance","3800")
+	Light:SetPos(m:GetPos())
+	Light:Fire("Color","180 255 255")
+	Light:SetParent(m)
+	Light:Spawn()
+	Light:Activate()
+	Light:Fire("TurnOn","",0)
+	Light:Fire("TurnOff","",5)
+	m:DeleteOnRemove(Light)
+	timer.Simple(4,function()
+		if IsValid(m) then
+			for _,v in pairs(ents.FindInSphere(m:GetPos(),3800)) do
+				if (v != self && v != self.User) && (((v:IsNPC() or (v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
+					local dmginfo = DamageInfo()
+					dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
+					dmginfo:SetDamageType(DMG_P_ALMIGHTY)
+					dmginfo:SetInflictor(IsValid(self) && self or v)
+					dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or v)
+					dmginfo:SetDamagePosition(v:NearestPoint(m:GetPos()))
+					v:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or v)
+					v:EmitSound("cpthazama/persona5/skills/0014.wav",70)
+				end
+			end
+		end
+	end)
+	timer.Simple(5,function()
+		if IsValid(m) then
+			SafeRemoveEntity(m)
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MaziodyneAttack(att,dist,eff)
+	local pos = self:GetAttachment(att).Pos
+	local ent = self.User:IsNPC() && IsValid(self.User:GetEnemy()) && self.User:GetEnemy() or self.User:IsPlayer() && IsValid(self.User.Persona_EyeTarget) && self.User.Persona_EyeTarget or NULL
+	local endPosi = IsValid(ent) && (ent:GetPos() +ent:OBBCenter()) or pos +self:GetForward() *dist
+	local tr = util.TraceLine({
+		start = pos,
+		endpos = endPosi,
+	})
+	self:EmitSound("cpthazama/persona5/adachi/elec_charge.wav",75)
+	if tr.Hit then
+		if !IsValid(ent) then
+			ent = tr.Entity
+		end
+		util.ParticleTracerEx(eff or "maziodyne_blue",pos,tr.HitPos,false,self:EntIndex(),att)
+	else
+		util.ParticleTracerEx(eff or "maziodyne_blue",pos,endPosi,false,self:EntIndex(),att)
+	end
+	if ent && ent:Health() && ent:Health() > 0 then
+		self:DealDamage(ent,1,DMG_P_ELEC,2)
+	end
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Curse(ent,t,dmg)
 	ent.Persona_DMG_Curse = CurTime() +t
@@ -433,21 +750,34 @@ function ENT:Curse(ent,t,dmg)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Fear(ent,t)
-	local prevDisp = ent:Disposition(self.User) != D_FR && ent:Disposition(self.User) or D_NU
-	ent.Persona_DMG_Fear = CurTime() +t
-	ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
-	ent:AddEntityRelationship(self.User,D_FR,99)
-	ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
-	timer.Simple(t +0.15,function()
-		if IsValid(ent) then
-			if CurTime() > ent.Persona_DMG_Fear then
-				ent:StopParticles()
-				if IsValid(self) && IsValid(self.User) then
-					ent:AddEntityRelationship(self.User,prevDisp,99)
+	if ent:IsNPC() then
+		local prevDisp = ent:Disposition(self.User) != D_FR && ent:Disposition(self.User) or D_NU
+		ent.Persona_DMG_Fear = CurTime() +t
+		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
+		ent:AddEntityRelationship(self.User,D_FR,99)
+		ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
+		timer.Simple(t +0.15,function()
+			if IsValid(ent) then
+				if CurTime() > ent.Persona_DMG_Fear then
+					ent:StopParticles()
+					if IsValid(self) && IsValid(self.User) then
+						ent:AddEntityRelationship(self.User,prevDisp,99)
+					end
 				end
 			end
-		end
-	end)
+		end)
+	else
+		ent.Persona_DMG_Fear = CurTime() +t
+		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
+		ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
+		timer.Simple(t +0.15,function()
+			if IsValid(ent) then
+				if CurTime() > ent.Persona_DMG_Fear then
+					ent:StopParticles()
+				end
+			end
+		end)
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 hook.Add("OnNPCKilled","Persona_NPCKilled",function(ent,killer,weapon)

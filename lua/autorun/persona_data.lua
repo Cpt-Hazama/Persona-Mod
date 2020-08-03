@@ -15,6 +15,11 @@ PERSONA["magatsu_izanagi"].Model = "models/cpthazama/persona5/persona/magatsu_iz
 PERSONA["magatsu_izanagi"].Aura = "jojo_aura_red"
 PERSONA["magatsu_izanagi"].Name = "Magatsu-Izanagi"
 
+PERSONA["magatsu_izanagi_picaro"] = {}
+PERSONA["magatsu_izanagi_picaro"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi_picaro.mdl"
+PERSONA["magatsu_izanagi_picaro"].Aura = "jojo_aura_black"
+PERSONA["magatsu_izanagi_picaro"].Name = "Magatsu-Izanagi Picaro"
+
 PERSONA["magatsu_izanagi_p4"] = {}
 PERSONA["magatsu_izanagi_p4"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi.mdl"
 PERSONA["magatsu_izanagi_p4"].Aura = "jojo_aura_red"
@@ -39,6 +44,11 @@ PERSONA["satanael"] = {}
 PERSONA["satanael"].Model = "models/cpthazama/persona5/persona/satanael.mdl"
 PERSONA["satanael"].Aura = "jojo_aura_blue"
 PERSONA["satanael"].Name = "Satanael"
+
+PERSONA["loki"] = {}
+PERSONA["loki"].Model = "models/cpthazama/persona5/persona/loki.mdl"
+PERSONA["loki"].Aura = "jojo_aura_red"
+PERSONA["loki"].Name = "Loki"
 
 game.AddParticles("particles/magatsu_izanagi.pcf")
 local pParticleList = {

@@ -10,6 +10,37 @@ ENT.Name = "Magatsu-Izanagi"
 ENT.Aura = "jojo_aura_red"
 ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB,DMG_P_FEAR)
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.Animations = {}
+ENT.Animations["idle"] = "idle"
+ENT.Animations["idle_low"] = "low_hp"
+ENT.Animations["melee"] = "ghostly_wail_noXY"
+ENT.Animations["range_start"] = "atk_magatsu_mandala_pre"
+ENT.Animations["range_start_idle"] = "atk_magatsu_mandala_pre_idle"
+ENT.Animations["range"] = "atk_magatsu_mandala_start"
+ENT.Animations["range_idle"] = "atk_magatsu_mandala"
+ENT.Animations["range_end"] = "atk_magatsu_mandala_end"
+ENT.Animations["special"] = "evileye"
+---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.Stats = {
+	LVL = 77, -- Innate level
+	STR = 65, -- Effectiveness of phys. attacks
+	MAG = 55, -- Effectiveness of magic. attacks
+	END = 66, -- Effectiveness of defense
+	AGI = 45, -- Effectiveness of hit and evasion rates
+	LUC = 45, -- Chance of getting a critical
+	WK = {},
+	RES = {},
+	NUL = {DMG_P_CURSE,DMG_P_BLESS,DMG_P_MIRACLE},
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HandleEvents(skill,animBlock,seq,t)
+	if skill == "Ghostly Wail" then
+		if animBlock == "melee" then
+			self.User:EmitSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnHitEntity(hitEnts,dmginfo)
 	-- if dmginfo:GetDamageType() == DMG_P_FEAR then
 		for _,v in pairs(hitEnts) do
@@ -24,7 +55,7 @@ function ENT:Maziodyne_NPC(ply,enemy)
 	local rmb = true
 	if rmb then
 		if self.InstaKillStage > 0 then return end
-		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" && CurTime() > self.RechargeT then
+		if self.User:GetSP() >= self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" && CurTime() > self.RechargeT then
 			self.DamageBuild = 250
 			self:TakeSP(self.CurrentCardCost)
 			self:SetTask("TASK_PLAY_ANIMATION")
@@ -84,84 +115,11 @@ function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)
 	local rmb = ply:KeyDown(IN_ATTACK2)
 	local r = ply:KeyDown(IN_RELOAD)
-	if self:GetTask() == "TASK_IDLE" then
-		if self.User:Crouching() && self.CurrentIdle != "low_hp" then
-			self:DoIdle()
-		elseif !self.User:Crouching() && self.CurrentIdle != "idle" then
-			self:DoIdle()
-		end
-	end
 	-- self:SetSkin(CurTime() > self.RechargeT && 0 or 1)
-	if lmb then
-		if self.InstaKillStage > 0 then return end
-		if self:GetTask() != "TASK_ATTACK" && !self.IsArmed then
-			self:SetTask("TASK_ATTACK")
-			self:PlayAnimation("ghostly_wail_noXY",1)
-			if math.random(1,5) == 1 then self:DoCritical(1) end
-			ply:EmitSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
-			self:FindTarget(ply)
-			-- self:SetPos(self.User:GetPos() +self.User:GetForward() *60)
-			self:SetAngles(self.User:GetAngles())
-			local t = {0.9,1.4,1.9}
-			for _,v in pairs(t) do
-				timer.Simple(v,function()
-					if IsValid(self) then
-						self:MeleeAttackCode(self.HeatRiserT > CurTime() && self.Damage *1.5 or self.Damage,210,70)
-					end
-				end)
-			end
-			timer.Simple(self:GetSequenceDuration(self,"ghostly_wail_noXY"),function()
-				if IsValid(self) then
-					self:DoIdle()
-				end
-			end)
-		end
-	end
 	if rmb then
 		-- if self.InstaKillStage > 0 then return end
-		if self:GetCard() == "Maziodyne" then
-			self:Maziodyne(ply,persona,rmb)
-		elseif self:GetCard() == "Evil Smile" then
-			self:EvilSmile(ply,persona,rmb)
-		elseif self:GetCard() == "Heat Riser" then
-			if self.InstaKillStage > 0 then return end
-			if self.User:GetSP() > self.CurrentCardCost && CurTime() > self.HeatRiserT && self:GetTask() != "TASK_PLAY_ANIMATION" then
-				self:SetTask("TASK_PLAY_ANIMATION")
-				self:TakeSP(self.CurrentCardCost)
-				self:PlayAnimation("atk_magatsu_mandala_pre",1)
-				timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_pre"),function()
-					if IsValid(self) then
-						self:PlayAnimation("atk_magatsu_mandala",0.4,1)
-						self.HeatRiserT = CurTime() +60
-						self:EmitSound("cpthazama/persona5/skills/0361.wav",85)
-						self.User:ChatPrint("Buffed melee attacks and evasion for 1 minute!")
-						timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala") +(self:GetSequenceDuration(self,"atk_magatsu_mandala") *0.4),function()
-							if IsValid(self) then
-								self:PlayAnimation("atk_magatsu_mandala_end",1)
-								timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_end"),function()
-									if IsValid(self) then
-										self:SetTask("TASK_IDLE")
-										self:DoIdle()
-									end
-								end)
-							end
-						end)
-					end
-				end)
-			end
-		elseif self:GetCard() == "Yomi Drop" then
+		if self:GetCard() == "Yomi Drop" then
 			self:InstaKill(ply,persona,rmb)
-		end
-	end
-	if r && CurTime() > self.NextCardSwitchT then
-		if self:GetCard() == "Maziodyne" then
-			self:SetCard("Heat Riser")
-		elseif self:GetCard() == "Heat Riser" then
-			self:SetCard("Evil Smile")
-		elseif self:GetCard() == "Evil Smile" then
-			self:SetCard("Yomi Drop")
-		elseif self:GetCard() == "Yomi Drop" then
-			self:SetCard("Maziodyne")
 		end
 	end
 	if self.InstaKillStage == 1 then
@@ -180,59 +138,10 @@ function ENT:PersonaControls(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Maziodyne(ply,persona,rmb)
-	local rmb = ply:KeyDown(IN_ATTACK2)
-	if rmb then
-		if self.InstaKillStage > 0 then return end
-		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" && CurTime() > self.RechargeT then
-			self.DamageBuild = 250
-			self:TakeSP(self.CurrentCardCost)
-			self:SetTask("TASK_PLAY_ANIMATION")
-			self:PlayAnimation("atk_magatsu_mandala_pre",1)
-			ply:EmitSound("cpthazama/persona5/adachi/vo/curse.wav")
-			if math.random(1,2) == 1 then self:DoCritical(1) end
-			timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_pre"),function()
-				if IsValid(self) then
-					self.IsArmed = true
-					self:PlayAnimation("atk_magatsu_mandala_pre_idle",1,1)
-				end
-			end)
-		end
-		if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && CurTime() > self.TimeToMazionga then
-			-- self:MeleeAttackCode(1000,2500,180,false)
-			self:PlayAnimation("atk_magatsu_mandala",1,1)
-			self.TimeToMazionga = CurTime() +3.5
-			self:EmitSound("beams/beamstart5.wav",90)
-			local tbl = {
-				"cpthazama/persona5/adachi/vo/blast.wav",
-				"cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",
-				"cpthazama/vox/adachi/kill/vbtl_pad_0#122 (pad166_0).wav"
-			}
-			ply:EmitSound(VJ_PICK(tbl))
-			for a = 1,5 do
-				for i = 1,20 do
-					timer.Simple(i *0.15,function()
-						if IsValid(self) then
-							self:MaziodyneAttack(a,30000)
-						end
-					end)
-				end
-			end
-			timer.Simple(3,function()
-				if IsValid(self) then
-					self.RechargeT = CurTime() +5
-					self.IsArmed = false
-					self:DoIdle()
-				end
-			end)
-		end
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:InstaKill(ply,persona,rmb)
 	if rmb then
 		if self.InstaKillStage > 0 then return end
-		if self.User:GetSP() > self.CurrentCardCost && CurTime() > self.NextInstaKillT && self:GetTask() == "TASK_IDLE" && self.InstaKillStage == 0 then
+		if self.User:GetSP() >= self.CurrentCardCost && CurTime() > self.NextInstaKillT && self:GetTask() == "TASK_IDLE" && self.InstaKillStage == 0 then
 			self:SetTask("TASK_PLAY_ANIMATION")
 			self:PlayAnimation("atk_magatsu_mandala_pre",1)
 			self.InstaKillStage = 1
@@ -378,64 +287,6 @@ function ENT:InstaKill(ply,persona,rmb)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:EvilSmile(ply,persona,rmb)
-	if !IsValid(ply.Persona_EyeTarget) then
-		return
-	end
-	if self.InstaKillStage > 0 then
-		return
-	end
-	if self.User:GetSP() > self.CurrentCardCost && self:GetTask() != "TASK_PLAY_ANIMATION" then
-		self:SetTask("TASK_PLAY_ANIMATION")
-		self:TakeSP(self.CurrentCardCost)
-		self:PlayAnimation("evileye",1)
-		ply:EmitSound("cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",72)
-		timer.Simple(0.6,function()
-			if IsValid(self) then
-				if !IsValid(ply.Persona_EyeTarget) then
-					return
-				end
-				self:Fear(ply.Persona_EyeTarget,15)
-				ply:ChatPrint("Target is now feared!")
-			end
-		end)
-		timer.Simple(self:GetSequenceDuration(self,"evileye"),function()
-			if IsValid(self) then
-				self:SetTask("TASK_IDLE")
-				self:DoIdle()
-			end
-		end)
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:MaziodyneAttack(att,dist)
-	local pos = self:GetAttachment(att).Pos
-	local tr = util.TraceLine({
-		start = pos,
-		endpos = pos +self:GetForward() *dist,
-	})
-	self:EmitSound("cpthazama/persona5/adachi/elec_charge.wav",75)
-	if tr.Hit then
-		util.ParticleTracerEx("fo4_libertyprime_laser",pos,tr.HitPos,false,self:EntIndex(),att) // maziodyne_blue
-		sound.Play("cpthazama/persona5/adachi/elec.wav",tr.HitPos,90)
-		if tr.Entity && tr.Entity:Health() && tr.Entity:Health() > 0 then
-			local dmginfo = DamageInfo()
-			dmginfo:SetDamage(self:GetCritical() && 5 *2 or 5)
-			dmginfo:SetAttacker(self.User)
-			dmginfo:SetInflictor(self)
-			dmginfo:SetDamageType(bit.bor(DMG_DISSOLVE,DMG_ENERGYBEAM,DMG_P_ELEC))
-			dmginfo:SetDamagePosition(tr.Entity:NearestPoint(tr.HitPos))
-			tr.Entity:TakeDamageInfo(dmginfo)
-		end
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:DoIdle()
-	self:SetTask("TASK_IDLE")
-	self.CurrentIdle = self.User:IsPlayer() && self.User:Crouching() && "low_hp" or "idle"
-	self:PlayAnimation(self.CurrentIdle,1,1)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
 	return self:GetTask() == "TASK_ATTACK" && self:GetPos() +self:OBBCenter() +self:GetForward() *675 or self:GetPos() +self:OBBCenter()
 end
@@ -460,7 +311,6 @@ function ENT:OnSummoned(ply)
 	if ply:IsPlayer() then ply:EmitSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav") end
 	self:SetModel(self.Model)
 	self.PersonaDistance = 999999999 -- 40 meters
-	self.TimeToMazionga = CurTime() +2
 	self.RechargeT = CurTime()
 	self.NextInstaKillT = CurTime()
 	self.InstaKillTarget = NULL
@@ -468,18 +318,23 @@ function ENT:OnSummoned(ply)
 	self.IsArmed = false
 	self.InstaKillStage = 0
 	self.InstaKillStyle = 0
-	self.HeatRiserT = CurTime()
+	self.Magatsu = true
 	
 	self:SetCritical(false)
 
 	self.Damage = 400
 
-	self:AddCard("Maziodyne",22,false)
-	self:AddCard("Heat Riser",30,false)
-	self:AddCard("Magatsu Mandala",30,false)
-	self:AddCard("Evil Smile",12,false)
-	self:AddCard("Yomi Drop",100,false)
+	self:AddCard("Maziodyne",22,false,"elec")
+	self:AddCard("Heat Riser",30,false,"passive")
+	self:AddCard("Magatsu Mandala",30,false,"curse")
+	self:AddCard("Ghastly Wail",30,true,"almighty")
+	self:AddCard("Evil Smile",12,false,"sleep")
+	self:AddCard("Charge",15,false,"passive")
+	self:AddCard("Megidolaon",38,false,"almighty")
+	self:AddCard("Yomi Drop",100,false,"phys")
+
 	self:SetCard("Maziodyne")
+	self:SetCard("Ghastly Wail",true)
 
 	local v = {forward=-200,right=80,up=50}
 	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))

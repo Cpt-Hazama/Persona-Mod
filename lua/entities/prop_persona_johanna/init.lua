@@ -50,7 +50,7 @@ function ENT:VajraBlast(owner,enemy)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Freila(owner,enemy)
-	if self.User:GetSP() > self.CurrentCardCost && self:GetTask() != "TASK_ATTACK" then
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() != "TASK_ATTACK" then
 		self:SetTask("TASK_ATTACK")
 		owner:VJ_ACT_PLAYACTIVITY("persona_attack",true,false,false)
 		VJ_CreateSound(owner,owner.SoundTbl_PersonaAttack,80)
@@ -102,12 +102,13 @@ function ENT:OnSummoned(owner)
 	VJ_CreateSound(owner,owner.SoundTbl_Persona,78)
 	self.PersonaDistance = 999999999
 	
-	self:AddCard("Vajra Blast",14,true) -- Med. Phys damage to all foes
-	self:AddCard("Freila",8,false) -- Med. Nuclear damage to one foe
-	self:AddCard("Energy Shower",8,false) -- Cure Confuse/Fear/Despair/Rage/Brainwash
-	self:AddCard("Diarahan",18,false) -- Fully restore HP
-	self:AddCard("Atomic Flare",48,false) -- Sev. Nuclear damage to one foes
-	self:SetCard("Freila",8)
+	self:AddCard("Vajra Blast",14,true,"phys") -- Med. Phys damage to all foes
+	self:AddCard("Freila",8,false,"nuclear") -- Med. Nuclear damage to one foe
+	self:AddCard("Energy Shower",8,false,"heal") -- Cure Confuse/Fear/Despair/Rage/Brainwash
+	self:AddCard("Diarahan",18,false,"heal") -- Fully restore HP
+	self:AddCard("Atomic Flare",48,false,"nuclear") -- Sev. Nuclear damage to one foes
+
+	self:SetCard("Freila")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RequestAura(ply,aura)

@@ -234,12 +234,13 @@ function ENT:PersonaThink(persona,enemy,dist)
 			if !self.PreparedToAttack && persona:GetTask() == "TASK_IDLE" then
 				self.PreparedToAttack = true
 				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,true)
+				if persona:GetTask() == "TASK_IDLE" then
+					persona:Maziodyne_NPC(self,enemy)
+				end
 				timer.Simple(self:DecideAnimationLength("persona_attack_start",false),function()
-					if IsValid(self) && IsValid(persona) && IsValid(enemy) then
-						if persona:GetTask() == "TASK_IDLE" then
-							persona:Maziodyne_NPC(self,enemy)
-							self.PreparedToAttack = false
-						end
+					if IsValid(self) then
+						self.PreparedToAttack = false
+						self:VJ_ACT_PLAYACTIVITY("persona_attack",true,false,true)
 					end
 				end)
 			end
@@ -253,11 +254,43 @@ function ENT:PersonaThink(persona,enemy,dist)
 				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,true)
 				if persona:GetTask() == "TASK_IDLE" then
 					persona:Maziodyne_NPC(self,enemy)
-					self.PreparedToAttack = false
 				end
 				timer.Simple(self:DecideAnimationLength("persona_attack_start",false),function()
 					if IsValid(self) then
 						self.PreparedToAttack = false
+						self:VJ_ACT_PLAYACTIVITY("persona_attack",true,false,true)
+					end
+				end)
+			end
+		end
+		if math.random(1,60) == 1 && dist > 500 && persona.HeatRiserT < CurTime() then
+			if !self.PreparedToAttack && persona:GetTask() == "TASK_IDLE" then
+				self.PreparedToAttack = true
+				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,true)
+				timer.Simple(self:DecideAnimationLength("persona_attack_start",false),function()
+					if IsValid(self) then
+						self.PreparedToAttack = false
+						if persona:GetTask() == "TASK_IDLE" then
+							persona:HeatRiser(self,persona,true)
+						end
+						self:VJ_ACT_PLAYACTIVITY("persona_attack",true,false,true)
+					end
+				end)
+			end
+		end
+		if dist <= 5000 && dist > 1000 && math.random(1,70) == 1 then
+			if !self.PreparedToAttack && persona:GetTask() == "TASK_IDLE" then
+				self.PreparedToAttack = true
+				VJ_CreateSound(self,"cpthazama/persona5/adachi/vo/npc/vbtl_pad_0#105 (pad157_1).wav",78)
+				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,true)
+				if persona:GetTask() == "TASK_IDLE" then
+					persona:Megidolaon(self,enemy)
+				end
+				timer.Simple(self:DecideAnimationLength("persona_attack_start",false),function()
+					if IsValid(self) then
+						self.PreparedToAttack = false
+						VJ_CreateSound(self,"cpthazama/persona5/adachi/vo/npc/vbtl_pad_0#107 (pad158_1).wav",78)
+						self:VJ_ACT_PLAYACTIVITY("persona_attack",true,false,true)
 					end
 				end)
 			end

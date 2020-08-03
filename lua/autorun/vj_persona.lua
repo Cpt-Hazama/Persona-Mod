@@ -24,6 +24,7 @@ if VJExists == true then
 		- Justine
 		- Lavenza
 		- Akechi
+		- Minato
 
 		- Yu
 		- Elizabeth
@@ -51,8 +52,41 @@ if VJExists == true then
 	
 		-- Persona 4 - Antagonists -- 
 	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi",vCat) -- Magatsu-Izanagi
+	
+		-- Persona 3 - Protagonists
+	-- VJ.AddNPC("Minato Arisato","npc_vj_per_minato",vCat) -- Orpheos / Messiah
+	-- VJ.AddNPC("Yukari Takeba","npc_vj_per_yukari",vCat) -- Isis
+	
+		-- Persona 3 - Antagonists -- 
+	-- VJ.AddNPC("Takuya","npc_vj_per_takuya",vCat) -- Hypnos
 
 	VJ.AddClientConVar("vj_persona_music",1)
+
+	properties.Add("Toggle Music", {
+		MenuLabel = "#Toggle Music",
+		Order = 999,
+		MenuIcon = "icon16/shield_add.png",
+
+		Filter = function(self,ent,ply)
+			if !IsValid(ent) then return false end
+			if !ent:IsNPC() then return false end
+			if !ent.VJ_PersonaNPC then return false end
+			if ent.VJ_Persona_HasTheme then
+				return true
+			end
+		end,
+		Action = function(self,ent) -- CS
+			self:MsgStart()
+				net.WriteEntity(ent)
+			self:MsgEnd()
+		end,
+		Receive = function(self,length,player) -- SV
+			local ent = net.ReadEntity()
+			if !self:Filter(ent,player) then return end
+			ent:ToggleTheme()
+			player:ChatPrint("Toggled Theme")
+		end
+	})
 
 -- !!!!!! DON'T TOUCH ANYTHING BELOW THIS !!!!!! -------------------------------------------------------------------------------------------------------------------------
 	AddCSLuaFile(AutorunFile)

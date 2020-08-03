@@ -6,66 +6,49 @@ ENT.Bot_Buttons = {
 	[1] = {but={IN_ATTACK},dist=100,chance=1},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.Animations = {}
+ENT.Animations["idle"] = "idle"
+ENT.Animations["idle_low"] = "idle"
+ENT.Animations["melee"] = "attack"
+ENT.Animations["range_start"] = "range_start"
+ENT.Animations["range_start_idle"] = "range_pre_idle"
+ENT.Animations["range"] = "range"
+ENT.Animations["range_idle"] = "range_loop"
+ENT.Animations["range_end"] = "range_end"
+---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.Stats = {
+	LVL = 95, -- Innate level
+	STR = 63, -- Effectiveness of phys. attacks
+	MAG = 60, -- Effectiveness of magic. attacks
+	END = 57, -- Effectiveness of defense
+	AGI = 56, -- Effectiveness of hit and evasion rates
+	LUC = 56, -- Chance of getting a critical
+	WK = {},
+	RES = {
+		DMG_P_ICE,
+		DMG_P_EARTH,
+		DMG_P_WIND,
+		DMG_P_GRAVITY,
+		DMG_P_NUCLEAR,
+		DMG_P_EXPEL,
+		DMG_P_DEATH,
+		DMG_P_FORCE,
+		DMG_P_TECH,
+		DMG_P_ALMIGHTY,
+		DMG_P_PSI,
+		DMG_P_ELEC,
+		DMG_P_CURSE,
+		DMG_P_FEAR,
+		DMG_P_PHYS,
+		DMG_P_GUN
+	},
+	NUL = {DMG_P_BLESS,DMG_P_MIRACLE},
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)
 	local rmb = ply:KeyDown(IN_ATTACK2)
 	local r = ply:KeyDown(IN_RELOAD)
-	if lmb then
-		if self.User:Health() > self.User:GetMaxHealth() *0.17 && self:GetTask() != "TASK_ATTACK" && !self.IsArmed then
-			self:SetTask("TASK_ATTACK")
-			self:PlayAnimation("attack",1)
-			ply:EmitSound("cpthazama/persona5/joker/0008.wav",85)
-			self:FindTarget(ply)
-			self:SetAngles(self.User:GetAngles())
-			self:TakeHP(self.User:GetMaxHealth() *0.17)
-			-- timer.Simple(SoundDuration("cpthazama/persona5/joker/0011.wav"),function()
-				-- if IsValid(self) then
-					-- ply:EmitSound("cpthazama/persona5/joker/0012.wav",85)
-				-- end
-			-- end)
-			timer.Simple(0.9,function()
-				if IsValid(self) then
-					self:MeleeAttackCode(self.Damage,300,75)
-				end
-			end)
-			timer.Simple(self:GetSequenceDuration(self,"attack"),function()
-				if IsValid(self) then
-					self:DoIdle()
-				end
-			end)
-		end
-	end
-	if rmb then
-		if self.User:GetSP() > self.CurrentCardCost && !self.IsArmed && self:GetTask() != "TASK_PLAY_ANIMATION" && self:GetTask() != "TASK_ATTACK" then
-			self.DamageBuild = 800
-			self:SetTask("TASK_PLAY_ANIMATION")
-			self:PlayAnimation("range_pre",1)
-			self:TakeSP(self.CurrentCardCost)
-			ply:EmitSound("cpthazama/persona5/joker/0007.wav")
-			self:SetAngles(self.User:GetAngles())
-			timer.Simple(self:GetSequenceDuration(self,"range_pre"),function()
-				if IsValid(self) then
-					self.IsArmed = true
-					self:PlayAnimation("range_pre_idle",1,1)
-				end
-			end)
-		end
-	end
-	if self.IsArmed && rmb then
-		self.DamageBuild = math.Clamp(self.DamageBuild +2,800,2000)
-	end
-	if self:GetTask() == "TASK_PLAY_ANIMATION" && self.IsArmed && !rmb && CurTime() > self.TimeToMazionga then
-		self:MeleeAttackCode(self.DamageBuild,2500,180,1)
-		self:PlayAnimation("range",1)
-		ply:EmitSound("cpthazama/persona5/joker/0028.wav",85)
-		self.TimeToMazionga = CurTime() +self:GetSequenceDuration(self,"range") +0.2
-		timer.Simple(self:GetSequenceDuration(self,"range"),function()
-			if IsValid(self) then
-				self.IsArmed = false
-				self:DoIdle()
-			end
-		end)
-	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
@@ -79,14 +62,16 @@ end
 function ENT:OnSummoned(ply)
 	ply:EmitSound("cpthazama/persona5/joker/0005.wav")
 	self.PersonaDistance = 999999999
-	self.TimeToMazionga = CurTime() +2
-	self.IsArmed = false
 
-	self.Damage = 1000
-	self.DamageBuild = 800
-	
-	self:AddCard("Doors of Hades",32,false)
-	self:SetCard("Doors of Hades",32)
+	self:AddCard("Maeigaon",22,false,"curse")
+	self:AddCard("Megidolaon",38,false,"almighty")
+	self:AddCard("Black Viper",48,false,"almighty")
+	self:AddCard("Heat Riser",30,false,"passive")
+	self:AddCard("Riot Gun",24,true,"gun")
+	self:AddCard("Sinful Shell",999,false,"almighty")
+
+	self:SetCard("Megidolaon")
+	self:SetCard("Riot Gun",true)
 
 	local v = {forward=-600,right=300,up=300}
 	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))

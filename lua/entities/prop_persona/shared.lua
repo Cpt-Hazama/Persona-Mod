@@ -18,6 +18,16 @@ if SERVER then
 	util.AddNetworkString("Persona_SetName")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HandleEvents(skill,animBlock,seq,t)
+	// Custom code here
+	/*
+		skill = The Skill in which this was called from
+		animBlock = The pre-set name in the Animations table for the sequence
+		seq = The sequence that has just been set to play
+		t = The length of the sequence in seconds
+	*/
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetupDataTables()
 	self:NetworkVar("Bool",0,"Critical")
 end
@@ -39,11 +49,18 @@ if CLIENT then
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:PlayAnimation(seq,rate,cycle)
+function ENT:PlaySet(skill,name,rate,cycle)
+	local seq = self.Animations[name]
+	return self:PlayAnimation(seq,rate,cycle,name,skill)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PlayAnimation(seq,rate,cycle,tbName,skill)
 	self:ResetSequence(seq)
 	self:SetPlaybackRate(rate)
 	self:SetCycle(cycle or 0)
-	return self:GetSequenceDuration(self,seq)
+	local t = self:GetSequenceDuration(self,seq)
+	self:HandleEvents(skill or "BLANK",tbName or "N/A",seq,t)
+	return t
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSequenceDuration(argent,actname)
@@ -81,3 +98,11 @@ if (CLIENT) then
 		self:Draw()
 	end
 end
+---------------------------------------------------------------------------------------------------------------------------------------------
+sound.Add({
+	name = "PERSONA_MEGIDOLAON",
+	channel = CHAN_STATIC,
+	volume = 1.0,
+	level = 125,
+	sound = "cpthazama/persona5/skills/megidolaon.wav"
+})

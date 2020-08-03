@@ -1,0 +1,8 @@
+"UnlitGeneric"
+{
+	"$basetexture" "hud/persona/critical_akechi"
+	"$nolod" 1
+	"$nomip" 1
+	"$ignorez" 1
+	"$translucent" 1
+}

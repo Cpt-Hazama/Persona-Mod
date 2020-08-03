@@ -202,6 +202,21 @@ function ENT:PersonaThink(persona,enemy,dist)
 		return
 	end
 	if IsValid(enemy) && self:Visible(enemy) then
+		if math.random(1,60) == 1 && dist > 500 && persona.ChaosT < CurTime() then
+			if !self.PreparedToAttack && persona:GetTask() == "TASK_IDLE" then
+				self.PreparedToAttack = true
+				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,true)
+				if persona:GetTask() == "TASK_IDLE" then
+					persona:CallOfChaos(self,persona)
+				end
+				timer.Simple(self:DecideAnimationLength("persona_attack_start",false) +2,function()
+					if IsValid(self) then
+						self.PreparedToAttack = false
+						self:VJ_ACT_PLAYACTIVITY("persona_attack",true,false,true)
+					end
+				end)
+			end
+		end
 		-- if dist < 2000 && dist > 700 then
 			-- if persona:GetTask() == "TASK_IDLE" then
 				-- persona:Freila(self,enemy)
