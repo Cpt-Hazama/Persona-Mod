@@ -190,7 +190,7 @@ if SERVER then
 				v:SetMaxSP(v:GetSP())
 			end
 			if IsValid(v:GetPersona()) then
-				if !v:HasWeapon(wep) then
+				if !v:HasWeapon(wep) && !v:IsFrozen() then
 					v:Give(wep)
 				end
 				v:SelectWeapon(wep)
@@ -435,6 +435,9 @@ if CLIENT then
 		local cPos = ply:GetNWVector("Persona_CustomPos")
 		local enabled = IsValid(persona)
 		if enabled then
+			if IsValid(ply:GetViewEntity()) && ply:GetViewEntity():GetClass() == "gmod_cameraprop" then
+				return
+			end
 			local function Position(ply,origin,angles,dist,cPos)
 				local allplayers = player.GetAll()
 				local ePos = angles:Right() *30

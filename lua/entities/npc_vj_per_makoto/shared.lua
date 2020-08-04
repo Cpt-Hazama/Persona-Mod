@@ -7,8 +7,63 @@ ENT.Purpose 		= ""
 ENT.Instructions 	= ""
 ENT.Category		= "NPC"
 
+ENT.VJ_PersonaNPC = true
+ENT.VJ_Persona_HasTheme = true
+
 if CLIENT then
 	local lerp_hp = 0
+	
+	function ENT:PlayMusic(bMode)
+		if GetConVarNumber("vj_persona_music") == 1 then
+			local ply = LocalPlayer()
+			ply.VJ_Persona_ThemeTrack = "cpthazama/persona5/music/theme_makoto.wav"
+			ply.VJ_Persona_Theme = CreateSound(ply,ply.VJ_Persona_ThemeTrack)
+			ply.VJ_Persona_Theme:SetSoundLevel(0)
+			ply.VJ_Persona_Theme:ChangeVolume(60)
+			ply.VJ_Persona_Theme:Play()
+			ply.VJ_Persona_ThemeT = CurTime() +193
+		end
+	end
+	
+	function ENT:ToggleTheme(bMode)
+		self.VJ_Persona_HasTheme = bMode
+		if bMode == true then -- Turn on
+			self:PlayMusic()
+		else -- Turn off
+			if ply.VJ_Persona_Theme then ply.VJ_Persona_Theme:FadeOut(1) end
+			ply.VJ_Persona_ThemeT = 0
+		end
+	end
+	
+	function ENT:Think()
+		local ply = LocalPlayer()
+		if GetConVarNumber("vj_persona_music") == 0 then
+			if ply.VJ_Persona_Theme then ply.VJ_Persona_Theme:Stop() end
+		end
+		if ply.VJ_Persona_ThemeT == nil then ply.VJ_Persona_ThemeT = 0 end
+		if self.VJ_Persona_HasTheme then
+			if ply.VJ_Persona_Theme == nil or ply.VJ_Persona_ThemeT < CurTime() then
+				if ply.VJ_Persona_Theme then ply.VJ_Persona_Theme:Stop() end
+				self:PlayMusic()
+			end
+		end
+	end
+	
+	function ENT:OnRemove()
+		local found = false
+		for _,v in pairs(ents.FindByClass(self:GetClass())) do
+			if v != self then
+				found = true
+				break
+			end
+		end
+		local ply = LocalPlayer()
+		if ply.VJ_Persona_ThemeTrack == "cpthazama/persona5/music/theme_makoto.wav" && found == false then
+			ply.VJ_Persona_Theme:FadeOut(2)
+			ply.VJ_Persona_ThemeT = 0
+			ply.VJ_Persona_ThemeTrack = "common/null.wav"
+		end
+	end
 
 	net.Receive("vj_persona_hud_makoto",function(len,pl)
 		local delete = net.ReadBool()

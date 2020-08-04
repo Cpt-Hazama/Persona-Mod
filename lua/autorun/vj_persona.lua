@@ -64,14 +64,14 @@ if VJExists == true then
 
 	properties.Add("Toggle Music", {
 		MenuLabel = "#Toggle Music",
-		Order = 999,
-		MenuIcon = "icon16/shield_add.png",
+		Order = 1,
+		MenuIcon = "vj_icons/persona16.png",
 
 		Filter = function(self,ent,ply)
 			if !IsValid(ent) then return false end
 			if !ent:IsNPC() then return false end
 			if !ent.VJ_PersonaNPC then return false end
-			if ent.VJ_Persona_HasTheme then
+			if ent.ToggleTheme then
 				return true
 			end
 		end,
@@ -79,11 +79,11 @@ if VJExists == true then
 			self:MsgStart()
 				net.WriteEntity(ent)
 			self:MsgEnd()
+			ent:ToggleTheme(!ent.VJ_Persona_HasTheme)
 		end,
 		Receive = function(self,length,player) -- SV
 			local ent = net.ReadEntity()
 			if !self:Filter(ent,player) then return end
-			ent:ToggleTheme()
 			player:ChatPrint("Toggled Theme")
 		end
 	})

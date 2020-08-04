@@ -39,7 +39,7 @@ function ENT:VorpalBlade(ply)
 			for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
 				if IsValid(v) then
 					timer.Simple(i,function()
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							self:DealDamage(v,DMG_P_MEDIUM,bit.bor(DMG_P_PHYS,DMG_P_CURSE))
 						end
 					end)
@@ -67,7 +67,7 @@ function ENT:OneShotKill(ply,persona)
 			if IsValid(v) then
 				v:EmitSound("cpthazama/persona5/skills/0461.wav",90)
 				timer.Simple(SoundDuration("cpthazama/persona5/skills/0461.wav") -0.6,function()
-					if IsValid(v) then
+					if IsValid(v) && IsValid(self) then
 						v:EmitSound("cpthazama/persona5/skills/0725.wav",90)
 						self:DealDamage(v,DMG_P_MEDIUM,DMG_P_GUN)
 					end
@@ -95,7 +95,7 @@ function ENT:RiotGun(ply,persona)
 			if IsValid(v) then
 				v:EmitSound("cpthazama/persona5/skills/0227.wav",95)
 				timer.Simple(2,function()
-					if IsValid(v) then
+					if IsValid(v) && IsValid(self) then
 						self:DealDamage(v,DMG_P_SEVERE,DMG_P_GUN)
 					end
 				end)

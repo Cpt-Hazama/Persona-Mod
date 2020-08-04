@@ -50,6 +50,11 @@ PERSONA["loki"].Model = "models/cpthazama/persona5/persona/loki.mdl"
 PERSONA["loki"].Aura = "jojo_aura_red"
 PERSONA["loki"].Name = "Loki"
 
+-- PERSONA["reaper"] = {}
+-- PERSONA["reaper"].Model = "models/cpthazama/persona5/persona/reaper.mdl"
+-- PERSONA["reaper"].Aura = "jojo_aura_red"
+-- PERSONA["reaper"].Name = "The Reaper"
+
 game.AddParticles("particles/magatsu_izanagi.pcf")
 local pParticleList = {
 	"fo4_libertyprime_impact",

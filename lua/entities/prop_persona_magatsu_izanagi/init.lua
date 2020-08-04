@@ -197,7 +197,8 @@ function ENT:InstaKill(ply,persona,rmb)
 						bloodeffect:SetScale(140)
 						bloodeffect:SetAttachment(5)
 						util.Effect("P4_RedMist",bloodeffect)
-						self:PlayInstaKillTheme({self.User,ent},prediction,1)
+						self:DoInstaKillTheme({self.User,ent},prediction,1)
+						-- self:PlayInstaKillTheme({self.User,ent},prediction,1)
 					else
 						self.InstaKillStage = 0
 					end

@@ -16,6 +16,7 @@ ENT.ControlType = 1 -- 1 = Follow User, 2 = User Controls
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	util.AddNetworkString("Persona_SetName")
+	util.AddNetworkString("Persona_InstaKill")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
@@ -39,6 +40,18 @@ function ENT:SetFeedName(name,class)
 	net.Broadcast()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DoInstaKillTheme(ents,t,ft)
+	for _,v in pairs(ents) do
+		if IsValid(v) && v:IsPlayer() then
+			net.Start("Persona_InstaKill")
+				net.WriteEntity(v)
+				net.WriteInt(t,32)
+				net.WriteInt(ft,32)
+			net.Broadcast()
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 if CLIENT then
 	net.Receive("Persona_SetName",function(len)
 		local name = net.ReadString()
@@ -46,6 +59,25 @@ if CLIENT then
 
 		language.Add(class,name)
 		killicon.Add(class,"HUD/killicons/default",Color(255,80,0,255))
+	end)
+
+	net.Receive("Persona_InstaKill",function(len)
+		local v = net.ReadEntity()
+		local t = net.ReadInt(32)
+		local ft = net.ReadInt(32)
+
+		if v.InstaKillTheme then v.InstaKillTheme:Stop() end
+		v.InstaKillTheme = CreateSound(v,"cpthazama/persona5/instakill.wav")
+		v.InstaKillTheme:SetSoundLevel(0)
+		v.InstaKillTheme:Play()
+		v.InstaKillTheme:ChangeVolume(1)
+		v.InstaKillThemeID = v.InstaKillThemeID && v.InstaKillThemeID +1 or 1
+		local id = v.InstaKillThemeID
+		timer.Simple(t,function()
+			if v.InstaKillTheme && v.InstaKillTheme:IsPlaying() && v.InstaKillThemeID == id then
+				v.InstaKillTheme:FadeOut(ft)
+			end
+		end)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------

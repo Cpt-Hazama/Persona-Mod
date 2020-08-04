@@ -69,6 +69,7 @@ function ENT:Initialize()
 	self.Flexes = {}
 	
 	self.NextCardSwitchT = CurTime()
+	self.NextLockOnT = CurTime()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoCritical(t)
@@ -148,7 +149,7 @@ end
 function ENT:DefaultPersonaControls(ply,persona)
 	if ply:IsPlayer() then
 		ply:SetNWEntity("Persona_Target",ply.Persona_EyeTarget)
-		if ply:KeyReleased(IN_WALK) then
+		if ply:KeyReleased(IN_WALK) && CurTime() > self.NextLockOnT then
 			if IsValid(ply.Persona_EyeTarget) then
 				ply.Persona_EyeTarget = NULL
 				ply:EmitSound("cpthazama/persona5/misc/00019.wav",70,100)
@@ -168,6 +169,7 @@ function ENT:DefaultPersonaControls(ply,persona)
 					end
 				end
 			end
+			self.NextLockOnT = CurTime() +0.2
 		end
 		if IsValid(ply.Persona_EyeTarget) then
 			ply:SetEyeAngles(LerpAngle(0.5,ply:EyeAngles(),((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetShootPos()):Angle()))
@@ -659,7 +661,7 @@ end
 function ENT:OnKilledEnemy(ent) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MegidolaonEffect(ent,dmg)
-	local dmg = dmg or 9999
+	local dmg = dmg or DMG_P_SEVERE
 	local m = ents.Create("prop_vj_animatable")
 	m:SetModel("models/cpthazama/persona5/effects/megidolaon.mdl")
 	m:SetPos(ent:GetPos())
