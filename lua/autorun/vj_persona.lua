@@ -24,7 +24,7 @@ if VJExists == true then
 		- Justine
 		- Lavenza
 		- Akechi
-		- Minato
+		- Yuki
 
 		- Yu
 		- Elizabeth
@@ -32,33 +32,36 @@ if VJExists == true then
 	*/
 
 		-- Persona 5 - Protagonists --
-	VJ.AddNPC("Ren Amamiya","npc_vj_per_ren",vCat) -- Persona: Arsène and Satanael
-	VJ.AddNPC("Makoto Niijima","npc_vj_per_makoto",vCat) -- Johanna
-	VJ.AddNPC("Ann Takamaki","npc_vj_per_ann",vCat) -- Carmen
-	VJ.AddNPC("Caroline","npc_vj_per_caroline",vCat) -- Shiisaa
-	VJ.AddNPC("Justine","npc_vj_per_justine",vCat) -- Sudama
-	VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat) -- Persona: Thor, Berith and Atavaka | Theme: Rivers in The Desert
+	-- VJ.AddNPC("Ren Amamiya","npc_vj_per_ren",vCat) -- Persona: Arsène and Satanael | Theme: Last Surprise / Groovy
+	VJ.AddNPC("Makoto Niijima","npc_vj_per_makoto",vCat) -- Johanna and Anat | Theme: Price
+	-- VJ.AddNPC("Ann Takamaki","npc_vj_per_ann",vCat) -- Carmen | Theme: Wake Up, Get Up, Get Out There
+	-- VJ.AddNPC("Caroline","npc_vj_per_caroline",vCat) -- Shiisaa | Theme: Life Will Change
+	-- VJ.AddNPC("Justine","npc_vj_per_justine",vCat) -- Sudama | Theme: Life Will Change
+	-- VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat) -- Persona: Thor, Berith and Atavaka | Theme: Rivers in The Desert
 
 		-- Persona 5 - Antagonists --
-	VJ.AddNPC("Kamoshida (Shadow)","npc_vj_per_kamoshida",vCat)
-	VJ.AddNPC("Madarame (Shadow)","npc_vj_per_madarame",vCat)
-	VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCat)
-	VJ.AddNPC("Goro Akechi","npc_vj_per_akechi",vCat) -- Persona: Loki and Hereward | Theme: Reincarnation (I'll Face Myself)
+	-- VJ.AddNPC("Kamoshida (Shadow)","npc_vj_per_kamoshida",vCat) -- Theme: King, Queen, And Slaves
+	-- VJ.AddNPC("Madarame (Shadow)","npc_vj_per_madarame",vCat) -- Theme: A Woman
+	VJ.AddNPC("Sae Niijima (Shadow)","npc_vj_per_sae",vCat) -- Persona: Leviathan | Theme: The Whims Of Fate
+	-- VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCat)
+	VJ.AddNPC("Goro Akechi","npc_vj_per_akechi_crow",vCat) -- Persona: Robin Hood | Theme: Ark
+	VJ.AddNPC("Goro Akechi (Black Mask)","npc_vj_per_akechi",vCat) -- Persona: Loki and Hereward | Theme: Reincarnation (I'll Face Myself)
 	
 		-- Persona 4 - Protagonists --
-	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami
-	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat) -- Thanatos
-	-- VJ.AddNPC("Margaret","npc_vj_per_margaret",vCat) -- Yoshitsune
+	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami | Theme: Reach Out To The Truth (Arena Ver.)
+	
+	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat) -- Thanatos | Theme: Whims Of Everyone's Souls
+	-- VJ.AddNPC("Margaret","npc_vj_per_margaret",vCat) -- Yoshitsune | Theme: Electronica In The Velvet Room
 	
 		-- Persona 4 - Antagonists -- 
-	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi",vCat) -- Magatsu-Izanagi
+	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi",vCat) -- Magatsu-Izanagi | Theme: A Fool or A Clown? / A New World Fool
 	
 		-- Persona 3 - Protagonists
-	-- VJ.AddNPC("Minato Arisato","npc_vj_per_minato",vCat) -- Orpheos / Messiah
-	-- VJ.AddNPC("Yukari Takeba","npc_vj_per_yukari",vCat) -- Isis
+	-- VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
+	-- VJ.AddNPC("Yukari Takeba","npc_vj_per_yukari",vCat) -- Isis | Theme: 
 	
 		-- Persona 3 - Antagonists -- 
-	-- VJ.AddNPC("Takuya","npc_vj_per_takuya",vCat) -- Hypnos
+	-- VJ.AddNPC("Takuya","npc_vj_per_takuya",vCat) -- Hypnos | Theme: 
 
 	VJ.AddClientConVar("vj_persona_music",1)
 

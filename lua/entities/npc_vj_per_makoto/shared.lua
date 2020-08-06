@@ -7,6 +7,8 @@ ENT.Purpose 		= ""
 ENT.Instructions 	= ""
 ENT.Category		= "NPC"
 
+include("social_link.lua")
+
 ENT.VJ_PersonaNPC = true
 ENT.VJ_Persona_HasTheme = true
 
