@@ -35,6 +35,8 @@ ENT.Stats = {
 	NUL = {},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LeveledSkills = {}
+---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.AuraChance = 2
 ENT.IdleSpeed = 1
 ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB)
@@ -70,6 +72,28 @@ function ENT:Initialize()
 	
 	self.NextCardSwitchT = CurTime()
 	self.NextLockOnT = CurTime()
+	
+	timer.Simple(0,function()
+		if self.User:IsPlayer() then
+			PXP.SetPersonaData(self.User,5,self.User:GetNWString("PersonaName"))
+			
+			self:CheckSkillLevel(true)
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CheckSkillLevel(noChat)
+	local lvl = PXP.GetPersonaData(self.User,2)
+	if #self.LeveledSkills > 0 then
+		for _,skill in pairs(self.LeveledSkills) do
+			if skill.Level && skill.Level <= lvl then
+				self:AddCard(skill.Name,skill.Cost,skill.UsesHP,skill.Icon)
+				if noChat != true then
+					self.User:ChatPrint("Obtained a new skill, " .. skill.Name .. "!")
+				end
+			end
+		end
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoCritical(t)
@@ -256,6 +280,8 @@ function ENT:PersonaCards(lmb,rmb,r)
 			self:MyriadTruths(ply,persona)
 		elseif self:GetCard() == "Maziodyne" then
 			self:Maziodyne(ply,persona,rmb)
+		elseif self:GetCard() == "Zionga" then
+			self:Zionga(ply,persona,rmb)
 		elseif self:GetCard() == "Mazionga" then
 			self:Mazionga(ply,persona,rmb)
 		elseif self:GetCard() == "Evil Smile" then
@@ -373,6 +399,10 @@ function ENT:DoIdle()
 	self:PlayAnimation(self.IdleAnimation,self.IdleSpeed,1)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetMeleeCost()
+	return (self.CurrentMeleeSkillCost *0.01)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AddCard(name,req,isHP,icon)
 	self.CardTable = self.CardTable or {}
 	self.CardTable[#self.CardTable +1] = {Name=name,Cost=req,UsesHP=isHP,Icon=(icon or "unknown")}
@@ -384,8 +414,27 @@ function ENT:AddCard(name,req,isHP,icon)
 	self.Cards[name].Icon = icon or "unknown"
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:GetMeleeCost()
-	return (self.CurrentMeleeSkillCost *0.01)
+function ENT:CheckCards()
+	if self.User:IsNPC() then return end
+
+	local oldSkills = {}
+	for _,v in pairs(self.CardTable) do
+		table.insert(oldSkills,v.Name)
+	end
+	local tbl = PXP.GetPersonaData(self.User,3)
+	local newSkills = {}
+	if tbl == nil then return end
+	for index,skill in pairs(tbl) do
+		-- print("Checking " .. skill.Name)
+		if !VJ_HasValue(oldSkills,skill.Name) then
+			table.insert(newSkills,skill)
+			-- print("Added " .. skill.Name .. " to new skills")
+		end
+	end
+	for _,skill in pairs(newSkills) do
+		self:AddCard(skill.Name,skill.Cost,skill.UsesHP,skill.Icon)
+		-- print("Implemented " .. skill.Name)
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetMeleeCard(name,cost)
@@ -660,6 +709,14 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnKilledEnemy(ent) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnKilledEnemy_EXP(ent)
+	local ply = self.User
+	local level = ent:GetNWInt("Persona_Level")
+	local exp = ent:GetNWInt("Persona_EXP")
+	
+	PXP.GiveEXP(ply,exp)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MegidolaonEffect(ent,dmg)
 	local dmg = dmg or DMG_P_SEVERE
 	local m = ents.Create("prop_vj_animatable")
@@ -787,6 +844,7 @@ hook.Add("OnNPCKilled","Persona_NPCKilled",function(ent,killer,weapon)
 		local persona = killer:GetPersona()
 		if IsValid(persona) then
 			persona:OnKilledEnemy(ent)
+			persona:OnKilledEnemy_EXP(ent)
 		end
 	end
 end)
@@ -796,6 +854,7 @@ hook.Add("PlayerDeath","Persona_PlayerKilled",function(ent,killer,weapon)
 		local persona = killer:GetPersona()
 		if IsValid(persona) then
 			persona:OnKilledEnemy(ent)
+			persona:OnKilledEnemy_EXP(ent)
 		end
 	end
 end)
@@ -806,6 +865,18 @@ function ENT:OnRemove()
 	if IsValid(self.User) then
 		self.User:SetNWVector("Persona_CustomPos",Vector(0,0,0))
 		self.User:StopParticles()
+
+		local exp = PXP.GetPersonaData(self.User,1)
+		local lvl = PXP.GetPersonaData(self.User,2)
+		self.EXP = exp != nil && exp or 0
+		self.Level = lvl != nil && lvl or self.Stats.LVL
+		-- if self.EXP < (self.Stats.LVL *1500) then
+			-- self.EXP = self.Stats.LVL *1500
+		-- end
+		if self.Level < self.Stats.LVL then
+			self.Level = self.Stats.LVL
+		end
+		PXP.SavePersonaData(self.User,self.EXP,self.Level,self.CardTable)
 	end
 	self:StopParticles()
 	self:WhenRemoved()

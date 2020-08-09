@@ -23,6 +23,8 @@ DMG_P_HEAVY = 100
 DMG_P_SEVERE = 175
 DMG_P_COLOSSAL = 300
 
+include("persona_xp.lua")
+
 if SERVER then
 	util.AddNetworkString("persona_csound")
 end
@@ -173,16 +175,53 @@ function NPC:SummonPersona(persona)
 	end
 end
 
+hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
+	ply:SetPersona(PXP.GetPersonaData(ply,5))
+	local exp = PXP.GetPersonaData(ply,1)
+	local lvl = PXP.GetPersonaData(ply,2)
+	local comp = PXP.GetPersonaData(ply,4)
+	PXP.SetPersonaData(ply,1,exp != nil && exp or 0)
+	PXP.SetPersonaData(ply,2,lvl != nil && lvl or 0)
+	PXP.SetPersonaData(ply,4,comp != nil && comp or {})
+	PXP.SetRequiredXP(ply,PXP.GetRequiredXP(ply))
+
+	ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
+	ply:SetMaxSP(ply:GetSP())
+	ply:SetMaxHealth(100)
+	ply.PXP_NextXPChange = CurTime()
+end)
+
 if SERVER then
 	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
 		ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
 		ply:SetMaxSP(ply:GetSP())
 		ply:SetMaxHealth(100)
+		ply.PXP_NextXPChange = CurTime()
+	end)
+
+	hook.Add("OnEntityCreated","Persona_EntitySpawn",function(ent)
+		if ent:IsNPC() then
+			timer.Simple(0,function()
+				if IsValid(ent) then
+					local mLevel = ent:GetNWInt("Persona_Level") or (ent.Stats && ent.Stats.LVL) or nil
+					if mLevel == nil or mLevel == 0 then
+						local ply = VJ_PICK(player.GetAll())
+						local pLevel = PXP.GetLevel(ply)
+						local level = math.Round(((ent:GetMaxHealth() /50) *pLevel))
+						ent:SetNWInt("Persona_Level",level)
+						ent:SetNWInt("Persona_EXP",level *math.random(2,6))
+					end
+				end
+			end)
+		end
 	end)
 
 	local wep = "weapon_jojo_nothing"
 	hook.Add("Think","Persona_Think",function()
 		for _,v in pairs(player.GetAll()) do
+			-- if CurTime() > v.PXP_NextXPChange && PXP.GetPersonaData(v,1) >= PXP.GetRequiredXP(v) then
+				-- PXP.LevelUp(v)
+			-- end
 			if v:Health() > v:GetMaxHealth() then
 				v:SetMaxHealth(v:Health())
 			end
@@ -261,8 +300,22 @@ if SERVER then
 				ent.Persona = ply:GetPersonaName()
 				ent:DoIdle()
 				ent:OnSummoned(ply)
+				ent:CheckCards()
 				ply:SetNWEntity("PersonaEntity",ent)
 				ent:SetFeedName(PERSONA[ply:GetPersonaName()].Name,class)
+
+				local exp = PXP.GetPersonaData(ply,1)
+				local lvl = PXP.GetPersonaData(ply,2)
+				ent.EXP = exp != nil && exp or 0
+				ent.Level = lvl != nil && lvl or ent.Stats.LVL
+				-- if ent.EXP < (ent.Stats.LVL *1500) then
+					-- ent.EXP = ent.Stats.LVL *1500
+				-- end
+				if ent.Level < ent.Stats.LVL then
+					ent.Level = ent.Stats.LVL
+				end
+				PXP.AddToCompendium(ply,ply:GetPersonaName())
+				PXP.SavePersonaData(ply,ent.EXP,ent.Level,ent.CardTable)
 			else
 				if persona:GetTask() == "TASK_IDLE" then
 					if !persona.IsFlinching then
@@ -281,6 +334,24 @@ if CLIENT then
 		font = "p5hatty",
 		extended = false,
 		size = 35,
+		weight = 500,
+		blursize = 0,
+		scanlines = 0,
+		antialias = true,
+		underline = false,
+		italic = false,
+		strikeout = false,
+		symbol = false,
+		rotary = false,
+		shadow = false,
+		additive = false,
+		outline = true,
+	})
+
+	surface.CreateFont("Persona_EXP",{
+		font = "p5hatty",
+		extended = false,
+		size = 25,
 		weight = 500,
 		blursize = 0,
 		scanlines = 0,
@@ -343,9 +414,9 @@ if CLIENT then
 
 		local corners = 1
 		local posX = GetConVarNumber("persona_hud_x") or 350
-		local posY = GetConVarNumber("persona_hud_y") or 170
+		local posY = GetConVarNumber("persona_hud_y") or 250
 		local len = 325
-		local height = 150
+		local height = 230
 		local colM = 35
 		local color = Color(colM,colM,colM,255)
 		local boxX = posX
@@ -411,6 +482,32 @@ if CLIENT then
 		surface.SetDrawColor(Color(255,255,255,255))
 		surface.DrawTexturedRect(ScrW() -posX,ScrH() -posY,len,height)
 
+		local text = "Level"
+		local posX = boxX -15
+		local posY = boxHeight -150
+		local color = Color(0,100,255,255)
+		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,Color(200,0,0))
+
+		local text = ply:GetNWInt("PXP_Level")
+		local posX = boxX -110
+		local posY = boxHeight -150
+		local color = Color(0,100,255,255)
+		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,Color(200,0,0))
+
+		local text = "Req: " .. ply:GetNWInt("PXP_EXP") .. "/" .. ply:GetNWInt("PXP_RequiredEXP")
+		local font = "Persona_EXP"
+		local color = Color(200,0,0)
+		local posX = boxX -15
+		local posY = boxHeight -192
+		if ply:GetNWInt("PXP_Level") == 99 then
+			text = "MAX"
+			font = "Persona"
+			color = Color(200,0,255,255)
+			posX = boxX -120
+			posY = boxHeight -190
+		end
+		draw.SimpleText(text,font,ScrW() -posX,ScrH() -posY,color)
+
 		if IsValid(target) then
 			local icon = persona:GetNWString("SpecialAttackIcon")
 			local matIcon = Material("hud/persona/crosshair")
@@ -470,7 +567,7 @@ if CLIENT then
 	end)
 	hook.Add("PopulateToolMenu","Persona_MainMenu",function()
 		spawnmenu.AddToolMenuOption("Persona","Main Settings","HUD","HUD","","",function(Panel)
-				Panel:AddControl("Label",{Text = "Default: X = 350 Y = 170"})
+				Panel:AddControl("Label",{Text = "Default: X = 350 Y = 250"})
 				Panel:AddControl("Slider",{Label = "Box X Position",Command = "persona_hud_x",Min = 0,Max = 1920})
 				Panel:AddControl("Slider",{Label = "Box Y Position",Command = "persona_hud_y",Min = 0,Max = 1080})
 		end,{})

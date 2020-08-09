@@ -403,6 +403,60 @@ function ENT:Magarudyne(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Zionga(ply,persona)
+	local skill = "Zionga"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1.5)
+		-- ply:EmitSound("cpthazama/persona5/adachi/vo/curse.wav")
+		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		timer.Simple(t -(t *0.5),function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1,1)
+				timer.Simple(0.5,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_idle",1,1)
+								self:EmitSound("beams/beamstart5.wav",90)
+								-- local tbl = {
+									-- "cpthazama/persona5/adachi/vo/blast.wav",
+									-- "cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",
+									-- "cpthazama/vox/adachi/kill/vbtl_pad_0#122 (pad166_0).wav"
+								-- }
+								-- ply:EmitSound(VJ_PICK(tbl))
+								self.ZioCount = 0
+								for a = 1,3 do
+									for i = 1,10 do
+										self.ZioCount = self.ZioCount +1
+										timer.Simple(i *0.15,function()
+											if IsValid(self) then
+												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil,self.ZioCount)
+											end
+										end)
+									end
+								end
+								timer.Simple(1.5,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:DoIdle()
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Mazionga(ply,persona)
 	local skill = "Mazionga"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then

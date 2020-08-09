@@ -28,6 +28,10 @@ ENT.Stats = {
 	NUL = {DMG_P_CURSE},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LeveledSkills = {
+	{Level = 24, Name = "Mazionga", Cost = 16, UsesHP = false, Icon = "elec"}
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Cross Slash" && self.User:IsPlayer() then
 		if math.random(1,10) == 1 then self:DoCritical(1) end
@@ -55,9 +59,9 @@ function ENT:OnSummoned(ply)
 	
 	self:AddCard("Cross Slash",8,true,"phys")
 	self:AddCard("Charge",15,false,"passive")
-	self:AddCard("Mazionga",16,false,"elec")
+	self:AddCard("Zionga",8,false,"elec")
 
-	self:SetCard("Mazionga")
+	self:SetCard("Zionga")
 	self:SetCard("Cross Slash",true)
 
 	local v = {forward=-200,right=80,up=50}
