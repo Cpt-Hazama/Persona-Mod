@@ -310,9 +310,6 @@ if SERVER then
 				local lvl = PXP.GetPersonaData(ply,2)
 				ent.EXP = exp != nil && exp or 0
 				ent.Level = lvl != nil && lvl or ent.Stats.LVL
-				-- if ent.EXP < (ent.Stats.LVL *1500) then
-					-- ent.EXP = ent.Stats.LVL *1500
-				-- end
 				if ent.Level < ent.Stats.LVL then
 					ent.Level = ent.Stats.LVL
 				end
@@ -523,12 +520,12 @@ if CLIENT then
 			surface.SetDrawColor(Color(255,255,255,255))
 			surface.DrawTexturedRect(entPos.x -offset,entPos.y -offset,size,size)
 
-			local text = "Level " .. tostring(target:GetNWInt("PXP_Level"))
+			local text = "Level " .. (tostring(target:GetNWInt("PXP_Level")) or "0")
 			local offset = 100
 			local color = Color(248,60,64,255)
 			draw.SimpleText(text,"Persona",entPos.x -offset,entPos.y -offset -35,color)
 
-			local text = "EXP " .. tostring(target:GetNWInt("PXP_EXP"))
+			local text = "EXP " .. (tostring(target:GetNWInt("PXP_EXP")) or "0")
 			local offset = 100
 			local color = Color(248,60,64,255)
 			draw.SimpleText(text,"Persona",entPos.x -offset,entPos.y -offset,color)
