@@ -797,7 +797,11 @@ function ENT:MaziodyneAttack(att,dist,eff)
 	else
 		util.ParticleTracerEx(eff or "maziodyne_blue",pos,endPosi,false,self:EntIndex(),att)
 	end
-	if ent && ent:Health() && ent:Health() > 0 then
+	local trB = util.TraceLine({
+		start = pos,
+		endpos = ent && ent:GetPos() +ent:OBBCenter() or tr.HitPos,
+	})
+	if ent && ent:Health() && ent:Health() > 0 && trB.Hit && trB.Entity == ent then
 		self:DealDamage(ent,1,DMG_P_ELEC,2)
 	end
 end
