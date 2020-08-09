@@ -1,6 +1,7 @@
 PXP = {}
 
 PXP.SetEXP = function(ply,xp)
+	if !ply:IsPlayer() then return end
 	local oldXP = PXP.GetEXP(ply)
 	-- ply:SetNWInt("PXP_EXP",xp)
 	PXP.SetPersonaData(ply,1,xp)
@@ -12,6 +13,7 @@ PXP.SetEXP = function(ply,xp)
 end
 
 PXP.GiveEXP = function(ply,xp)
+	if !ply:IsPlayer() then return end
 	local oldXP = PXP.GetEXP(ply)
 	if ply:IsPlayer() then
 		ply:ChatPrint("You've earned " .. ((oldXP +xp) -oldXP) .. " EXP!")
@@ -21,14 +23,17 @@ PXP.GiveEXP = function(ply,xp)
 end
 
 PXP.GiveRequiredEXP = function(ply)
+	if !ply:IsPlayer() then return end
 	PXP.SetEXP(ply,PXP.GetRequiredXP(ply),true)
 end
 
 PXP.GetEXP = function(ply)
+	if !ply:IsPlayer() then return end
 	return PXP.GetPersonaData(ply,1)
 end
 
 PXP.SetLevel = function(ply,lvl,chat)
+	if !ply:IsPlayer() then return end
 	-- ply:SetNWInt("PXP_Level",lvl)
 	PXP.SetPersonaData(ply,2,lvl)
 	-- if lvl != ply:GetNWInt("PXP_Level") then PXP.CalculateRequiredXP(ply) end
@@ -41,20 +46,24 @@ PXP.SetLevel = function(ply,lvl,chat)
 end
 
 PXP.GetLevel = function(ply)
+	if !ply:IsPlayer() then return end
 	return PXP.GetPersonaData(ply,2)
 end
 
 PXP.SetRequiredXP = function(ply,amount)
+	if !ply:IsPlayer() then return end
 	ply:SetNWInt("PXP_RequiredEXP",amount)
 	PXP.SetPersonaData(ply,6,amount)
 	-- PXP.SavePersonaData(ply)
 end
 
 PXP.GetRequiredXP = function(ply)
+	if !ply:IsPlayer() then return end
 	return PXP.GetLevel(ply) == 99 && 0 or PXP.GetPersonaData(ply,6)
 end
 
 PXP.CalculateRequiredXP = function(ply)
+	if !ply:IsPlayer() then return end
 	-- local formula = (75 *(PXP.GetLevel(ply) -1) +200)
 	local formula = PXP.GetLevel(ply) *1500
 	local mRequiredXP = formula
@@ -62,10 +71,12 @@ PXP.CalculateRequiredXP = function(ply)
 end
 
 PXP.FindRemainingXP = function(ply)
+	if !ply:IsPlayer() then return end
 	return PXP.GetRequiredXP(ply) -PXP.GetEXP(ply)
 end
 
 PXP.ManagePersonaStats = function(ply,chat)
+	if !ply:IsPlayer() then return end
 	local persona = ply:GetPersona()
 	if IsValid(persona) then
 		local add = PXP.GetLevel(ply) -persona.BaseLevel
@@ -80,10 +91,12 @@ PXP.ManagePersonaStats = function(ply,chat)
 end
 
 PXP.GetPersonaStats = function(ply)
+	if !ply:IsPlayer() then return end
 	return PXP.GetPersonaData(ply,7)
 end
 
 PXP.SavePersonaStats = function(ply)
+	if !ply:IsPlayer() then return end
 	local persona = ply:GetPersona()
 	if IsValid(persona) then
 		local tbl = persona.Stats
@@ -98,6 +111,7 @@ PXP.SavePersonaStats = function(ply)
 end
 
 PXP.LevelUp = function(ply)
+	if !ply:IsPlayer() then return end
 	if PXP.GetLevel(ply) == 99 then return end
 	PXP.SetLevel(ply,PXP.GetLevel(ply) +1,true)
 	PXP.CalculateRequiredXP(ply)
@@ -118,10 +132,12 @@ PXP.LevelUp = function(ply)
 end
 
 PXP.SetCompendium = function(ply,com)
+	if !ply:IsPlayer() then return end
 	ply.PXP_Compendium = com
 end
 
 PXP.AddToCompendium = function(ply,persona)
+	if !ply:IsPlayer() then return end
 	if ply.PXP_Compendium == nil then ply.PXP_Compendium = {} end
 	if !VJ_HasValue(ply.PXP_Compendium,persona) then
 		table.insert(ply.PXP_Compendium,persona)
@@ -135,10 +151,12 @@ PXP.AddToCompendium = function(ply,persona)
 end
 
 PXP.GetCompendium = function(ply)
+	if !ply:IsPlayer() then return end
 	return PXP.GetPersonaData(ply,4)
 end
 
 PXP.ResetXPStats = function(ply)
+	if !ply:IsPlayer() then return end
 	ply:SetNWInt("PXP_NextEXPChange",CurTime() +1)
 	PXP.SetEXP(ply,0)
 	PXP.SetLevel(ply,0)
@@ -163,6 +181,7 @@ PXP.DataExists = function(ent,tbData)
 end
 
 PXP.GetPersonaData = function(ply,type)
+	if !ply:IsPlayer() then return end
 	local name = ply:GetPersonaName() or PXP.GetPersonaData(ply,5)
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
 	if type == 5 then -- Last Persona
@@ -191,6 +210,7 @@ PXP.GetPersonaData = function(ply,type)
 end
 
 PXP.SetPersonaData = function(ply,type,val)
+	if !ply:IsPlayer() then return end
 	local name = ply:GetPersonaName() or PXP.GetPersonaData(ply,5)
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
 	if type == 5 then -- Last Persona
@@ -218,6 +238,7 @@ PXP.SetPersonaData = function(ply,type,val)
 end
 
 PXP.SavePersonaData = function(ply,exp,level,cards)
+	if !ply:IsPlayer() then return end
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
 
 	PXP.SetPersonaData(ply,1,exp)
@@ -233,6 +254,7 @@ PXP.SavePersonaData = function(ply,exp,level,cards)
 end
 
 PXP.ReadCompendium = function(ply)
+	if !ply:IsPlayer() then return end
 	return PXP.ReadDataTable(PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_") .. "_COMPENDIUM.txt")
 end
 
