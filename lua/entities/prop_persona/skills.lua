@@ -483,6 +483,7 @@ function ENT:Mazionga(ply,persona)
 								-- ply:EmitSound(VJ_PICK(tbl))
 								self.ZioCount = 0
 								for a = 1,5 do
+									-- local target = VJ_PICK(self:FindEnemies(self:GetPos(),7000))
 									for i = 1,10 do
 										self.ZioCount = self.ZioCount +1
 										timer.Simple(i *0.15,function()

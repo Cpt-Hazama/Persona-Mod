@@ -37,7 +37,7 @@ ENT.Stats = {
 ENT.LeveledSkills = {
 	{Level = 88, Name = "Heat Riser", Cost = 30, UsesHP = false, Icon = "passive"},
 	{Level = 85, Name = "Megidolaon", Cost = 38, UsesHP = false, Icon = "almighty"},
-	{Level = 83, Name = "Magarudyne", Cost = 20, UsesHP = false, Icon = "wind"},
+	{Level = 83, Name = "Magarudyne", Cost = 22, UsesHP = false, Icon = "wind"},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)

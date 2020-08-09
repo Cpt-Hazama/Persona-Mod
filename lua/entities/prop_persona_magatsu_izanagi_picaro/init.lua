@@ -36,7 +36,7 @@ ENT.Stats = {
 ENT.LeveledSkills = {
 	{Level = 86, Name = "Heat Riser", Cost = 30, UsesHP = false, Icon = "passive"},
 	{Level = 83, Name = "Megidolaon", Cost = 38, UsesHP = false, Icon = "almighty"},
-	{Level = 81, Name = "Magarudyne", Cost = 20, UsesHP = false, Icon = "wind"},
+	{Level = 81, Name = "Magarudyne", Cost = 22, UsesHP = false, Icon = "wind"},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
@@ -93,7 +93,7 @@ function ENT:OnSummoned(ply)
 	self.PersonaDistance = 999999999 -- 40 meters
 	self.Magatsu = true
 
-	-- self:AddCard("Magarudyne",30,false,"wind")
+	-- self:AddCard("Magarudyne",22,false,"wind")
 	-- self:AddCard("Heat Riser",30,false,"passive")
 	self:AddCard("Magatsu Mandala",30,false,"curse")
 	self:AddCard("Ghastly Wail",30,true,"almighty")
