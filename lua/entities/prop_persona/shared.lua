@@ -38,6 +38,7 @@ function ENT:SetFeedName(name,class)
 		net.WriteString(name)
 		net.WriteString(class)
 	net.Broadcast()
+	self.FeedName = name
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoInstaKillTheme(ents,t,ft)

@@ -661,7 +661,7 @@ function ENT:Maeigaon(ply,persona)
 								spawnparticle:Spawn()
 								spawnparticle:Activate()
 								spawnparticle:Fire("Start","",0)
-								spawnparticle:Fire("Kill","",0.1)
+								spawnparticle:Fire("Kill","",1)
 
 								self:DealDamage(v,DMG_P_HEAVY,DMG_P_CURSE,2)
 

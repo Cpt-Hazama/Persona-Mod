@@ -73,11 +73,19 @@ function ENT:Initialize()
 	self.NextCardSwitchT = CurTime()
 	self.NextLockOnT = CurTime()
 	
+	self.BaseLevel = self.Stats.LVL
+	self.BaseSTR = self.Stats.STR
+	self.BaseMAG = self.Stats.MAG
+	self.BaseEND = self.Stats.END
+	self.BaseAGI = self.Stats.AGI
+	self.BaseLUC = self.Stats.LUC
+	
 	timer.Simple(0,function()
 		if self.User:IsPlayer() then
 			PXP.SetPersonaData(self.User,5,self.User:GetNWString("PersonaName"))
-			
+
 			self:CheckSkillLevel(true)
+			PXP.ManagePersonaStats(self.User)
 		end
 	end)
 end
@@ -86,7 +94,17 @@ function ENT:CheckSkillLevel(noChat)
 	local lvl = PXP.GetPersonaData(self.User,2)
 	if #self.LeveledSkills > 0 then
 		for _,skill in pairs(self.LeveledSkills) do
+			local proceed = true
 			if skill.Level && skill.Level <= lvl then
+				for _,v in pairs(self.CardTable) do
+					if v.Name == skill.Name then
+						proceed = false
+						break
+					end
+				end
+				if !proceed then
+					break
+				end
 				self:AddCard(skill.Name,skill.Cost,skill.UsesHP,skill.Icon)
 				if noChat != true then
 					self.User:ChatPrint("Obtained a new skill, " .. skill.Name .. "!")
@@ -711,8 +729,8 @@ function ENT:OnKilledEnemy(ent) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnKilledEnemy_EXP(ent)
 	local ply = self.User
-	local level = ent:GetNWInt("Persona_Level")
-	local exp = ent:GetNWInt("Persona_EXP")
+	local level = ent:GetNWInt("PXP_Level")
+	local exp = ent:GetNWInt("PXP_EXP")
 	
 	PXP.GiveEXP(ply,exp)
 end
@@ -858,6 +876,15 @@ hook.Add("PlayerDeath","Persona_PlayerKilled",function(ent,killer,weapon)
 		end
 	end
 end)
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:UpdateStats()
+	self.Stats.STR = self.Stats.STR +1
+	self.Stats.MAG = self.Stats.MAG +1
+	self.Stats.END = self.Stats.END +1
+	self.Stats.AGI = self.Stats.AGI +1
+	self.Stats.LUC = self.Stats.LUC +1
+	PXP.SavePersonaStats(self.User)
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:WhenRemoved() end
 ---------------------------------------------------------------------------------------------------------------------------------------------

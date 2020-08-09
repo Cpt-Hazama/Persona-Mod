@@ -28,6 +28,10 @@ ENT.Stats = {
 	NUL = {DMG_P_CURSE},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LeveledSkills = {
+	{Level = 80, Name = "Maeigaon", Cost = 22, UsesHP = false, Icon = "curse"}
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	local ply = self.User
 	if ply:IsNPC() && ply:GetClass() == "npc_vj_per_akechi" then

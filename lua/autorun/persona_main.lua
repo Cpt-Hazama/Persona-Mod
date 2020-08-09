@@ -31,7 +31,7 @@ end
 
 if CLIENT then
 	CreateClientConVar("persona_hud_x","350",false,false)
-	CreateClientConVar("persona_hud_y","170",false,false)
+	CreateClientConVar("persona_hud_y","250",false,false)
 
 	net.Receive("persona_csound",function(len,pl)
 		local ply = net.ReadEntity()
@@ -203,13 +203,15 @@ if SERVER then
 		if ent:IsNPC() then
 			timer.Simple(0,function()
 				if IsValid(ent) then
-					local mLevel = ent:GetNWInt("Persona_Level") or (ent.Stats && ent.Stats.LVL) or nil
+					local mLevel = ent:GetNWInt("PXP_Level") or (ent.Stats && ent.Stats.LVL) or nil
 					if mLevel == nil or mLevel == 0 then
 						local ply = VJ_PICK(player.GetAll())
 						local pLevel = PXP.GetLevel(ply)
-						local level = math.Round(((ent:GetMaxHealth() /50) *pLevel))
-						ent:SetNWInt("Persona_Level",level)
-						ent:SetNWInt("Persona_EXP",level *math.random(2,6))
+						local gLevel = math.Round(((ent:GetMaxHealth() /800) *pLevel))
+						local level = math.Clamp(math.random(math.Clamp(gLevel -10,1,99),math.Clamp(gLevel +10,1,99)),1,99)
+						local exp = math.Round(((ent:GetMaxHealth() /50) *level))
+						ent:SetNWInt("PXP_Level",level)
+						ent:SetNWInt("PXP_EXP",exp *math.random(2,50))
 					end
 				end
 			end)
@@ -348,7 +350,7 @@ if CLIENT then
 		outline = true,
 	})
 
-	surface.CreateFont("Persona_EXP",{
+	surface.CreateFont("PXP_EXP",{
 		font = "p5hatty",
 		extended = false,
 		size = 25,
@@ -495,7 +497,7 @@ if CLIENT then
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,Color(200,0,0))
 
 		local text = "Req: " .. ply:GetNWInt("PXP_EXP") .. "/" .. ply:GetNWInt("PXP_RequiredEXP")
-		local font = "Persona_EXP"
+		local font = "PXP_EXP"
 		local color = Color(200,0,0)
 		local posX = boxX -15
 		local posY = boxHeight -192
@@ -520,6 +522,16 @@ if CLIENT then
 			surface.SetMaterial(matIcon)
 			surface.SetDrawColor(Color(255,255,255,255))
 			surface.DrawTexturedRect(entPos.x -offset,entPos.y -offset,size,size)
+
+			local text = "Level " .. tostring(target:GetNWInt("PXP_Level"))
+			local offset = 100
+			local color = Color(248,60,64,255)
+			draw.SimpleText(text,"Persona",entPos.x -offset,entPos.y -offset -35,color)
+
+			local text = "EXP " .. tostring(target:GetNWInt("PXP_EXP"))
+			local offset = 100
+			local color = Color(248,60,64,255)
+			draw.SimpleText(text,"Persona",entPos.x -offset,entPos.y -offset,color)
 		end
 	end)
 
@@ -561,15 +573,38 @@ if CLIENT then
 	end)
 end
 
+local function ShowStats(ply)
+	local persona = ply:GetPersona()
+	if IsValid(persona) then
+		local stats = persona.Stats
+		ply:ChatPrint(persona.FeedName .. " Stats:")
+		ply:ChatPrint("STR - " .. stats.STR)
+		ply:ChatPrint("MAG - " .. stats.MAG)
+		ply:ChatPrint("END - " .. stats.END)
+		ply:ChatPrint("AGI - " .. stats.AGI)
+		ply:ChatPrint("LUC - " .. stats.LUC)
+	else
+		ply:ChatPrint("Summon your Persona first!")
+	end
+	ply:EmitSound(Sound("cpthazama/persona4/ui_changepersona.wav"))
+end
+concommand.Add("persona_showstats",ShowStats)
+
 if CLIENT then
 	hook.Add("AddToolMenuTabs","Persona_MainMenuIcon",function()
 		spawnmenu.AddToolTab("Persona","Persona","vj_icons/persona16.png")
 	end)
 	hook.Add("PopulateToolMenu","Persona_MainMenu",function()
 		spawnmenu.AddToolMenuOption("Persona","Main Settings","HUD","HUD","","",function(Panel)
-				Panel:AddControl("Label",{Text = "Default: X = 350 Y = 250"})
-				Panel:AddControl("Slider",{Label = "Box X Position",Command = "persona_hud_x",Min = 0,Max = 1920})
-				Panel:AddControl("Slider",{Label = "Box Y Position",Command = "persona_hud_y",Min = 0,Max = 1080})
+			local DefaultBox = {Options = {},CVars = {},Label = "#Presets",MenuButton = "1",Folder = "Main Settings"}
+			DefaultBox.Options["#Default"] = {
+				persona_hud_x = "350",
+				persona_hud_y = "250",
+			}
+			Panel:AddControl("Label",{Text = "Default: X = 350 Y = 250"})
+			Panel:AddControl("Slider",{Label = "Box X Position",Command = "persona_hud_x",Min = 0,Max = 1920})
+			Panel:AddControl("Slider",{Label = "Box Y Position",Command = "persona_hud_y",Min = 0,Max = 1080})
+			Panel:AddControl("Button",{Label = "Print Persona Stats",Command = "persona_showstats"})
 		end,{})
 	end)
 end
