@@ -40,6 +40,12 @@ ENT.Stats = {
 	NUL = {},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LeveledSkills = {
+	{Level = 95, Name = "Heat Riser", Cost = 30, UsesHP = false, Icon = "passive"},
+	{Level = 93, Name = "Salvation", Cost = 48, UsesHP = false, Icon = "heal"},
+	{Level = 92, Name = "Concentrate", Cost = 15, UsesHP = false, Icon = "passive"}
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Heaven's Blade" && self.User:IsPlayer() then
 		if math.random(1,8) == 1 then self:DoCritical(1) end
@@ -78,9 +84,9 @@ function ENT:OnSummoned(ply)
 
 	self:AddCard("Heaven's Blade",35,true,"phys")
 	self:AddCard("Myriad Truths",40,false,"almighty")
-	self:AddCard("Concentrate",15,false,"passive")
-	self:AddCard("Heat Riser",30,false,"passive")
-	self:AddCard("Salvation",48,false,"heal")
+	-- self:AddCard("Concentrate",15,false,"passive")
+	-- self:AddCard("Heat Riser",30,false,"passive")
+	-- self:AddCard("Salvation",48,false,"heal")
 
 	self:SetCard("Myriad Truths")
 	self:SetCard("Heaven's Blade",true)

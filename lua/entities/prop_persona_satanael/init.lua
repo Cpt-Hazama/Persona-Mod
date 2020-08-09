@@ -45,6 +45,11 @@ ENT.Stats = {
 	NUL = {DMG_P_BLESS,DMG_P_MIRACLE},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LeveledSkills = {
+	{Level = 99, Name = "Sinful Shell", Cost = 999, UsesHP = false, Icon = "almighty"},
+	{Level = 97, Name = "Black Viper", Cost = 48, UsesHP = false, Icon = "almighty"}
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)
 	local rmb = ply:KeyDown(IN_ATTACK2)
@@ -65,10 +70,10 @@ function ENT:OnSummoned(ply)
 
 	self:AddCard("Maeigaon",22,false,"curse")
 	self:AddCard("Megidolaon",38,false,"almighty")
-	self:AddCard("Black Viper",48,false,"almighty")
+	-- self:AddCard("Black Viper",48,false,"almighty")
 	self:AddCard("Heat Riser",30,false,"passive")
 	self:AddCard("Riot Gun",24,true,"gun")
-	self:AddCard("Sinful Shell",999,false,"almighty")
+	-- self:AddCard("Sinful Shell",999,false,"almighty")
 
 	self:SetCard("Megidolaon")
 	self:SetCard("Riot Gun",true)

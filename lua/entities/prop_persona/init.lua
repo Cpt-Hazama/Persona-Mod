@@ -35,7 +35,7 @@ ENT.Stats = {
 	NUL = {},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
-ENT.LeveledSkills = {}
+ENT.LeveledSkills = {} -- Skills must be place in a specific order! Top of table must be the highest level req. and the last one in the table must be the lowest level req.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.AuraChance = 2
 ENT.IdleSpeed = 1
@@ -109,8 +109,10 @@ end
 function ENT:CheckSkillLevel(noChat)
 	local lvl = PXP.GetPersonaData(self.User,2)
 	if #self.LeveledSkills > 0 then
-		for _,skill in pairs(self.LeveledSkills) do
+		-- for _,skill in pairs(self.LeveledSkills) do
+		for i = 1,#self.LeveledSkills do
 			local proceed = true
+			local skill = self.LeveledSkills[i]
 			if skill.Level && skill.Level <= lvl then
 				for _,v in pairs(self.CardTable) do
 					if v.Name == skill.Name then
@@ -119,11 +121,12 @@ function ENT:CheckSkillLevel(noChat)
 					end
 				end
 				if !proceed then
-					break
+					return
 				end
 				self:AddCard(skill.Name,skill.Cost,skill.UsesHP,skill.Icon)
 				if noChat != true then
 					self.User:ChatPrint("Obtained a new skill, " .. skill.Name .. "!")
+					self.User:EmitSound("cpthazama/persona4/ui_newskill.wav")
 				end
 			end
 		end

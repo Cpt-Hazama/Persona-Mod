@@ -28,6 +28,10 @@ ENT.Stats = {
 	NUL = {DMG_P_CURSE},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LeveledSkills = {
+	{Level = 70, Name = "Doors of Hades", Cost = 32, UsesHP = false, Icon = "almighty"}
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)
 	local rmb = ply:KeyDown(IN_ATTACK2)
@@ -46,13 +50,13 @@ function ENT:OnSummoned(ply)
 	ply:EmitSound("cpthazama/persona5/joker/0005.wav")
 	self.PersonaDistance = 999999999
 
-	self:AddCard("Doors of Hades",32,false,"almighty")
+	-- self:AddCard("Doors of Hades",32,false,"almighty")
 	self:AddCard("Maeigaon",22,false,"curse")
 	self:AddCard("Mamudoon",34,false,"curse")
 	self:AddCard("Concentrate",15,false,"passive")
 	self:AddCard("One-shot Kill",17,true,"gun")
 
-	self:SetCard("Doors of Hades")
+	self:SetCard("Maeigaon")
 	self:SetCard("One-shot Kill",true)
 
 	local v = {forward=-200,right=80,up=50}

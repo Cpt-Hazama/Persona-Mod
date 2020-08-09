@@ -34,6 +34,12 @@ ENT.Stats = {
 	NUL = {DMG_P_CURSE,DMG_P_BLESS,DMG_P_MIRACLE},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LeveledSkills = {
+	{Level = 88, Name = "Heat Riser", Cost = 30, UsesHP = false, Icon = "passive"},
+	{Level = 85, Name = "Megidolaon", Cost = 38, UsesHP = false, Icon = "almighty"},
+	{Level = 83, Name = "Magarudyne", Cost = 20, UsesHP = false, Icon = "wind"},
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Ghostly Wail" then
 		if animBlock == "melee" then
@@ -96,7 +102,7 @@ function ENT:OnSummoned(ply)
 	self:SetSkin(1)
 
 	self:AddCard("Maziodyne",22,false,"elec")
-	self:AddCard("Heat Riser",30,false,"passive")
+	-- self:AddCard("Heat Riser",30,false,"passive")
 	self:AddCard("Maeigaon",22,false,"curse")
 	self:AddCard("Ghastly Wail",30,true,"almighty")
 	self:AddCard("Evil Smile",12,false,"sleep")

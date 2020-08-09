@@ -33,6 +33,13 @@ ENT.Stats = {
 	NUL = {DMG_P_CURSE,DMG_P_BLESS,DMG_P_MIRACLE},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LeveledSkills = {
+	{Level = 90, Name = "Yomi Drop", Cost = 100, UsesHP = false, Icon = "phys"},
+	{Level = 83, Name = "Heat Riser", Cost = 30, UsesHP = false, Icon = "passive"},
+	{Level = 80, Name = "Megidolaon", Cost = 38, UsesHP = false, Icon = "almighty"},
+	{Level = 78, Name = "Maziodyne", Cost = 22, UsesHP = false, Icon = "elec"},
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Ghostly Wail" then
 		if animBlock == "melee" then
@@ -325,16 +332,16 @@ function ENT:OnSummoned(ply)
 
 	self.Damage = 400
 
-	self:AddCard("Maziodyne",22,false,"elec")
-	self:AddCard("Heat Riser",30,false,"passive")
+	-- self:AddCard("Maziodyne",22,false,"elec")
+	-- self:AddCard("Heat Riser",30,false,"passive")
 	self:AddCard("Magatsu Mandala",30,false,"curse")
 	self:AddCard("Ghastly Wail",30,true,"almighty")
 	self:AddCard("Evil Smile",12,false,"sleep")
 	self:AddCard("Charge",15,false,"passive")
-	self:AddCard("Megidolaon",38,false,"almighty")
-	self:AddCard("Yomi Drop",100,false,"phys")
+	-- self:AddCard("Megidolaon",38,false,"almighty")
+	-- self:AddCard("Yomi Drop",100,false,"phys")
 
-	self:SetCard("Maziodyne")
+	self:SetCard("Evil Smile")
 	self:SetCard("Ghastly Wail",true)
 
 	local v = {forward=-200,right=80,up=50}

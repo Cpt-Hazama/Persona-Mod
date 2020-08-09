@@ -33,7 +33,7 @@ PXP.SetLevel = function(ply,lvl,chat)
 	PXP.SetPersonaData(ply,2,lvl)
 	-- if lvl != ply:GetNWInt("PXP_Level") then PXP.CalculateRequiredXP(ply) end
 	if ply:IsPlayer() && chat then
-		ply:ChatPrint("You're now level " .. lvl)
+		ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " is now level " .. lvl)
 		ply:EmitSound("cpthazama/persona4/ui_skillup.wav")
 	end
 	ply:SetNWInt("PXP_Level",lvl)

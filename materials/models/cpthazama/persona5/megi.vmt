@@ -3,7 +3,15 @@
 	"$basetexture" "models/cpthazama/persona5/megi"
 	
 	"$nocull" "1"
-	"$selfillum" "1"
+	//"$selfillum" "1"
+
+	"$emissiveBlendEnabled" "1"
+	"$emissiveBlendTexture" "models/cpthazama/persona_shared/megi"
+	"$emissiveBlendBaseTexture" "models/cpthazama/persona5/megi"
+	"$emissiveBlendFlowTexture" "models/cpthazama/persona_shared/megi"
+	"$emissiveBlendTint" "[1 1 1]"
+	"$emissiveBlendStrength" "2"
+	"$emissiveBlendScrollVector" "[-0.5 -1]"
 
 	"$phong"				"1"
 	"$phongboost"			"0"

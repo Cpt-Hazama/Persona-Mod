@@ -33,6 +33,12 @@ ENT.Stats = {
 	NUL = {DMG_P_CURSE,DMG_P_BLESS,DMG_P_MIRACLE},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LeveledSkills = {
+	{Level = 86, Name = "Heat Riser", Cost = 30, UsesHP = false, Icon = "passive"},
+	{Level = 83, Name = "Megidolaon", Cost = 38, UsesHP = false, Icon = "almighty"},
+	{Level = 81, Name = "Magarudyne", Cost = 20, UsesHP = false, Icon = "wind"},
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Ghostly Wail" then
 		if animBlock == "melee" then
@@ -87,15 +93,15 @@ function ENT:OnSummoned(ply)
 	self.PersonaDistance = 999999999 -- 40 meters
 	self.Magatsu = true
 
-	self:AddCard("Magarudyne",30,false,"wind")
-	self:AddCard("Heat Riser",30,false,"passive")
+	-- self:AddCard("Magarudyne",30,false,"wind")
+	-- self:AddCard("Heat Riser",30,false,"passive")
 	self:AddCard("Magatsu Mandala",30,false,"curse")
 	self:AddCard("Ghastly Wail",30,true,"almighty")
 	self:AddCard("Evil Smile",12,false,"sleep")
 	self:AddCard("Charge",15,false,"passive")
-	self:AddCard("Megidolaon",38,false,"almighty")
+	-- self:AddCard("Megidolaon",38,false,"almighty")
 
-	self:SetCard("Magarudyne")
+	self:SetCard("Evil Smile")
 	self:SetCard("Ghastly Wail",true)
 
 	local v = {forward=-200,right=80,up=50}
