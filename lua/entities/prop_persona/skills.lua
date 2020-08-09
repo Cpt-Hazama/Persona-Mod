@@ -896,28 +896,39 @@ function ENT:Concentrate(ply,persona)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Salvation(ply,persona)
+	local skill = "Salvation"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
 		self:SetTask("TASK_PLAY_ANIMATION")
 		self:TakeSP(self.CurrentCardCost)
-		local t = self:PlaySet("Salvation","range_start",1)
+		local t = self:PlaySet(skill,"range_start",1)
 		timer.Simple(t,function()
 			if IsValid(self) then
-				t = self:PlaySet("Salvation","range",1)
-				self.User:SetHealth(self.User:GetMaxHealth())
-				self:DoChat("Fully restored HP and cured all ailments!")
-				self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
-
-				local spawnparticle = ents.Create("info_particle_system")
-				spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
-				spawnparticle:SetPos(self.User:GetPos())
-				spawnparticle:Spawn()
-				spawnparticle:Activate()
-				spawnparticle:Fire("Start","",0)
-				spawnparticle:Fire("Kill","",0.1)
+				t = self:PlaySet(skill,"range",1)
 				timer.Simple(t,function()
 					if IsValid(self) then
-						self:SetTask("TASK_IDLE")
-						self:DoIdle()
+						t = self:PlaySet(skill,"range_idle",1,1)
+						self.User:SetHealth(self.User:GetMaxHealth())
+						self:DoChat("Fully restored HP and cured all ailments!")
+						self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+
+						local spawnparticle = ents.Create("info_particle_system")
+						spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
+						spawnparticle:SetPos(self.User:GetPos())
+						spawnparticle:Spawn()
+						spawnparticle:Activate()
+						spawnparticle:Fire("Start","",0)
+						spawnparticle:Fire("Kill","",0.1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
 					end
 				end)
 			end

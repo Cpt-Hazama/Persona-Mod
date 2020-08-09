@@ -302,7 +302,6 @@ if SERVER then
 				ent.Persona = ply:GetPersonaName()
 				ent:DoIdle()
 				ent:OnSummoned(ply)
-				ent:CheckCards()
 				ply:SetNWEntity("PersonaEntity",ent)
 				ent:SetFeedName(PERSONA[ply:GetPersonaName()].Name,class)
 
@@ -314,6 +313,7 @@ if SERVER then
 					ent.Level = ent.Stats.LVL
 				end
 				PXP.AddToCompendium(ply,ply:GetPersonaName())
+				ent:CheckCards()
 				PXP.SavePersonaData(ply,ent.EXP,ent.Level,ent.CardTable)
 			else
 				if persona:GetTask() == "TASK_IDLE" then

@@ -90,6 +90,22 @@ function ENT:Initialize()
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:AddItemSkill(data)
+	local proceed = true
+	for _,v in pairs(self.CardTable) do
+		if v.Name == data.Name then
+			proceed = false
+			break
+		end
+	end
+	if !proceed then
+		return
+	end
+	self:AddCard(data.Name,data.Cost,data.UsesHP,data.Icon)
+	PXP.SetPersonaData(self.User,3,self.CardTable)
+	self.User:ChatPrint("Obtained a new skill, " .. data.Name .. "!")
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CheckSkillLevel(noChat)
 	local lvl = PXP.GetPersonaData(self.User,2)
 	if #self.LeveledSkills > 0 then

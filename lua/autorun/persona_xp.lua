@@ -225,6 +225,7 @@ PXP.SavePersonaData = function(ply,exp,level,cards)
 	PXP.SetPersonaData(ply,2,level)
 	PXP.SetLevel(ply,level)
 	PXP.SetPersonaData(ply,3,cards)
+	-- PrintTable(cards)
 	PXP.SetPersonaData(ply,4,ply.PXP_Compendium)
 	PXP.CalculateRequiredXP(ply)
 	PXP.ManagePersonaStats(ply)
@@ -249,7 +250,7 @@ end
 
 PXP.ReadDataTable = function(dir)
 	local data = file.Read(dir,"DATA")
-	if tbl == nil then return end
+	if data == nil then return end
 	local json = util.JSONToTable(data)
 	local tbData = {}
 	if json && json.Name && json.Set then
