@@ -211,7 +211,7 @@ if SERVER then
 						local level = math.Clamp(math.random(math.Clamp(gLevel -10,1,99),math.Clamp(gLevel +10,1,99)),1,99)
 						local exp = math.Round(((ent:GetMaxHealth() /50) *level))
 						ent:SetNWInt("PXP_Level",level)
-						ent:SetNWInt("PXP_EXP",exp *math.random(2,50))
+						ent:SetNWInt("PXP_EXP",exp *math.random(2,20))
 					end
 				end
 			end)

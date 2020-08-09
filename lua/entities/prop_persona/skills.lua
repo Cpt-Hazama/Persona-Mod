@@ -433,7 +433,7 @@ function ENT:Zionga(ply,persona)
 										self.ZioCount = self.ZioCount +1
 										timer.Simple(i *0.15,function()
 											if IsValid(self) then
-												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil,self.ZioCount)
+												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil)
 											end
 										end)
 									end
@@ -487,7 +487,7 @@ function ENT:Mazionga(ply,persona)
 										self.ZioCount = self.ZioCount +1
 										timer.Simple(i *0.15,function()
 											if IsValid(self) then
-												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil,self.ZioCount)
+												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil)
 											end
 										end)
 									end
@@ -537,11 +537,12 @@ function ENT:Maziodyne(ply,persona)
 								-- ply:EmitSound(VJ_PICK(tbl))
 								self.ZioCount = 0
 								for a = 1,5 do
+									local target = VJ_PICK(self:FindEnemies(self:GetPos(),7000))
 									for i = 1,20 do
 										self.ZioCount = self.ZioCount +1
 										timer.Simple(i *0.15,function()
 											if IsValid(self) then
-												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil,self.ZioCount)
+												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil,target)
 											end
 										end)
 									end

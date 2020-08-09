@@ -799,9 +799,12 @@ function ENT:MegidolaonEffect(ent,dmg)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:MaziodyneAttack(att,dist,eff)
+function ENT:MaziodyneAttack(att,dist,eff,target)
 	local pos = self:GetAttachment(att).Pos
 	local ent = self.User:IsNPC() && IsValid(self.User:GetEnemy()) && self.User:GetEnemy() or self.User:IsPlayer() && IsValid(self.User.Persona_EyeTarget) && self.User.Persona_EyeTarget or NULL
+	if IsValid(target) then
+		ent = target
+	end
 	local endPosi = IsValid(ent) && (ent:GetPos() +ent:OBBCenter()) or pos +self:GetForward() *dist
 	local tr = util.TraceLine({
 		start = pos,

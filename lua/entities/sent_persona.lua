@@ -34,6 +34,7 @@ function ENT:Initialize()
 		self:GetPhysicsObject():Wake()
 		local ply = self:GetCreator()
 		if IsValid(ply) then
+			if IsValid(ply:GetPersona()) then SafeRemoveEntity(self) return end
 			self:SelectPersona(ply)
 			SafeRemoveEntity(self)
 		end
@@ -45,7 +46,7 @@ function ENT:Think()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Use(ply,caller)
-	self:SelectPersona(ply)
+	-- self:SelectPersona(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:FindPersona()

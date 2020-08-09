@@ -35,6 +35,7 @@ function ENT:Initialize()
 		self:GetPhysicsObject():Wake()
 		local ply = self:GetCreator()
 		if IsValid(ply) then
+			if IsValid(ply:GetPersona()) then SafeRemoveEntity(self) return end
 			self:SelectPersona(ply,self.DataName)
 			SafeRemoveEntity(self)
 		end
