@@ -41,6 +41,15 @@ function ENT:VorpalBlade(ply)
 					timer.Simple(i,function()
 						if IsValid(v) && IsValid(self) then
 							self:DealDamage(v,DMG_P_MEDIUM,bit.bor(DMG_P_PHYS,DMG_P_CURSE))
+							for i = 1,math.random(1,4) do
+								local effectdata = EffectData()
+								local s = v:NearestPoint(self:GetAttackPosition())
+								local dist = 200
+								effectdata:SetAngles(Angle(100,250,255))
+								effectdata:SetStart(s +Vector(math.Rand(-dist,dist),math.Rand(-dist,dist),math.Rand(-dist,dist)))
+								effectdata:SetOrigin(s +Vector(math.Rand(-dist,dist),math.Rand(-dist,dist),math.Rand(-dist,dist)))
+								util.Effect("Persona_Slice",effectdata)
+							end
 						end
 					end)
 				end
@@ -66,10 +75,29 @@ function ENT:OneShotKill(ply,persona)
 		for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
 			if IsValid(v) then
 				v:EmitSound("cpthazama/persona5/skills/0461.wav",90)
+				for i = 1,8  do
+					timer.Simple(i *0.1,function()
+						if IsValid(v) then
+							local effectdata = EffectData()
+							local s = v:NearestPoint(self:GetAttackPosition())
+							local dist = math.Clamp(v:GetPos():Distance(v:GetPos() +v:OBBCenter()) *6,100,1000)
+							effectdata:SetStart(s)
+							effectdata:SetOrigin(s +v:GetRight() *dist)
+							effectdata:SetAngles(Angle(255,255,255))
+							effectdata:SetRadius(50)
+							util.Effect("Persona_Slice",effectdata)
+						end
+					end)
+				end
 				timer.Simple(SoundDuration("cpthazama/persona5/skills/0461.wav") -0.6,function()
 					if IsValid(v) && IsValid(self) then
 						v:EmitSound("cpthazama/persona5/skills/0725.wav",90)
 						self:DealDamage(v,DMG_P_MEDIUM,DMG_P_GUN)
+						local effectdata = EffectData()
+						local s = v:NearestPoint(self:GetAttackPosition())
+						effectdata:SetScale(math.Clamp(DMG_P_MEDIUM /3,20,300))
+						effectdata:SetOrigin(s)
+						util.Effect("Persona_Hit_Bullet_Mega",effectdata)
 					end
 				end)
 			end
@@ -94,9 +122,36 @@ function ENT:RiotGun(ply,persona)
 		for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
 			if IsValid(v) then
 				v:EmitSound("cpthazama/persona5/skills/0227.wav",95)
+				for i = 1,20 do
+					timer.Simple(i *0.1,function()
+						if IsValid(v) then
+							local effectdata = EffectData()
+							local s = v:GetPos() +v:OBBCenter()
+							local dist = math.Clamp(v:GetPos():Distance(v:GetPos() +v:OBBCenter()) *6,250,2000)
+							local start = s +Vector(math.Rand(-dist,dist),math.Rand(-dist,dist),dist)
+							local tr = util.TraceLine({
+								start = start,
+								endpos = start +Vector(0,0,-dist *2),
+							})
+							effectdata:SetStart(start)
+							effectdata:SetOrigin(tr.HitPos)
+							effectdata:SetAngles(Angle(255,255,255))
+							effectdata:SetRadius(math.random(25,35))
+							util.Effect("Persona_Slice",effectdata)
+						end
+					end)
+				end
 				timer.Simple(2,function()
 					if IsValid(v) && IsValid(self) then
 						self:DealDamage(v,DMG_P_SEVERE,DMG_P_GUN)
+						for i = 1,math.random(1,4) do
+							local effectdata = EffectData()
+							local s = v:NearestPoint(self:GetAttackPosition())
+							local dist = 40
+							effectdata:SetScale(math.Clamp(DMG_P_SEVERE /3,20,300))
+							effectdata:SetOrigin(s +Vector(math.Rand(-dist,dist),math.Rand(-dist,dist),math.Rand(-dist,dist)))
+							util.Effect("Persona_Hit_Bullet",effectdata)
+						end
 					end
 				end)
 			end

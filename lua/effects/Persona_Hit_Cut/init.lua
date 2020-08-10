@@ -4,28 +4,32 @@ if (!file.Exists("autorun/vj_base_autorun.lua","LUA")) then return end
 	No parts of this code or any of its contents may be reproduced, copied, modified or adapted,
 	without the prior written consent of the author, unless otherwise indicated for stand-alone materials.
 --------------------------------------------------*/
--- Based off of the GMod lasertracer
-EFFECT.MainMat = Material("vj_hl/beam")
-
 function EFFECT:Init(data)
-	self.StartPos = data:GetStart()
-	self.EndPos = data:GetOrigin()
+	self.Pos = data:GetOrigin()
+	self.Size = data:GetScale() or 50
+	local Emitter = ParticleEmitter(self.Pos)
+	if Emitter == nil then return end
 
-	self.HitPos = self.EndPos - self.StartPos
-	self.DieTime = CurTime() +0.6
-	self:SetRenderBoundsWS(self.StartPos,self.EndPos)
+	local EffectCode = Emitter:Add("effects/persona/slash", self.Pos)
+	-- EffectCode:SetVelocity(data:GetNormal() + 1.1 * data:GetEntity():GetOwner():GetVelocity())
+	-- EffectCode:SetAirResistance(160)
+	EffectCode:SetDieTime(0.2)
+	EffectCode:SetStartAlpha(255)
+	EffectCode:SetEndAlpha(0)
+	EffectCode:SetStartSize(self.Size)
+	EffectCode:SetEndSize(self.Size *2)
+	EffectCode:SetRoll(math.Rand(0,360))
+	EffectCode:SetRollDelta(math.Rand(-1, 1))
+	EffectCode:SetColor(255,255,255)
+
+	Emitter:Finish()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function EFFECT:Think()
-	if (CurTime() > self.DieTime) then
-		return false
-	end
-	return true
+	return false
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function EFFECT:Render()
-	render.SetMaterial(self.MainMat)
-	render.DrawBeam(self.StartPos,self.EndPos,math.Rand(18,24),math.Rand(0,1),math.Rand(0,1) +((self.StartPos -self.EndPos):Length() /128),Color(255,255,255,(50 /((self.DieTime -0.5) -CurTime()))))
 end
 /*--------------------------------------------------
 	*** Copyright (c) 2012-2020 by DrVrej, All rights reserved. ***

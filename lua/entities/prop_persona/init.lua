@@ -693,6 +693,13 @@ function ENT:DealDamage(ent,dmg,dmgtype,type)
 	if ent:IsPlayer() then
 		ent:ViewPunch(Angle(math.random(-1,1) *dmg,math.random(-1,1) *dmg,math.random(-1,1) *dmg))
 	end
+
+	if type != 2 then
+		local effectdata = EffectData()
+		effectdata:SetOrigin(ent:NearestPoint(self:GetAttackPosition()))
+		effectdata:SetScale(math.Clamp(dmg /3,20,300))
+		util.Effect("Persona_Hit_Cut",effectdata)
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
@@ -723,6 +730,12 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 					if v:IsPlayer() then
 						v:ViewPunch(Angle(math.random(-1,1) *dmg,math.random(-1,1) *dmg,math.random(-1,1) *dmg))
 					end
+
+					local effectdata = EffectData()
+					effectdata:SetOrigin(v:NearestPoint(attackPos))
+					effectdata:SetScale(math.Clamp(dmg /3,20,300))
+					util.Effect("Persona_Hit_Cut",effectdata)
+
 					hitentity = true
 					table.insert(hitEnts,v)
 					if snd && type(snd) == "string" then v:EmitSound("cpthazama/persona5/misc/00051.wav",math.random(60,72),math.random(100,120)) end

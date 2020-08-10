@@ -124,11 +124,16 @@ PXP.LevelUp = function(ply)
 	end
 
 	ply:EmitSound("cpthazama/persona4/ui_lvlup.wav")
-	if PXP.GetPersonaData(ply,1) >= PXP.GetRequiredXP(ply) then
-		PXP.LevelUp(ply)
-	else
-		PXP.SetEXP(ply,0)
+	local toAdd = 0
+	if PXP.GetEXP(ply) > PXP.GetRequiredXP(ply) then
+		toAdd = PXP.GetEXP(ply) -PXP.GetRequiredXP(ply)
 	end
+	PXP.SetEXP(ply,0 +toAdd)
+	-- if PXP.GetPersonaData(ply,1) >= PXP.GetRequiredXP(ply) then
+		-- PXP.LevelUp(ply)
+	-- else
+		-- PXP.SetEXP(ply,0)
+	-- end
 end
 
 PXP.SetCompendium = function(ply,com)
