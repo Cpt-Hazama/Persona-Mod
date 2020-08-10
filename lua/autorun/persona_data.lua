@@ -50,6 +50,11 @@ PERSONA["loki"].Model = "models/cpthazama/persona5/persona/loki.mdl"
 PERSONA["loki"].Aura = "jojo_aura_red"
 PERSONA["loki"].Name = "Loki"
 
+PERSONA["ariadne_picaro"] = {}
+PERSONA["ariadne_picaro"].Model = "models/cpthazama/persona5/persona/ariadne_picaro.mdl"
+PERSONA["ariadne_picaro"].Aura = "jojo_aura_blue"
+PERSONA["ariadne_picaro"].Name = "Ariadne Picaro"
+
 -- PERSONA["reaper"] = {}
 -- PERSONA["reaper"].Model = "models/cpthazama/persona5/persona/reaper.mdl"
 -- PERSONA["reaper"].Aura = "jojo_aura_red"

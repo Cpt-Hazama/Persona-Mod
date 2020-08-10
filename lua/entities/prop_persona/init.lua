@@ -64,6 +64,7 @@ function ENT:Initialize()
 	self.HeatRiserT = CurTime()
 	self.FocusedT = CurTime()
 	self.ChargedT = CurTime()
+	self.TarundaT = CurTime()
 	self.HasChaosParticle = false
 	self.ChaosT = CurTime()
 
@@ -87,8 +88,11 @@ function ENT:Initialize()
 			self:CheckSkillLevel(true)
 			PXP.ManagePersonaStats(self.User)
 		end
+		self:CustomOnInitialize()
 	end)
 end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnInitialize() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AddItemSkill(data)
 	local proceed = true
@@ -310,6 +314,10 @@ function ENT:PersonaCards(lmb,rmb,r)
 			self:RiotGun(ply,persona)
 		elseif melee == "Vorpal Blade" then
 			self:VorpalBlade(ply,persona)
+		elseif melee == "Beast Weaver" then
+			self:BeastWeaver(ply,persona)
+		elseif melee == "Miracle Punch" then
+			self:MiraclePunch(ply,persona)
 		end
 	end
 	if rmb then // Time for spaghet code
@@ -333,6 +341,8 @@ function ENT:PersonaCards(lmb,rmb,r)
 			self:HeatRiser(ply,persona)
 		elseif self:GetCard() == "Salvation" then
 			self:Salvation(ply,persona)
+		elseif self:GetCard() == "Mediarahan" then
+			self:Mediarahan(ply,persona)
 		elseif self:GetCard() == "Debilitate" then
 			self:Debilitate(ply,persona)
 		elseif self:GetCard() == "Eigaon" then
@@ -349,6 +359,8 @@ function ENT:PersonaCards(lmb,rmb,r)
 			self:Megidolaon(ply,ply.Persona_EyeTarget)
 		elseif self:GetCard() == "Call of Chaos" then
 			self:CallOfChaos(ply,persona)
+		elseif self:GetCard() == "Abyssal Wings" then
+			self:AbyssalWings(ply,persona)
 		elseif self:GetCard() == "Laevateinn" then
 			self.CurrentMeleeSkill = "Laevateinn"
 		elseif self:GetCard() == "Heaven's Blade" then
@@ -363,6 +375,10 @@ function ENT:PersonaCards(lmb,rmb,r)
 			self.CurrentMeleeSkill = "Riot Gun"
 		elseif self:GetCard() == "Vorpal Blade" then
 			self.CurrentMeleeSkill = "Vorpal Blade"
+		elseif self:GetCard() == "Beast Weaver" then
+			self.CurrentMeleeSkill = "Beast Weaver"
+		elseif self:GetCard() == "Miracle Punch" then
+			self.CurrentMeleeSkill = "Miracle Punch"
 		end
 	end
 	if r && CurTime() > self.NextCardSwitchT then
@@ -630,6 +646,7 @@ function ENT:FacePlayerAim(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AdditionalInput(dmg,type)
+	dmg = self.TarundaT && dmg *0.5 or dmg
 	dmg = self:GetCritical() && dmg *1.25 or dmg
 	dmg = self.HeatRiserT > CurTime() && dmg *1.5 or dmg
 	dmg = self.ChaosT > CurTime() && dmg *3 or dmg

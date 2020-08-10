@@ -28,6 +28,55 @@ ENT.Stats = {
 	NUL = {DMG_P_CURSE},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HandleEvents(skill,animBlock,seq,t)
+	local ply = self.User
+	if animBlock == "melee" then
+		local tbl = {
+			"cpthazama/persona4/sho/nb400a.wav",
+			"cpthazama/persona4/sho/nb400b.wav",
+			"cpthazama/persona4/sho/no124a.wav",
+			"cpthazama/persona4/sho/no125a.wav",
+			"cpthazama/persona4/sho/no126a.wav",
+			"cpthazama/persona4/sho/no126ak.wav",
+			"cpthazama/persona4/sho/no127a.wav",
+			"cpthazama/persona4/sho/no127b.wav",
+			"cpthazama/persona4/sho/no128a.wav",
+		}
+		self.User:EmitSound(VJ_PICK(tbl))
+	end
+	if animBlock == "special" then
+		local tbl = {
+			"cpthazama/persona4/sho/nb313b.wav"
+		}
+		self.User:EmitSound(VJ_PICK(tbl))
+	end
+	if skill == "Abyssal Wings" then
+		if animBlock == "range_start" then
+			self.Set = math.random(1,2)
+			self.User:EmitSound(self.Set == 1 && "cpthazama/persona4/sho/nb313b.wav" or "cpthazama/persona4/sho/nb322a.wav")
+		end
+		if animBlock == "range" then
+			self.User:EmitSound(self.Set == 1 && "cpthazama/persona4/sho/nb322b.wav" or "cpthazama/persona4/sho/nb323a.wav")
+		end
+	else
+		if animBlock == "range_start" then
+			local tbl = {
+				"cpthazama/persona4/sho/no304a.wav",
+				"cpthazama/persona4/sho/nb400a.wav",
+				"cpthazama/persona4/sho/nb400b.wav",
+			}
+			self.User:EmitSound(VJ_PICK(tbl))
+		end
+		if animBlock == "range" then
+			local tbl = {
+				"cpthazama/persona4/sho/no303b.wav",
+				"cpthazama/persona4/sho/nb323b.wav",
+			}
+			self.User:EmitSound(VJ_PICK(tbl))
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnHitEntity(hitEnts,dmginfo)
 	if dmginfo:GetDamageType() == DMG_P_CURSE then
 		for _,v in pairs(hitEnts) do
@@ -58,8 +107,15 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	ply:EmitSound("cpthazama/persona5/joker/0029.wav")
-	self.PersonaDistance = 999999999 -- 40 meters
+	local tbl = {
+		"cpthazama/persona4/sho/nb213a.wav",
+		"cpthazama/persona4/sho/nb213b.wav",
+		"cpthazama/persona4/sho/no210a.wav",
+		"cpthazama/persona4/sho/no210b.wav",
+		"cpthazama/persona4/sho/no211a.wav",
+		"cpthazama/persona4/sho/no211b.wav",
+	}
+	ply:EmitSound(VJ_PICK(tbl))
 	
 	self:AddCard("Abyssal Wings",30,false,"curse")
 	self:AddCard("Life Drain",3,false,"almighty")
@@ -74,5 +130,5 @@ function ENT:OnSummoned(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
-	ply:EmitSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
+	ply:EmitSound("cpthazama/persona4/sho/no127b.wav")
 end

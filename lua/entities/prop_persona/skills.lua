@@ -131,6 +131,50 @@ function ENT:Cleave(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MiraclePunch(ply,persona)
+	local skill = "Miracle Punch"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		if math.random(1,100) <= self.Stats.LUC *2.5 then self:DoCritical(1) end
+		timer.Simple(1,function()
+			if IsValid(self) then
+				self:MeleeAttackCode(DMG_P_MEDIUM,600,125)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:BeastWeaver(ply,persona)
+	local skill = "Beast Weaver"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		timer.Simple(1.3,function()
+			if IsValid(self) then
+				self:MeleeAttackCode(DMG_P_COLOSSAL,1200,90)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CrossSlash(ply,persona) // Izanagi Skill
 	local skill = "Cross Slash"
 	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
@@ -197,7 +241,7 @@ function ENT:Teleport()
 		local t = self:PlaySet(skill,"range_start",1)
 		self:SetAngles(self.User:GetAngles())
 		local tr = self:UserTrace(2000)
-		local pos = tr.HitPos +tr.HitNormal *8
+		local pos = tr.HitPos +tr.HitNormal *self.User:OBBMaxs()
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_end",1)
@@ -688,6 +732,53 @@ function ENT:Maeigaon(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:AbyssalWings(ply,persona)
+	local skill = "Abyssal Wings"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) then
+								for i = 1,4 do
+									local spawnparticle = ents.Create("info_particle_system")
+									spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse")
+									spawnparticle:SetPos(v:GetPos() +v:OBBCenter() +v:GetRight() *math.Rand(-250,250) +v:GetForward() *math.Rand(-250,250))
+									spawnparticle:Spawn()
+									spawnparticle:Activate()
+									spawnparticle:Fire("Start","",0)
+									spawnparticle:Fire("Kill","",1)
+								end
+
+								self:DealDamage(v,DMG_P_SEVERE,DMG_P_CURSE,2)
+
+								v:EmitSound("cpthazama/persona5/skills/0069.wav",90)
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Debilitate(ply,persona,rmb)
 	if !IsValid(ply.Persona_EyeTarget) then
 		return
@@ -911,6 +1002,47 @@ function ENT:Salvation(ply,persona)
 						t = self:PlaySet(skill,"range_idle",1,1)
 						self.User:SetHealth(self.User:GetMaxHealth())
 						self:DoChat("Fully restored HP and cured all ailments!")
+						self:EmitSound("cpthazama/persona5/skills/0318.wav",85)
+
+						local spawnparticle = ents.Create("info_particle_system")
+						spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
+						spawnparticle:SetPos(self.User:GetPos())
+						spawnparticle:Spawn()
+						spawnparticle:Activate()
+						spawnparticle:Fire("Start","",0)
+						spawnparticle:Fire("Kill","",0.1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Mediarahan(ply,persona)
+	local skill = "Mediarahan"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						self.User:SetHealth(self.User:GetMaxHealth())
+						self:DoChat("Fully restored HP!")
 						self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
 
 						local spawnparticle = ents.Create("info_particle_system")
