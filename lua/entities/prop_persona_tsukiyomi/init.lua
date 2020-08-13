@@ -28,6 +28,10 @@ ENT.Stats = {
 	NUL = {DMG_P_CURSE},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.LegendaryMaterials = {}
+ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/tsukiyomi/tsukiyomi_legendary"
+ENT.LegendaryMaterials[4] = "models/cpthazama/persona5/tsukiyomi/helmet_legendary"
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	local ply = self.User
 	if animBlock == "melee" then

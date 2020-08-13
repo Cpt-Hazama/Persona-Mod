@@ -31,6 +31,8 @@ ENT.Stats = {
 ENT.LeveledSkills = {
 	{Level = 70, Name = "Doors of Hades", Cost = 32, UsesHP = false, Icon = "almighty"}
 }
+ENT.LegendaryMaterials = {}
+ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/thanatos/thanatos_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)

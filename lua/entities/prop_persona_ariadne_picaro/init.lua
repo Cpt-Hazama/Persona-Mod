@@ -16,6 +16,8 @@ ENT.Stats = {
 ENT.LeveledSkills = {
 	{Level = 48, Name = "Charge", Cost = 15, UsesHP = false, Icon = "passive"}
 }
+ENT.LegendaryMaterials = {}
+ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/ariadne_picaro/ariadne_picaro_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	local ply = self.User

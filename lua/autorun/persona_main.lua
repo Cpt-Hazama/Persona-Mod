@@ -162,6 +162,7 @@ hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
 
 	ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
 	ply:SetMaxSP(ply:GetSP())
+	ply.Persona_MaxHealth = 100
 	ply:SetMaxHealth(100)
 	ply.PXP_NextXPChange = CurTime()
 end)
@@ -170,7 +171,11 @@ if SERVER then
 	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
 		ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
 		ply:SetMaxSP(ply:GetSP())
-		ply:SetMaxHealth(100)
+		timer.Simple(0,function()
+			if IsValid(ply) then
+				ply:SetHealth(ply.Persona_MaxHealth)
+			end
+		end)
 		ply.PXP_NextXPChange = CurTime()
 	end)
 
@@ -201,6 +206,7 @@ if SERVER then
 			-- end
 			if v:Health() > v:GetMaxHealth() then
 				v:SetMaxHealth(v:Health())
+				v.Persona_MaxHealth = v:Health()
 			end
 			if v:GetSP() > v:GetMaxSP() then
 				v:SetMaxSP(v:GetSP())
@@ -279,6 +285,10 @@ if SERVER then
 				ent:OnSummoned(ply)
 				ply:SetNWEntity("PersonaEntity",ent)
 				ent:SetFeedName(PERSONA[ply:GetPersonaName()].Name,class)
+
+				if PXP.IsLegendary(ply) then
+					ent:MakeLegendary()
+				end
 
 				local exp = PXP.GetPersonaData(ply,1)
 				local lvl = PXP.GetPersonaData(ply,2)
@@ -562,6 +572,26 @@ local function ShowStats(ply)
 end
 concommand.Add("persona_showstats",ShowStats)
 
+local function MakeLegendary(ply)
+	if PXP.GetLevel(ply) >= 99 && !PXP.IsLegendary(ply) && !PXP.IsVelvet(ply) then
+		PXP.SetLegendary(ply)
+		ply:EmitSound(Sound("cpthazama/persona4/ui_changepersona.wav"))
+		ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " is now a Legendary Persona!")
+		return
+	end
+	if PXP.IsLegendary(ply) then
+		ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " is already a Legendary Persona!")
+		return
+	elseif PXP.IsVelvet(ply) then
+		ply:ChatPrint("Velvet Personas can not evolve any further!")
+		return
+	else
+		ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " must be a LVL 99 to become a Legendary Persona!")
+		return
+	end
+end
+concommand.Add("persona_legendary",MakeLegendary)
+
 if CLIENT then
 	hook.Add("AddToolMenuTabs","Persona_MainMenuIcon",function()
 		spawnmenu.AddToolTab("Persona","Persona","vj_icons/persona16.png")
@@ -573,10 +603,16 @@ if CLIENT then
 				persona_hud_x = "350",
 				persona_hud_y = "250",
 			}
-			Panel:AddControl("Label",{Text = "Default: X = 350 Y = 250"})
+			Panel:AddControl("ComboBox",DefaultBox)
+			-- Panel:AddControl("Label",{Text = "Default: X = 350 Y = 250"})
 			Panel:AddControl("Slider",{Label = "Box X Position",Command = "persona_hud_x",Min = 0,Max = 1920})
 			Panel:AddControl("Slider",{Label = "Box Y Position",Command = "persona_hud_y",Min = 0,Max = 1080})
+		end,{})
+
+		spawnmenu.AddToolMenuOption("Persona","Main Settings","Persona","Persona","","",function(Panel)
 			Panel:AddControl("Button",{Label = "Print Persona Stats",Command = "persona_showstats"})
+			Panel:AddControl("Button",{Label = "Create Legendary Persona",Command = "persona_legendary"})
+			Panel:AddControl("Label",{Text = "Persona must be LVL 99 to become Legendary!"})
 		end,{})
 	end)
 end

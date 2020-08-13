@@ -31,18 +31,14 @@ ENT.Stats = {
 ENT.LeveledSkills = {
 	{Level = 24, Name = "Mazionga", Cost = 16, UsesHP = false, Icon = "elec"}
 }
+ENT.LegendaryMaterials = {}
+ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/izanagi/izanagi_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Cross Slash" && self.User:IsPlayer() then
 		if math.random(1,10) == 1 then self:DoCritical(1) end
 		self.User:EmitSound("cpthazama/persona5/joker/0011.wav",85)
 	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:PersonaControls(ply,persona)
-	local lmb = ply:KeyDown(IN_ATTACK)
-	local rmb = ply:KeyDown(IN_ATTACK2)
-	local r = ply:KeyDown(IN_RELOAD)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
@@ -55,7 +51,6 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
 	ply:EmitSound("cpthazama/persona5/joker/0009.wav")
-	self.PersonaDistance = 999999999
 	
 	self:AddCard("Cross Slash",8,true,"phys")
 	self:AddCard("Charge",15,false,"passive")

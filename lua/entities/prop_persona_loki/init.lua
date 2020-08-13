@@ -31,20 +31,66 @@ ENT.Stats = {
 ENT.LeveledSkills = {
 	{Level = 80, Name = "Maeigaon", Cost = 22, UsesHP = false, Icon = "curse"}
 }
+ENT.LegendaryMaterials = {}
+ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/loki/loki_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	local ply = self.User
-	if ply:IsNPC() && ply:GetClass() == "npc_vj_per_akechi" then
-		if skill == "Call of Chaos" then
-			if animBlock == "range_start" then
+	if skill == "Call of Chaos" then
+		if animBlock == "range_start" then
+			if ply:IsNPC() && ply:GetClass() == "npc_vj_per_akechi" then
 				VJ_CreateSound(ply,"cpthazama/persona5/akechi/blackmask/00027_streaming [1].wav",78)
+			else
+				self:UserSound("cpthazama/persona5/akechi/blackmask/00027_streaming [1].wav",80)
 			end
-			if animBlock == "range" then
+		end
+		if animBlock == "range" then
+			if ply:IsNPC() && ply:GetClass() == "npc_vj_per_akechi" then
 				VJ_CreateSound(ply,"cpthazama/persona5/akechi/blackmask/00029_streaming [1].wav",78)
+			else
+				self:UserSound("cpthazama/persona5/akechi/blackmask/00029_streaming [1].wav",80)
 			end
-			if animBlock == "range_idle" then
-				VJ_CreateSound(ply,"cpthazama/persona5/akechi/blackmask/00020_streaming [1].wav",85)
+		end
+		if animBlock == "range_idle" then
+			if ply:IsNPC() && ply:GetClass() == "npc_vj_per_akechi" then
+				VJ_CreateSound(ply,"cpthazama/persona5/akechi/blackmask/00020_streaming [1].wav.wav",78)
+			else
+				self:UserSound("cpthazama/persona5/akechi/blackmask/00020_streaming [1].wav",80)
 			end
+		end
+	end
+	if animBlock == "melee" then
+		if skill == "Laevateinn" then
+			self:UserSound("cpthazama/persona5/akechi/blackmask/00010_streaming [1].wav",80)
+		else
+			self:UserSound(VJ_PICK({
+				"cpthazama/persona5/akechi/blackmask/00004_streaming [1].wav",
+				"cpthazama/persona5/akechi/blackmask/00006_streaming [1].wav",
+				"cpthazama/persona5/akechi/blackmask/00007_streaming [1].wav",
+				"cpthazama/persona5/akechi/blackmask/00008_streaming [1].wav",
+				"cpthazama/persona5/akechi/blackmask/00009_streaming [1].wav",
+			}),80)
+		end
+	end
+	if animBlock == "range" then
+		if string.StartWith(skill,"Agi") or string.StartWith(skill,"Mara") then
+			self:UserSound("cpthazama/persona5/akechi/blackmask/00002_streaming [1].wav",80)
+			return
+		elseif string.StartWith(skill,"Buf") or string.StartWith(skill,"Mabuf") then
+			self:UserSound("cpthazama/persona5/akechi/blackmask/00001_streaming [1].wav",80)
+			return
+		elseif string.StartWith(skill,"Zio") or string.StartWith(skill,"Mazio") then
+			self:UserSound("cpthazama/persona5/akechi/blackmask/00003_streaming [1].wav",80)
+			return
+		elseif string.StartWith(skill,"Garu") or string.StartWith(skill,"Magaru") then
+			self:UserSound("cpthazama/persona5/akechi/blackmask/00004_streaming [1].wav",80)
+			return
+		elseif string.StartWith(skill,"Evil") or string.StartWith(skill,"Ei") or string.StartWith(skill,"Maei") then
+			self:UserSound("cpthazama/persona5/akechi/blackmask/00005_streaming [1].wav",80)
+			return
+		elseif string.StartWith(skill,"Megi") then
+			self:UserSound("cpthazama/persona5/akechi/blackmask/00008_streaming [1].wav",80)
+			return
 		end
 	end
 end
@@ -112,7 +158,11 @@ function ENT:OnSummoned(owner)
 	end
 	self:SetModel(self.Model)
 	if owner:IsNPC() then VJ_CreateSound(owner,owner.SoundTbl_Persona,78) end
-	self.PersonaDistance = 999999999
+	self:UserSound(VJ_PICK({
+		"cpthazama/persona5/akechi/blackmask/00028_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00029_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00027_streaming [1].wav",
+	}),80)
 	
 	self:AddCard("Laevateinn",25,true,"almighty")
 	self:AddCard("Megidolaon",38,false,"almighty")
@@ -128,12 +178,11 @@ function ENT:OnSummoned(owner)
 	self.User:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:RequestAura(ply,aura)
-	self:EmitSound("cpthazama/persona5/misc/00118.wav",75,100)
-	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
-	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
-	local fx = EffectData()
-	fx:SetOrigin(self:GetIdlePosition(ply))
-	fx:SetScale(80)
-	util.Effect("JoJo_Summon",fx)
+function ENT:OnRequestDisappear(ply)
+	self:UserSound(VJ_PICK({
+		"cpthazama/persona5/akechi/blackmask/00016_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00017_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00015_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00013_streaming [1].wav",
+	}),80)
 end

@@ -1,0 +1,44 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/izanagiokami/okami"
+	"$bumpmap" "models/cpthazama/persona5/izanagiokami/okami_n"
+	"$phongexponenttexture" "models/cpthazama/persona5/izanagiokami/okami_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[1 1 0]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "200"
+	"$rimmask" "1"
+
+	"$envmap" "models/cpthazama/persona5/izanagiokami/envmap"
+	"$envmaptint" "[0.01 0.01 0.01]"
+	"$envmapfresnel" "1"
+
+	$detail	"models/cpthazama/persona5/izanagiokami/flow"
+	$detailscale "2"
+	$detailblendfactor "0.5"
+	$detailblendmode "2"
+
+	"Proxies"
+	{
+		"Sine"
+		{
+			"resultvar"	"$detailblendfactor"
+			"sineperiod" 8
+			"sinemin" 0
+			"sinemax" 0.1
+		}
+		"TextureScroll"
+		{
+			"texturescrollvar"	"$detailtexturetransform"
+			"texturescrollrate"	0.05
+			"texturescrollangle" 90
+		}
+	}
+
+	"$lightwarptexture" "models/cpthazama/persona5/cel_legendary"
+}

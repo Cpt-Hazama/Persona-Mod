@@ -31,6 +31,8 @@ ENT.Stats = {
 ENT.LeveledSkills = {
 	{Level = 27, Name = "Mazionga", Cost = 16, UsesHP = false, Icon = "elec"}
 }
+ENT.LegendaryMaterials = {}
+ENT.LegendaryMaterials[2] = "models/cpthazama/persona5/izanagi/izanagi_picaro_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Cross Slash" && self.User:IsPlayer() then

@@ -86,6 +86,12 @@ function ENT:OneShotKill(ply,persona)
 							effectdata:SetAngles(Angle(255,255,255))
 							effectdata:SetRadius(50)
 							util.Effect("Persona_Slice",effectdata)
+
+							local effectdata = EffectData()
+							effectdata:SetScale(30)
+							effectdata:SetOrigin(s)
+							effectdata:SetAttachment(0)
+							util.Effect("Persona_Hit_Bullet_Mega",effectdata)
 						end
 					end)
 				end
@@ -230,6 +236,28 @@ function ENT:BeastWeaver(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:AlmightySlash(ply,persona)
+	local skill = "Almighty Slash"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		timer.Simple(0.8,function()
+			if IsValid(self) then
+				self:MeleeAttackCode(DMG_P_COLOSSAL,850,90,DMG_P_ALMIGHTY)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CrossSlash(ply,persona) // Izanagi Skill
 	local skill = "Cross Slash"
 	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
@@ -241,12 +269,12 @@ function ENT:CrossSlash(ply,persona) // Izanagi Skill
 		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
 		timer.Simple(0.8,function()
 			if IsValid(self) then
-				self:MeleeAttackCode(DMG_P_HEAVY,600,150)
+				self:MeleeAttackCode(DMG_P_HEAVY,600,90)
 			end
 		end)
 		timer.Simple(1,function()
 			if IsValid(self) then
-				self:MeleeAttackCode(DMG_P_HEAVY,600,150)
+				self:MeleeAttackCode(DMG_P_HEAVY,600,90)
 			end
 		end)
 		timer.Simple(tA,function()
@@ -1225,6 +1253,67 @@ function ENT:HeatRiser(ply,persona)
 									if IsValid(self) then
 										self:SetTask("TASK_IDLE")
 										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Megidola(ply,ent)
+	local skill = "Megidola"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1)
+		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						self:EmitSound("cpthazama/persona5/skills/0070.wav",75)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) then
+								for i = 1,3  do
+									timer.Simple(i *0.4,function()
+										if IsValid(v) then
+											local effectdata = EffectData()
+											local dist = math.Clamp(v:GetPos():Distance(v:GetPos() +v:OBBCenter()) *5,100,1000)
+											local s = (v:GetPos() +v:GetUp() *v:GetPos():Distance(v:GetPos() +v:OBBCenter()))
+											s = s +Vector(math.Rand(-300,300),math.Rand(-300,300),dist)
+											effectdata:SetStart(s)
+											effectdata:SetOrigin(v:GetPos() +v:OBBCenter())
+											effectdata:SetEntity(v)
+											util.Effect("Persona_Megidola",effectdata)
+
+											timer.Simple(3,function()
+												if IsValid(v) && IsValid(self) then
+													self:DealDamage(v,DMG_P_SEVERE,DMG_P_ALMIGHTY,2)
+												end
+											end)
+										end
+									end)
+								end
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								self:PlaySet(skill,"range_idle",1,1)
+								t = 4
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:DoIdle()
+											end
+										end)
 									end
 								end)
 							end

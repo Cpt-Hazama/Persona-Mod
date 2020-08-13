@@ -10,6 +10,11 @@ PERSONA["izanagi_picaro"].Model = "models/cpthazama/persona5/persona/izanagi.mdl
 PERSONA["izanagi_picaro"].Aura = "jojo_aura_blue"
 PERSONA["izanagi_picaro"].Name = "Izanagi Picaro"
 
+PERSONA["izanagi_velvet"] = {}
+PERSONA["izanagi_velvet"].Model = "models/cpthazama/persona5/persona/izanagi_velvet.mdl"
+PERSONA["izanagi_velvet"].Aura = "jojo_aura_blue"
+PERSONA["izanagi_velvet"].Name = "Izanagi (Velvet)"
+
 PERSONA["magatsu_izanagi"] = {}
 PERSONA["magatsu_izanagi"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi.mdl"
 PERSONA["magatsu_izanagi"].Aura = "jojo_aura_red"
@@ -24,6 +29,11 @@ PERSONA["magatsu_izanagi_p4"] = {}
 PERSONA["magatsu_izanagi_p4"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi.mdl"
 PERSONA["magatsu_izanagi_p4"].Aura = "jojo_aura_red"
 PERSONA["magatsu_izanagi_p4"].Name = "Magatsu-Izanagi (Classic)"
+
+PERSONA["magatsu_izanagi_velvet"] = {}
+PERSONA["magatsu_izanagi_velvet"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi_velvet.mdl"
+PERSONA["magatsu_izanagi_velvet"].Aura = "jojo_aura_blue"
+PERSONA["magatsu_izanagi_velvet"].Name = "Magatsu-Izanagi (Velvet)"
 
 PERSONA["izanagi_okami"] = {}
 PERSONA["izanagi_okami"].Model = "models/cpthazama/persona5/persona/izanagi_no_okami.mdl"

@@ -38,6 +38,9 @@ ENT.LeveledSkills = {
 	{Level = 83, Name = "Megidolaon", Cost = 38, UsesHP = false, Icon = "almighty"},
 	{Level = 81, Name = "Magarudyne", Cost = 22, UsesHP = false, Icon = "wind"},
 }
+ENT.LegendaryMaterials = {}
+ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/magatsuizanagi/magatsuizanagi_picaro_nofx_legendary"
+ENT.LegendaryMaterials[2] = "models/cpthazama/persona5/magatsuizanagi/magatsuizanagi_picaro_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Ghostly Wail" then
@@ -96,7 +99,7 @@ function ENT:OnSummoned(ply)
 	-- self:AddCard("Magarudyne",22,false,"wind")
 	-- self:AddCard("Heat Riser",30,false,"passive")
 	self:AddCard("Magatsu Mandala",30,false,"curse")
-	self:AddCard("Ghastly Wail",30,true,"almighty")
+	self:AddCard("Ghastly Wail",19,true,"almighty")
 	self:AddCard("Evil Smile",12,false,"sleep")
 	self:AddCard("Charge",15,false,"passive")
 	-- self:AddCard("Megidolaon",38,false,"almighty")

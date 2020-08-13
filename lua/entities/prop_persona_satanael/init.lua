@@ -49,6 +49,8 @@ ENT.LeveledSkills = {
 	{Level = 99, Name = "Sinful Shell", Cost = 999, UsesHP = false, Icon = "almighty"},
 	{Level = 97, Name = "Black Viper", Cost = 48, UsesHP = false, Icon = "almighty"}
 }
+ENT.LegendaryMaterials = {}
+ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/satanael/satanael_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)

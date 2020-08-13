@@ -15,6 +15,9 @@ end
 PXP.GiveEXP = function(ply,xp)
 	if !ply:IsPlayer() then return end
 	local oldXP = PXP.GetEXP(ply)
+	if PXP.IsLegendary(ply) then
+		xp = xp *2
+	end
 	if ply:IsPlayer() then
 		ply:ChatPrint("You've earned " .. ((oldXP +xp) -oldXP) .. " EXP!")
 		ply:EmitSound("cpthazama/persona4/ui_skillup.wav")
@@ -30,6 +33,29 @@ end
 PXP.GetEXP = function(ply)
 	if !ply:IsPlayer() then return end
 	return PXP.GetPersonaData(ply,1)
+end
+
+PXP.SetLegendary = function(ply)
+	PXP.SetLevel(ply,0)
+	PXP.CalculateRequiredXP(ply)
+
+	local persona = ply:GetPersona()
+	if IsValid(persona) then
+		persona:MakeLegendary()
+		PXP.ManagePersonaStats(ply)
+	end
+	PXP.SetEXP(ply,0)
+	PXP.SetPersonaData(ply,8,1)
+end
+
+PXP.IsLegendary = function(ply)
+	if !ply:IsPlayer() then return end
+	return PXP.GetPersonaData(ply,8) == 1
+end
+
+PXP.IsVelvet = function(ply)
+	if !ply:IsPlayer() then return end
+	return PXP.GetPersonaData(ply,8) == 2
 end
 
 PXP.SetLevel = function(ply,lvl,chat)
@@ -80,11 +106,11 @@ PXP.ManagePersonaStats = function(ply,chat)
 	local persona = ply:GetPersona()
 	if IsValid(persona) then
 		local add = PXP.GetLevel(ply) -persona.BaseLevel
-		persona.Stats.STR = persona.BaseSTR +add
-		persona.Stats.MAG = persona.BaseMAG +add
-		persona.Stats.END = persona.BaseEND +add
-		persona.Stats.AGI = persona.BaseAGI +add
-		persona.Stats.LUC = persona.BaseLUC +add
+		persona.Stats.STR = math.Clamp(persona.BaseSTR +add,1,99)
+		persona.Stats.MAG = math.Clamp(persona.BaseMAG +add,1,99)
+		persona.Stats.END = math.Clamp(persona.BaseEND +add,1,99)
+		persona.Stats.AGI = math.Clamp(persona.BaseAGI +add,1,99)
+		persona.Stats.LUC = math.Clamp(persona.BaseLUC +add,1,99)
 
 		PXP.SavePersonaStats(ply)
 	end
@@ -139,6 +165,20 @@ end
 PXP.SetCompendium = function(ply,com)
 	if !ply:IsPlayer() then return end
 	ply.PXP_Compendium = com
+end
+
+PXP.InCompendium = function(ply,findPersona)
+	if !ply:IsPlayer() then return end
+	local exists = false
+	for _,persona in pairs(PXP.GetCompendium(ply)) do
+		-- print(persona,findPersona)
+		if persona == findPersona then
+			-- print("found " .. findPersona)
+			exists = true
+			break
+		end
+	end
+	return exists
 end
 
 PXP.AddToCompendium = function(ply,persona)
@@ -205,11 +245,13 @@ PXP.GetPersonaData = function(ply,type)
 		elseif type == 3 then -- Skills
 			return PXP.ReadDataTable(dir .. "_" .. name .. "_SKILLS.txt","DATA") or {}
 		elseif type == 4 then -- Compendium
-			return PXP.ReadDataTable(dir .. "_" .. name .. "_COMPENDIUM.txt","DATA") or {}
+			return PXP.ReadDataTable(dir .. "_COMPENDIUM.txt","DATA") or {}
 		elseif type == 6 then -- Req
 			return tonumber(file.Read(dir .. "_" .. name .. "_REQ.txt","DATA") or 0) or 0
 		elseif type == 7 then -- Stats
 			return PXP.ReadDataTable(dir .. "_" .. name .. "_STATS.txt","DATA") or {}
+		elseif type == 8 then -- Legendary/Velvet
+			return tonumber(file.Read(dir .. "_" .. name .. "_ENHANCEMENT.txt","DATA") or 0) or 0
 		end
 	end
 end
@@ -238,6 +280,8 @@ PXP.SetPersonaData = function(ply,type,val)
 			ply:SetNWInt("PXP_RequiredEXP",val)
 		elseif type == 7 then -- Stats
 			PXP.WriteTable(dir .. "_" .. ply:GetPersonaName() .. "_STATS.txt","Stats",val,true)
+		elseif type == 8 then -- Legendary/Velvet
+			PXP.WriteFile(dir .. "_" .. ply:GetPersonaName() .. "_ENHANCEMENT.txt",val)
 		end
 	end
 end

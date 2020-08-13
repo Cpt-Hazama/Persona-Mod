@@ -45,6 +45,8 @@ ENT.LeveledSkills = {
 	{Level = 93, Name = "Salvation", Cost = 48, UsesHP = false, Icon = "heal"},
 	{Level = 92, Name = "Concentrate", Cost = 15, UsesHP = false, Icon = "passive"}
 }
+ENT.LegendaryMaterials = {}
+ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/izanagiokami/okami_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Heaven's Blade" && self.User:IsPlayer() then

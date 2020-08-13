@@ -122,6 +122,12 @@ function ENT:GetTaskID()
 	return self.CurrentTaskID
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:UserSound(snd,vol,pitch)
+	if IsValid(self.User) && self.User:IsPlayer() then
+		self.User:EmitSound(snd,vol or 75,pitch or 100)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 if (CLIENT) then
 	function ENT:Draw()
 		self:DrawModel()

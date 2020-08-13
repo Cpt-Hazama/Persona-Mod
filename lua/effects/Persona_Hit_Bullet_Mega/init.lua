@@ -7,6 +7,7 @@ if (!file.Exists("autorun/vj_base_autorun.lua","LUA")) then return end
 function EFFECT:Init(data)
 	self.Pos = data:GetOrigin()
 	self.Size = data:GetScale() or 15
+	self.Roll = data:GetAttachment() or math.Rand(0,360)
 	local Emitter = ParticleEmitter(self.Pos)
 	if Emitter == nil then return end
 
@@ -18,7 +19,7 @@ function EFFECT:Init(data)
 	EffectCode:SetEndAlpha(0)
 	EffectCode:SetStartSize(self.Size)
 	EffectCode:SetEndSize(self.Size *2)
-	EffectCode:SetRoll(math.Rand(0,360))
+	EffectCode:SetRoll(self.Roll)
 	EffectCode:SetRollDelta(math.Rand(-1, 1))
 	EffectCode:SetColor(255,255,255)
 
