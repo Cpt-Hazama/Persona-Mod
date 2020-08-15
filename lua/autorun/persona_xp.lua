@@ -106,6 +106,7 @@ PXP.ManagePersonaStats = function(ply,chat)
 	local persona = ply:GetPersona()
 	if IsValid(persona) then
 		local add = PXP.GetLevel(ply) -persona.BaseLevel
+		if PXP.IsLegendary(ply) then add = add *2 end
 		persona.Stats.STR = math.Clamp(persona.BaseSTR +add,1,99)
 		persona.Stats.MAG = math.Clamp(persona.BaseMAG +add,1,99)
 		persona.Stats.END = math.Clamp(persona.BaseEND +add,1,99)

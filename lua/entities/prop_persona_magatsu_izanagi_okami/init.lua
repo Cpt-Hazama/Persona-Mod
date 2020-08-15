@@ -37,8 +37,8 @@ ENT.Stats = {
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.LeveledSkills = {
+	{Level = 98, Name = "Concentrate", Cost = 15, UsesHP = false, Icon = "passive"},
 	{Level = 96, Name = "Heat Riser", Cost = 30, UsesHP = false, Icon = "passive"},
-	{Level = 98, Name = "Concentrate", Cost = 15, UsesHP = false, Icon = "passive"}
 }
 ENT.LegendaryMaterials = {}
 ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/izanagiokami/okami_magatsu_legendary"

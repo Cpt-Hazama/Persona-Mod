@@ -1069,11 +1069,12 @@ hook.Add("PlayerDeath","Persona_PlayerKilled",function(ent,killer,weapon)
 end)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:UpdateStats()
-	self.Stats.STR = self.Stats.STR +1
-	self.Stats.MAG = self.Stats.MAG +1
-	self.Stats.END = self.Stats.END +1
-	self.Stats.AGI = self.Stats.AGI +1
-	self.Stats.LUC = self.Stats.LUC +1
+	local add = PXP.IsLegendary(self.User) && 2 or 1
+	self.Stats.STR = self.Stats.STR +add
+	self.Stats.MAG = self.Stats.MAG +add
+	self.Stats.END = self.Stats.END +add
+	self.Stats.AGI = self.Stats.AGI +add
+	self.Stats.LUC = self.Stats.LUC +add
 	PXP.SavePersonaStats(self.User)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
