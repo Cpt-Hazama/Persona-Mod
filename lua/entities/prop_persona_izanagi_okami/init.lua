@@ -36,6 +36,7 @@ ENT.Stats = {
 		DMG_SHOCK,
 		DMG_BURN,
 		DMG_VEHICLE,
+		DMG_BULLET,
 	},
 	NUL = {},
 }

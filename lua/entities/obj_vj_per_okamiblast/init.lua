@@ -27,8 +27,14 @@ function ENT:CustomOnInitialize()
 	self:SetNoDraw(true)
 	self:DrawShadow(false)
 
+	local col = "255 229 0"
+	local Magatsu = self:GetNWBool("Magatsu")
+	if Magatsu then
+		col = "255 0 0"
+	end
+
 	self.StartGlow1 = ents.Create( "env_sprite" )
-	self.StartGlow1:SetKeyValue( "rendercolor","255 229 0" )
+	self.StartGlow1:SetKeyValue( "rendercolor",col )
 	self.StartGlow1:SetKeyValue( "GlowProxySize","2.0" )
 	self.StartGlow1:SetKeyValue( "HDRColorScale","1.0" )
 	self.StartGlow1:SetKeyValue( "renderfx","14" )
@@ -51,7 +57,7 @@ function ENT:CustomOnInitialize()
 	self.StartLight1:SetKeyValue("distance", "200")
 	self.StartLight1:SetLocalPos(self:GetPos())
 	self.StartLight1:SetLocalAngles( self:GetAngles() )
-	self.StartLight1:Fire("Color", "255 229 0")
+	self.StartLight1:Fire("Color", col)
 	self.StartLight1:SetParent(self)
 	self.StartLight1:Spawn()
 	self.StartLight1:Activate()

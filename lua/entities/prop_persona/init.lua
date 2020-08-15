@@ -340,133 +340,183 @@ function ENT:PersonaCards(lmb,rmb,r)
 		self:CycleCards()
 	end
 	if lmb then
-		if melee == "Heaven's Blade" then
-			self:HeavensBlade(ply,persona)
-			return
-		elseif melee == "Cross Slash" then
-			self:CrossSlash(ply,persona)
-			return
-		elseif melee == "Ghastly Wail" then
-			self:GhostlyWail(ply)
-			return
-		elseif melee == "Laevateinn" then
-			self:Laevateinn(ply,ply.Persona_EyeTarget)
-			return
-		elseif melee == "One-shot Kill" then
-			self:OneShotKill(ply,persona)
-			return
-		elseif melee == "Riot Gun" then
-			self:RiotGun(ply,persona)
-			return
-		elseif melee == "Vorpal Blade" then
-			self:VorpalBlade(ply,persona)
-			return
-		elseif melee == "Beast Weaver" then
-			self:BeastWeaver(ply,persona)
-			return
-		elseif melee == "Miracle Punch" then
-			self:MiraclePunch(ply,persona)
-			return
-		elseif melee == "Almighty Slash" then
-			self:AlmightySlash(ply,persona)
-			return
-		end
+		self:DoMeleeAttack(ply,persona,melee,rmb)
 	end
-	if rmb then // Time for spaghet code
-		if self:GetCard() == "Myriad Truths" then 
-			self:MyriadTruths(ply,persona)
-			return
-		elseif self:GetCard() == "Maziodyne" then
-			self:Maziodyne(ply,persona,rmb)
-			return
-		elseif self:GetCard() == "Zionga" then
-			self:Zionga(ply,persona,rmb)
-			return
-		elseif self:GetCard() == "Mazionga" then
-			self:Mazionga(ply,persona,rmb)
-			return
-		elseif self:GetCard() == "Evil Smile" then
-			self:EvilSmile(ply,persona,rmb)
-			return
-		elseif self:GetCard() == "Teleport" then
-			self:Teleport(ply,persona)
-			return
-		elseif self:GetCard() == "Charge" then
-			self:Charge(ply,persona)
-			return
-		elseif self:GetCard() == "Concentrate" then
-			self:Concentrate(ply,persona)
-			return
-		elseif self:GetCard() == "Heat Riser" then
-			self:HeatRiser(ply,persona)
-			return
-		elseif self:GetCard() == "Salvation" then
-			self:Salvation(ply,persona)
-			return
-		elseif self:GetCard() == "Mediarahan" then
-			self:Mediarahan(ply,persona)
-			return
-		elseif self:GetCard() == "Debilitate" then
-			self:Debilitate(ply,persona)
-			return
-		elseif self:GetCard() == "Eigaon" then
-			self:Eigaon(ply,persona)
-			return
-		elseif self:GetCard() == "Maeigaon" then
-			self:Maeigaon(ply,persona)
-			return
-		elseif self:GetCard() == "Garu" then
-			self:Garu(ply,persona)
-			return
-		elseif self:GetCard() == "Garudyne" then
-			self:Garudyne(ply,persona)
-			return
-		elseif self:GetCard() == "Magarudyne" then
-			self:Magarudyne(ply,persona)
-			return
-		elseif self:GetCard() == "Megidola" then
-			self:Megidola(ply,persona)
-			return
-		elseif self:GetCard() == "Megidolaon" then
-			self:Megidolaon(ply,ply.Persona_EyeTarget)
-			return
-		elseif self:GetCard() == "Call of Chaos" then
-			self:CallOfChaos(ply,persona)
-			return
-		elseif self:GetCard() == "Abyssal Wings" then
-			self:AbyssalWings(ply,persona)
-			return
-		elseif self:GetCard() == "Laevateinn" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
-		elseif self:GetCard() == "Heaven's Blade" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
-		elseif self:GetCard() == "Cross Slash" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
-		elseif self:GetCard() == "Ghastly Wail" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
-		elseif self:GetCard() == "One-shot Kill" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
-		elseif self:GetCard() == "Riot Gun" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
-		elseif self:GetCard() == "Vorpal Blade" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
-		elseif self:GetCard() == "Beast Weaver" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
-		elseif self:GetCard() == "Miracle Punch" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
-		elseif self:GetCard() == "Almighty Slash" then
-			self.CurrentMeleeSkill = self:GetCard()
-			return
+	if rmb then
+		self:DoSpecialAttack(ply,persona,melee,rmb)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DoMeleeAttack(ply,persona,melee,rmb)
+	if melee == "Heaven's Blade" then
+		self:HeavensBlade(ply,persona)
+		return
+	elseif melee == "Cross Slash" then
+		self:CrossSlash(ply,persona)
+		return
+	elseif melee == "Ghastly Wail" then
+		self:GhostlyWail(ply)
+		return
+	elseif melee == "Laevateinn" then
+		self:Laevateinn(ply,ply.Persona_EyeTarget)
+		return
+	elseif melee == "One-shot Kill" then
+		self:OneShotKill(ply,persona)
+		return
+	elseif melee == "Riot Gun" then
+		self:RiotGun(ply,persona)
+		return
+	elseif melee == "Vorpal Blade" then
+		self:VorpalBlade(ply,persona)
+		return
+	elseif melee == "Beast Weaver" then
+		self:BeastWeaver(ply,persona)
+		return
+	elseif melee == "Miracle Punch" then
+		self:MiraclePunch(ply,persona)
+		return
+	elseif melee == "Almighty Slash" then
+		self:AlmightySlash(ply,persona)
+		return
+	elseif melee == "Magatsu Blade" then
+		self:MagatsuBlade(ply,persona)
+		return
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DoSpecialAttack(ply,persona,melee,rmb)
+	if self:GetCard() == "Myriad Truths" then 
+		self:MyriadTruths(ply,persona)
+		return
+	elseif self:GetCard() == "Myriad Mandala" then
+		self:MyriadMandala(ply,persona)
+		return
+	elseif self:GetCard() == "Maziodyne" then
+		self:Maziodyne(ply,persona,rmb)
+		return
+	elseif self:GetCard() == "Zionga" then
+		self:Zionga(ply,persona,rmb)
+		return
+	elseif self:GetCard() == "Mazionga" then
+		self:Mazionga(ply,persona,rmb)
+		return
+	elseif self:GetCard() == "Evil Smile" then
+		self:EvilSmile(ply,persona,rmb)
+		return
+	elseif self:GetCard() == "Teleport" then
+		self:Teleport(ply,persona)
+		return
+	elseif self:GetCard() == "Charge" then
+		self:Charge(ply,persona)
+		return
+	elseif self:GetCard() == "Concentrate" then
+		self:Concentrate(ply,persona)
+		return
+	elseif self:GetCard() == "Heat Riser" then
+		self:HeatRiser(ply,persona)
+		return
+	elseif self:GetCard() == "Salvation" then
+		self:Salvation(ply,persona)
+		return
+	elseif self:GetCard() == "Mediarahan" then
+		self:Mediarahan(ply,persona)
+		return
+	elseif self:GetCard() == "Debilitate" then
+		self:Debilitate(ply,persona)
+		return
+	elseif self:GetCard() == "Eigaon" then
+		self:Eigaon(ply,persona)
+		return
+	elseif self:GetCard() == "Maeigaon" then
+		self:Maeigaon(ply,persona)
+		return
+	elseif self:GetCard() == "Garu" then
+		self:Garu(ply,persona)
+		return
+	elseif self:GetCard() == "Garudyne" then
+		self:Garudyne(ply,persona)
+		return
+	elseif self:GetCard() == "Magarudyne" then
+		self:Magarudyne(ply,persona)
+		return
+	elseif self:GetCard() == "Megidola" then
+		self:Megidola(ply,persona)
+		return
+	elseif self:GetCard() == "Megidolaon" then
+		self:Megidolaon(ply,ply.Persona_EyeTarget)
+		return
+	elseif self:GetCard() == "Call of Chaos" then
+		self:CallOfChaos(ply,persona)
+		return
+	elseif self:GetCard() == "Abyssal Wings" then
+		self:AbyssalWings(ply,persona)
+		return
+	elseif self:GetCard() == "Laevateinn" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
+		return
+	elseif self:GetCard() == "Magatsu Blade" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Heaven's Blade" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Cross Slash" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Ghastly Wail" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "One-shot Kill" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Riot Gun" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Vorpal Blade" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Beast Weaver" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Miracle Punch" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Almighty Slash" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -840,6 +890,7 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 		self:EmitSound("npc/zombie/claw_miss1.wav",math.random(50,65),math.random(100,125))
 		if self.CustomOnMissEntity then self:CustomOnMissEntity() end
 	end
+	return hitEnts
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CreateAura(ply)

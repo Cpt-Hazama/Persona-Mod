@@ -7,7 +7,12 @@ ENT.Information		= "Projectiles for my addons"
 ENT.Category		= "Projectiles"
 
 if CLIENT then
+	local col = Color(255,229,0)
 	function ENT:Think()
+		local Magatsu = self:GetNWBool("Magatsu")
+		if Magatsu then
+			col = Color(255,0,0)
+		end
 		self.Emitter = ParticleEmitter(self:GetPos())
 		self.SmokeEffect1 = self.Emitter:Add("sprites/light_glow02_add",self:GetPos())
 		self.SmokeEffect1:SetVelocity(self:GetForward() *math.Rand(0,50))
@@ -17,7 +22,7 @@ if CLIENT then
 		self.SmokeEffect1:SetStartSize(20)
 		self.SmokeEffect1:SetEndSize(5)
 		self.SmokeEffect1:SetRoll(math.Rand(-0.2,0.2))
-		self.SmokeEffect1:SetColor(255,229,0)
+		self.SmokeEffect1:SetColor(col)
 		self.Emitter:Finish()
 	end
 end

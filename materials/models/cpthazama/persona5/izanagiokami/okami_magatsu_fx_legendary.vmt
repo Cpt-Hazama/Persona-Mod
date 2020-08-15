@@ -1,0 +1,34 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/izanagiokami/okami_magatsu"
+	"$bumpmap" "models/cpthazama/persona5/izanagiokami/okami_n"
+	"$phongexponenttexture" "models/cpthazama/persona5/izanagiokami/okami_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[1 1 0]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "200"
+	"$rimmask" "1"
+
+	$detail	"models/cpthazama/persona4/magatsuizanagi/magatsu_mandala"
+	$detailscale "4"
+	$detailblendfactor "0.5"
+	$detailblendmode "2"
+
+	"Proxies"
+	{
+		"Sine"
+		{
+			"resultvar"	"$detailblendfactor"
+			"sineperiod" 1.5
+			"sinemin" 0.2
+			"sinemax" 4
+		}
+	}
+
+	"$lightwarptexture" "models/cpthazama/persona5/cel_legendary"
+}

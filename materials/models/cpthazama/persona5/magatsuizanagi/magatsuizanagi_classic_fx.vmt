@@ -14,7 +14,7 @@
 	"$rimlightboost" "200"
 	"$rimmask" "1"
 
-	$detail	"models/cpthazama/persona5/magatsuizanagi/magatsuizanagi_flow"
+	$detail	"models/cpthazama/persona4/magatsuizanagi/magatsu_mandala"
 	$detailscale "4"
 	$detailblendfactor "0.5"
 	$detailblendmode "2"
@@ -26,7 +26,7 @@
 			"resultvar"	"$detailblendfactor"
 			"sineperiod" 1.5
 			"sinemin" 0.2
-			"sinemax" 0.9
+			"sinemax" 4
 		}
 	}
 

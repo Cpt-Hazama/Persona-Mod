@@ -35,6 +35,11 @@ PERSONA["magatsu_izanagi_velvet"].Model = "models/cpthazama/persona5/persona/mag
 PERSONA["magatsu_izanagi_velvet"].Aura = "jojo_aura_blue"
 PERSONA["magatsu_izanagi_velvet"].Name = "Magatsu-Izanagi (Velvet)"
 
+PERSONA["magatsu_izanagi_okami"] = {}
+PERSONA["magatsu_izanagi_okami"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi_no_okami.mdl"
+PERSONA["magatsu_izanagi_okami"].Aura = "jojo_aura_red"
+PERSONA["magatsu_izanagi_okami"].Name = "Magatsu-Izanagi-no-Okami"
+
 PERSONA["izanagi_okami"] = {}
 PERSONA["izanagi_okami"].Model = "models/cpthazama/persona5/persona/izanagi_no_okami.mdl"
 PERSONA["izanagi_okami"].Aura = "jojo_aura_blue"

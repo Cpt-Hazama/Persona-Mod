@@ -316,6 +316,88 @@ function ENT:HeavensBlade(ply,persona) // Izanagi-no-Okami Skill
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MagatsuBlade(ply,persona) // Magatsu-Izanagi-no-Okami Skill
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet("Magatsu Blade","melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		timer.Simple(0.8,function()
+			if IsValid(self) then
+				local hents = self:MeleeAttackCode(DMG_P_HEAVY,1500,130)
+				if #hents > 0 then
+					for _,v in pairs(hents) do
+						if IsValid(v) && math.random(1,4) == 1 then
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse")
+							spawnparticle:SetPos(v:GetPos() +v:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",1)
+
+							self:DealDamage(v,DMG_P_MEDIUM,DMG_P_CURSE,2)
+
+							v:EmitSound("cpthazama/persona5/skills/0067.wav",90)
+						end
+					end
+				end
+			end
+		end)
+		timer.Simple(1.65,function()
+			if IsValid(self) then
+				local hents = self:MeleeAttackCode(DMG_P_HEAVY,1500,130)
+				if #hents > 0 then
+					for _,v in pairs(hents) do
+						if IsValid(v) && math.random(1,4) == 1 then
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse")
+							spawnparticle:SetPos(v:GetPos() +v:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",1)
+
+							self:DealDamage(v,DMG_P_MEDIUM,DMG_P_CURSE,2)
+
+							v:EmitSound("cpthazama/persona5/skills/0067.wav",90)
+						end
+					end
+				end
+			end
+		end)
+		timer.Simple(1.9,function()
+			if IsValid(self) then
+				local hents = self:MeleeAttackCode(DMG_P_HEAVY,1500,130)
+				if #hents > 0 then
+					for _,v in pairs(hents) do
+						if IsValid(v) && math.random(1,4) == 1 then
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse")
+							spawnparticle:SetPos(v:GetPos() +v:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",1)
+
+							self:DealDamage(v,DMG_P_MEDIUM,DMG_P_CURSE,2)
+
+							v:EmitSound("cpthazama/persona5/skills/0067.wav",90)
+						end
+					end
+				end
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Teleport()
 	local skill = "Teleport"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
@@ -956,6 +1038,63 @@ function ENT:MyriadTruths(ply,persona)
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet("Myriad Truths","range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MyriadMandala(ply,persona)
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet("Myriad Mandala","range_start",1)
+		self:TakeSP(self.CurrentCardCost)
+		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet("Myriad Mandala","range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet("Myriad Mandala","range_idle",1)
+						local tb = {
+							[1] = self:GetUp() *350,
+							[2] = self:GetUp() *310 +self:GetRight() *50,
+							[3] = self:GetUp() *270 +self:GetRight() *100,
+							[4] = self:GetUp() *230 +self:GetRight() *150,
+							[5] = self:GetUp() *190 +self:GetRight() *200,
+							[6] = self:GetUp() *310 +self:GetRight() *-50,
+							[7] = self:GetUp() *270 +self:GetRight() *-100,
+							[8] = self:GetUp() *230 +self:GetRight() *-150,
+							[9] = self:GetUp() *190 +self:GetRight() *-200,
+						}
+						for i = 1,9 do
+							local proj = ents.Create("obj_vj_per_okamiblast")
+							proj:SetPos(self:GetPos() +self:OBBCenter() +tb[i])
+							proj:SetAngles(IsValid(self:UserTrace().Entity) && (self:UserTrace().Entity:GetPos() +self:UserTrace().Entity:OBBCenter() -proj:GetPos()):Angle() or (self:UserTrace().HitPos -self:GetPos() +self:OBBCenter()):Angle())
+							proj:SetNWBool("Magatsu",true)
+							proj:Spawn()
+							proj.RadiusDamage = self:AdditionalInput(DMG_P_HEAVY,2)
+							proj.RadiusDamage = proj.RadiusDamage *1.25 // Automatic boost
+							proj.RadiusDamageType = DMG_P_CURSE
+							proj:SetOwner(self.User)
+							proj:SetPhysicsAttacker(self.User)
+							proj:EmitSound("cpthazama/persona5/skills/0338.wav")
+							
+							if IsValid(proj:GetPhysicsObject()) then
+								proj:GetPhysicsObject():SetVelocity(IsValid(self:UserTrace().Entity) && (self:UserTrace().Entity:GetPos() +self:UserTrace().Entity:OBBCenter() -proj:GetPos()) *5000 or (self:UserTrace().HitPos -proj:GetPos()) *5000)
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet("Myriad Mandala","range_end",1)
 								timer.Simple(t,function()
 									if IsValid(self) then
 										self:DoIdle()
