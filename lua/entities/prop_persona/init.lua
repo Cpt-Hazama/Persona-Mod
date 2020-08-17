@@ -96,6 +96,8 @@ function ENT:Initialize()
 
 			self:CheckSkillLevel(true)
 			PXP.ManagePersonaStats(self.User)
+		else
+			self:UnlockAllSkills()
 		end
 		self:CustomOnInitialize()
 	end)
@@ -325,7 +327,7 @@ function ENT:DefaultPersonaControls(ply,persona)
 			self:SetAngles(self.User:GetAngles())
 		end
 	elseif self:GetTask() == "TASK_ATTACK" then
-		if !IsValid(self.Target) then self:FindTarget(ply) end
+		-- if !IsValid(ply.Persona_EyeTarget) then self:FindTarget(ply) end
 		self:FaceTarget()
 	else
 		-- self:SetColor(Color(255,255,255,255))
@@ -552,12 +554,17 @@ function ENT:Think()
 		end
 		if self.User:IsPlayer() then
 			self:PersonaCards(self.User:KeyDown(IN_ATTACK),self.User:KeyDown(IN_ATTACK2),self.User:KeyDown(IN_RELOAD))
+			self:PersonaControls(self.User,self)
+		elseif self.User:IsNPC() then
+			if IsValid(self.User:GetEnemy()) then
+				self.User.Persona_EyeTarget = self.User:GetEnemy()
+			end
 		end
-		self:PersonaControls(self.User,self.Stand)
+		-- self:PersonaControls(self.User,self)
 		if self.ControlType == 2 then
 			self:ControlPersonaMovement(self.User)
 		else
-			self:DefaultPersonaControls(self.User,self.Stand)
+			self:DefaultPersonaControls(self.User,self)
 		end
 	else
 		self:Remove()
@@ -621,6 +628,17 @@ function ENT:CheckCards()
 	for _,skill in pairs(newSkills) do
 		self:AddCard(skill.Name,skill.Cost,skill.UsesHP,skill.Icon)
 		-- print("Implemented " .. skill.Name)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:UnlockAllSkills()
+	local lvl = 0
+	if #self.LeveledSkills > 0 then
+		for index,skill in pairs(self.LeveledSkills) do
+			if skill.Name then
+				self:AddCard(skill.Name,skill.Cost,skill.UsesHP,skill.Icon)
+			end
+		end
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -727,7 +745,7 @@ function ENT:UserTrace(maxDist)
 	end
 	local tracedata = {}
 	tracedata.start = self.User:EyePos()
-	tracedata.endpos = self.User:GetEyeTrace().HitPos
+	tracedata.endpos = self.User:IsNPC() && (IsValid(self.User:GetEnemy()) && self.User:GetEnemy():GetPos() or self.User:EyePos() +self.User:EyeAngles():Forward() *5000) or self.User:GetEyeTrace().HitPos
 	tracedata.filter = {self.User,self}
 	local tr = util.TraceLine(tracedata)
 
@@ -735,31 +753,32 @@ function ENT:UserTrace(maxDist)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:FindTarget(ply)
-	if ply:IsPlayer() then
-		local tracedata = {}
-		tracedata.start = ply:EyePos()
-		tracedata.endpos = ply:GetEyeTrace().HitPos
-		tracedata.filter = {ply,self}
-		local tr = util.TraceLine(tracedata)
-		local ent = tr.Entity
-	else
-		ent = ply:GetEnemy()
-	end
+	-- if ply:IsPlayer() then
+		-- local tracedata = {}
+		-- tracedata.start = ply:EyePos()
+		-- tracedata.endpos = ply:GetEyeTrace().HitPos
+		-- tracedata.filter = {ply,self}
+		-- local tr = util.TraceLine(tracedata)
+		-- local ent = tr.Entity
+	-- else
+		-- ent = ply:GetEnemy()
+	-- end
 	
-	self.Target = IsValid(ent) && (ent:IsNPC() or ent:IsPlayer()) && ent
+	-- ply.Persona_EyeTarget = IsValid(ent) && (ent:IsNPC() or ent:IsPlayer()) && ent
+	-- self.Target = IsValid(ent) && (ent:IsNPC() or ent:IsPlayer()) && ent
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:FaceTarget()
-	if IsValid(self.Target) then
+	if IsValid(self.User.Persona_EyeTarget) then
 		local ang = self:GetAngles()
-		self:SetAngles(Angle(ang.x,(self.Target:GetPos() -self:GetPos()):Angle().y,ang.z))
+		self:SetAngles(Angle(ang.x,(self.User.Persona_EyeTarget:GetPos() -self:GetPos()):Angle().y,ang.z))
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:FacePlayerAim(ply)
-	if IsValid(self.Target) then
+	if IsValid(ply.Persona_EyeTarget) then
 		local ang = self:GetAngles()
-		self:SetAngles(Angle(ang.x,(self.Target:GetPos() -self:GetPos()):Angle().y,ang.z))
+		self:SetAngles(Angle(ang.x,(ply.Persona_EyeTarget:GetPos() -self:GetPos()):Angle().y,ang.z))
 		return
 	end
 

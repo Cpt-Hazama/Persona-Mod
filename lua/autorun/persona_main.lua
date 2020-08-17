@@ -131,17 +131,18 @@ function NPC:SummonPersona(persona)
 	if !IsValid(personaEntity) then
 		local class = "prop_persona_" .. persona
 		local ent = ents.Create(class)
-		ent:SetModel(ent.Model)
+		-- ent:SetModel(ent.Model)
+		ent:SetModel(PERSONA[persona] && PERSONA[persona].Model or ent.Model)
 		ent:SetPos(ent:GetSpawnPosition(self) or self:GetPos())
 		ent:SetAngles(self:GetAngles())
 		ent:Spawn()
 		self:SetPersonaEntity(ent,persona)
-		ent:RequestAura(ent,ent.Aura)
+		ent:RequestAura(ent,PERSONA[persona] && PERSONA[persona].Aura or ent.Aura)
 		ent.User = self
 		-- ent.Persona = self:GetPersonaName()
 		ent:DoIdle()
 		ent:OnSummoned(self)
-		ent:SetFeedName(ent.Name,class)
+		ent:SetFeedName(PERSONA[persona] && PERSONA[persona].Name or ent.Name,class)
 	else
 		if personaEntity:GetTask() != "TASK_RETURN" then
 			personaEntity:SetTask("TASK_RETURN")
@@ -412,6 +413,28 @@ if CLIENT then
 		-- local posY = 160
 		-- local color = Color(200,0,255,255)
 		-- draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
+
+		-- local posX = 700
+		-- local posY = 600
+		-- local len = 600
+		-- local height = 600
+		-- surface.SetMaterial(Material("hud/persona/social/lavenza/main.png"))
+		-- surface.SetDrawColor(Color(255,255,255,255))
+		-- surface.DrawTexturedRect(ScrW() -posX,ScrH() -posY,len,height)
+		-- local EposX = 575
+		-- local EposY = 338
+		-- local Elen = 300
+		-- local Eheight = 150
+		-- surface.SetMaterial(Material("hud/persona/social/lavenza/eyes2.png"))
+		-- surface.SetDrawColor(Color(255,255,255,255))
+		-- surface.DrawTexturedRect(ScrW() -EposX,ScrH() -EposY,Elen,Eheight)
+		-- local MposX = 500
+		-- local MposY = 185
+		-- local Mlen = 150
+		-- local Mheight = 80
+		-- surface.SetMaterial(Material("hud/persona/social/lavenza/m2.png"))
+		-- surface.SetDrawColor(Color(255,255,255,255))
+		-- surface.DrawTexturedRect(ScrW() -MposX,ScrH() -MposY,Mlen,Mheight)
 		
 			--== SP ==--
 		local text = "SP:"

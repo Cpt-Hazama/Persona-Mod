@@ -42,13 +42,13 @@ if VJExists == true then
 		-- Persona 5 - Antagonists --
 	-- VJ.AddNPC("Kamoshida (Shadow)","npc_vj_per_kamoshida",vCat) -- Theme: King, Queen, And Slaves
 	-- VJ.AddNPC("Madarame (Shadow)","npc_vj_per_madarame",vCat) -- Theme: A Woman
-	VJ.AddNPC("Sae Niijima (Shadow)","npc_vj_per_sae",vCat) -- Persona: Leviathan | Theme: The Whims Of Fate
+	-- VJ.AddNPC("Sae Niijima (Shadow)","npc_vj_per_sae",vCat) -- Persona: Leviathan | Theme: The Whims Of Fate
 	-- VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCat)
 	VJ.AddNPC("Goro Akechi","npc_vj_per_akechi_crow",vCat) -- Persona: Robin Hood | Theme: Ark
 	VJ.AddNPC("Goro Akechi (Black Mask)","npc_vj_per_akechi",vCat) -- Persona: Loki and Hereward | Theme: Reincarnation (I'll Face Myself)
 	
 		-- Persona 4 - Protagonists --
-	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami | Theme: Reach Out To The Truth (Arena Ver.)
+	-- VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami | Theme: Reach Out To The Truth (Arena Ver.)
 	
 	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat) -- Thanatos | Theme: Whims Of Everyone's Souls
 	-- VJ.AddNPC("Margaret","npc_vj_per_margaret",vCat) -- Yoshitsune | Theme: Electronica In The Velvet Room

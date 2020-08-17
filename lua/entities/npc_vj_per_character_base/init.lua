@@ -24,6 +24,17 @@ ENT.BloodColor = "Red"
 
 ENT.HasMeleeAttack = false
 
+ENT.FarAttackDistance = 3500
+ENT.CloseAttackDistance = 500
+
+ENT.ConstantlyFaceEnemy = true
+ENT.ConstantlyFaceEnemy_IfVisible = true
+ENT.ConstantlyFaceEnemy_IfAttacking = false
+ENT.ConstantlyFaceEnemy_Postures = "Standing"
+ENT.NoChaseAfterCertainRange = true
+ENT.NoChaseAfterCertainRange_CloseDistance = 0
+ENT.NoChaseAfterCertainRange_Type = "Regular"
+
 ENT.HasDeathAnimation = false
 ENT.AnimTbl_Death = {ACT_DIESIMPLE}
 ENT.DeathCorpseEntityClass = "prop_vj_animatable"
@@ -40,6 +51,19 @@ ENT.SoundTbl_PersonaAttack = {}
 ENT.SoundTbl_GetUp = {}
 
 ENT.GeneralSoundPitch1 = 100
+
+ENT.Animations = {}
+ENT.Animations["idle"] = ACT_IDLE
+ENT.Animations["idle_combat"] = ACT_IDLE_ANGRY
+ENT.Animations["idle_low"] = ACT_IDLE_STIMULATED
+ENT.Animations["melee"] = "persona_attack"
+ENT.Animations["range_start"] = "persona_attack_start"
+ENT.Animations["range_start_idle"] = "persona_attack_start_idle"
+ENT.Animations["range"] = "persona_attack"
+ENT.Animations["range_idle"] = "persona_attack_idle"
+ENT.Animations["range_end"] = "persona_attack_end"
+
+ENT.Persona = "izanagi"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaInit() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -48,9 +72,11 @@ function ENT:CustomOnTakeDamage_BeforeDamage(dmginfo,hitgroup)
 	local dmgtype = dmginfo:GetDamageType()
 	
 	if dmginfo:GetDamage() > 0 then
-		if math.random(1,100) <= self.Stats.AGI then
+		local canDodge = math.random(1,100) <= self.Stats.AGI
+		if canDodge && self:BusyWithActivity() == false && math.random(1,2) == 1 then
 			if self:LookupSequence("dodge") then
 				self:VJ_ACT_PLAYACTIVITY("dodge",true,false,true)
+				self:ResetLoopAnimation()
 			end
 			dmginfo:SetDamage(0)
 		end
@@ -61,8 +87,11 @@ function ENT:CustomOnInitialize()
 	self:SetHealth((GetConVarNumber("vj_npc_allhealth") > 0) and GetConVarNumber("vj_npc_allhealth") or self:VJ_GetDifficultyValue(self.Stats.HP))
 	self.SP = self.Stats.SP
 	
-	self.PreparedToAttack = false
-	
+	self.MetaVerseMode = false
+	self.NextMetaChangeT = 0
+
+	self.NextUseT = 0
+
 	self.MouthDistance = 0
 	self.NextMouthMoveT = 0
 	self.NextNumChangeT = 0
@@ -94,18 +123,167 @@ function ENT:CustomOnAcceptInput(key,activator,caller,data)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:PersonaThink(persona,enemy,dist)
-
+function ENT:StartLoopAnimation(anim)
+	self.DisableChasingEnemy = true
+	self.AnimTbl_IdleStand = {anim}
+	self.NextIdleStandTime = 0
+	self:StopMoving()
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:ResetLoopAnimation()
+	self.AnimTbl_IdleStand = {self.CurrentIdle}
+	self.NextIdleStandTime = 0
+	self.DisableChasingEnemy = false
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnPersonaAnimation(persona,skill,animBlock,seq,t)
+	local myAnim = self.Animations[animBlock]
+	if animBlock == "melee" then
+		local tStart = self:DecideAnimationLength(self.Animations[animBlock],false)
+		self.DisableChasingEnemy = true
+		self:StopMoving()
+		self:VJ_ACT_PLAYACTIVITY(self.Animations["range_start"],true,false,true)
+		timer.Simple(tStart,function()
+			if IsValid(self) then
+				self.DisableChasingEnemy = false
+				self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+			end
+		end)
+	end
+	if animBlock == "range_start" then
+		self.DisableChasingEnemy = true
+		self:StopMoving()
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+	if animBlock == "range_start_idle" then
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+	if animBlock == "range" then
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+	if animBlock == "range_idle" then
+		self:StartLoopAnimation(myAnim)
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+	if animBlock == "range_end" then
+		self:ResetLoopAnimation()
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PersonaThink(persona,enemy,dist,controlled)
+	if !IsValid(enemy) then return end
+	if !self:Visible(enemy) then return end
+	if controlled then
+		local controller = self.VJ_TheController
+		if controller:KeyDown(IN_RELOAD) then
+			persona:CycleCards()
+			return
+		end
+		if controller:KeyDown(IN_ATTACK) then
+			persona:DoMeleeAttack(self,persona,persona.CurrentMeleeSkill,true)
+			return
+		end
+		if controller:KeyDown(IN_ATTACK2) then
+			persona:DoSpecialAttack(self,persona,nil,true)
+			return
+		end
+		if controller:KeyDown(IN_DUCK) then
+			self:UseItem("item_persona_hp")
+			return
+		end
+		return
+	end
+	if math.random(1,10) == 1 then
+		persona:CycleCards()
+	end
+	if self:Health() <= self:GetMaxHealth() /2 && math.random(1,20) == 1 then
+		self:UseItem("item_persona_hp")
+	end
+	if dist <= self.FarAttackDistance && dist >= self.CloseAttackDistance -100 && math.random(1,4) == 1 then
+		persona:DoSpecialAttack(self,persona,nil,true)
+	elseif dist < self.CloseAttackDistance && math.random(1,6) == 1 then
+		persona:DoMeleeAttack(self,persona,persona.CurrentMeleeSkill,true)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnThink() end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnSwitchMetaVerse(didSwitch) end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:UseItem(class,t)
+	if CurTime() > self.NextUseT then
+		local ent = ents.Create(class)
+		ent:SetPos(self:GetPos() +self:OBBCenter())
+		ent:Spawn()
+		ent:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+		ent:Use(self,self)
+		self.NextUseT = CurTime() +(t or math.Rand(2,4))
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
-	local idle = IsValid(self:GetEnemy()) && ACT_IDLE_ANGRY or ACT_IDLE
-	
+	self.CurrentIdle = IsValid(self:GetEnemy()) && self.Animations["idle_combat"] or self.Animations["idle"]
+	self.CurrentRun = self.MetaVerseMode && ACT_RUN_STIMULATED or ACT_RUN
+
+	self.ConstantlyFaceEnemyDistance = self.FarAttackDistance -500
+	self.NoChaseAfterCertainRange_FarDistance = self.CloseAttackDistance -50
+
 	if self:Health() <= self:GetMaxHealth() *0.4 then
-		idle = ACT_IDLE_STIMULATED
+		self.CurrentIdle = self.Animations["idle_low"]
 	end
 
-	self.AnimTbl_IdleStand = {idle}
+	if self.DisableChasingEnemy == false then
+		self.AnimTbl_IdleStand = {idle}
+		self.AnimTbl_Run = {self.CurrentRun}
+	end
+
+	if IsValid(self:GetEnemy()) then
+		if self.MetaVerseMode == false then
+			if CurTime() > self.NextMetaChangeT then
+				self.MetaVerseMode = true
+				self.NextMetaChangeT = CurTime() +3
+				self:OnSwitchMetaVerse(true)
+			end
+		else
+			self.NextMetaChangeT = CurTime() +3
+		end
+	else
+		if self.MetaVerseMode then
+			if CurTime() > self.NextMetaChangeT then
+				self.MetaVerseMode = false
+				self.NextMetaChangeT = CurTime() +2
+				self:OnSwitchMetaVerse(false)
+			end
+		else
+			self.NextMetaChangeT = CurTime() +1
+		end
+	end
+	
+	if self.MetaVerseMode && self:Health() > 0 then
+		if !IsValid(self:GetPersona()) then
+			if self.VJ_IsBeingControlled then
+				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
+				if jump then
+					self:SummonPersona(self.Persona)
+				end
+			end
+			if IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
+				self:SummonPersona(self.Persona)
+			end
+		elseif IsValid(self:GetPersona()) then
+			if self.VJ_IsBeingControlled then
+				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
+				if jump then
+					self:SummonPersona(self.Persona)
+				end
+			end
+			if !IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
+				self:SummonPersona(self.Persona)
+			end
+			self:PersonaThink(self:GetPersona(),self:GetEnemy(),self:VJ_GetNearestPointToEntityDistance(self:GetEnemy()),self.VJ_IsBeingControlled)
+		end
+	end
 
 	if CurTime() < self.NextMouthMoveT then
 		if CurTime() > self.NextNumChangeT then
@@ -127,6 +305,8 @@ function ENT:CustomOnThink()
 	else
 		self:SetPoseParameter("talk",0)
 	end
+	
+	self:OnThink()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)

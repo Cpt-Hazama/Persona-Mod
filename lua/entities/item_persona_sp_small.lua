@@ -44,18 +44,16 @@ function ENT:Initialize()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Use(activator, caller)
-	if activator:IsPlayer() then
-		self:EmitSound(Sound("items/smallmedkit1.wav"),70,100)
-		activator:PrintMessage(HUD_PRINTTALK,self.Text)
-		if self.RestoresHP then
-			activator:SetHealth(math.Clamp(activator:Health() +self.RestoreAmount,activator:Health(),activator:GetMaxHealth()))
-			activator:PrintMessage(HUD_PRINTTALK,"HP is now " .. activator:Health() .. "/" .. activator:GetMaxHealth())
-		else
-			activator:SetSP(math.Clamp(activator:GetSP() +self.RestoreAmount,activator:GetSP(),activator:GetMaxSP()))
-			activator:PrintMessage(HUD_PRINTTALK,"SP is now " .. activator:GetSP() .. "/" .. activator:GetMaxSP())
-		end
-		self:Remove()
+	self:EmitSound(Sound("items/smallmedkit1.wav"),70,100)
+	if activator:IsPlayer() then activator:PrintMessage(HUD_PRINTTALK,self.Text) end
+	if self.RestoresHP then
+		activator:SetHealth(math.Clamp(activator:Health() +self.RestoreAmount,activator:Health(),activator:GetMaxHealth()))
+		if activator:IsPlayer() then activator:PrintMessage(HUD_PRINTTALK,"HP is now " .. activator:Health() .. "/" .. activator:GetMaxHealth()) end
+	else
+		activator:SetSP(math.Clamp(activator:GetSP() +self.RestoreAmount,activator:GetSP(),activator:GetMaxSP()))
+		if activator:IsPlayer() then activator:PrintMessage(HUD_PRINTTALK,"SP is now " .. activator:GetSP() .. "/" .. activator:GetMaxSP()) end
 	end
+	self:Remove()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnTakeDamage(dmginfo)

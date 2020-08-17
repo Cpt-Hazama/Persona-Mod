@@ -7,8 +7,15 @@ ENT.Purpose 		= ""
 ENT.Instructions 	= ""
 ENT.Category		= "NPC"
 
+include("social_link.lua")
+
 ENT.VJ_PersonaNPC = true
 ENT.VJ_Persona_HasTheme = true
+
+function ENT:SetupDataTables()
+	self:NetworkVar("Bool",0,"Speaking")
+	self:NetworkVar("Entity",0,"SpeakingTo")
+end
 
 if CLIENT then
 	local lerp_hp = 0
@@ -68,7 +75,131 @@ if CLIENT then
 			ply.VJ_Persona_ThemeT = 0
 			ply.VJ_Persona_ThemeTrack = "common/null.wav"
 		end
+		hook.Remove("HUDPaint","VJ_Persona_HUD_Lavenza")
+		hook.Remove("HUDPaint","VJ_Persona_HUD_Lavenza_Speech")
 	end
+
+	net.Receive("vj_persona_hud_lavenza_speech",function(len,pl)
+		local delete = net.ReadBool()
+		local ent = net.ReadEntity()
+		local ply = net.ReadEntity()
+		local text = net.ReadString()
+		local text2 = net.ReadString()
+		local text3 = net.ReadString()
+		local text4 = net.ReadString()
+		local text5 = net.ReadString()
+
+		local matMain = Material("hud/persona/social/lavenza/main.png")
+		local matE1 = Material("hud/persona/social/lavenza/eyes1.png")
+		local matE2 = Material("hud/persona/social/lavenza/eyes2.png")
+		local matEyes = matE2
+		local matM1 = Material("hud/persona/social/lavenza/m1.png")
+		local matM2 = Material("hud/persona/social/lavenza/m2.png")
+		local matM3 = Material("hud/persona/social/lavenza/m3.png")
+		local matMouth = matM1
+		local posX = 700
+		local posY = 600
+		local len = 600
+		local height = 600
+		local ctEyes = CurTime() +math.Rand(0.3,1.5)
+		local ctM = CurTime() +0.1
+		local name = "Lavenza"
+		local dPos = 15
+		local dPos1 = dPos *4
+		local dPos2 = dPos *6
+		local dPos3 = dPos *8
+		local dPos4 = dPos *10
+		local dPos5 = dPos *12
+
+		hook.Add("HUDPaint","VJ_Persona_HUD_Lavenza_Speech",function()
+			local corners = 1
+			local boxposX = 1200
+			local boxposY = 250
+			local boxlen = 900
+			local boxheight = 230
+			local colM = 35
+			local color = Color(colM,colM,colM,255)
+			draw.RoundedBox(corners,ScrW() -boxposX,ScrH() -boxposY,boxlen,boxheight,color)
+
+			local tposX = boxposX -15
+			local tposY = boxposY -15
+			local color = Color(0,100,255,255)
+			draw.SimpleText(name,"Persona",ScrW() -tposX,ScrH() -tposY,color)
+
+			local tposX = boxposX -15
+			local tposY = boxposY -dPos1
+			local color = Color(0,100,255,255)
+			draw.SimpleText(text,"Persona",ScrW() -tposX,ScrH() -tposY,color)
+
+			if text2 != "" then
+				local tposX = boxposX -15
+				local tposY = boxposY -dPos2
+				local color = Color(0,100,255,255)
+				draw.SimpleText(text2,"Persona",ScrW() -tposX,ScrH() -tposY,color)
+			end
+
+			if text3 != "" then
+				local tposX = boxposX -15
+				local tposY = boxposY -dPos3
+				local color = Color(0,100,255,255)
+				draw.SimpleText(text3,"Persona",ScrW() -tposX,ScrH() -tposY,color)
+			end
+
+			if text4 != "" then
+				local tposX = boxposX -15
+				local tposY = boxposY -dPos4
+				local color = Color(0,100,255,255)
+				draw.SimpleText(text4,"Persona",ScrW() -tposX,ScrH() -tposY,color)
+			end
+
+			if text5 != "" then
+				local tposX = boxposX -15
+				local tposY = boxposY -dPos5
+				local color = Color(0,100,255,255)
+				draw.SimpleText(text5,"Persona",ScrW() -tposX,ScrH() -tposY,color)
+			end
+
+			surface.SetMaterial(matMain)
+			surface.SetDrawColor(Color(255,255,255,255))
+			surface.DrawTexturedRect(ScrW() -posX,ScrH() -posY,len,height)
+			
+			if CurTime() > ctEyes then
+				matEyes = matE2
+				timer.Simple(0.15,function()
+					matEyes = matE1
+				end)
+				timer.Simple(0.3,function()
+					matEyes = matE2
+				end)
+				ctEyes = CurTime() +math.Rand(3,8)
+			end
+			local EposX = 575
+			local EposY = 338
+			local Elen = 300
+			local Eheight = 150
+			surface.SetMaterial(matEyes)
+			surface.SetDrawColor(Color(255,255,255,255))
+			surface.DrawTexturedRect(ScrW() -EposX,ScrH() -EposY,Elen,Eheight)
+			if CurTime() > ctM then
+				matMouth = matM2
+				timer.Simple(0.15,function()
+					matMouth = matM3
+				end)
+				timer.Simple(0.3,function()
+					matMouth = matM1
+				end)
+				ctM = CurTime() +math.Rand(0.35,0.7)
+			end
+			local MposX = 500
+			local MposY = 185
+			local Mlen = 150
+			local Mheight = 80
+			surface.SetMaterial(matMouth)
+			surface.SetDrawColor(Color(255,255,255,255))
+			surface.DrawTexturedRect(ScrW() -MposX,ScrH() -MposY,Mlen,Mheight)
+		end)
+		if delete == true then hook.Remove("HUDPaint","VJ_Persona_HUD_Lavenza_Speech") end
+	end)
 
 	net.Receive("vj_persona_hud_lavenza",function(len,pl)
 		local delete = net.ReadBool()

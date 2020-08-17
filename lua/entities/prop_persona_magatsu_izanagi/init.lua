@@ -306,7 +306,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
 	if ply:IsPlayer() then
-		return ply:GetPos() +ply:GetForward() *(ply:Crouching() && -10 or -50) +ply:GetRight() *(ply:Crouching() && -10 or 0)
+		return ply:GetPos() +ply:GetForward() *(ply:IsPlayer() && ply:Crouching() && -10 or -50) +ply:GetRight() *(ply:IsPlayer() && ply:Crouching() && -10 or 0)
 	else
 		return ply:GetPos() +ply:GetForward() *-50
 	end
@@ -314,7 +314,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetIdlePosition(ply)
 	if ply:IsPlayer() then
-		return ply:GetPos() +ply:GetForward() *(ply:Crouching() && -10 or -50) +ply:GetRight() *(ply:Crouching() && -10 or 0)
+		return ply:GetPos() +ply:GetForward() *(ply:IsPlayer() && ply:Crouching() && -10 or -50) +ply:GetRight() *(ply:IsPlayer() && ply:Crouching() && -10 or 0)
 	else
 		return ply:GetPos() +ply:GetForward() *-50
 	end

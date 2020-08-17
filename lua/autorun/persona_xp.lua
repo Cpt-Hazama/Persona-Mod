@@ -257,6 +257,20 @@ PXP.GetPersonaData = function(ply,type)
 	end
 end
 
+PXP.SetSocialLinkData = function(ply,char,rank)
+	if !ply:IsPlayer() then return end
+	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
+	ply:ChatPrint("Your Social Link with " .. char .. " has increased to " .. tostring(rank) .. "!")
+	ply:EmitSound("cpthazama/persona5/misc/00108_streaming.wav")
+	PXP.WriteFile(dir .. "_SOCIAL_" .. char .. ".txt",val)
+end
+
+PXP.GetSocialLinkData = function(ply,char)
+	if !ply:IsPlayer() then return end
+	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
+	return tonumber(file.Read(dir .. "_SOCIAL_" .. char .. ".txt","DATA") or 0) or 0
+end
+
 PXP.SetPersonaData = function(ply,type,val)
 	if !ply:IsPlayer() then return end
 	local name = ply:GetPersonaName() or PXP.GetPersonaData(ply,5)

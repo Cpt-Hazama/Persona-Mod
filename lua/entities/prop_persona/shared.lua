@@ -93,6 +93,9 @@ function ENT:PlayAnimation(seq,rate,cycle,tbName,skill)
 	self:SetCycle(cycle or 0)
 	local t = self:GetSequenceDuration(self,seq)
 	self:HandleEvents(skill or "BLANK",tbName or "N/A",seq,t)
+	if IsValid(self.User) && self.User:IsNPC() && self.User.OnPersonaAnimation then
+		self.User:OnPersonaAnimation(self,skill or "BLANK",tbName or "N/A",seq,t)
+	end
 	return t
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------

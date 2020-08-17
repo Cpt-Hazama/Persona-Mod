@@ -45,11 +45,11 @@ ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/izanagiokami/okami_magats
 ENT.LegendaryMaterials[2] = "models/cpthazama/persona5/izanagiokami/okami_magatsu_fx_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
-	return ply:GetPos() +ply:GetForward() *-50 +ply:GetRight() *-15 +ply:GetUp() *(ply:Crouching() && 0 or 45)
+	return ply:GetPos() +ply:GetForward() *-50 +ply:GetRight() *-15 +ply:GetUp() *(ply:IsPlayer() && ply:Crouching() && 0 or 45)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetIdlePosition(ply)
-	return ply:GetPos() +ply:GetForward() *-50 +ply:GetRight() *-15 +ply:GetUp() *(ply:Crouching() && 0 or 45)
+	return ply:GetPos() +ply:GetForward() *-50 +ply:GetRight() *-15 +ply:GetUp() *(ply:IsPlayer() && ply:Crouching() && 0 or 45)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)

@@ -19,6 +19,7 @@ ENT.Stats = {
 ENT.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_VELVET_ROOM"}
 
 util.AddNetworkString("vj_persona_hud_lavenza")
+util.AddNetworkString("vj_persona_hud_lavenza_speech")
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Controller_Initialize(ply)
     net.Start("vj_persona_hud_lavenza")
@@ -36,6 +37,12 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaInit()
 	self:SetCollisionBounds(Vector(8,8,48),Vector(-8,-8,0))
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnAcceptInput(key,ent,caller,data)
+	if ent:IsPlayer() then
+		self:OnInteract(ent)
+	end
 end
 /*-----------------------------------------------
 	*** Copyright (c) 2012-2019 by Cpt. Hazama, All rights reserved. ***

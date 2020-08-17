@@ -1,0 +1,27 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/adam/adam_red"
+	"$bumpmap" "models/cpthazama/persona5/adam/adam_n"
+	//"$phongexponenttexture" "models/cpthazama/persona5/adam/adam_s"
+	"$phongexponenttexture" "models/cpthazama/persona5/adam/gold_ref"
+
+	"$emissiveBlendEnabled" 		"1"
+    "$emissiveBlendTexture"    		"dev/null"
+    "$emissiveBlendBaseTexture"    	"models/cpthazama/persona5/adam/adam_red_g"
+    "$emissiveBlendFlowTexture"    	"dev/null"
+    "$emissiveBlendTint" 			"[1 1 1]"
+    "$emissiveBlendStrength" 		"1"
+    "$emissiveBlendScrollVector" 	"[0 0]"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[1 0 0]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "200"
+	"$rimmask" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/cel_red"
+}
