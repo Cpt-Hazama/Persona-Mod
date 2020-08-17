@@ -87,6 +87,8 @@ function ENT:CustomOnInitialize()
 	self:SetHealth((GetConVarNumber("vj_npc_allhealth") > 0) and GetConVarNumber("vj_npc_allhealth") or self:VJ_GetDifficultyValue(self.Stats.HP))
 	self.SP = self.Stats.SP
 	
+	self.HasDeathRagdoll = self.HasDeathAnimation
+	
 	self.MetaVerseMode = false
 	self.NextMetaChangeT = 0
 
@@ -211,6 +213,8 @@ function ENT:OnThink() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSwitchMetaVerse(didSwitch) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnSummonPersona(persona) end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:UseItem(class,t)
 	if CurTime() > self.NextUseT then
 		local ent = ents.Create(class)
@@ -222,9 +226,36 @@ function ENT:UseItem(class,t)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PersonaCode()
+	if self.MetaVerseMode && self:Health() > 0 then
+		if !IsValid(self:GetPersona()) then
+			if self.VJ_IsBeingControlled then
+				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
+				if jump then
+					self:SummonPersona(self.Persona)
+				end
+			end
+			if IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
+				self:SummonPersona(self.Persona)
+			end
+		elseif IsValid(self:GetPersona()) then
+			if self.VJ_IsBeingControlled then
+				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
+				if jump then
+					self:SummonPersona(self.Persona)
+				end
+			end
+			if !IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
+				self:SummonPersona(self.Persona)
+			end
+			self:PersonaThink(self:GetPersona(),self:GetEnemy(),self:VJ_GetNearestPointToEntityDistance(self:GetEnemy()),self.VJ_IsBeingControlled)
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
 	self.CurrentIdle = IsValid(self:GetEnemy()) && self.Animations["idle_combat"] or self.Animations["idle"]
-	self.CurrentRun = self.MetaVerseMode && ACT_RUN_STIMULATED or ACT_RUN
+	self.CurrentRun = self.MetaVerseMode && self.Animations["run_combat"] or self.Animations["run"]
 
 	self.ConstantlyFaceEnemyDistance = self.FarAttackDistance -500
 	self.NoChaseAfterCertainRange_FarDistance = self.CloseAttackDistance -50
@@ -260,30 +291,7 @@ function ENT:CustomOnThink()
 		end
 	end
 	
-	if self.MetaVerseMode && self:Health() > 0 then
-		if !IsValid(self:GetPersona()) then
-			if self.VJ_IsBeingControlled then
-				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
-				if jump then
-					self:SummonPersona(self.Persona)
-				end
-			end
-			if IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
-				self:SummonPersona(self.Persona)
-			end
-		elseif IsValid(self:GetPersona()) then
-			if self.VJ_IsBeingControlled then
-				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
-				if jump then
-					self:SummonPersona(self.Persona)
-				end
-			end
-			if !IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
-				self:SummonPersona(self.Persona)
-			end
-			self:PersonaThink(self:GetPersona(),self:GetEnemy(),self:VJ_GetNearestPointToEntityDistance(self:GetEnemy()),self.VJ_IsBeingControlled)
-		end
-	end
+	self:PersonaCode()
 
 	if CurTime() < self.NextMouthMoveT then
 		if CurTime() > self.NextNumChangeT then
@@ -310,7 +318,8 @@ function ENT:CustomOnThink()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
-	if !self.CanRespawn then return end
+	if self.HasDeathAnimation == false then return end
+	if self.CanRespawn == false then return end
 	GetCorpse:ResetSequence("death")
 	GetCorpse:SetCycle(1)
 	GetCorpse.SP = self.SP

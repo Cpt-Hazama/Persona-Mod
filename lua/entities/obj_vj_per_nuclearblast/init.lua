@@ -6,9 +6,12 @@ include("shared.lua")
 	without the prior written consent of the author, unless otherwise indicated for stand-alone materials.
 -----------------------------------------------*/
 ENT.Model = {"models/weapons/w_missile_launch.mdl"} -- The models it should spawn with | Picks a random one from the table
-ENT.DoesDirectDamage = true -- Should it do a direct damage when it hits something?
-ENT.DirectDamage = 100 -- How much damage should it do when it hits something
-ENT.DirectDamageType = DMG_P_NUCLEAR -- Damage type
+ENT.DoesDirectDamage = false -- Should it do a direct damage when it hits something?
+ENT.DoesRadiusDamage = true -- Should it do a blast damage when it hits something?
+ENT.RadiusDamageRadius = 200 -- How far the damage go? The farther away it's from its enemy, the less damage it will do | Counted in world units
+ENT.RadiusDamageUseRealisticRadius = false -- Should the damage decrease the farther away the enemy is from the position that the projectile hit?
+ENT.RadiusDamage = 1 -- How much damage should it deal? Remember this is a radius damage, therefore it will do less damage the farther away the entity is from its enemy
+ENT.RadiusDamageType = DMG_P_NUCLEAR -- Damage type
 ENT.DecalTbl_DeathDecals = {}
 ENT.SoundTbl_OnCollide = {"cpthazama/persona5/skills/0230.wav"}
 ---------------------------------------------------------------------------------------------------------------------------------------------

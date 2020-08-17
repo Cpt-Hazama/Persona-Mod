@@ -143,6 +143,9 @@ function NPC:SummonPersona(persona)
 		ent:DoIdle()
 		ent:OnSummoned(self)
 		ent:SetFeedName(PERSONA[persona] && PERSONA[persona].Name or ent.Name,class)
+		if self.OnSummonPersona then
+			self:OnSummonPersona(ent)
+		end
 	else
 		if personaEntity:GetTask() != "TASK_RETURN" then
 			personaEntity:SetTask("TASK_RETURN")

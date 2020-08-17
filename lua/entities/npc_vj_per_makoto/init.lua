@@ -1,6 +1,5 @@
 AddCSLuaFile("shared.lua")
 include('shared.lua')
--- include('social_link.lua')
 /*-----------------------------------------------
 	*** Copyright (c) 2012-2019 by Cpt. Hazama, All rights reserved. ***
 	No parts of this code or any of its contents may be reproduced, copied, modified or adapted,
@@ -15,29 +14,11 @@ ENT.Stats = {
 	END = 81,
 	AGI = 85,
 	LUC = 69,
-	WK = DMG_PSY,
-	STR = DMG_P_CURSE,
-	NUL = DMG_NUCLEAR,
 }
-ENT.Evasion = 45
-ENT.HullType = HULL_HUMAN
----------------------------------------------------------------------------------------------------------------------------------------------
 ENT.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_PHANTOMTHIEVES"}
-ENT.PlayerFriendly = true
-ENT.FriendsWithAllPlayerAllies = true
-
-ENT.BloodColor = "Red"
-
-ENT.HasMeleeAttack = true
-ENT.AnimTbl_MeleeAttack = {ACT_MELEE_ATTACK1}
-ENT.TimeUntilMeleeAttackDamage = false
-ENT.MeleeAttackDistance = 80
-ENT.MeleeAttackDamageDistance = 110
-ENT.MeleeAttackDamage = 25
 
 ENT.HasDeathAnimation = true
-ENT.AnimTbl_Death = {ACT_DIESIMPLE}
-ENT.DeathCorpseEntityClass = "prop_vj_animatable"
+ENT.CanRespawn = true
 
 ENT.SoundTbl_FootStep = {}
 ENT.SoundTbl_Alert = {
@@ -156,9 +137,23 @@ ENT.SoundTbl_IdleDialogueAnswer = {
 	"cpthazama/persona5/makoto/0196.wav",
 }
 
-ENT.GeneralSoundPitch1 = 100
-
 util.AddNetworkString("vj_persona_hud_makoto")
+
+ENT.Animations = {}
+ENT.Animations["idle"] = ACT_IDLE
+ENT.Animations["idle_combat"] = ACT_IDLE_ANGRY
+ENT.Animations["idle_low"] = ACT_IDLE_STIMULATED
+ENT.Animations["walk"] = ACT_WALK
+ENT.Animations["run"] = ACT_RUN
+ENT.Animations["run_combat"] = ACT_RUN_STIMULATED
+ENT.Animations["melee"] = "persona_attack"
+ENT.Animations["range_start"] = "persona_attack_start"
+ENT.Animations["range_start_idle"] = "persona_attack_start_idle"
+ENT.Animations["range"] = "persona_attack"
+ENT.Animations["range_idle"] = "persona_attack_start_idle"
+ENT.Animations["range_end"] = "persona_attack_end"
+
+ENT.Persona = "johanna"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Controller_Initialize(ply)
     net.Start("vj_persona_hud_makoto")
@@ -174,305 +169,42 @@ function ENT:Controller_Initialize(ply)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:CustomOnTakeDamage_BeforeDamage(dmginfo,hitgroup)
-	local dmg = dmginfo:GetDamage()
-	local dmgtype = dmginfo:GetDamageType()
-	
-	if dmgtype == self.Stats.WK then
-		dmginfo:ScaleDamage(2)
-	end
-	if dmgtype == self.Stats.STR then
-		dmginfo:ScaleDamage(0.35)
-	end
-	if dmgtype == self.Stats.NUL then
-		dmginfo:SetDamage(0)
-	end
-	
-	if dmginfo:GetDamage() > 0 then
-		if math.random(1,100) <= self.Evasion then
-			self:VJ_ACT_PLAYACTIVITY("dodge",true,false,true)
-			dmginfo:SetDamage(0)
-		end
-	end
+function ENT:PersonaInit()
+	-- self:SetBodygroup(1,1)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:CustomOnInitialize()
-	self:SetHealth((GetConVarNumber("vj_npc_allhealth") > 0) and GetConVarNumber("vj_npc_allhealth") or self:VJ_GetDifficultyValue(self.Stats.HP))
-	self.SP = self.Stats.SP
-	
-	self.MetaVerseMode = false
-	
-	self.NextMetaChangeT = CurTime() +2
-	self.MouthDistance = 0
-	self.NextMouthMoveT = 0
-	self.NextNumChangeT = 0
-	
-	self:CapabilitiesAdd(bit.bor(CAP_ANIMATEDFACE))
-	self:CapabilitiesAdd(bit.bor(CAP_TURN_HEAD))
-	self:CapabilitiesAdd(bit.bor(CAP_OPEN_DOORS))
-	self:CapabilitiesAdd(bit.bor(CAP_AUTO_DOORS))
-	self:CapabilitiesAdd(bit.bor(CAP_USE))
-	
-	-- local max,min = self:GetCollisionBounds()
-	
-	self:SetSP(self.Stats.SP)
-	self:SetMaxSP(self.Stats.SP)
-	
-	self:SetUpSocialLinkData()
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnPlayCreateSound(SoundData,SoundFile)
-	if !VJ_HasValue(self.SoundTbl_FootStep,SoundFile) then
-		self.NextMouthMoveT = CurTime() +SoundDuration(SoundFile)
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:CustomOnAcceptInput(key,activator,caller,data)
-	if key == "step" then
-		VJ_EmitSound(self,self.SoundTbl_FootStep,self.FootStepSoundLevel,self:VJ_DecideSoundPitch(self.FootStepPitch1,self.FootStepPitch2))
-	elseif string.find(key,"melee") then
-		local atk = string.Replace(key,"melee ","")
-		self:MeleeAttackCode()
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:PersonaThink(persona,enemy,dist)
-	if self.VJ_IsBeingControlled then
-		local ply = self.VJ_TheController
-		local lmb = ply:KeyDown(IN_ATTACK)
-		local rmb = ply:KeyDown(IN_ATTACK2)
-		local r = ply:KeyDown(IN_RELOAD)
-		
-		if lmb then
-			if persona:GetTask() == "TASK_IDLE" then
-				persona:VajraBlast(self,enemy)
-			end
-		end
-		if rmb then
-			if persona:GetTask() == "TASK_IDLE" then
-				persona:Freila(self,enemy)
-			end
-		end
-		return
-	end
-	if IsValid(enemy) && self:Visible(enemy) then
-		if dist < 2000 && dist > 500 then
-			if persona:GetTask() == "TASK_IDLE" then
-				persona:Freila(self,enemy)
-			end
-		elseif dist <= 500 then
-			if persona:GetTask() == "TASK_IDLE" then
-				persona:VajraBlast(self,enemy)
-			end
-		end
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:CustomOnThink()
-	local idle = self.MetaVerseMode && ACT_IDLE_ANGRY or ACT_IDLE
-	local run = self.MetaVerseMode && ACT_RUN_STIMULATED or ACT_RUN
-	
-	if self:Health() <= self:GetMaxHealth() *0.3 then
-		idle = ACT_IDLE_STIMULATED
-		self:SetPoseParameter("hurt",0.625)
+function ENT:OnSwitchMetaVerse(didSwitch)
+	if didSwitch then
+		self:SetModel("models/cpthazama/persona5/makoto.mdl")
+		self:SetBodygroup(1,1)
 	else
-		self:SetPoseParameter("hurt",0)
+		self:SetModel("models/cpthazama/persona5/makoto_normal.mdl")
+		self:SetBodygroup(1,0)
 	end
-	if IsValid(self:GetPersona()) then
-		-- idle = VJ_SequenceToActivity(self,"persona_idle")
-		-- if self.PreparedToAttack then
-			idle = VJ_SequenceToActivity(self,"persona_attack_start_idle")
-		-- end
-	end
-
-	self.AnimTbl_IdleStand = {idle}
-	self.AnimTbl_Run = {run}
-
-	-- if self.FollowingPlayer && !IsValid(self:GetEnemy()) then
-		-- self:DoPoseParameterLooking(false,self.FollowPlayer_Entity)
-	-- end
-	
-	self.DisableChasingEnemy = IsValid(self:GetPersona())
-	if self.DisableChasingEnemy then
-		if self:IsMoving() then
-			self:StopMoving()
-			self:ClearSchedule()
-		end
-	end
-	
-	if self.MetaVerseMode && self:Health() > 0 then
-		self:SetPoseParameter("serious",1)
-		if !IsValid(self:GetPersona()) then
-			if self.VJ_IsBeingControlled then
-				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
-				if jump then
-					self:SummonPersona("johanna")
-					self:StopMoving()
-					self:ClearSchedule()
-					self:GetPersona():SetTask("TASK_PLAY_ANIMATION")
-					self:GetPersona():PlayAnimation("summon",1)
-					self:SetPos(self:GetPos() +self:GetForward() *-20)
-					self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,false)
-					timer.Simple(1.35,function()
-						if IsValid(self) && IsValid(self:GetPersona()) then
-							self:GetPersona():DoIdle()
-						end
-					end)
-					ParticleEffectAttach("jojo_aura_blue_light",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
-				end
-			end
-			if IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
-				self:SummonPersona("johanna")
-				self:StopMoving()
-				self:ClearSchedule()
-				self:GetPersona():SetTask("TASK_PLAY_ANIMATION")
-				self:GetPersona():PlayAnimation("summon",1)
-				self:SetPos(self:GetPos() +self:GetForward() *-20)
-				self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,false)
-				timer.Simple(1.35,function()
-					if IsValid(self) && IsValid(self:GetPersona()) then
-						self:GetPersona():DoIdle()
-					end
-				end)
-				ParticleEffectAttach("jojo_aura_blue_light",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
-			end
-		elseif IsValid(self:GetPersona()) then
-			self:SetBodygroup(1,0)
-			if self.VJ_IsBeingControlled then
-				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
-				if jump then
-					self:SummonPersona("johanna")
-				end
-			end
-			if !IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
-				self:SummonPersona("johanna")
-				self:SetBodygroup(1,1)
-			end
-			self:PersonaThink(self:GetPersona(),self:GetEnemy(),self:VJ_GetNearestPointToEntityDistance(self:GetEnemy()))
-		end
-	else
-		self:SetPoseParameter("serious",0)
-	end
-
-	if IsValid(self:GetEnemy()) then
-		if self.MetaVerseMode == false then
-			if CurTime() > self.NextMetaChangeT then
-				self.MetaVerseMode = true
-				self.NextMetaChangeT = CurTime() +5
-				self:SetModel("models/cpthazama/persona5/makoto.mdl")
-				self:SetBodygroup(1,1)
-			end
-		else
-			self.NextMetaChangeT = CurTime() +5
-		end
-	else
-		if self.MetaVerseMode then
-			if CurTime() > self.NextMetaChangeT then
-				self.MetaVerseMode = false
-				self.NextMetaChangeT = CurTime() +2
-				self:SetModel("models/cpthazama/persona5/makoto_normal.mdl")
-				self:SetBodygroup(1,0)
-			end
-		else
-			self.NextMetaChangeT = CurTime() +2
-		end
-	end
-	if CurTime() < self.NextMouthMoveT then
-		if CurTime() > self.NextNumChangeT then
-			self.MouthDistance = math.Rand(0,1)
-			self.NextNumChangeT = CurTime() +0.2
-		end
-		local pp = self:GetPoseParameter("talk")
-		local targ = self.MouthDistance
-		local input = self:GetPoseParameter("talk")
-		if pp != targ then
-			if self.MouthDistance > input then
-				input = pp +0.2
-			else
-				input = pp -0.2
-			end
-		end
-		local fin = Lerp(1,pp,input)
-		self:SetPoseParameter("talk",fin)
-	else
-		self:SetPoseParameter("talk",0)
-	end
+	self:SetPos(self:GetPos() +Vector(0,0,8))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
-	GetCorpse:ResetSequence("death")
-	GetCorpse:SetCycle(1)
-	GetCorpse.SP = self.SP
-	GetCorpse.Class = self:GetClass()
-	undo.ReplaceEntity(self,GetCorpse)
-	timer.Simple(20,function()
-		if IsValid(GetCorpse) then
-			local e = ents.Create(GetCorpse.Class)
-			e:SetPos(GetCorpse:GetPos())
-			e:SetAngles(GetCorpse:GetAngles())
-			e:Spawn()
-			e:SetNoDraw(true)
-			e:SetModel(GetCorpse:GetModel())
-			e:SetHealth(e:Health() /2)
-			e.SP = GetCorpse.SP
-			undo.ReplaceEntity(GetCorpse,e)
-			e:VJ_ACT_PLAYACTIVITY("getup",true,false,false)
-			e:SetState(VJ_STATE_FREEZE,e:DecideAnimationLength("getup"))
-			e:StopAllCommonSpeechSounds()
-			VJ_CreateSound(e,e.SoundTbl_GetUp,80,e:VJ_DecideSoundPitch(e.GeneralSoundPitch1,e.GeneralSoundPitch2))
-			timer.Simple(0.2,function() SafeRemoveEntity(GetCorpse) if IsValid(e) then e:SetNoDraw(false) end end)
+function ENT:OnSummonPersona(persona)
+	self:StopMoving()
+	self:ClearSchedule()
+	self:GetPersona():SetTask("TASK_PLAY_ANIMATION")
+	self:GetPersona():PlayAnimation("summon",1)
+	self:SetPos(self:GetPos() +self:GetForward() *-20)
+	self:VJ_ACT_PLAYACTIVITY("persona_attack_start",true,false,false)
+	timer.Simple(1.35,function()
+		if IsValid(self) && IsValid(self:GetPersona()) then
+			self:GetPersona():DoIdle()
 		end
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:DoPoseParameterLooking(ResetPoses,ovEnt)
-	if self.HasPoseParameterLooking == false then return end
-	ResetPoses = ResetPoses or false
-	//self:VJ_GetAllPoseParameters(true)
-	local ent = NULL
-	if self.VJ_IsBeingControlled == true then ent = self.VJ_TheController else ent = self:GetEnemy() end
-	if ovEnt then
-		ent = ovEnt
-		ResetPoses = false
-	end
-	local p_enemy = 0 -- Pitch
-	local y_enemy = 0 -- Yaw
-	local r_enemy = 0 -- Roll
-	if IsValid(ent) && ResetPoses == false then
-		local enemy_pos = false
-		if self.VJ_IsBeingControlled == true then
-			//enemy_pos = self.VJ_TheController:GetEyeTrace().HitPos
-			local gettr = util.GetPlayerTrace(self.VJ_TheController) -- Get the player's trace
-			local tr = util.TraceLine({start = gettr.start, endpos = gettr.endpos, filter = {self, self.VJ_TheController}}) -- Apply the filter to it (The player and the NPC)
-			enemy_pos = tr.HitPos
-		else
-			enemy_pos = ent:GetPos() + ent:OBBCenter()
-		end
-		if enemy_pos == false then return end
-		local self_ang = self:GetAngles()
-		local enemy_ang = (enemy_pos - (self:GetPos() + self:OBBCenter())):Angle()
-		p_enemy = math.AngleDifference(enemy_ang.p, self_ang.p)
-		if self.PoseParameterLooking_InvertPitch == true then p_enemy = -p_enemy end
-		y_enemy = math.AngleDifference(enemy_ang.y, self_ang.y)
-		if self.PoseParameterLooking_InvertYaw == true then y_enemy = -y_enemy end
-		r_enemy = math.AngleDifference(enemy_ang.z, self_ang.z)
-		if self.PoseParameterLooking_InvertRoll == true then r_enemy = -r_enemy end
-	elseif self.PoseParameterLooking_CanReset == false then -- Should it reset its pose parameters if there is no enemies?
-		return
-	end
-	
-	self:CustomOn_PoseParameterLookingCode(p_enemy, y_enemy, r_enemy)
-	
-	local ang_app = math.ApproachAngle
-	local names = self.PoseParameterLooking_Names
-	for x = 1, #names.pitch do
-		self:SetPoseParameter(names.pitch[x], ang_app(self:GetPoseParameter(names.pitch[x]), p_enemy, self.PoseParameterLooking_TurningSpeed))
-	end
-	for x = 1, #names.yaw do
-		self:SetPoseParameter(names.yaw[x], ang_app(self:GetPoseParameter(names.yaw[x]), y_enemy, self.PoseParameterLooking_TurningSpeed))
-	end
-	for x = 1, #names.roll do
-		self:SetPoseParameter(names.roll[x], ang_app(self:GetPoseParameter(names.roll[x]), r_enemy, self.PoseParameterLooking_TurningSpeed))
+function ENT:OnThink()
+	if self.MetaVerseMode && self:Health() > 0 then
+		self.DisableChasingEnemy = true
+		self:SetPoseParameter("serious",1)
+	else
+		self:SetPoseParameter("serious",0)
+		self.DisableChasingEnemy = false
 	end
 end
 /*-----------------------------------------------

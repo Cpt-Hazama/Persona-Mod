@@ -382,6 +382,8 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 		return
 	elseif melee == "Magatsu Blade" then
 		self:MagatsuBlade(ply,persona)
+	elseif melee == "Vajra Blast" then
+		self:VajraBlast(ply,persona)
 		return
 	end
 end
@@ -420,6 +422,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif self:GetCard() == "Salvation" then
 		self:Salvation(ply,persona)
 		return
+	elseif self:GetCard() == "Diarahan" then
+		self:Diarahan(ply,persona)
+		return
 	elseif self:GetCard() == "Mediarahan" then
 		self:Mediarahan(ply,persona)
 		return
@@ -452,6 +457,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		return
 	elseif self:GetCard() == "Abyssal Wings" then
 		self:AbyssalWings(ply,persona)
+		return
+	elseif self:GetCard() == "Freila" then
+		self:Freila(ply,persona)
 		return
 	elseif self:GetCard() == "Laevateinn" then
 		self.CurrentMeleeSkill = self:GetCard()
@@ -519,6 +527,12 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
+	elseif self:GetCard() == "Vajra Blast" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -530,12 +544,12 @@ function ENT:Think()
 		if self:GetTask() == "TASK_RETURN" then
 			local dist = self.User:GetPos():Distance(self:GetPos())
 			self:FacePlayerAim(self.User)
-			local speed = 30
+			local speed = 80
 			if dist <= 170 then
-				speed = 15
+				speed = 20
 			end
 			self:MoveToPos(self.User:GetPos(),speed)
-			if dist <= 10 then
+			if dist <= 15 then
 				self.User:EmitSound("cpthazama/persona5/persona_disapper.wav",65)
 				SafeRemoveEntity(self)
 			end
@@ -561,11 +575,11 @@ function ENT:Think()
 			end
 		end
 		-- self:PersonaControls(self.User,self)
-		if self.ControlType == 2 then
-			self:ControlPersonaMovement(self.User)
-		else
+		-- if self.ControlType == 2 then
+			-- self:ControlPersonaMovement(self.User)
+		-- else
 			self:DefaultPersonaControls(self.User,self)
-		end
+		-- end
 	else
 		self:Remove()
 	end
@@ -824,9 +838,14 @@ end
 function ENT:FindEnemies(pos,dist)
 	local FindEnts = ents.FindInSphere(pos,dist)
 	local foundEnts = {}
+	local user = self.User
+	local checkPlayers = true
+	if (user:IsNPC() && GetConVarNumber("ai_ignoreplayers") == 1) then
+		checkPlayers = false
+	end
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
-			if (v != self && v != self.User) && ((v:IsNPC() or (v:IsPlayer() && v:Alive()))) then
+			if (v != self && v != user) && ((v:IsNPC() or (checkPlayers == true && v:IsPlayer() && v:Alive() && (self.User:IsNPC() && self.User:Disposition(v) != 3 or true)))) then
 				table.insert(foundEnts,v)
 			end
 		end
@@ -865,9 +884,13 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 	local doactualdmg = DamageInfo()
 	local agility = self.Stats.AGI
 	dmg = self:AdditionalInput(dmg,1)
+	local checkPlayers = true
+	if (self.User:IsNPC() && GetConVarNumber("ai_ignoreplayers") == 1) then
+		checkPlayers = false
+	end
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
-			if (v != self && v != self.User) && (((v:IsNPC() or (v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
+			if (v != self && v != self.User) && (((v:IsNPC() or (checkPlayers && v:IsPlayer() && v:Alive() && (self.User:IsNPC() && self.User:Disposition(v) != 3 or true)))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
 				if (self:GetForward():Dot((Vector(v:GetPos().x,v:GetPos().y,0) - Vector(self:GetPos().x,self:GetPos().y,0)):GetNormalized()) > math.cos(math.rad(rad))) then
 					-- if math.random(1,100) > agility then
 						-- self:OnMissedEnemy(v)
@@ -944,6 +967,7 @@ function ENT:MegidolaonEffect(ent,dmg)
 	m:SetModel("models/cpthazama/persona5/effects/megidolaon.mdl")
 	m:SetPos(ent:GetPos())
 	m:Spawn()
+	m:DrawShadow(false)
 	m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 	m:ResetSequence("idle")
 	m:SetModelScale(100,5)
@@ -1118,9 +1142,11 @@ function ENT:OnRemove()
 	end
 	self:StopParticles()
 	self:WhenRemoved()
-	for _,v in pairs(self.Loops) do
-		if v then
-			v:Stop()
+	if self.Loops then
+		for _,v in pairs(self.Loops) do
+			if v then
+				v:Stop()
+			end
 		end
 	end
 end
