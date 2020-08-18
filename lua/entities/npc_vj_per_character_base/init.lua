@@ -126,35 +126,44 @@ function ENT:CustomOnAcceptInput(key,activator,caller,data)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:StartLoopAnimation(anim)
-	self.DisableChasingEnemy = true
+	-- self.DisableChasingEnemy = true
+	self:SetState(VJ_STATE_ONLY_ANIMATION)
 	self.AnimTbl_IdleStand = {anim}
 	self.NextIdleStandTime = 0
 	self:StopMoving()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:ResetLoopAnimation()
+	self:SetState()
 	self.AnimTbl_IdleStand = {self.CurrentIdle}
 	self.NextIdleStandTime = 0
-	self.DisableChasingEnemy = false
+	-- self.DisableChasingEnemy = false
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnPersonaAnimation(persona,skill,animBlock,seq,t)
 	local myAnim = self.Animations[animBlock]
 	if animBlock == "melee" then
-		local tStart = self:DecideAnimationLength(self.Animations[animBlock],false)
-		self.DisableChasingEnemy = true
-		self:StopMoving()
+		local tStart = self:DecideAnimationLength(self.Animations["range_start"],false)
+		local tMelee = self:DecideAnimationLength(self.Animations["melee"],false)
+		self:SetState(VJ_STATE_ONLY_ANIMATION)
 		self:VJ_ACT_PLAYACTIVITY(self.Animations["range_start"],true,false,true)
 		timer.Simple(tStart,function()
 			if IsValid(self) then
-				self.DisableChasingEnemy = false
+				self:StartLoopAnimation("range_idle")
 				self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+				timer.Simple(tMelee,function()
+					if IsValid(self) then
+						self:SetState()
+						self:VJ_ACT_PLAYACTIVITY(self.Animations["range_end"],true,false,true)
+					end
+				end)
 			end
 		end)
 	end
 	if animBlock == "range_start" then
-		self.DisableChasingEnemy = true
-		self:StopMoving()
+		-- self.DisableChasingEnemy = true
+		-- self:StopMoving()
+		self:StartLoopAnimation("range_idle")
 		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
 	end
 	if animBlock == "range_start_idle" then
@@ -164,7 +173,6 @@ function ENT:OnPersonaAnimation(persona,skill,animBlock,seq,t)
 		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
 	end
 	if animBlock == "range_idle" then
-		self:StartLoopAnimation(myAnim)
 		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
 	end
 	if animBlock == "range_end" then
@@ -254,7 +262,7 @@ function ENT:PersonaCode()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
-	self.CurrentIdle = IsValid(self:GetEnemy()) && self.Animations["idle_combat"] or self.Animations["idle"]
+	self.CurrentIdle = IsValid(self:GetPersona()) && self.Animations["idle_combat"] or self.Animations["idle"]
 	self.CurrentRun = self.MetaVerseMode && self.Animations["run_combat"] or self.Animations["run"]
 
 	self.ConstantlyFaceEnemyDistance = self.FarAttackDistance -500
@@ -331,6 +339,13 @@ function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
 			e:SetPos(GetCorpse:GetPos())
 			e:SetAngles(GetCorpse:GetAngles())
 			e:Spawn()
+			if self.DeathCorpseSubMaterials != nil then
+				for _, x in ipairs(self.DeathCorpseSubMaterials) do
+					if self:GetSubMaterial(x) != "" then
+						self.Corpse:SetSubMaterial(x, self:GetSubMaterial(x))
+					end
+				end
+			end
 			e:SetNoDraw(true)
 			e:SetModel(GetCorpse:GetModel())
 			e:SetHealth(e:Health() /2)

@@ -37,7 +37,7 @@ if VJExists == true then
 	-- VJ.AddNPC("Ann Takamaki","npc_vj_per_ann",vCat) -- Carmen | Theme: Wake Up, Get Up, Get Out There
 	-- VJ.AddNPC("Caroline","npc_vj_per_caroline",vCat) -- Shiisaa | Theme: Life Will Change
 	-- VJ.AddNPC("Justine","npc_vj_per_justine",vCat) -- Sudama | Theme: Life Will Change
-	-- VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat) -- Persona: Thor, Berith and Atavaka | Theme: Rivers in The Desert
+	VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat) -- Persona: Thor, Berith and Atavaka | Theme: Rivers in The Desert
 
 		-- Persona 5 - Antagonists --
 	-- VJ.AddNPC("Kamoshida (Shadow)","npc_vj_per_kamoshida",vCat) -- Theme: King, Queen, And Slaves

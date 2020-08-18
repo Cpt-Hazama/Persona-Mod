@@ -5,7 +5,7 @@ include('shared.lua')
 	No parts of this code or any of its contents may be reproduced, copied, modified or adapted,
 	without the prior written consent of the author, unless otherwise indicated for stand-alone materials.
 -----------------------------------------------*/
-ENT.Model = {"models/cpthazama/persona5/akechi.mdl"} -- The game will pick a random model from the table when the SNPC is spawned | Add as many as you want 
+ENT.Model = {"models/cpthazama/persona5/akechi_royal.mdl"} -- The game will pick a random model from the table when the SNPC is spawned | Add as many as you want 
 ENT.Stats = {
 	HP = 5000,
 	SP = 999,
@@ -114,6 +114,30 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaInit()
 	self:SetBodygroup(1,1)
+	self.IsGood = false
+	-- self:MakeGood()
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MakeGood()
+	for k, v in ipairs(self:GetMaterials()) do
+		if v == "models/cpthazama/persona5/akechi/body" then
+			self.DeathCorpseSubMaterials = {k -1}
+			self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/body_good")
+		end
+		if v == "models/cpthazama/persona5/akechi/mask" then
+			self.DeathCorpseSubMaterials = {k -1}
+			self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/mask_good")
+		end
+	end
+	self.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_PHANTOMTHIEVES"}
+	self.PlayerFriendly = true
+	self.IsGood = true
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnSummonPersona(persona)
+	if self.IsGood then
+		persona:SetMaterial("models/cpthazama/persona5/loki/loki_good")
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink()

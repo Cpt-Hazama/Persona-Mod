@@ -719,7 +719,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeSP(sp)
 	if self.User:HasGodMode() then return end
-	self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,999))
+	self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,self.User:IsPlayer() && 999 or 9999))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeHP(hp)
