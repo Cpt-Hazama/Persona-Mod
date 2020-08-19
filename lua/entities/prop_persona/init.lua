@@ -467,6 +467,12 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif self:GetCard() == "Freila" then
 		self:Freila(ply,persona)
 		return
+	elseif self:GetCard() == "Kougaon" then
+		self:Kougaon(ply,persona)
+		return
+	elseif self:GetCard() == "Makougaon" then
+		self:Makougaon(ply,persona)
+		return
 	elseif self:GetCard() == "Laevateinn" then
 		self.CurrentMeleeSkill = self:GetCard()
 		if ply:IsNPC() then
@@ -595,7 +601,8 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RequestAura(ply,aura)
 	self:EmitSound("cpthazama/persona5/misc/00118.wav",75,100)
-	if math.random(1,self.AuraChance) == 1 then ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin")) end
+	ParticleEffectAttach(aura == "jojo_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
 	local fx = EffectData()
 	fx:SetOrigin(self:GetIdlePosition(ply))

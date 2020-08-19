@@ -102,6 +102,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RequestAura(ply,aura)
 	ply:EmitSound("cpthazama/persona5/joker/0022.wav",75,100)
+	ParticleEffectAttach(aura == "jojo_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
 	local fx = EffectData()

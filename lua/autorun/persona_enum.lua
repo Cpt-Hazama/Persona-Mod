@@ -16,6 +16,7 @@ DMG_P_CURSE = 1013
 DMG_P_FEAR = 1014
 DMG_P_PHYS = 1015
 DMG_P_GUN = 1016
+DMG_P_BLESS = 1017
 
 	//-- Default Damage Amounts --\\
 DMG_P_MINISCULE = 10

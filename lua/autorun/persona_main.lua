@@ -683,5 +683,9 @@ local pParticleList = {
 	"vj_per_skill_def",
 	"vj_per_skill_evasion",
 	"vj_per_skill_heatriser",
+	"vj_per_idle_chains",
+	"vj_per_idle_chains_evil",
+	"vj_per_skill_bless",
+	"vj_per_skill_bless_insta",
 }
 for _,v in ipairs(pParticleList) do PrecacheParticleSystem(v) end
