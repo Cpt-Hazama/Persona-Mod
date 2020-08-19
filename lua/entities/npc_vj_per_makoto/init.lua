@@ -145,8 +145,9 @@ ENT.Animations["idle"] = ACT_IDLE
 ENT.Animations["idle_combat"] = ACT_IDLE_ANGRY
 ENT.Animations["idle_low"] = ACT_IDLE_STIMULATED
 ENT.Animations["walk"] = ACT_WALK
+ENT.Animations["walk_combat"] = ACT_WALK_STIMULATED
 ENT.Animations["run"] = ACT_RUN
-ENT.Animations["run_combat"] = ACT_RUN_STIMULATED
+ENT.Animations["run_combat"] = ACT_RUN_AGITATED
 ENT.Animations["melee"] = "persona_attack"
 ENT.Animations["range_start"] = "persona_attack_start"
 ENT.Animations["range_start_idle"] = "persona_attack_start_idle"
@@ -201,11 +202,66 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink()
 	if self.MetaVerseMode && self:Health() > 0 then
-		self.DisableChasingEnemy = true
 		self:SetPoseParameter("serious",1)
 	else
 		self:SetPoseParameter("serious",0)
-		self.DisableChasingEnemy = false
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HandleAnimations()
+	local hasPersona = IsValid(self:GetPersona())
+	if hasPersona then
+		self.Animations["idle_combat"] = VJ_SequenceToActivity(self,"persona_attack_start_idle")
+	else
+		self.Animations["idle_combat"] = ACT_IDLE_ANGRY
+	end
+	self.CurrentIdle = hasPersona && self.Animations["idle_combat"] or self.Animations["idle"]
+	self.CurrentWalk = hasPersona && self.Animations["walk_combat"] or self.Animations["walk"]
+	self.CurrentRun = hasPersona && self.Animations["run_combat"] or self.Animations["run"]
+
+	if self:Health() <= self:GetMaxHealth() *0.4 && !hasPersona then
+		self.CurrentIdle = self.Animations["idle_low"]
+	end
+	
+	if self.MetaVerseMode then
+		if hasPersona then
+			self:SetBodygroup(1,0)
+		else
+			self:SetBodygroup(1,1)
+		end
+	end
+
+	if self:GetState() == 0 then
+		self.AnimTbl_IdleStand = {self.CurrentIdle}
+		self.AnimTbl_Walk = {self.CurrentWalk}
+		self.AnimTbl_Run = {self.CurrentRun}
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnPersonaAnimation(persona,skill,animBlock,seq,t)
+	local myAnim = self.Animations[animBlock]
+	if animBlock == "melee" then
+		-- self:SetState(VJ_STATE_ONLY_ANIMATION)
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+	if animBlock == "range_start" then
+		-- self.DisableChasingEnemy = true
+		-- self:StopMoving()
+		self:StartLoopAnimation("range_idle")
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+	if animBlock == "range_start_idle" then
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+	if animBlock == "range" then
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+	if animBlock == "range_idle" then
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
+	end
+	if animBlock == "range_end" then
+		self:ResetLoopAnimation()
+		self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
 	end
 end
 /*-----------------------------------------------

@@ -250,6 +250,15 @@ function ENT:ControlPersonaMovement(ply)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:IdleAnimationCode(ply)
+	self.CurrentIdle = self.User:IsPlayer() && self.User:Crouching() && "idle_low" or "idle"
+	if self:GetSequenceName(self:GetSequence()) != self.Animations[self.CurrentIdle] then
+		self:DoIdle()
+	end
+	self:SetPos(self:GetIdlePosition(ply))
+	self:FacePlayerAim(self.User)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DefaultPersonaControls(ply,persona)
 	if ply:IsPlayer() then
 		ply:SetNWEntity("Persona_Target",ply.Persona_EyeTarget)
@@ -276,16 +285,13 @@ function ENT:DefaultPersonaControls(ply,persona)
 			self.NextLockOnT = CurTime() +0.2
 		end
 		if IsValid(ply.Persona_EyeTarget) then
-			ply:SetEyeAngles(LerpAngle(0.5,ply:EyeAngles(),((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetShootPos()):Angle()))
+			-- ply:SetEyeAngles(LerpAngle(5 *FrameTime(),ply:EyeAngles(),((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetShootPos()):Angle()))
+			local ang = ply:GetAngles()
+			ply:SetAngles(Angle(ang.x,((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetPos()):Angle().y,ang.z))
 		end
 	end
 	if self:GetTask() == "TASK_IDLE" then
-		self.CurrentIdle = self.User:IsPlayer() && self.User:Crouching() && "idle_low" or "idle"
-		if self:GetSequenceName(self:GetSequence()) != self.Animations[self.CurrentIdle] then
-			self:DoIdle()
-		end
-		self:SetPos(self:GetIdlePosition(ply))
-		self:FacePlayerAim(self.User)
+		self:IdleAnimationCode(ply)
 
 		if ply:IsPlayer() then
 			local w = ply:KeyDown(IN_FORWARD)
@@ -537,6 +543,7 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Think()
+	self:NextThink(CurTime() +(0.069696968793869 +FrameTime()))
 	if IsValid(self.User) then
 		if !self.User:Alive() then
 			self:Remove()
@@ -583,7 +590,6 @@ function ENT:Think()
 	else
 		self:Remove()
 	end
-	self:NextThink(CurTime())
 	return true
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------

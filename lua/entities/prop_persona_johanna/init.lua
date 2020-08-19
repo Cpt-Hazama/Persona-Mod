@@ -17,6 +17,22 @@ ENT.Animations["range"] = "attack"
 ENT.Animations["range_idle"] = "range_loop"
 ENT.Animations["range_end"] = "range_end"
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:IdleAnimationCode(ply)
+	local ply = self.User
+	self.CurrentIdle = ply:IsMoving() && ply:GetSequenceName(ply:GetSequence()) or "idle"
+	if self:GetSequenceName(self:GetSequence()) != self.CurrentIdle then
+		self:DoIdle()
+	end
+	self:SetPos(self:GetIdlePosition(ply))
+	self:FacePlayerAim(self.User)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DoIdle()
+	self:SetTask("TASK_IDLE")
+	self.IdleAnimation = self.CurrentIdle
+	self:PlayAnimation(self.IdleAnimation,self.IdleSpeed,1)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	local ply = self.User
 	if animBlock == "melee" then
@@ -36,7 +52,7 @@ function ENT:GetSpawnPosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetIdlePosition(ply)
-	return ply:GetPos()
+	return self.CurrentIdle == "drive" && (ply:GetPos() +ply:GetForward() *5) or self.CurrentIdle == "drive_fast" && (ply:GetPos() +ply:GetForward() *10) or ply:GetPos()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnHitEntity(entities,dmginfo)

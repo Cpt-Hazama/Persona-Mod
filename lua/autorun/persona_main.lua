@@ -128,6 +128,7 @@ end
 
 function NPC:SummonPersona(persona)
 	local personaEntity = self:GetPersona()
+	if self:GetState() != 0 then return end
 	if !IsValid(personaEntity) then
 		local class = "prop_persona_" .. persona
 		local ent = ents.Create(class)

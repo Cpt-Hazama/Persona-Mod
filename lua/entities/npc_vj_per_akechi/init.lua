@@ -87,6 +87,7 @@ ENT.Animations["idle"] = ACT_IDLE
 ENT.Animations["idle_combat"] = ACT_IDLE_ANGRY
 ENT.Animations["idle_low"] = ACT_IDLE_STIMULATED
 ENT.Animations["walk"] = ACT_WALK
+ENT.Animations["walk_combat"] = ACT_WALK
 ENT.Animations["run"] = ACT_RUN
 ENT.Animations["run_combat"] = ACT_RUN_STIMULATED
 ENT.Animations["melee"] = "persona_attack"
@@ -145,6 +146,40 @@ function ENT:OnThink()
 		self:SetPoseParameter("anger",0.6)
 	else
 		self:SetPoseParameter("anger",0)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:UseItem(class,t)
+	if CurTime() > self.NextUseT && !self:BusyWithActivity() then
+		self:VJ_ACT_PLAYACTIVITY("item_start",true,false,true)
+		timer.Simple(self:DecideAnimationLength("item_start",false),function()
+			if IsValid(self) then
+				local ent = ents.Create(class)
+				ent:SetPos(self:GetPos() +self:OBBCenter())
+				ent:Spawn()
+				ent:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+				ent:Use(self,self)
+				self.NextUseT = CurTime() +(t or math.Rand(2,4))
+				
+				self:VJ_ACT_PLAYACTIVITY("item_end",true,false,true)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HandleAnimations()
+	self.CurrentIdle = IsValid(self:GetPersona()) && self.Animations["idle_combat"] or self.Animations["idle"]
+	self.CurrentWalk = IsValid(self:GetPersona()) && self.Animations["walk_combat"] or self.Animations["walk"]
+	self.CurrentRun = IsValid(self:GetPersona()) && self.Animations["run_combat"] or self.Animations["run"]
+
+	if self:Health() <= self:GetMaxHealth() *0.4 then
+		self.CurrentIdle = self.Animations["idle_low"]
+	end
+
+	if self:GetState() == 0 then
+		self.AnimTbl_IdleStand = {self.CurrentIdle}
+		self.AnimTbl_Walk = {self.CurrentWalk}
+		self.AnimTbl_Run = {self.CurrentRun}
 	end
 end
 /*-----------------------------------------------

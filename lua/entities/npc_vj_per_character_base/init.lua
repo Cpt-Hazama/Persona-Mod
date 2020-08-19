@@ -56,6 +56,9 @@ ENT.Animations = {}
 ENT.Animations["idle"] = ACT_IDLE
 ENT.Animations["idle_combat"] = ACT_IDLE_ANGRY
 ENT.Animations["idle_low"] = ACT_IDLE_STIMULATED
+ENT.Animations["walk"] = ACT_WALK
+ENT.Animations["run"] = ACT_RUN
+ENT.Animations["run_combat"] = ACT_RUN_STIMULATED
 ENT.Animations["melee"] = "persona_attack"
 ENT.Animations["range_start"] = "persona_attack_start"
 ENT.Animations["range_start_idle"] = "persona_attack_start_idle"
@@ -261,21 +264,27 @@ function ENT:PersonaCode()
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:CustomOnThink()
+function ENT:HandleAnimations()
 	self.CurrentIdle = IsValid(self:GetPersona()) && self.Animations["idle_combat"] or self.Animations["idle"]
-	self.CurrentRun = self.MetaVerseMode && self.Animations["run_combat"] or self.Animations["run"]
-
-	self.ConstantlyFaceEnemyDistance = self.FarAttackDistance -500
-	self.NoChaseAfterCertainRange_FarDistance = self.CloseAttackDistance -50
+	self.CurrentWalk = IsValid(self:GetPersona()) && self.Animations["walk_combat"] or self.Animations["walk"]
+	self.CurrentRun = IsValid(self:GetPersona()) && self.Animations["run_combat"] or self.Animations["run"]
 
 	if self:Health() <= self:GetMaxHealth() *0.4 then
 		self.CurrentIdle = self.Animations["idle_low"]
 	end
 
-	if self.DisableChasingEnemy == false then
-		self.AnimTbl_IdleStand = {idle}
+	if self:GetState() == 0 then
+		self.AnimTbl_IdleStand = {self.CurrentIdle}
+		self.AnimTbl_Walk = {self.CurrentWalk}
 		self.AnimTbl_Run = {self.CurrentRun}
 	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnThink()
+	self:HandleAnimations()
+
+	self.ConstantlyFaceEnemyDistance = self.FarAttackDistance -500
+	self.NoChaseAfterCertainRange_FarDistance = self.CloseAttackDistance -50
 
 	if IsValid(self:GetEnemy()) then
 		if self.MetaVerseMode == false then
