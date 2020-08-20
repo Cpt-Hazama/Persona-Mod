@@ -15,3 +15,5 @@ LMB - Melee Skill
 RMB - Use Skill Card (if Skill Card is a Melee skill, it will set your LMB to use the Melee skill)
 
 R - Cycle Skill Cards
+
+[BOUND_KEY] - You have to bind a key to "target_persona" to be able to lock-on to targets
