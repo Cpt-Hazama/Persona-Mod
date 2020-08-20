@@ -1,8 +1,8 @@
 "VertexlitGeneric"
 {
-	"$basetexture" "models/cpthazama/persona5/cendrillon/misc_berserk"
-	"$bumpmap" "models/cpthazama/persona5/cendrillon/misc_n"
-	"$phongexponenttexture" "models/cpthazama/persona5/cendrillon/misc_berserk_s"
+	"$basetexture" "models/cpthazama/persona3/hypnos/hypnos"
+	"$bumpmap" "models/cpthazama/persona3/hypnos/hypnos_n"
+	"$phongexponenttexture" "models/cpthazama/persona3/hypnos/hypnos_s"
 
 	"$phong"				"1"
 	"$phongboost"			"0"

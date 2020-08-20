@@ -273,6 +273,7 @@ if SERVER then
 	end)
 
 	local function summon_persona(ply)
+		if !ply:Alive() then return end
 		if ply:HasPersona() && CurTime() > ply:GetNextPersonaSummonT() then
 			local persona = ply:GetPersona()
 			if !IsValid(persona) then
@@ -316,6 +317,35 @@ if SERVER then
 		end
 	end
 	concommand.Add("summon_persona",summon_persona)
+
+	local function findTarget(ply)
+		ply.NextLockOnT = ply.NextLockOnT or CurTime()
+		if IsValid(ply:GetPersona()) && ply:Alive() then
+			if CurTime() > ply.NextLockOnT then
+				if IsValid(ply.Persona_EyeTarget) then
+					ply.Persona_EyeTarget = NULL
+					ply:EmitSound("cpthazama/persona5/misc/00019.wav",70,100)
+				else
+					local ent = ply:GetEyeTrace().Entity
+					if IsValid(ent) then
+						if (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != ply:GetPersona())) then
+							ply.Persona_EyeTarget = ent
+							ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+						end
+					else
+						local ents = ply:GetPersona():FindEnemies(ply:GetPos(),2000)
+						local ent = VJ_PICK(ents)
+						if IsValid(ent) then
+							ply.Persona_EyeTarget = ent
+							ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+						end
+					end
+				end
+				ply.NextLockOnT = CurTime() +0.2
+			end
+		end
+	end
+	concommand.Add("target_persona",findTarget)
 end
 
 if CLIENT then

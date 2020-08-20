@@ -1,13 +1,13 @@
 "VertexlitGeneric"
 {
-	"$basetexture" "models/cpthazama/persona5/cendrillon/cendrillon"
+	"$basetexture" "models/cpthazama/persona5/cendrillon/cendrillon_berserk"
 	"$bumpmap" "models/cpthazama/persona5/cendrillon/cendrillon_n"
-	"$phongexponenttexture" "models/cpthazama/persona5/cendrillon/cendrillon_s"
+	"$phongexponenttexture" "models/cpthazama/persona5/cendrillon/cendrillon_berserk_s"
 
 	"$phong"				"1"
 	"$phongboost"			"0"
 	"$phongfresnelranges"	"[0 0.5 1]"
-	"$phongtint"			"[1 1 0]"
+	"$phongtint"			"[1 0 0]"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"
@@ -18,5 +18,5 @@
 	"$envmaptint" "[0.001 0.001 0.001]"
 	"$envmapfresnel" "1"
 
-	"$lightwarptexture" "models/cpthazama/persona5/cel_legendary"
+	"$lightwarptexture" "models/cpthazama/persona5/cel_red"
 }

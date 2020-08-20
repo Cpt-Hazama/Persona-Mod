@@ -539,23 +539,25 @@ function ENT:Garudyne(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range",1)
 						local v = ply.Persona_EyeTarget
-						local spawnparticle = ents.Create("info_particle_system")
-						spawnparticle:SetKeyValue("effect_name","vj_per_skill_garudyne")
-						spawnparticle:SetPos(v:GetPos())
-						spawnparticle:SetParent(v)
-						spawnparticle:Spawn()
-						spawnparticle:Activate()
-						spawnparticle:Fire("Start","",0)
-						spawnparticle:Fire("SetParent",v:GetName())
-						v:EmitSound("cpthazama/persona5/skills/0035.wav",90,90)
-						timer.Simple(3,function()
-							if IsValid(spawnparticle) then
-								spawnparticle:Fire("Kill","",0.1)
-							end
-							if IsValid(v) then
-								self:DealDamage(v,DMG_P_HEAVY,DMG_P_WIND)
-							end
-						end)
+						if IsValid(v) then
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_garudyne")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:SetParent(v)
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("SetParent",v:GetName())
+							v:EmitSound("cpthazama/persona5/skills/0035.wav",90,90)
+							timer.Simple(3,function()
+								if IsValid(spawnparticle) then
+									spawnparticle:Fire("Kill","",0.1)
+								end
+								if IsValid(v) then
+									self:DealDamage(v,DMG_P_HEAVY,DMG_P_WIND)
+								end
+							end)
+						end
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)

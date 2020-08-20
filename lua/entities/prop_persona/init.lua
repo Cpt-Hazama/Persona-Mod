@@ -262,28 +262,28 @@ end
 function ENT:DefaultPersonaControls(ply,persona)
 	if ply:IsPlayer() then
 		ply:SetNWEntity("Persona_Target",ply.Persona_EyeTarget)
-		if ply:KeyReleased(IN_WALK) && CurTime() > self.NextLockOnT then
-			if IsValid(ply.Persona_EyeTarget) then
-				ply.Persona_EyeTarget = NULL
-				ply:EmitSound("cpthazama/persona5/misc/00019.wav",70,100)
-			else
-				local ent = ply:GetEyeTrace().Entity
-				if IsValid(ent) then
-					if (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != persona)) then
-						ply.Persona_EyeTarget = ent
-						ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
-					end
-				else
-					local ents = self:FindEnemies(ply:GetPos(),2000)
-					local ent = VJ_PICK(ents)
-					if IsValid(ent) then
-						ply.Persona_EyeTarget = ent
-						ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
-					end
-				end
-			end
-			self.NextLockOnT = CurTime() +0.2
-		end
+		-- if ply:KeyReleased(IN_WALK) && CurTime() > self.NextLockOnT then
+			-- if IsValid(ply.Persona_EyeTarget) then
+				-- ply.Persona_EyeTarget = NULL
+				-- ply:EmitSound("cpthazama/persona5/misc/00019.wav",70,100)
+			-- else
+				-- local ent = ply:GetEyeTrace().Entity
+				-- if IsValid(ent) then
+					-- if (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != persona)) then
+						-- ply.Persona_EyeTarget = ent
+						-- ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+					-- end
+				-- else
+					-- local ents = self:FindEnemies(ply:GetPos(),2000)
+					-- local ent = VJ_PICK(ents)
+					-- if IsValid(ent) then
+						-- ply.Persona_EyeTarget = ent
+						-- ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+					-- end
+				-- end
+			-- end
+			-- self.NextLockOnT = CurTime() +0.2
+		-- end
 		if IsValid(ply.Persona_EyeTarget) then
 			-- ply:SetEyeAngles(LerpAngle(5 *FrameTime(),ply:EyeAngles(),((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetShootPos()):Angle()))
 			local ang = ply:GetAngles()

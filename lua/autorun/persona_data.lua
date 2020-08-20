@@ -75,6 +75,11 @@ PERSONA["ariadne_picaro"].Model = "models/cpthazama/persona5/persona/ariadne_pic
 PERSONA["ariadne_picaro"].Aura = "jojo_aura_blue"
 PERSONA["ariadne_picaro"].Name = "Ariadne Picaro"
 
+PERSONA["hypnos"] = {}
+PERSONA["hypnos"].Model = "models/cpthazama/persona3/persona/hypnos.mdl"
+PERSONA["hypnos"].Aura = "jojo_aura_red"
+PERSONA["hypnos"].Name = "Hypnos"
+
 -- PERSONA["reaper"] = {}
 -- PERSONA["reaper"].Model = "models/cpthazama/persona5/persona/reaper.mdl"
 -- PERSONA["reaper"].Aura = "jojo_aura_red"
