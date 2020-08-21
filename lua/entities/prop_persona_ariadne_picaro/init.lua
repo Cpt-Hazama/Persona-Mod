@@ -22,7 +22,7 @@ ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/ariadne_picaro/ariadne_pi
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	local ply = self.User
 	if animBlock == "melee" then
-		self.User:EmitSound("cpthazama/persona5/joker/00" .. math.random(23,24) .. ".wav")
+		self:UserSound("cpthazama/persona5/joker/00" .. math.random(23,24) .. ".wav")
 		timer.Simple(1.28,function()
 			if IsValid(self) then
 				self:SetBodygroup(3,1)
@@ -101,7 +101,7 @@ function ENT:CustomOnInitialize()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RequestAura(ply,aura)
-	ply:EmitSound("cpthazama/persona5/joker/0022.wav",75,100)
+	self:UserSound:EmitSound("cpthazama/persona5/joker/0022.wav",75,100)
 	ParticleEffectAttach(aura == "jojo_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
@@ -112,5 +112,5 @@ function ENT:RequestAura(ply,aura)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
-	ply:EmitSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
+	self:UserSound:EmitSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
 end

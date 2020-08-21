@@ -46,21 +46,21 @@ function ENT:HandleEvents(skill,animBlock,seq,t)
 			"cpthazama/persona4/sho/no127b.wav",
 			"cpthazama/persona4/sho/no128a.wav",
 		}
-		self.User:EmitSound(VJ_PICK(tbl))
+		self:UserSound(VJ_PICK(tbl))
 	end
 	if animBlock == "special" then
 		local tbl = {
 			"cpthazama/persona4/sho/nb313b.wav"
 		}
-		self.User:EmitSound(VJ_PICK(tbl))
+		self:UserSound(VJ_PICK(tbl))
 	end
 	if skill == "Abyssal Wings" then
 		if animBlock == "range_start" then
 			self.Set = math.random(1,2)
-			self.User:EmitSound(self.Set == 1 && "cpthazama/persona4/sho/nb313b.wav" or "cpthazama/persona4/sho/nb322a.wav")
+			self:UserSound(self.Set == 1 && "cpthazama/persona4/sho/nb313b.wav" or "cpthazama/persona4/sho/nb322a.wav")
 		end
 		if animBlock == "range" then
-			self.User:EmitSound(self.Set == 1 && "cpthazama/persona4/sho/nb322b.wav" or "cpthazama/persona4/sho/nb323a.wav")
+			self:UserSound(self.Set == 1 && "cpthazama/persona4/sho/nb322b.wav" or "cpthazama/persona4/sho/nb323a.wav")
 		end
 	else
 		if animBlock == "range_start" then
@@ -69,14 +69,14 @@ function ENT:HandleEvents(skill,animBlock,seq,t)
 				"cpthazama/persona4/sho/nb400a.wav",
 				"cpthazama/persona4/sho/nb400b.wav",
 			}
-			self.User:EmitSound(VJ_PICK(tbl))
+			self:UserSound(VJ_PICK(tbl))
 		end
 		if animBlock == "range" then
 			local tbl = {
 				"cpthazama/persona4/sho/no303b.wav",
 				"cpthazama/persona4/sho/nb323b.wav",
 			}
-			self.User:EmitSound(VJ_PICK(tbl))
+			self:UserSound(VJ_PICK(tbl))
 		end
 	end
 end
@@ -119,7 +119,7 @@ function ENT:OnSummoned(ply)
 		"cpthazama/persona4/sho/no211a.wav",
 		"cpthazama/persona4/sho/no211b.wav",
 	}
-	ply:EmitSound(VJ_PICK(tbl))
+	self:UserSound(VJ_PICK(tbl))
 	
 	self:AddCard("Abyssal Wings",30,false,"curse")
 	self:AddCard("Life Drain",3,false,"almighty")
@@ -134,5 +134,5 @@ function ENT:OnSummoned(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
-	ply:EmitSound("cpthazama/persona4/sho/no127b.wav")
+	self:UserSound("cpthazama/persona4/sho/no127b.wav")
 end

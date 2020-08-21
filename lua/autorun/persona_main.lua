@@ -246,7 +246,7 @@ if SERVER then
 				dmginfo:ScaleDamage(0.5)
 			end
 		end
-		if ent:IsPlayer() then
+		if ent:IsPlayer() or ent:IsNPC() then
 			local dmgtype = dmginfo:GetDamageType()
 			local dmg = dmginfo:GetDamage()
 			local persona = ent:GetPersona()
@@ -262,6 +262,11 @@ if SERVER then
 					end
 					if VJ_HasValue(stats.NUL,dmgtype) then
 						dmginfo:SetDamage(0)
+					end
+					if stats.ABS && VJ_HasValue(stats.ABS,dmgtype) then
+						dmginfo:SetDamage(0)
+						ent:SetHealth(math.Clamp(ent:Health() +dmg,1,ent:GetMaxHealth()))
+						ent:EmitSound("cpthazama/persona5/skills/0679.wav",80)
 					end
 				end
 				if persona.HandleDamage then
@@ -666,13 +671,58 @@ if CLIENT then
 			Panel:AddControl("Slider",{Label = "Box Y Position",Command = "persona_hud_y",Min = 0,Max = 1080})
 		end,{})
 
-		spawnmenu.AddToolMenuOption("Persona","Main Settings","Persona","Persona","","",function(Panel)
+		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)
 			Panel:AddControl("Button",{Label = "Print Persona Stats",Command = "persona_showstats"})
 			Panel:AddControl("Button",{Label = "Create Legendary Persona",Command = "persona_legendary"})
 			Panel:AddControl("Label",{Text = "Persona must be LVL 99 to become Legendary!"})
 		end,{})
+
+		spawnmenu.AddToolMenuOption("Persona","Admin Settings","Cheats","Cheats","","",function(Panel)
+			Panel:AddControl("TextBox",{Label = "Level",Command = "persona_i_setlevel",WaitForEnter = "1"})
+			Panel:AddControl("Button",{Label = "Set Level",Command = "persona_setlevel"})
+
+			Panel:AddControl("TextBox",{Label = "EXP",Command = "persona_i_setexp",WaitForEnter = "0"})
+			Panel:AddControl("Button",{Label = "Set EXP",Command = "persona_setexp"})
+
+			Panel:AddControl("Button",{Label = "Give Req. EXP",Command = "persona_giveexp"})
+
+			Panel:AddControl("TextBox",{Label = "SP",Command = "persona_i_setsp",WaitForEnter = "1"})
+			Panel:AddControl("Button",{Label = "Set SP",Command = "persona_setsp"})
+		end,{})
 	end)
+
+	CreateClientConVar("persona_i_setlevel","1",false,false)
+	CreateClientConVar("persona_i_setexp","0",false,false)
+	CreateClientConVar("persona_i_setsp","1",false,false)
 end
+
+local function persona_setlevel(ply)
+	if !ply:IsAdmin() or !ply:IsSuperAdmin() then return end
+	PXP.SetLevel(ply,math.Clamp(GetConVarNumber("persona_i_setlevel"),1,99))
+end
+concommand.Add("persona_setlevel",persona_setlevel)
+
+local function persona_setexp(ply)
+	if !ply:IsAdmin() or !ply:IsSuperAdmin() then return end
+	PXP.SetEXP(ply,GetConVarNumber("persona_i_setexp"))
+end
+concommand.Add("persona_setexp",persona_setexp)
+
+local function persona_setsp(ply)
+	if !ply:IsAdmin() or !ply:IsSuperAdmin() then return end
+	local sp = GetConVarNumber("persona_i_setsp")
+	ply:SetSP(sp)
+	if sp > ply:GetMaxSP() then
+		ply:SetMaxSP(sp)
+	end
+end
+concommand.Add("persona_setsp",persona_setsp)
+
+local function persona_giveexp(ply)
+	if !ply:IsAdmin() or !ply:IsSuperAdmin() then return end
+	PXP.GiveRequiredEXP(ply)
+end
+concommand.Add("persona_giveexp",persona_giveexp)
 
 game.AddParticles("particles/magatsu_izanagi.pcf")
 

@@ -48,7 +48,7 @@ ENT.LegendaryMaterials[4] = "models/cpthazama/persona5/magatsuizanagi/magatsuiza
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Ghostly Wail" then
 		if animBlock == "melee" then
-			self.User:EmitSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
+			self:UserSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
 		end
 	end
 end
@@ -77,7 +77,7 @@ function ENT:PersonaControls(ply,persona)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
-	return self:GetTask() == "TASK_ATTACK" && self:GetPos() +self:OBBCenter() +self:GetForward() *675 or self:GetPos() +self:OBBCenter()
+	return self:GetPos() +self:OBBCenter()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
@@ -97,12 +97,17 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	if ply:IsPlayer() then ply:EmitSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav") end
+	self:UserSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
 	self:SetModel(self.Model)
 	self.PersonaDistance = 999999999 -- 40 meters
 	self.RechargeT = CurTime()
 	self.IsArmed = false
 	self.Magatsu = true
+	self.NextInstaKillT = CurTime()
+	self.InstaKillTarget = NULL
+	self.InstaKillTargetPos = Vector(0,0,0)
+	self.InstaKillStage = 0
+	self.InstaKillStyle = 0
 	
 	self:SetSkin(1)
 
@@ -113,6 +118,9 @@ function ENT:OnSummoned(ply)
 	self:AddCard("Evil Smile",12,false,"sleep")
 	self:AddCard("Charge",15,false,"passive")
 	self:AddCard("Megidola",24,false,"almighty")
+	if self.User:IsNPC() then
+		self:AddCard("Yomi Drop",100,false,"phys")
+	end
 
 	self:SetCard("Maziodyne")
 	self:SetCard("Ghastly Wail",true)
@@ -129,5 +137,22 @@ function ENT:OnRequestDisappear(ply)
 		"cpthazama/vox/adachi/kill/vbtl_pad_0#179 (pad300_1).wav",
 		"cpthazama/vox/adachi/kill/vbtl_pad_0#180 (pad300_2).wav",
 	}
-	ply:EmitSound(VJ_PICK(tbl))
+	self:UserSound(VJ_PICK(tbl))
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PersonaThink_NPC(ply,persona)
+	if self.InstaKillStage == 1 then
+		self:MoveToPos(self:GetPos() +Vector(0,0,-5),1.25)
+	end
+	if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
+		self.InstaKillTarget:SetPos(self.InstaKillTargetPos +Vector(0,0,-(self.InstaKillTarget:OBBMaxs().z /2)))
+		if self.InstaKillTarget:IsNPC() then
+			self.InstaKillTarget:StopMoving()
+			self.InstaKillTarget:StopMoving()
+			self.InstaKillTarget:ClearSchedule()
+			-- self.InstaKillTarget:ResetSequence(-1)
+			self.InstaKillTarget:ResetSequence(ACT_IDLE)
+		end
+		SafeRemoveEntity(self.InstaKillTarget:GetActiveWeapon())
+	end
 end

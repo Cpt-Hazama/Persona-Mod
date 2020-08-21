@@ -45,7 +45,7 @@ ENT.IsVelvetPersona = true
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Ghostly Wail" then
 		if animBlock == "melee" then
-			self.User:EmitSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
+			self:UserSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
 		end
 	end
 end
@@ -61,7 +61,7 @@ function ENT:CustomOnHitEntity(hitEnts,dmginfo)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
-	return self:GetTask() == "TASK_ATTACK" && self:GetPos() +self:OBBCenter() +self:GetForward() *675 or self:GetPos() +self:OBBCenter()
+	return self:GetPos() +self:OBBCenter()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
@@ -81,7 +81,7 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	if ply:IsPlayer() then ply:EmitSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav") end
+	self:UserSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
 
 	self:AddCard("Velvet Mandala",48,false,"almighty")
 	self:AddCard("Ghastly Wail",19,true,"almighty")
@@ -107,5 +107,5 @@ function ENT:OnRequestDisappear(ply)
 		"cpthazama/vox/adachi/kill/vbtl_pad_0#179 (pad300_1).wav",
 		"cpthazama/vox/adachi/kill/vbtl_pad_0#180 (pad300_2).wav",
 	}
-	ply:EmitSound(VJ_PICK(tbl))
+	self:UserSound(VJ_PICK(tbl))
 end

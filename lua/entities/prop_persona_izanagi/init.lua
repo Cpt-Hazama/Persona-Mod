@@ -37,7 +37,7 @@ ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/izanagi/izanagi_legendary
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Cross Slash" && self.User:IsPlayer() then
 		if math.random(1,10) == 1 then self:DoCritical(1) end
-		self.User:EmitSound("cpthazama/persona5/joker/0011.wav",85)
+		self:UserSound:EmitSound("cpthazama/persona5/joker/0011.wav",85)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	ply:EmitSound("cpthazama/persona5/joker/0009.wav")
+	self:UserSound("cpthazama/persona5/joker/0009.wav")
 	
 	self:AddCard("Cross Slash",8,true,"phys")
 	self:AddCard("Charge",15,false,"passive")
@@ -64,5 +64,5 @@ function ENT:OnSummoned(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
-	ply:EmitSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
+	self:UserSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
 end

@@ -116,23 +116,39 @@ end
 function ENT:PersonaInit()
 	self:SetBodygroup(1,1)
 	self.IsGood = false
-	-- self:MakeGood()
+	-- self:ChangeFaction(true)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:MakeGood()
-	for k, v in ipairs(self:GetMaterials()) do
-		if v == "models/cpthazama/persona5/akechi/body" then
-			self.DeathCorpseSubMaterials = {k -1}
-			self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/body_good")
+function ENT:ChangeFaction(bEvil)
+	if bEvil then
+		for k, v in ipairs(self:GetMaterials()) do
+			if v == "models/cpthazama/persona5/akechi/body" then
+				self.DeathCorpseSubMaterials = {k -1}
+				self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/body_good")
+			end
+			if v == "models/cpthazama/persona5/akechi/mask" then
+				self.DeathCorpseSubMaterials = {k -1}
+				self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/mask_good")
+			end
 		end
-		if v == "models/cpthazama/persona5/akechi/mask" then
-			self.DeathCorpseSubMaterials = {k -1}
-			self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/mask_good")
+		self.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_PHANTOMTHIEVES"}
+		self.Animations["idle_combat"] = ACT_IDLE
+		self.IsGood = true
+	else
+		for k, v in ipairs(self:GetMaterials()) do
+			if v == "models/cpthazama/persona5/akechi/body" then
+				self.DeathCorpseSubMaterials = {k -1}
+				self:SetSubMaterial(k -1,nil)
+			end
+			if v == "models/cpthazama/persona5/akechi/mask" then
+				self.DeathCorpseSubMaterials = {k -1}
+				self:SetSubMaterial(k -1,nil)
+			end
 		end
+		self.VJ_NPC_Class = {"CLASS_BLACKMASK","CLASS_SHIDO"}
+		self.Animations["idle_combat"] = ACT_IDLE_ANGRY
+		self.IsGood = false
 	end
-	self.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_PHANTOMTHIEVES"}
-	self.PlayerFriendly = true
-	self.IsGood = true
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummonPersona(persona)
@@ -142,6 +158,11 @@ function ENT:OnSummonPersona(persona)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink()
+	if self.PlayerFriendly == true && self.IsGood == false then
+		self:ChangeFaction(true)
+	elseif self.PlayerFriendly == false && self.IsGood == true then
+		self:ChangeFaction(false)
+	end
 	if self.MetaVerseMode && self:Health() > 0 then
 		self:SetPoseParameter("anger",0.6)
 	else

@@ -196,59 +196,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:ControlPersonaMovement(ply)
-	local dir = Vector()
-	local w = ply:KeyDown(IN_FORWARD)
-	local a = ply:KeyDown(IN_MOVELEFT)
-	local s = ply:KeyDown(IN_BACK)
-	local d = ply:KeyDown(IN_MOVERIGHT)
-	local ang = self.User:GetAngles()
-	-- if !w && !a && !d && !s then
-		-- self:SetAngles(self.User:GetAngles())
-	-- end
-	if w then
-		if self.CurrentForwardAng != 15 then
-			self.CurrentForwardAng = self.CurrentForwardAng +1
-		end
-		dir = dir +self:GetForward()
-	elseif s then
-		if self.CurrentForwardAng != -15 then
-			self.CurrentForwardAng = self.CurrentForwardAng -1
-		end
-		dir = dir -self:GetForward()
-	else
-		if self.CurrentForwardAng != 0 then
-			self.CurrentForwardAng = (self.CurrentForwardAng > 0 && self.CurrentForwardAng -1) or self.CurrentForwardAng +1
-		end
-	end
-	if a then
-		if self.CurrentSideAng != -8 then
-			self.CurrentSideAng = self.CurrentSideAng -1
-		end
-		dir = dir -self:GetRight()
-	elseif d then
-		if self.CurrentSideAng != 8 then
-			self.CurrentSideAng = self.CurrentSideAng +1
-		end
-		dir = dir +self:GetRight()
-	else
-		if self.CurrentSideAng != 0 then
-			self.CurrentSideAng = (self.CurrentSideAng > 0 && self.CurrentSideAng -1) or self.CurrentSideAng +1
-		end
-	end
-	self:FacePlayerAim(self.User)
-	if dir:Length() > 0 then
-		local tPos = self:GetPos() +dir *20
-		local tracedata = {}
-		tracedata.start = self:GetPos() +self:OBBCenter()
-		tracedata.endpos = tPos
-		tracedata.filter = {ply,self}
-		local tr = util.TraceLine(tracedata)
-		if !tr.Hit then
-			self:MoveToPos(tPos,1.75)
-		end
-	end
-end
+function ENT:PersonaThink_NPC(ply,persona) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:IdleAnimationCode(ply)
 	self.CurrentIdle = self.User:IsPlayer() && self.User:Crouching() && "idle_low" or "idle"
@@ -299,33 +247,35 @@ function ENT:DefaultPersonaControls(ply,persona)
 			local d = ply:KeyDown(IN_MOVERIGHT)
 			local s = ply:KeyDown(IN_BACK)
 			local ang = self.User:GetAngles()
+			local speed = 3
+			local speedS = 2
 			if !w && !a && !d && !s then
 				self:SetAngles(self.User:GetAngles())
 			end
 			if w then
 				if self.CurrentForwardAng != 15 then
-					self.CurrentForwardAng = self.CurrentForwardAng +1
+					self.CurrentForwardAng = self.CurrentForwardAng +speed
 				end
 			elseif s then
 				if self.CurrentForwardAng != -15 then
-					self.CurrentForwardAng = self.CurrentForwardAng -1
+					self.CurrentForwardAng = self.CurrentForwardAng -speed
 				end
 			else
 				if self.CurrentForwardAng != 0 then
-					self.CurrentForwardAng = (self.CurrentForwardAng > 0 && self.CurrentForwardAng -1) or self.CurrentForwardAng +1
+					self.CurrentForwardAng = (self.CurrentForwardAng > 0 && self.CurrentForwardAng -speed) or self.CurrentForwardAng +speed
 				end
 			end
 			if a then
 				if self.CurrentSideAng != -8 then
-					self.CurrentSideAng = self.CurrentSideAng -1
+					self.CurrentSideAng = self.CurrentSideAng -speedS
 				end
 			elseif d then
 				if self.CurrentSideAng != 8 then
-					self.CurrentSideAng = self.CurrentSideAng +1
+					self.CurrentSideAng = self.CurrentSideAng +speedS
 				end
 			else
 				if self.CurrentSideAng != 0 then
-					self.CurrentSideAng = (self.CurrentSideAng > 0 && self.CurrentSideAng -1) or self.CurrentSideAng +1
+					self.CurrentSideAng = (self.CurrentSideAng > 0 && self.CurrentSideAng -speedS) or self.CurrentSideAng +speedS
 				end
 			end
 			self:SetAngles(Angle(self.CurrentForwardAng,ang.y,self.CurrentSideAng))
@@ -391,12 +341,24 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 	elseif melee == "Vajra Blast" then
 		self:VajraBlast(ply,persona)
 		return
+	elseif melee == "Hassou Tobi" then
+		self:HassouTobi(ply,persona)
+		return
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	if self:GetCard() == "Myriad Truths" then 
 		self:MyriadTruths(ply,persona)
+		return
+	elseif self:GetCard() == "Agidyne" then
+		self:Agidyne(ply,persona)
+		return
+	elseif self:GetCard() == "Maragidyne" then
+		self:Maragidyne(ply,persona)
+		return
+	elseif self:GetCard() == "Yomi Drop" then
+		self:YomiDrop(ply,persona)
 		return
 	elseif self:GetCard() == "Myriad Mandala" then
 		self:MyriadMandala(ply,persona)
@@ -427,6 +389,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		return
 	elseif self:GetCard() == "Salvation" then
 		self:Salvation(ply,persona)
+		return
+	elseif self:GetCard() == "Diarama" then
+		self:Diarama(ply,persona)
 		return
 	elseif self:GetCard() == "Diarahan" then
 		self:Diarahan(ply,persona)
@@ -480,6 +445,12 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		end
 		return
 	elseif self:GetCard() == "Magatsu Blade" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Hassou Tobi" then
 		self.CurrentMeleeSkill = self:GetCard()
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
@@ -586,13 +557,9 @@ function ENT:Think()
 			if IsValid(self.User:GetEnemy()) then
 				self.User.Persona_EyeTarget = self.User:GetEnemy()
 			end
+			self:PersonaThink_NPC(self.User,self)
 		end
-		-- self:PersonaControls(self.User,self)
-		-- if self.ControlType == 2 then
-			-- self:ControlPersonaMovement(self.User)
-		-- else
-			self:DefaultPersonaControls(self.User,self)
-		-- end
+		self:DefaultPersonaControls(self.User,self)
 	else
 		self:Remove()
 	end
@@ -972,6 +939,42 @@ function ENT:OnKilledEnemy_EXP(ent)
 	local exp = ent:GetNWInt("PXP_EXP")
 	
 	PXP.GiveEXP(ply,exp)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:AgiEffect(ent,dmg)
+	local dmg = dmg or DMG_P_HEAVY
+	local m = ents.Create("prop_vj_animatable")
+	m:SetModel("models/cpthazama/persona5/effects/agi.mdl")
+	m:SetPos(ent:GetPos())
+	m:Spawn()
+	m:SetParent(ent)
+	m:DrawShadow(false)
+	m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+	m:ResetSequence("idle")
+	m:SetModelScale(ent:OBBMaxs().z *0.03,1)
+	m:EmitSound("ambient/fire/ignite.wav",80)
+	timer.Simple(1,function()
+		if IsValid(m) then
+			m:EmitSound("cpthazama/persona5/skills/0015.wav",95)
+		end
+	end)
+	timer.Simple(2,function()
+		if IsValid(ent) && IsValid(self) then
+			if math.random(1,4) == 1 then
+				ent:Ignite(20)
+				if IsValid(self.User) && self.User:IsPlayer() then
+					self.User:ChatPrint("Inflicted Burn!")
+				end
+			end
+			ent:EmitSound("cpthazama/persona5/skills/0011.wav",75)
+			self:DealDamage(ent,dmg,DMG_P_FIRE,2)
+		end
+	end)
+	timer.Simple(3,function()
+		if IsValid(m) then
+			SafeRemoveEntity(m)
+		end
+	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MegidolaonEffect(ent,dmg)

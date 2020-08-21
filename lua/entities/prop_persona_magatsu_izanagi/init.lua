@@ -48,7 +48,7 @@ ENT.LegendaryMaterials[4] = "models/cpthazama/persona5/magatsuizanagi/magatsuiza
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Ghostly Wail" then
 		if animBlock == "melee" then
-			self.User:EmitSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
+			self:UserSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
 		end
 	end
 end
@@ -120,20 +120,10 @@ function ENT:PersonaControls_NPC(ply,persona)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
-	if ply:IsNPC() then
-		self:PersonaControls_NPC(ply,persona)
-		return
-	end
 	local lmb = ply:KeyDown(IN_ATTACK)
 	local rmb = ply:KeyDown(IN_ATTACK2)
 	local r = ply:KeyDown(IN_RELOAD)
-	-- self:SetSkin(CurTime() > self.RechargeT && 0 or 1)
-	if rmb then
-		-- if self.InstaKillStage > 0 then return end
-		if self:GetCard() == "Yomi Drop" then
-			self:InstaKill(ply,persona,rmb)
-		end
-	end
+
 	if self.InstaKillStage == 1 then
 		self:MoveToPos(self:GetPos() +Vector(0,0,-5),1.25)
 	end
@@ -150,158 +140,8 @@ function ENT:PersonaControls(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:InstaKill(ply,persona,rmb)
-	if rmb then
-		if self.InstaKillStage > 0 then return end
-		if self.User:GetSP() >= self.CurrentCardCost && CurTime() > self.NextInstaKillT && self:GetTask() == "TASK_IDLE" && self.InstaKillStage == 0 then
-			self:SetTask("TASK_PLAY_ANIMATION")
-			self:PlayAnimation("atk_magatsu_mandala_pre",1)
-			self.InstaKillStage = 1
-			self.InstaKillTarget = NULL
-			self.NextInstaKillT = CurTime() +20
-			self:TakeSP(self.CurrentCardCost)
-			self:DoCritical(1)
-
-			local style = math.random(1,2)
-			local dur1 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_start0" .. style .. ".wav")
-			local dur2 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_phase1_0" .. style .. ".wav")
-			local dur3 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_phase2_0" .. style .. ".wav")
-			local delay = 3
-			local dur4 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_phase3_0" .. style .. ".wav")
-			local prediction = dur1 +dur2 +dur3 +dur4 +delay
-			self.InstaKillStyle = style
-
-			local bloodeffect = EffectData()
-			bloodeffect:SetOrigin(self:GetPos())
-			bloodeffect:SetScale(225)
-			bloodeffect:SetAttachment(8)
-			util.Effect("P4_RedMist",bloodeffect)
-
-			timer.Simple(dur1 -0.8,function()
-				if IsValid(self) && IsValid(ply) then
-					self:SetNoDraw(true)
-					self.InstaKillStage = 2
-					self:EmitSound("cpthazama/persona5/adachi/redmist.wav")
-					self:PlayAnimation("atk_magatsu_mandala_pre_idle",1,1)
-				end
-			end)
-			
-			timer.Simple(dur1,function()
-				if IsValid(self) && IsValid(ply) then
-					local findEnts = ents.FindInSphere(self:GetPos(),1500)
-					local entTbl = {}
-					if findEnts != nil then
-						for _,v in pairs(findEnts) do
-							if (v != self && v != self.User) && (((v:IsNPC() or (v:IsPlayer() && v:Alive())))) && v:IsOnGround() then
-								table.insert(entTbl,v)
-							end
-						end
-					end
-					local ent = VJ_PICK(entTbl)
-					if IsValid(ent) then
-						self.InstaKillTarget = ent
-						self.InstaKillTargetPos = ent:GetPos()
-						if ent:IsPlayer() then ent:Freeze(true) end
-						ent:EmitSound("cpthazama/persona5/adachi/redmist_puddle.wav")
-
-						local bloodeffect = EffectData()
-						bloodeffect:SetOrigin(ent:GetPos())
-						bloodeffect:SetScale(140)
-						bloodeffect:SetAttachment(5)
-						util.Effect("P4_RedMist",bloodeffect)
-						self:DoInstaKillTheme({self.User,ent},prediction,1)
-						-- self:PlayInstaKillTheme({self.User,ent},prediction,1)
-					else
-						self.InstaKillStage = 0
-					end
-				end
-			end)
-			
-			timer.Simple(dur1 +1,function()
-				if IsValid(self) && IsValid(ply) then
-					if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
-						local ang = self:GetAngles()
-						self:SetPos(self.InstaKillTarget:GetPos() +self.InstaKillTarget:GetForward() *-100 +Vector(0,0,self.InstaKillTarget:OBBMaxs().z /2))
-						self:SetAngles(Angle(ang.x,(self.InstaKillTarget:GetPos() -self:GetPos()):Angle().y,ang.z))
-					end
-					self:SetNoDraw(false)
-					self:EmitSound("cpthazama/persona5/adachi/redmist.wav")
-				end
-			end)
-
-			timer.Simple(dur1 +dur2 +dur3,function()
-				if IsValid(self) && IsValid(ply) then
-					if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
-						self:PlayAnimation("atk_magatsu_mandala",1,1)
-						self:EmitSound("cpthazama/persona5/adachi/blast_charge.wav",120)
-						util.ScreenShake(self:GetPos(),16,100,3,5000)
-					end
-				end
-			end)
-
-			timer.Simple(dur1 +dur2 +dur3 +delay -0.8,function()
-				if IsValid(self) && IsValid(ply) then
-					if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
-						self:PlayAnimation("atk_cross_slash",1)
-						timer.Simple(self:GetSequenceDuration(self,"atk_cross_slash") -0.25,function()
-							if IsValid(self) then
-								self:PlayAnimation("idle",1,1)
-							end
-						end)
-					end
-				end
-			end)
-			
-			timer.Simple(dur1 +dur2 +dur3 +delay,function()
-				if IsValid(self) && IsValid(ply) then
-					if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
-						local ent = self.InstaKillTarget
-						if ent:IsPlayer() then
-							ent:GodDisable()
-						end
-						self:EmitSound("cpthazama/persona5/adachi/slash.wav",120)
-						ent:SetPos(self.InstaKillTargetPos)
-						if ent:IsPlayer() then ent:Freeze(false) end
-						ent:SetHealth(1)
-						if ent.Armor && type(ent.Armor) == "number" then
-							ent.Armor = 0
-						end
-						if ent.Shields && type(ent.Shields) == "number" then
-							ent.Shields = 0
-						end
-						if ent.ShieldHealth && type(ent.ShieldHealth) == "number" then
-							ent.ShieldHealth = 0
-						end
-						ent:TakeDamage(999999999,ply,self)
-						util.ScreenShake(self:GetPos(),16,100,0.5,10000)
-						self.InstaKillStage = 0
-
-						local bloodeffect = EffectData()
-						bloodeffect:SetOrigin(ent:GetPos())
-						bloodeffect:SetScale(200)
-						bloodeffect:SetAttachment(12)
-						util.Effect("P4_RedMist",bloodeffect)
-					end
-				end
-			end)
-			
-			timer.Simple(dur1 +dur2 +dur3 +delay +dur4 -0.25,function()
-				if IsValid(self) && IsValid(ply) then
-					self:DoIdle()
-				end
-			end)
-
-			self:SoundTimer(0,ply,"cpthazama/persona5/adachi/vo/instakill_start0" .. style .. ".wav")
-			self:SoundTimer(dur1,ply,"cpthazama/persona5/adachi/vo/instakill_phase1_0" .. style .. ".wav")
-			self:SoundTimer(dur1 +dur2,ply,"cpthazama/persona5/adachi/vo/instakill_phase2_0" .. style .. ".wav")
-			self:SoundTimer(dur1 +dur2 +dur3,ply,"cpthazama/persona5/adachi/vo/instakill_phase3_0" .. style .. ".wav")
-			self:SoundTimer(dur1 +dur2 +dur3 +delay +dur4 -1,ply,"cpthazama/persona5/adachi/vo/instakill_end0" .. style .. ".wav")
-		end
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
-	return self:GetTask() == "TASK_ATTACK" && self:GetPos() +self:OBBCenter() +self:GetForward() *675 or self:GetPos() +self:OBBCenter()
+	return self:GetPos() +self:OBBCenter()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
@@ -321,7 +161,7 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	if ply:IsPlayer() then ply:EmitSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav") end
+	self:UserSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
 	self:SetModel(self.Model)
 	self.PersonaDistance = 999999999 -- 40 meters
 	self.RechargeT = CurTime()
@@ -361,5 +201,5 @@ function ENT:OnRequestDisappear(ply)
 		"cpthazama/vox/adachi/kill/vbtl_pad_0#179 (pad300_1).wav",
 		"cpthazama/vox/adachi/kill/vbtl_pad_0#180 (pad300_2).wav",
 	}
-	ply:EmitSound(VJ_PICK(tbl))
+	self:UserSound(VJ_PICK(tbl))
 end

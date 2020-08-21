@@ -6,15 +6,15 @@ function ENT:GhostlyWail(ply) // Magatsu-Izanagi Skill
 	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
 		self:SetTask("TASK_ATTACK")
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		local tA = self:PlaySet("Ghostly Wail","melee",1)
+		local tA = self:PlaySet("Ghastly Wail","melee",1)
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		local t = {0.9,1.4,1.9}
 		for _,v in pairs(t) do
 			timer.Simple(v,function()
 				if IsValid(self) then
-					self:MeleeAttackCode(DMG_P_HEAVY,210,70)
+					self:MeleeAttackCode(DMG_P_HEAVY,850,70)
 				end
 			end)
 		end
@@ -26,6 +26,212 @@ function ENT:GhostlyWail(ply) // Magatsu-Izanagi Skill
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HassouTobi(ply)
+	local skill = "Hassou Tobi"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		local tA = self:PlaySet(skill,"melee",1)
+		self:SetAngles(self.User:GetAngles())
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
+		local tblOffset = {
+			[1] = {f=0,r=350},
+			[2] = {f=350,r=350},
+			[3] = {f=350,r=0},
+			[4] = {f=0,r=0},
+			[5] = {f=350,r=0},
+			[6] = {f=350,r=350},
+			[7] = {f=0,r=350},
+			[8] = {f=0,r=0},
+		}
+		for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+			v:EmitSound("cpthazama/persona5/skills/0215.wav",80)
+			local doDMG = math.random(1,10) <= 9
+			for i = 1,8 do
+				local t = 0.3 *i
+				timer.Simple(t,function()
+					if IsValid(self) && IsValid(v) then
+						if doDMG then self:DealDamage(v,DMG_P_MEDIUM,DMG_P_PHYS) end
+
+						local effectdata = EffectData()
+						local data = tblOffset[i]
+						effectdata:SetStart(v:GetPos() +v:GetForward() *data.f +v:GetRight() *data.r)
+						effectdata:SetOrigin(v:GetPos() +v:GetForward() *-data.f +v:GetRight() *-data.r)
+						effectdata:SetAngles(Angle(255,0,0))
+						effectdata:SetRadius(100)
+						effectdata:SetHitBox(1.25)
+						util.Effect("Persona_Slice",effectdata)
+					end
+				end)
+			end
+		end
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:YomiDrop(ply,persona,rmb)
+	-- if rmb then
+		local skill = "Yomi Drop"
+		if self.InstaKillStage > 0 then return end
+		if self.User:GetSP() >= self.CurrentCardCost && CurTime() > self.NextInstaKillT && self:GetTask() == "TASK_IDLE" && self.InstaKillStage == 0 then
+			self:SetTask("TASK_PLAY_ANIMATION")
+			local t = self:PlaySet(skill,"range_start",1)
+			-- self:PlayAnimation("atk_magatsu_mandala_pre",1)
+			self.InstaKillStage = 1
+			self.InstaKillTarget = NULL
+			self.NextInstaKillT = CurTime() +20
+			self:TakeSP(self.CurrentCardCost)
+			self:DoCritical(1)
+
+			local style = math.random(1,2)
+			local dur1 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_start0" .. style .. ".wav")
+			local dur2 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_phase1_0" .. style .. ".wav")
+			local dur3 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_phase2_0" .. style .. ".wav")
+			local delay = 3
+			local dur4 = SoundDuration("cpthazama/persona5/adachi/vo/instakill_phase3_0" .. style .. ".wav")
+			local prediction = dur1 +dur2 +dur3 +dur4 +delay
+			self.InstaKillStyle = style
+
+			local bloodeffect = EffectData()
+			bloodeffect:SetOrigin(self:GetPos())
+			bloodeffect:SetScale(225)
+			bloodeffect:SetAttachment(8)
+			util.Effect("P4_RedMist",bloodeffect)
+
+			timer.Simple(dur1 -0.8,function()
+				if IsValid(self) && IsValid(ply) then
+					self:SetNoDraw(true)
+					self.InstaKillStage = 2
+					self:EmitSound("cpthazama/persona5/adachi/redmist.wav")
+					-- self:PlayAnimation("atk_magatsu_mandala_pre_idle",1,1)
+					self:PlaySet(skill,"range_start_idle",1,1)
+				end
+			end)
+			
+			timer.Simple(dur1,function()
+				if IsValid(self) && IsValid(ply) then
+					local findEnts = ents.FindInSphere(self:GetPos(),1500)
+					local entTbl = {}
+					if findEnts != nil then
+						for _,v in pairs(findEnts) do
+							if (v != self && v != self.User) && (((v:IsNPC() or (v:IsPlayer() && v:Alive())))) && v:IsOnGround() then
+								table.insert(entTbl,v)
+							end
+						end
+					end
+					local ent = VJ_PICK(entTbl)
+					if IsValid(ent) then
+						self.InstaKillTarget = ent
+						self.InstaKillTargetPos = ent:GetPos()
+						if ent:IsPlayer() then ent:Freeze(true) end
+						ent:EmitSound("cpthazama/persona5/adachi/redmist_puddle.wav")
+
+						local bloodeffect = EffectData()
+						bloodeffect:SetOrigin(ent:GetPos())
+						bloodeffect:SetScale(140)
+						bloodeffect:SetAttachment(5)
+						util.Effect("P4_RedMist",bloodeffect)
+						local pUser = self.User
+						if pUser:IsNPC() && pUser.VJ_IsBeingControlled then
+							pUser = pUser.VJ_TheController
+						end
+						self:DoInstaKillTheme({pUser,ent},prediction,1)
+						-- self:PlayInstaKillTheme({self.User,ent},prediction,1)
+					else
+						self.InstaKillStage = 0
+					end
+				end
+			end)
+			
+			timer.Simple(dur1 +1,function()
+				if IsValid(self) && IsValid(ply) then
+					if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
+						local ang = self:GetAngles()
+						self:SetPos(self.InstaKillTarget:GetPos() +self.InstaKillTarget:GetForward() *-100 +Vector(0,0,self.InstaKillTarget:OBBMaxs().z /2))
+						self:SetAngles(Angle(ang.x,(self.InstaKillTarget:GetPos() -self:GetPos()):Angle().y,ang.z))
+					end
+					self:SetNoDraw(false)
+					self:EmitSound("cpthazama/persona5/adachi/redmist.wav")
+				end
+			end)
+
+			timer.Simple(dur1 +dur2 +dur3,function()
+				if IsValid(self) && IsValid(ply) then
+					if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
+						-- self:PlayAnimation("atk_magatsu_mandala",1,1)
+						self:PlaySet(skill,"range_idle",1,1)
+						self:EmitSound("cpthazama/persona5/adachi/blast_charge.wav",120)
+						util.ScreenShake(self:GetPos(),16,100,3,5000)
+					end
+				end
+			end)
+
+			timer.Simple(dur1 +dur2 +dur3 +delay -0.8,function()
+				if IsValid(self) && IsValid(ply) then
+					if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
+						self:PlayAnimation("atk_cross_slash",1)
+						timer.Simple(self:GetSequenceDuration(self,"atk_cross_slash") -0.25,function()
+							if IsValid(self) then
+								-- self:PlayAnimation("idle",1,1)
+								self:PlaySet(skill,"range_end",1,1)
+							end
+						end)
+					end
+				end
+			end)
+			
+			timer.Simple(dur1 +dur2 +dur3 +delay,function()
+				if IsValid(self) && IsValid(ply) then
+					if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
+						local ent = self.InstaKillTarget
+						if ent:IsPlayer() then
+							ent:GodDisable()
+						end
+						self:EmitSound("cpthazama/persona5/adachi/slash.wav",120)
+						ent:SetPos(self.InstaKillTargetPos)
+						if ent:IsPlayer() then ent:Freeze(false) end
+						ent:SetHealth(1)
+						if ent.Armor && type(ent.Armor) == "number" then
+							ent.Armor = 0
+						end
+						if ent.Shields && type(ent.Shields) == "number" then
+							ent.Shields = 0
+						end
+						if ent.ShieldHealth && type(ent.ShieldHealth) == "number" then
+							ent.ShieldHealth = 0
+						end
+						ent:TakeDamage(999999999,ply,self)
+						util.ScreenShake(self:GetPos(),16,100,0.5,10000)
+						self.InstaKillStage = 0
+
+						local bloodeffect = EffectData()
+						bloodeffect:SetOrigin(ent:GetPos())
+						bloodeffect:SetScale(200)
+						bloodeffect:SetAttachment(12)
+						util.Effect("P4_RedMist",bloodeffect)
+					end
+				end
+			end)
+			
+			timer.Simple(dur1 +dur2 +dur3 +delay +dur4 -0.25,function()
+				if IsValid(self) && IsValid(ply) then
+					self:DoIdle()
+				end
+			end)
+
+			self:SoundTimer(0,ply,"cpthazama/persona5/adachi/vo/instakill_start0" .. style .. ".wav")
+			self:SoundTimer(dur1,ply,"cpthazama/persona5/adachi/vo/instakill_phase1_0" .. style .. ".wav")
+			self:SoundTimer(dur1 +dur2,ply,"cpthazama/persona5/adachi/vo/instakill_phase2_0" .. style .. ".wav")
+			self:SoundTimer(dur1 +dur2 +dur3,ply,"cpthazama/persona5/adachi/vo/instakill_phase3_0" .. style .. ".wav")
+			self:SoundTimer(dur1 +dur2 +dur3 +delay +dur4 -1,ply,"cpthazama/persona5/adachi/vo/instakill_end0" .. style .. ".wav")
+		end
+	-- end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:VorpalBlade(ply)
 	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
 		self:SetTask("TASK_ATTACK")
@@ -33,7 +239,7 @@ function ENT:VorpalBlade(ply)
 		local tA = self:PlaySet("Vorpal Blade","melee",1)
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		local t = {0.5,0.8,1.1,1.4,1.7,2}
 		for _,i in pairs(t) do
 			for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
@@ -44,10 +250,12 @@ function ENT:VorpalBlade(ply)
 							for i = 1,math.random(1,4) do
 								local effectdata = EffectData()
 								local s = v:NearestPoint(self:GetAttackPosition())
-								local dist = 200
+								local dist = 100
+								local distEx = 300
 								effectdata:SetAngles(Angle(100,250,255))
+								effectdata:SetRadius(4)
 								effectdata:SetStart(s +Vector(math.Rand(-dist,dist),math.Rand(-dist,dist),math.Rand(-dist,dist)))
-								effectdata:SetOrigin(s +Vector(math.Rand(-dist,dist),math.Rand(-dist,dist),math.Rand(-dist,dist)))
+								effectdata:SetOrigin(s +Vector(math.Rand(-distEx,distEx),math.Rand(-distEx,distEx),math.Rand(-distEx,distEx)))
 								util.Effect("Persona_Slice",effectdata)
 							end
 						end
@@ -124,7 +332,7 @@ function ENT:RiotGun(ply,persona)
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
 			if IsValid(v) then
 				v:EmitSound("cpthazama/persona5/skills/0227.wav",95)
@@ -178,7 +386,7 @@ function ENT:Cleave(ply,persona)
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(0.8,function()
 			if IsValid(self) then
 				self:MeleeAttackCode(DMG_P_LIGHT,600,150)
@@ -200,7 +408,7 @@ function ENT:VajraBlast(ply,persona)
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(0.8,function()
 			if IsValid(self) then
 				self:MeleeAttackCode(DMG_P_MEDIUM,600,150)
@@ -244,7 +452,7 @@ function ENT:BeastWeaver(ply,persona)
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(1.3,function()
 			if IsValid(self) then
 				self:MeleeAttackCode(DMG_P_COLOSSAL,1200,90)
@@ -266,7 +474,7 @@ function ENT:AlmightySlash(ply,persona)
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(0.8,function()
 			if IsValid(self) then
 				self:MeleeAttackCode(DMG_P_COLOSSAL,850,90,DMG_P_ALMIGHTY)
@@ -288,7 +496,7 @@ function ENT:CrossSlash(ply,persona) // Izanagi Skill
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(0.8,function()
 			if IsValid(self) then
 				self:MeleeAttackCode(DMG_P_HEAVY,600,90)
@@ -314,7 +522,7 @@ function ENT:HeavensBlade(ply,persona) // Izanagi-no-Okami Skill
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(0.8,function()
 			if IsValid(self) then
 				self:MeleeAttackCode(DMG_P_SEVERE,1500,130)
@@ -345,7 +553,7 @@ function ENT:MagatsuBlade(ply,persona) // Magatsu-Izanagi-no-Okami Skill
 		self:FindTarget(ply)
 		self:SetAngles(self.User:GetAngles())
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(0.8,function()
 			if IsValid(self) then
 				local hents = self:MeleeAttackCode(DMG_P_HEAVY,1500,130)
@@ -479,7 +687,7 @@ function ENT:Garu(ply,persona)
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1)
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1,1)
@@ -531,7 +739,7 @@ function ENT:Garudyne(ply,persona)
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1)
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1,1)
@@ -586,7 +794,7 @@ function ENT:Magarudyne(ply,persona)
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1)
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1,1)
@@ -643,7 +851,7 @@ function ENT:Zionga(ply,persona)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1.5)
 		-- ply:EmitSound("cpthazama/persona5/adachi/vo/curse.wav")
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t -(t *0.5),function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1,1)
@@ -697,7 +905,7 @@ function ENT:Mazionga(ply,persona)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1.5)
 		-- ply:EmitSound("cpthazama/persona5/adachi/vo/curse.wav")
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t -(t *0.5),function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1,1)
@@ -752,7 +960,7 @@ function ENT:Maziodyne(ply,persona)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1)
 		-- ply:EmitSound("cpthazama/persona5/adachi/vo/curse.wav")
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1,1)
@@ -909,6 +1117,78 @@ function ENT:Makougaon(ply,persona)
 										spawnparticle:Fire("Kill","",0.1)
 									end
 								end)
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Agidyne(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Agidyne"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:AgiEffect(ent,DMG_P_HEAVY)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Maragidyne(ply,persona)
+	local skill = "Maragidyne"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) then
+								self:AgiEffect(v,DMG_P_HEAVY)
 							end
 						end
 						timer.Simple(t,function()
@@ -1126,7 +1406,7 @@ function ENT:MyriadTruths(ply,persona)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet("Myriad Truths","range_start",1)
 		self:TakeSP(self.CurrentCardCost)
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet("Myriad Truths","range",1)
@@ -1181,7 +1461,7 @@ function ENT:MyriadMandala(ply,persona)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet("Myriad Mandala","range_start",1)
 		self:TakeSP(self.CurrentCardCost)
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet("Myriad Mandala","range",1)
@@ -1243,7 +1523,7 @@ function ENT:Freila(ply,persona)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1)
 		self:TakeSP(self.CurrentCardCost)
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range",1)
@@ -1400,6 +1680,47 @@ function ENT:Salvation(ply,persona)
 
 						local spawnparticle = ents.Create("info_particle_system")
 						spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
+						spawnparticle:SetPos(self.User:GetPos())
+						spawnparticle:Spawn()
+						spawnparticle:Activate()
+						spawnparticle:Fire("Start","",0)
+						spawnparticle:Fire("Kill","",0.1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Diarama(ply,persona)
+	local skill = "Diarama"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						self.User:SetHealth(math.Clamp(self.User:Health() +(self.User:GetMaxHealth() *0.2),1,self.User:GetMaxHealth()))
+						self:DoChat("Restored 20% of your HP!")
+						self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+
+						local spawnparticle = ents.Create("info_particle_system")
+						spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
 						spawnparticle:SetPos(self.User:GetPos())
 						spawnparticle:Spawn()
 						spawnparticle:Activate()
@@ -1622,7 +1943,7 @@ function ENT:Megidola(ply,ent)
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1)
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1)
@@ -1687,7 +2008,7 @@ function ENT:Megidolaon(ply,ent)
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet("Megidolaon","range_start",1)
-		if math.random(1,100) <= self.Stats.LUC then self:DoCritical(1) end
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet("Megidolaon","range_start_idle",1)

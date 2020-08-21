@@ -80,6 +80,11 @@ PERSONA["hypnos"].Model = "models/cpthazama/persona3/persona/hypnos.mdl"
 PERSONA["hypnos"].Aura = "jojo_aura_red"
 PERSONA["hypnos"].Name = "Hypnos"
 
+PERSONA["medea"] = {}
+PERSONA["medea"].Model = "models/cpthazama/persona3/persona/medea.mdl"
+PERSONA["medea"].Aura = "jojo_aura_red"
+PERSONA["medea"].Name = "Medea"
+
 -- PERSONA["reaper"] = {}
 -- PERSONA["reaper"].Model = "models/cpthazama/persona5/persona/reaper.mdl"
 -- PERSONA["reaper"].Aura = "jojo_aura_red"

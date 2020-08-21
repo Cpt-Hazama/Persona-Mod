@@ -52,7 +52,7 @@ ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/izanagiokami/okami_legend
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Heaven's Blade" && self.User:IsPlayer() then
 		if math.random(1,8) == 1 then self:DoCritical(1) end
-		self.User:EmitSound("cpthazama/persona5/joker/0027.wav",85)
+		self:UserSound("cpthazama/persona5/joker/0027.wav",85)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	ply:EmitSound("cpthazama/persona5/joker/0009.wav")
+	self:UserSound("cpthazama/persona5/joker/0009.wav")
 	self.PersonaDistance = 999999999
 
 	self.Damage = 2500
@@ -104,5 +104,5 @@ function ENT:OnKilledEnemy(ent)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
-	ply:EmitSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
+	self:UserSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
 end

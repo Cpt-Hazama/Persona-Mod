@@ -1,0 +1,18 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona3/medea/medea02"
+	"$bumpmap" "models/cpthazama/persona3/medea/medea02_n"
+	"$phongexponenttexture" "models/cpthazama/persona3/medea/medea02_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[1 0 0]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "200"
+	"$rimmask" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/cel_red"
+}

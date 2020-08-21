@@ -27,7 +27,7 @@ function ENT:GetAttackPosition()
 	return self.AttackPosition or self:GetPos() +self:OBBCenter()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnSummoned(owner)	
+function ENT:OnSummoned(owner)
 	self:AddCard("Riot Gun",COST_P_RIOT_GUN,true,"gun")
 	self:AddCard("Agidyne",COST_P_AGIDYNE,false,"fire")
 	self:AddCard("Bufudyne",COST_P_BAFUDYNE,false,"frost")

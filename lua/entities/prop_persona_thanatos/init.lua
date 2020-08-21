@@ -49,7 +49,7 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	ply:EmitSound("cpthazama/persona5/joker/0005.wav")
+	self:UserSound("cpthazama/persona5/joker/0005.wav")
 	self.PersonaDistance = 999999999
 
 	-- self:AddCard("Doors of Hades",32,false,"almighty")
@@ -66,5 +66,5 @@ function ENT:OnSummoned(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
-	ply:EmitSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
+	self:UserSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
 end
