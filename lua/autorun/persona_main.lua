@@ -249,6 +249,7 @@ if SERVER then
 		if ent:IsPlayer() or ent:IsNPC() then
 			local dmgtype = dmginfo:GetDamageType()
 			local dmg = dmginfo:GetDamage()
+			local attacker = dmginfo:GetAttacker()
 			local persona = ent:GetPersona()
 
 			if IsValid(persona) then
@@ -267,6 +268,18 @@ if SERVER then
 						dmginfo:SetDamage(0)
 						ent:SetHealth(math.Clamp(ent:Health() +dmg,1,ent:GetMaxHealth()))
 						ent:EmitSound("cpthazama/persona5/skills/0679.wav",80)
+					end
+					if stats.REF && VJ_HasValue(stats.REF,dmgtype) then
+						dmginfo:SetDamage(0)
+						if IsValid(attacker) then
+							local reflect = DamageInfo()
+							reflect:SetDamage(dmg)
+							reflect:SetDamageType(dmgtype)
+							reflect:SetInflictor(persona)
+							reflect:SetAttacker(ent)
+							reflect:SetDamagePosition(attacker:NearestPoint(ent:GetPos()))
+							attacker:TakeDamageInfo(reflect)
+						end
 					end
 				end
 				if persona.HandleDamage then

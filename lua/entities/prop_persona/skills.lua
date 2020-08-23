@@ -1156,6 +1156,7 @@ function ENT:Agidyne(ply,persona)
 						if IsValid(ent) then
 							self:AgiEffect(ent,DMG_P_HEAVY)
 						end
+						t = 3
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_end",1)
@@ -1191,6 +1192,7 @@ function ENT:Maragidyne(ply,persona)
 								self:AgiEffect(v,DMG_P_HEAVY)
 							end
 						end
+						t = 3
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_end",1)
