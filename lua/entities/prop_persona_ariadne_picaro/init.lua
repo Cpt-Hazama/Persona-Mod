@@ -101,7 +101,7 @@ function ENT:CustomOnInitialize()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RequestAura(ply,aura)
-	self:UserSound:EmitSound("cpthazama/persona5/joker/0022.wav",75,100)
+	self:UserSound("cpthazama/persona5/joker/0022.wav",75,100)
 	ParticleEffectAttach(aura == "jojo_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
@@ -112,5 +112,5 @@ function ENT:RequestAura(ply,aura)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
-	self:UserSound:EmitSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
+	self:UserSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
 end

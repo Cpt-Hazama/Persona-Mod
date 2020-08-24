@@ -47,20 +47,22 @@ function ENT:HassouTobi(ply)
 		for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
 			v:EmitSound("cpthazama/persona5/skills/0215.wav",80)
 			local doDMG = math.random(1,10) <= 9
+			local rPos = v:GetPos()
 			for i = 1,8 do
+				local effectdata = EffectData()
+				local data = tblOffset[i]
+				effectdata:SetStart(v:GetPos() +v:GetForward() *data.f +v:GetRight() *data.r)
+				effectdata:SetOrigin(v:GetPos() +v:GetForward() *-data.f +v:GetRight() *-data.r)
+				effectdata:SetAngles(Angle(255,0,0))
+				effectdata:SetRadius(100)
+				effectdata:SetHitBox(3)
+				util.Effect("Persona_Slice",effectdata)
 				local t = 0.3 *i
 				timer.Simple(t,function()
 					if IsValid(self) && IsValid(v) then
 						if doDMG then self:DealDamage(v,DMG_P_MEDIUM,DMG_P_PHYS) end
-
-						local effectdata = EffectData()
-						local data = tblOffset[i]
-						effectdata:SetStart(v:GetPos() +v:GetForward() *data.f +v:GetRight() *data.r)
-						effectdata:SetOrigin(v:GetPos() +v:GetForward() *-data.f +v:GetRight() *-data.r)
-						effectdata:SetAngles(Angle(255,0,0))
-						effectdata:SetRadius(100)
-						effectdata:SetHitBox(1.25)
-						util.Effect("Persona_Slice",effectdata)
+						effects.BeamRingPoint(rPos +Vector(0,0,5),0.3,4,850,75,0,Color(255,0,0),{material="effects/persona/slice",framerate=20,flags=0})
+						effects.BeamRingPoint(rPos +Vector(0,0,5),0.3,4,850,75,0,Color(255,0,0),{material="effects/persona/slice",framerate=20,flags=0})
 					end
 				end)
 			end

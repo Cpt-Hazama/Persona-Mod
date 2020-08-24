@@ -37,7 +37,7 @@ ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/izanagi/izanagi_legendary
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Cross Slash" && self.User:IsPlayer() then
 		if math.random(1,10) == 1 then self:DoCritical(1) end
-		self:UserSound:EmitSound("cpthazama/persona5/joker/0011.wav",85)
+		self:UserSound("cpthazama/persona5/joker/0011.wav",85)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
