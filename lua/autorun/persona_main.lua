@@ -191,7 +191,10 @@ if SERVER then
 					local mLevel = ent:GetNWInt("PXP_Level") or (ent.Stats && ent.Stats.LVL) or nil
 					if mLevel == nil or mLevel == 0 then
 						local ply = VJ_PICK(player.GetAll())
-						local pLevel = PXP.GetLevel(ply)
+						local pLevel = 1
+						if IsValid(ply) then
+							pLevel = PXP.GetLevel(ply)
+						end
 						local gLevel = math.Round(((ent:GetMaxHealth() /800) *pLevel))
 						local level = math.Clamp(math.random(math.Clamp(gLevel -10,1,99),math.Clamp(gLevel +10,1,99)),1,99)
 						local exp = math.Round(((ent:GetMaxHealth() /50) *level))

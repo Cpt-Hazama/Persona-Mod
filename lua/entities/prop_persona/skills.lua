@@ -68,6 +68,11 @@ function ENT:HassouTobi(ply)
 			end
 		end
 		timer.Simple(tA,function()
+			if IsValid(self) && self:GetTask() == "TASK_PLAY_ANIMATION" then
+				self:PlaySet(skill,"idle",1)
+			end
+		end)
+		timer.Simple(3,function()
 			if IsValid(self) then
 				self:DoIdle()
 			end
