@@ -100,6 +100,16 @@ PERSONA["azathoth"].Model = "models/cpthazama/persona5/persona/azathoth.mdl"
 PERSONA["azathoth"].Aura = "jojo_aura_red"
 PERSONA["azathoth"].Name = "Azathoth"
 
+PERSONA["orpheus"] = {}
+PERSONA["orpheus"].Model = "models/cpthazama/persona3/persona/orpheus.mdl"
+PERSONA["orpheus"].Aura = "jojo_aura_blue"
+PERSONA["orpheus"].Name = "Orpheus"
+
+PERSONA["messiah"] = {}
+PERSONA["messiah"].Model = "models/cpthazama/persona3/persona/messiah.mdl"
+PERSONA["messiah"].Aura = "jojo_aura_blue"
+PERSONA["messiah"].Name = "Messiah"
+
 -- PERSONA["reaper"] = {}
 -- PERSONA["reaper"].Model = "models/cpthazama/persona5/persona/reaper.mdl"
 -- PERSONA["reaper"].Aura = "jojo_aura_red"

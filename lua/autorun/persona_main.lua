@@ -170,6 +170,13 @@ hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
 	ply.Persona_MaxHealth = 100
 	ply:SetMaxHealth(100)
 	ply.PXP_NextXPChange = CurTime()
+	
+	ply.Persona_TarundaT = 0
+	ply.Persona_DebilitateT = 0
+	ply.Persona_HeatRiserT = 0
+	ply.Persona_ChaosT = 0
+	ply.Persona_ChargedT = 0
+	ply.Persona_FocusedT = 0
 end)
 
 if SERVER then
@@ -182,12 +189,25 @@ if SERVER then
 			end
 		end)
 		ply.PXP_NextXPChange = CurTime()
+	
+		ply.Persona_TarundaT = 0
+		ply.Persona_DebilitateT = 0
+		ply.Persona_HeatRiserT = 0
+		ply.Persona_ChaosT = 0
+		ply.Persona_ChargedT = 0
+		ply.Persona_FocusedT = 0
 	end)
 
 	hook.Add("OnEntityCreated","Persona_EntitySpawn",function(ent)
 		if ent:IsNPC() then
 			timer.Simple(0,function()
 				if IsValid(ent) then
+					ent.Persona_TarundaT = 0
+					ent.Persona_DebilitateT = 0
+					ent.Persona_HeatRiserT = 0
+					ent.Persona_ChaosT = 0
+					ent.Persona_ChargedT = 0
+					ent.Persona_FocusedT = 0
 					local mLevel = ent:GetNWInt("PXP_Level") or (ent.Stats && ent.Stats.LVL) or nil
 					if mLevel == nil or mLevel == 0 then
 						local ply = VJ_PICK(player.GetAll())
@@ -244,10 +264,8 @@ if SERVER then
 		if ent.Persona_DebilitateT && ent.Persona_DebilitateT > CurTime() then
 			dmginfo:ScaleDamage(1.5)
 		end
-		if ent.GetPersona && IsValid(ent:GetPersona()) then
-			if ent:GetPersona().HeatRiserT > CurTime() then
-				dmginfo:ScaleDamage(0.5)
-			end
+		if ent.Persona_HeatRiserT && ent.Persona_HeatRiserT > CurTime() then
+			dmginfo:ScaleDamage(0.5)
 		end
 		if ent:IsPlayer() or ent:IsNPC() then
 			local dmgtype = dmginfo:GetDamageType()

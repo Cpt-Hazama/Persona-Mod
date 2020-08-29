@@ -41,8 +41,8 @@ if VJExists == true then
 	-- VJ.AddNPC("Sho Minazuki","npc_vj_per_sho",vCat) -- Tsukiyomi | Theme: Blood Red Moon
 	
 		-- Persona 3 - Protagonists
-	-- VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
-	-- VJ.AddNPC("Yukari Takeba","npc_vj_per_yukari",vCat) -- Isis | Theme: 
+	VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
+	-- VJ.AddNPC("Yukari Takeba","npc_vj_per_yukari",vCat) -- Isis | Theme: Pink Sniper
 
 	VJ.AddClientConVar("vj_persona_music",1)
 

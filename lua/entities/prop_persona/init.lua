@@ -64,12 +64,7 @@ function ENT:Initialize()
 	self.NextDamageUserT = 0
 	
 	self:SetCritical(false)
-	self.HeatRiserT = CurTime()
-	self.FocusedT = CurTime()
-	self.ChargedT = CurTime()
-	self.TarundaT = CurTime()
 	self.HasChaosParticle = false
-	self.ChaosT = CurTime()
 
 	self.Loops = {}
 	self.Flexes = {}
@@ -345,6 +340,15 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 	elseif melee == "Hassou Tobi" then
 		self:HassouTobi(ply,persona)
 		return
+	elseif melee == "Cleave" then
+		self:Cleave(ply,persona)
+		return
+	elseif melee == "Bash" then
+		self:Bash(ply,persona)
+		return
+	elseif melee == "God's Hand" then
+		self:GodsHand(ply,persona)
+		return
 	else
 		if ply:IsPlayer() then
 			ply:ChatPrint("Sorry, " .. melee .. " has not been programmed yet. It will be available in the future!")
@@ -362,6 +366,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		return
 	elseif self:GetCard() == "Maragidyne" then
 		self:Maragidyne(ply,persona)
+		return
+	elseif self:GetCard() == "Maragion" then
+		self:Maragion(ply,persona)
 		return
 	elseif self:GetCard() == "Yomi Drop" then
 		self:YomiDrop(ply,persona)
@@ -395,6 +402,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		return
 	elseif self:GetCard() == "Salvation" then
 		self:Salvation(ply,persona)
+		return
+	elseif self:GetCard() == "Cadenza" then
+		self:Cadenza(ply,persona)
 		return
 	elseif self:GetCard() == "Diarama" then
 		self:Diarama(ply,persona)
@@ -522,6 +532,24 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
+	elseif self:GetCard() == "Cleave" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "Bash" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif self:GetCard() == "God's Hand" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
 	else
 		if ply:IsPlayer() then
 			ply:ChatPrint("Sorry, " .. self:GetCard() .. " has not been programmed yet. It will be available in the future!")
@@ -551,7 +579,7 @@ function ENT:Think()
 			return
 		end
 		if self.HasChaosParticle then
-			if CurTime() > self.ChaosT then
+			if CurTime() > self.User.Persona_ChaosT then
 				self.HasChaosParticle = false
 				self.User:StopParticles()
 				self:CreateAura(self.User)
@@ -668,7 +696,7 @@ function ENT:CycleCards()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetActiveCard(name,cost,useHP,icon,index)
-	cost = (!useHP && self.ChaosT > CurTime()) && cost *2 or cost
+	cost = (!useHP && (IsValid(self.User) && self.User.Persona_ChaosT && self.User.Persona_ChaosT > CurTime())) && cost *2 or cost
 	self:SetNWString("SpecialAttack",name)
 	self:SetNWInt("SpecialAttackCost",cost)
 	self:SetNWBool("SpecialAttackUsesHP",useHP or false)
@@ -804,15 +832,16 @@ function ENT:FacePlayerAim(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AdditionalInput(dmg,type)
-	dmg = self.TarundaT && dmg *0.5 or dmg
+	dmg = self.User.Persona_TarundaT > CurTime() && dmg *0.5 or dmg
+	dmg = self.User.Persona_DebilitateT > CurTime() && dmg *0.5 or dmg
+	dmg = self.User.Persona_HeatRiserT > CurTime() && dmg *1.5 or dmg
+	dmg = self.User.Persona_ChaosT > CurTime() && dmg *3 or dmg
 	dmg = self:GetCritical() && dmg *1.25 or dmg
-	dmg = self.HeatRiserT > CurTime() && dmg *1.5 or dmg
-	dmg = self.ChaosT > CurTime() && dmg *3 or dmg
 	if type == 1 then -- Physical
-		dmg = self.ChargedT > CurTime() && dmg *2 or dmg
+		dmg = self.User.Persona_ChargedT > CurTime() && dmg *2 or dmg
 		dmg = (dmg *self.Stats.STR) /6
 	elseif type == 2 then -- Magic
-		dmg = self.FocusedT > CurTime() && dmg *2 or dmg
+		dmg = self.User.Persona_FocusedT > CurTime() && dmg *2 or dmg
 		dmg = (dmg *self.Stats.MAG) /6
 	end
 	return dmg

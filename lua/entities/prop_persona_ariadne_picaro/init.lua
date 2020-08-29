@@ -85,6 +85,8 @@ function ENT:PersonaControls(ply,persona)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(owner)	
+	self:UserSound("cpthazama/persona5/joker/0022.wav",75,100)
+
 	self:AddCard("Beast Weaver",20,true,"phys")
 	self:AddCard("Miracle Punch",8,true,"phys")
 	self:AddCard("Mediarahan",30,false,"heal")
@@ -98,17 +100,6 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()
 	self.HeatUpT = CurTime() +30
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:RequestAura(ply,aura)
-	self:UserSound("cpthazama/persona5/joker/0022.wav",75,100)
-	ParticleEffectAttach(aura == "jojo_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
-	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
-	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
-	local fx = EffectData()
-	fx:SetOrigin(self:GetIdlePosition(ply))
-	fx:SetScale(80)
-	util.Effect("JoJo_Summon",fx)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
