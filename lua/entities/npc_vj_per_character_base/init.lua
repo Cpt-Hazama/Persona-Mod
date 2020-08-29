@@ -143,8 +143,11 @@ function ENT:ResetLoopAnimation()
 	-- self.DisableChasingEnemy = false
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnAnimEvent(persona,skill,animBlock,seq,t) end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnPersonaAnimation(persona,skill,animBlock,seq,t)
 	local myAnim = self.Animations[animBlock]
+	self:OnAnimEvent(persona,skill,animBlock,seq,t)
 	if animBlock == "melee" then
 		local tStart = self:DecideAnimationLength(self.Animations["range_start"],false)
 		local tMelee = self:DecideAnimationLength(self.Animations["melee"],false)
@@ -184,11 +187,14 @@ function ENT:OnPersonaAnimation(persona,skill,animBlock,seq,t)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:ControllerThink(controller,persona,enemy,dist) end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaThink(persona,enemy,dist,controlled)
 	if !IsValid(enemy) then return end
 	if !self:Visible(enemy) then return end
 	if controlled then
 		local controller = self.VJ_TheController
+		self:ControllerThink(controller,persona,enemy,dist)
 		if controller:KeyDown(IN_RELOAD) then
 			persona:CycleCards()
 			return
@@ -201,7 +207,7 @@ function ENT:PersonaThink(persona,enemy,dist,controlled)
 			persona:DoSpecialAttack(self,persona,nil,true)
 			return
 		end
-		if controller:KeyDown(IN_DUCK) then
+		if controller:KeyDown(IN_DUCK) && !controller:KeyDown(IN_USE) then
 			self:UseItem("item_persona_hp")
 			return
 		end

@@ -10,6 +10,50 @@ ENT.Category		= "NPC"
 ENT.VJ_PersonaNPC = true
 ENT.VJ_Persona_HasTheme = true
 
+ENT.CostumeList = {
+	[1] = {Model="models/cpthazama/persona5/akechi_royal.mdl",Name="Black Suit"},
+	[2] = {Model="models/cpthazama/persona5/akechi_royal_starlight.mdl",Name="Starlight Costume"},
+}
+
+function ENT:GetNextCostume()
+	self.CurrentCostumeID = self.CurrentCostumeID or 1
+	local nextID = self.CurrentCostumeID +1
+	if nextID > #self.CostumeList then
+		nextID = 1
+	end
+
+	return self.CostumeList[nextID]
+end
+
+function ENT:GetCostumeName()
+	self.CurrentCostumeID = self.CurrentCostumeID or 1
+	return self.CostumeList[self.CurrentCostumeID].Name
+end
+
+function ENT:UpdateCostume(ply)
+	self.CurrentCostumeID = self.CurrentCostumeID or 1
+	self.CurrentCostumeID = self.CurrentCostumeID +1
+	if self.CurrentCostumeID > #self.CostumeList then
+		self.CurrentCostumeID = 1
+		self.DisableMetaVerseCostume = false
+	else
+		self.DisableMetaVerseCostume = true
+	end
+	
+	if SERVER then
+		local c = self:GetCollisionBounds()
+		self:SetModel(self.CostumeList[self.CurrentCostumeID].Model)
+		self:SetCollisionBounds(Vector(c.x,c.y,c.z != 0 && c.z or 72),-Vector(c.x,c.y,0))
+	end
+	
+	if IsValid(ply) then
+		local cSound = CreateSound(ply,"common/null")
+		cSound:SetSoundLevel(0)
+		cSound:Play()
+		cSound:ChangeVolume(60)
+	end
+end
+
 if CLIENT then
 	local lerp_hp = 0
 	

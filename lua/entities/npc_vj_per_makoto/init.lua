@@ -16,7 +16,7 @@ ENT.Stats = {
 	LUC = 69,
 }
 ENT.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_PHANTOMTHIEVES"}
-ENT.PlayerFriendly = true
+ENT.FriendsWithAllPlayerAllies = true
 
 ENT.HasDeathAnimation = true
 ENT.CanRespawn = true

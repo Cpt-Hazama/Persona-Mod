@@ -1,0 +1,21 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/yaldabaoth/yaldabaoth02"
+	"$phongexponenttexture" "models/cpthazama/persona5/yaldabaoth/yaldabaoth02_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[0.3 0.3 0.3]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "10"
+	"$rimmask" "1"
+
+	"$envmap" "models/cpthazama/persona5/yaldabaoth/envmap"
+	"$envmaptint" "[0.01 0.01 0.01]"
+	"$envmapfresnel" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}

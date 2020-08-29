@@ -17,7 +17,7 @@ ENT.Stats = {
 	LUC = 99,
 }
 ENT.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_VELVET_ROOM"}
-ENT.PlayerFriendly = true
+ENT.FriendsWithAllPlayerAllies = true
 
 ENT.Animations = {}
 ENT.Animations["idle"] = ACT_IDLE

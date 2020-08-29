@@ -39,6 +39,7 @@ ENT.LeveledSkills = {} -- Skills must be place in a specific order! Top of table
 -- ENT.LegendaryMaterials = {}
 ENT.IsVelvetPersona = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.MovesWithUser = true
 ENT.AuraChance = 2
 ENT.IdleSpeed = 1
 ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB)
@@ -241,7 +242,7 @@ function ENT:DefaultPersonaControls(ply,persona)
 	if self:GetTask() == "TASK_IDLE" then
 		self:IdleAnimationCode(ply)
 
-		if ply:IsPlayer() then
+		if ply:IsPlayer() && self.MovesWithUser then
 			local w = ply:KeyDown(IN_FORWARD)
 			local a = ply:KeyDown(IN_MOVELEFT)
 			local d = ply:KeyDown(IN_MOVERIGHT)
@@ -343,6 +344,11 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 		return
 	elseif melee == "Hassou Tobi" then
 		self:HassouTobi(ply,persona)
+		return
+	else
+		if ply:IsPlayer() then
+			ply:ChatPrint("Sorry, " .. melee .. " has not been programmed yet. It will be available in the future!")
+		end
 		return
 	end
 end
@@ -514,6 +520,11 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		self.CurrentMeleeSkill = self:GetCard()
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	else
+		if ply:IsPlayer() then
+			ply:ChatPrint("Sorry, " .. self:GetCard() .. " has not been programmed yet. It will be available in the future!")
 		end
 		return
 	end
@@ -839,9 +850,9 @@ function ENT:DealDamage(ent,dmg,dmgtype,type)
 	doactualdmg:SetDamage(dmg)
 	doactualdmg:SetDamageType(dmgtype)
 	doactualdmg:SetInflictor(self)
-	doactualdmg:SetAttacker(self.User)
+	doactualdmg:SetAttacker(IsValid(self.User) && self.User or self)
 	doactualdmg:SetDamagePosition(ent:NearestPoint(self:GetAttackPosition()))
-	ent:TakeDamageInfo(doactualdmg,self.User)
+	ent:TakeDamageInfo(doactualdmg,IsValid(self.User) && self.User or self)
 	if ent:IsPlayer() then
 		ent:ViewPunch(Angle(math.random(-1,1) *dmg,math.random(-1,1) *dmg,math.random(-1,1) *dmg))
 	end

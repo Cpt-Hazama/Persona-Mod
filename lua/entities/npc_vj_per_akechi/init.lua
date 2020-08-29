@@ -121,28 +121,32 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:ChangeFaction(bEvil)
 	if bEvil then
-		for k, v in ipairs(self:GetMaterials()) do
-			if v == "models/cpthazama/persona5/akechi/body" then
-				self.DeathCorpseSubMaterials = {k -1}
-				self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/body_good")
-			end
-			if v == "models/cpthazama/persona5/akechi/mask" then
-				self.DeathCorpseSubMaterials = {k -1}
-				self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/mask_good")
+		if self:GetCostumeName() == "Black Suit" then
+			for k, v in ipairs(self:GetMaterials()) do
+				if v == "models/cpthazama/persona5/akechi/body" then
+					self.DeathCorpseSubMaterials = {k -1}
+					self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/body_good")
+				end
+				if v == "models/cpthazama/persona5/akechi/mask" then
+					self.DeathCorpseSubMaterials = {k -1}
+					self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/mask_good")
+				end
 			end
 		end
 		self.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_PHANTOMTHIEVES"}
 		self.Animations["idle_combat"] = ACT_IDLE
 		self.IsGood = true
 	else
-		for k, v in ipairs(self:GetMaterials()) do
-			if v == "models/cpthazama/persona5/akechi/body" then
-				self.DeathCorpseSubMaterials = {k -1}
-				self:SetSubMaterial(k -1,nil)
-			end
-			if v == "models/cpthazama/persona5/akechi/mask" then
-				self.DeathCorpseSubMaterials = {k -1}
-				self:SetSubMaterial(k -1,nil)
+		if self:GetCostumeName() == "Black Suit" then
+			for k, v in ipairs(self:GetMaterials()) do
+				if v == "models/cpthazama/persona5/akechi/body" then
+					self.DeathCorpseSubMaterials = {k -1}
+					self:SetSubMaterial(k -1,nil)
+				end
+				if v == "models/cpthazama/persona5/akechi/mask" then
+					self.DeathCorpseSubMaterials = {k -1}
+					self:SetSubMaterial(k -1,nil)
+				end
 			end
 		end
 		self.VJ_NPC_Class = {"CLASS_BLACKMASK","CLASS_SHIDO"}

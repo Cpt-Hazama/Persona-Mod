@@ -1,0 +1,7 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona4/yu/lens"
+	"$translucent" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}

@@ -1,0 +1,46 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/azathoth/tentacles"
+	"$bumpmap" "models/cpthazama/persona5/azathoth/tentacles_n"
+	"$phongexponenttexture" "models/cpthazama/persona5/azathoth/tentacles_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[0 0.15 1]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "200"
+	"$rimmask" "1"
+
+	$detail	"models/cpthazama/persona5/azathoth/tentacles_g"
+	$detailscale "1"
+	$detailblendfactor "0.5"
+	$detailblendmode "2"
+
+	"Proxies"
+	{
+		"Sine"
+		{
+			"resultvar"	"$detailblendfactor"
+			"sineperiod" 1.5
+			"sinemin" 0.1
+			"sinemax" 8
+		}
+		"TextureScroll"
+		{
+			"texturescrollvar"	"$detailtexturetransform"
+			"texturescrollrate"	0.5
+			"texturescrollangle" 90
+		}
+		"TextureScroll"
+		{
+			"texturescrollvar"	"$basetexturetransform"
+			"texturescrollrate"	0.5
+			"texturescrollangle" 90
+		}
+	}
+
+	"$lightwarptexture" "models/cpthazama/persona5/cel_blue"
+}
