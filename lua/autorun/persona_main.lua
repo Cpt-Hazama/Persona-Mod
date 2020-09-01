@@ -1,12 +1,21 @@
 include("persona_xp.lua")
 
+local Persona_DMGMarkers = {}
+local lCurTime = 0
+
+local function useMarkers()
+	return GetConVarNumber("persona_hud_damage") == 1
+end
+
 if SERVER then
 	util.AddNetworkString("persona_csound")
+	util.AddNetworkString("persona_spawndmg")
 end
 
 if CLIENT then
 	CreateClientConVar("persona_hud_x","350",false,false)
 	CreateClientConVar("persona_hud_y","250",false,false)
+	CreateClientConVar("persona_hud_damage","1",false,false)
 
 	net.Receive("persona_csound",function(len,pl)
 		local ply = net.ReadEntity()
@@ -15,6 +24,109 @@ if CLIENT then
 		local pit = net.ReadFloat()
 
 		ply:EmitSound(snd,vol,pit)
+	end)
+
+	local function LerpAnimation(n)
+		if n <= 0.2 then
+			local x = (n -0) /(0.2 -0)
+			return x *3 *0.25 +0.25
+		else
+			local x = (n -0.2) /(1 -0.2)
+			return ((-x +1) /2) +0.5
+		end
+	end
+
+	local function SpawnMarker(text,col,pos,vel,ttl,dmg)
+		if !useMarkers() then return end
+
+		local marker = {}
+		marker.text = text
+		marker.pos = Vector(pos.x,pos.y,pos.z)
+		marker.vel = Vector(vel.x,vel.y,vel.z)
+		marker.col = Color(col.r,col.g,col.b)
+		marker.ttl = ttl
+		marker.dmg = dmg
+		marker.life = ttl
+		marker.spawntime = CurTime()
+		marker.deathtime = CurTime() +ttl
+
+		surface.SetFont("Persona")
+		local w,h = surface.GetTextSize(text)
+
+		marker.widthH = w/2
+		marker.heightH = h/2
+
+		table.insert(Persona_DMGMarkers,marker)
+	end
+
+	net.Receive("persona_spawndmg",function()
+		if !useMarkers() then return end
+
+		local dmg = net.ReadFloat()
+		local dmgtype = net.ReadUInt(32)
+		if dmg < 1 then
+			dmg = math.Round(dmg,3)
+		else
+			dmg = math.floor(dmg)
+		end
+
+		local crit = (net.ReadBit() ~= 0)
+		local pos = net.ReadVector()
+		local force = net.ReadVector()
+		local col = crit && Color(255,0,0) or Color(0,161,255)
+		local ttl = 1.5
+		local fxmin, fxmax = -0.5, 0.5
+		local fymin, fymax = -0.5, 0.5
+		local fzmin, fzmax = 0.75, 1.0
+
+		local txt = (tostring(dmg) or tostring(math.abs(dmg)))
+		SpawnMarker(txt,col,pos,force +Vector(math.Rand(fxmin,fxmax),math.Rand(fymin,fymax),math.Rand(fzmin,fzmax) *1.5),ttl,dmg)
+	end)
+
+	hook.Add("Tick","Persona_CleanMarkers",function()		
+		local Cur = CurTime()
+		if #Persona_DMGMarkers == 0 then return end
+
+		-- local gravity = 1 *0.05
+		local gravity = GetConVarNumber("sv_gravity") /1000
+		local marker
+		for i=1,#Persona_DMGMarkers do
+			marker = Persona_DMGMarkers[i]
+			marker.pos = marker.pos +Vector(0,0,gravity)
+		end
+
+		local i = 1
+		while i <= #Persona_DMGMarkers do
+			if Persona_DMGMarkers[i].deathtime < Cur then
+				table.remove(Persona_DMGMarkers,i)
+			else
+				i = i + 1
+			end
+		end
+	end)
+
+	hook.Add("PostDrawTranslucentRenderables","Persona_DrawMarkers",function() // Referenced Hit Markers addon, obv will revamp if asked to
+		if #Persona_DMGMarkers == 0 then return end
+
+		local ply = (LocalPlayer():GetViewEntity() or LocalPlayer())
+		local ang = ply:EyeAngles()
+		ang:RotateAroundAxis(ang:Forward(),90)
+		ang:RotateAroundAxis(ang:Right(),90)
+		ang = Angle(0,ang.y,ang.r)
+		local scale = 0.0045
+		local alphamul = 255
+
+		surface.SetFont("Persona")
+		local marker
+		for i=1,#Persona_DMGMarkers do
+			marker = Persona_DMGMarkers[i]
+			scale = math.Clamp(scale *marker.dmg,0.5,3)
+			cam.Start3D2D(marker.pos,ang,scale *(LerpAnimation((CurTime() - marker.spawntime) / marker.ttl) or 1))
+				surface.SetTextColor(marker.col.r,marker.col.g,marker.col.b,((CurTime() -marker.spawntime /marker.ttl) *alphamul))
+				surface.SetTextPos(-marker.widthH,-marker.heightH)
+				surface.DrawText(marker.text)
+			cam.End3D2D()
+		end
 	end)
 end
 
@@ -257,6 +369,18 @@ if SERVER then
 		end
 	end)
 
+	local function SpawnMarker_SV(dmgAmount,dmgType,dmgPosition,dmgForce,isCrit)
+		if !useMarkers() then return end
+
+		net.Start("persona_spawndmg",true)
+			net.WriteFloat(dmgAmount)
+			net.WriteUInt(dmgType,32)
+			net.WriteBit(isCrit)
+			net.WriteVector(dmgPosition)
+			net.WriteVector(dmgForce)
+		net.Broadcast()
+	end
+
 	hook.Add("EntityTakeDamage","Persona_ModifyPlayerDMG",function(ent,dmginfo)
 		if ent.Persona_DMG_Fear && ent.Persona_DMG_Fear > CurTime() then
 			dmginfo:ScaleDamage(1.5)
@@ -272,6 +396,10 @@ if SERVER then
 			local dmg = dmginfo:GetDamage()
 			local attacker = dmginfo:GetAttacker()
 			local persona = ent:GetPersona()
+			
+			if IsValid(attacker) && IsValid(attacker:GetPersona()) && useMarkers() then
+				SpawnMarker_SV(dmg,dmgtype,dmginfo:GetDamagePosition(),dmginfo:GetDamageForce(),attacker:GetPersona():GetCritical() or false)
+			end
 
 			if IsValid(persona) then
 				if persona.Stats then
@@ -698,11 +826,12 @@ if CLIENT then
 			DefaultBox.Options["#Default"] = {
 				persona_hud_x = "350",
 				persona_hud_y = "250",
+				persona_hud_damage = "1",
 			}
 			Panel:AddControl("ComboBox",DefaultBox)
-			-- Panel:AddControl("Label",{Text = "Default: X = 350 Y = 250"})
 			Panel:AddControl("Slider",{Label = "Box X Position",Command = "persona_hud_x",Min = 0,Max = 1920})
 			Panel:AddControl("Slider",{Label = "Box Y Position",Command = "persona_hud_y",Min = 0,Max = 1080})
+			Panel:AddControl("CheckBox",{Label = "Enable Damage Markers",Command = "persona_hud_damage"})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)
