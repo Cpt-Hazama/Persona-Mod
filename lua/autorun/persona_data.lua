@@ -110,6 +110,16 @@ PERSONA["messiah"].Model = "models/cpthazama/persona3/persona/messiah.mdl"
 PERSONA["messiah"].Aura = "jojo_aura_blue"
 PERSONA["messiah"].Name = "Messiah"
 
+PERSONA["robinhood"] = {}
+PERSONA["robinhood"].Model = "models/cpthazama/persona5/persona/robinhood.mdl"
+PERSONA["robinhood"].Aura = "jojo_aura_blue"
+PERSONA["robinhood"].Name = "Robin-Hood"
+
+-- PERSONA["hereward"] = {}
+-- PERSONA["hereward"].Model = "models/cpthazama/persona5/persona/hereward.mdl"
+-- PERSONA["hereward"].Aura = "jojo_aura_red"
+-- PERSONA["hereward"].Name = "Hereward"
+
 -- PERSONA["reaper"] = {}
 -- PERSONA["reaper"].Model = "models/cpthazama/persona5/persona/reaper.mdl"
 -- PERSONA["reaper"].Aura = "jojo_aura_red"

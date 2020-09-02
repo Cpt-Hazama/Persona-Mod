@@ -33,6 +33,8 @@ ENT.Stats = {
 	WK = {},
 	RES = {},
 	NUL = {},
+	REF = {},
+	ABS = {},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.LeveledSkills = {} -- Skills must be place in a specific order! Top of table must be the highest level req. and the last one in the table must be the lowest level req.
@@ -865,7 +867,10 @@ function ENT:FindEnemies(pos,dist)
 	end
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
-			if (v != self && v != user) && ((v:IsNPC() or (checkPlayers == true && v:IsPlayer() && v:Alive() && (self.User:IsNPC() && self.User:Disposition(v) != 3 or true)))) then
+			if (v != self && v != user) && ((v:IsNPC() or (checkPlayers == true && v:IsPlayer() && v:Alive()))) then
+				if self.User:IsNPC() && self.User:Disposition(v) == 3 then
+					continue
+				end
 				table.insert(foundEnts,v)
 			end
 		end
@@ -1041,17 +1046,20 @@ function ENT:MegidolaonEffect(ent,dmg)
 	Light:Fire("TurnOff","",5)
 	m:DeleteOnRemove(Light)
 	timer.Simple(4,function()
-		if IsValid(m) then
-			for _,v in pairs(ents.FindInSphere(m:GetPos(),3800)) do
-				if (v != self && v != self.User) && (((v:IsNPC() or (v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
-					local dmginfo = DamageInfo()
-					dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
-					dmginfo:SetDamageType(DMG_P_ALMIGHTY)
-					dmginfo:SetInflictor(IsValid(self) && self or v)
-					dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or v)
-					dmginfo:SetDamagePosition(v:NearestPoint(m:GetPos()))
-					v:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or v)
-					v:EmitSound("cpthazama/persona5/skills/0014.wav",70)
+		if IsValid(m) && IsValid(self) then
+			local ents = self:FindEnemies(m:GetPos(),3800)
+			if ents != nil then
+				for _,v in pairs(ents) do
+					if IsValid(v) then
+						local dmginfo = DamageInfo()
+						dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
+						dmginfo:SetDamageType(DMG_P_ALMIGHTY)
+						dmginfo:SetInflictor(IsValid(self) && self or v)
+						dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or v)
+						dmginfo:SetDamagePosition(m:NearestPoint(v:GetPos() +v:OBBCenter()))
+						v:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or v)
+						v:EmitSound("cpthazama/persona5/skills/0014.wav",70)
+					end
 				end
 			end
 		end
@@ -1101,6 +1109,7 @@ function ENT:Curse(ent,t,dmg)
 				local dmginfo = DamageInfo()
 				dmginfo:SetDamage(dmg)
 				dmginfo:SetDamageType(DMG_P_CURSE)
+				dmginfo:SetDamagePosition(ent:GetPos() +ent:OBBCenter())
 				dmginfo:SetInflictor(IsValid(self) && self or ent)
 				dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
 				ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)

@@ -1,7 +1,14 @@
 include("persona_xp.lua")
 
 local Persona_DMGMarkers = {}
-local lCurTime = 0
+local Persona_HUDEffects = {
+	[1] = "hud/persona/png/ico_weak.png",
+	[2] = "hud/persona/png/ico_resist.png",
+	[3] = "hud/persona/png/ico_block.png",
+	-- [4] = "hud/persona/png/ico_absorb.png",
+	-- [5] = "hud/persona/png/ico_block.png",
+	[6] = "hud/persona/png/ico_critical.png",
+}
 
 local function useMarkers()
 	return GetConVarNumber("persona_hud_damage") == 1
@@ -26,73 +33,61 @@ if CLIENT then
 		ply:EmitSound(snd,vol,pit)
 	end)
 
-	local function LerpAnimation(n)
-		if n <= 0.2 then
-			local x = (n -0) /(0.2 -0)
-			return x *3 *0.25 +0.25
-		else
-			local x = (n -0.2) /(1 -0.2)
-			return ((-x +1) /2) +0.5
-		end
-	end
-
-	local function SpawnMarker(text,col,pos,vel,ttl,dmg)
+	local function SpawnMarker(text,col,pos,vel,dmg,bonus)
 		if !useMarkers() then return end
+		
+		local split = string.Split(text,"")
+		-- for i = 1,#split do
+			local marker = {}
+			marker.text = text
+			-- marker.text = split[i]
+			marker.numbers = split
+			marker.effects = bonus
+			marker.initialized = false
+			marker.pos = Vector(pos.x,pos.y,pos.z)
+			marker.vel = Vector(vel.x,vel.y,vel.z)
+			marker.col = Color(col.r,col.g,col.b)
+			marker.duration = 1.5
+			marker.dmg = dmg
+			marker.spawntime = CurTime()
+			marker.deathtime = CurTime() +1.5
 
-		local marker = {}
-		marker.text = text
-		marker.pos = Vector(pos.x,pos.y,pos.z)
-		marker.vel = Vector(vel.x,vel.y,vel.z)
-		marker.col = Color(col.r,col.g,col.b)
-		marker.ttl = ttl
-		marker.dmg = dmg
-		marker.life = ttl
-		marker.spawntime = CurTime()
-		marker.deathtime = CurTime() +ttl
+			surface.SetFont("Persona")
+			local w,h = surface.GetTextSize(text)
 
-		surface.SetFont("Persona")
-		local w,h = surface.GetTextSize(text)
+			marker.widthH = w /2
+			marker.heightH = h /2
 
-		marker.widthH = w/2
-		marker.heightH = h/2
-
-		table.insert(Persona_DMGMarkers,marker)
+			table.insert(Persona_DMGMarkers,marker)
+		-- end
 	end
 
 	net.Receive("persona_spawndmg",function()
 		if !useMarkers() then return end
 
 		local dmg = net.ReadFloat()
+		dmg = dmg < 1 && math.Round(dmg,3) or math.floor(dmg)
 		local dmgtype = net.ReadUInt(32)
-		if dmg < 1 then
-			dmg = math.Round(dmg,3)
-		else
-			dmg = math.floor(dmg)
-		end
-
 		local crit = (net.ReadBit() ~= 0)
 		local pos = net.ReadVector()
 		local force = net.ReadVector()
-		local col = crit && Color(255,0,0) or Color(0,161,255)
-		local ttl = 1.5
-		local fxmin, fxmax = -0.5, 0.5
-		local fymin, fymax = -0.5, 0.5
-		local fzmin, fzmax = 0.75, 1.0
+		local col = crit && Color(255,255,0) or net.ReadVector()
+		local bonus = net.ReadFloat() or 0
+		if bonus == 0 && crit then
+			bonus = 6
+		end
 
-		local txt = (tostring(dmg) or tostring(math.abs(dmg)))
-		SpawnMarker(txt,col,pos,force +Vector(math.Rand(fxmin,fxmax),math.Rand(fymin,fymax),math.Rand(fzmin,fzmax) *1.5),ttl,dmg)
+		SpawnMarker(tostring(math.abs(dmg)),col,pos,force +Vector(math.Rand(-1,1),math.Rand(-1,1),math.Rand(0,1) *1.5),dmg,bonus)
 	end)
 
 	hook.Add("Tick","Persona_CleanMarkers",function()		
 		local Cur = CurTime()
 		if #Persona_DMGMarkers == 0 then return end
 
-		-- local gravity = 1 *0.05
-		local gravity = GetConVarNumber("sv_gravity") /1000
 		local marker
 		for i=1,#Persona_DMGMarkers do
 			marker = Persona_DMGMarkers[i]
-			marker.pos = marker.pos +Vector(0,0,gravity)
+			marker.pos = marker.pos +Vector(0,0,0.6)
 		end
 
 		local i = 1
@@ -100,12 +95,12 @@ if CLIENT then
 			if Persona_DMGMarkers[i].deathtime < Cur then
 				table.remove(Persona_DMGMarkers,i)
 			else
-				i = i + 1
+				i = i +1
 			end
 		end
 	end)
 
-	hook.Add("PostDrawTranslucentRenderables","Persona_DrawMarkers",function() // Referenced Hit Markers addon, obv will revamp if asked to
+	hook.Add("PostDrawTranslucentRenderables","Persona_DrawMarkers",function()
 		if #Persona_DMGMarkers == 0 then return end
 
 		local ply = (LocalPlayer():GetViewEntity() or LocalPlayer())
@@ -116,15 +111,29 @@ if CLIENT then
 		local scale = 0.0045
 		local alphamul = 255
 
-		surface.SetFont("Persona")
 		local marker
 		for i=1,#Persona_DMGMarkers do
+		-- for _,marker in  pairs(Persona_DMGMarkers) do
 			marker = Persona_DMGMarkers[i]
-			scale = math.Clamp(scale *marker.dmg,0.5,3)
-			cam.Start3D2D(marker.pos,ang,scale *(LerpAnimation((CurTime() - marker.spawntime) / marker.ttl) or 1))
-				surface.SetTextColor(marker.col.r,marker.col.g,marker.col.b,((CurTime() -marker.spawntime /marker.ttl) *alphamul))
-				surface.SetTextPos(-marker.widthH,-marker.heightH)
-				surface.DrawText(marker.text)
+			scale = math.Clamp(scale *marker.dmg,5,12)
+			local pos = (marker.pos):ToScreen()
+			local offsetX = 0
+			cam.Start3D2D(marker.pos,ang,3)
+				local ran = marker.initialized
+				if !ran then
+					marker.initialized = true
+				end
+				for _,num in pairs(marker.numbers) do
+					offsetX = offsetX +scale -(scale /4.25)
+					surface.SetMaterial(Material("hud/persona/dmg/".. num .. ".png"))
+					surface.SetDrawColor(marker.col.r,marker.col.g,marker.col.b,((CurTime() -marker.spawntime /marker.duration) *alphamul))
+					surface.DrawTexturedRect(offsetX,0,scale,scale)
+				end
+				if marker.effects && Persona_HUDEffects[marker.effects] then
+					surface.SetMaterial(Material(Persona_HUDEffects[marker.effects]))
+					surface.SetDrawColor(255,255,255,((CurTime() -marker.spawntime /marker.duration) *alphamul))
+					surface.DrawTexturedRect(scale,scale,offsetX,scale)
+				end
 			cam.End3D2D()
 		end
 	end)
@@ -259,6 +268,9 @@ function NPC:SummonPersona(persona)
 		if self.OnSummonPersona then
 			self:OnSummonPersona(ent)
 		end
+		if self.SoundTbl_Persona then
+			VJ_CreateSound(self,self.SoundTbl_Persona,80,100)
+		end
 	else
 		if personaEntity:GetTask() != "TASK_RETURN" then
 			personaEntity:SetTask("TASK_RETURN")
@@ -369,15 +381,17 @@ if SERVER then
 		end
 	end)
 
-	local function SpawnMarker_SV(dmgAmount,dmgType,dmgPosition,dmgForce,isCrit)
+	local function SpawnMarker_SV(dmgAmount,dmgType,dmgPosition,dmgForce,isCrit,color,flag)
 		if !useMarkers() then return end
-
+		local col = Vector(color.r,color.g,color.b)
 		net.Start("persona_spawndmg",true)
 			net.WriteFloat(dmgAmount)
 			net.WriteUInt(dmgType,32)
 			net.WriteBit(isCrit)
 			net.WriteVector(dmgPosition)
 			net.WriteVector(dmgForce)
+			net.WriteVector(col)
+			net.WriteFloat(flag)
 		net.Broadcast()
 	end
 
@@ -397,8 +411,39 @@ if SERVER then
 			local attacker = dmginfo:GetAttacker()
 			local persona = ent:GetPersona()
 			
-			if IsValid(attacker) && IsValid(attacker:GetPersona()) && useMarkers() then
-				SpawnMarker_SV(dmg,dmgtype,dmginfo:GetDamagePosition(),dmginfo:GetDamageForce(),attacker:GetPersona():GetCritical() or false)
+			if IsValid(attacker) && (attacker:IsNPC() or attacker:IsPlayer()) && IsValid(attacker:GetPersona()) && useMarkers() then
+				local color = Color(0,161,255)
+				local bonus = 0
+				if IsValid(persona) then
+					local stats = persona.Stats
+					local weak = stats.WK
+					local resist = stats.RES
+					local block = stats.NUL
+					local absorb = stats.ABS
+					local reflect = stats.REF
+					
+					if VJ_HasValue(weak,dmgtype) then
+						color = Color(255,0,0)
+						bonus = 1
+					end
+					if VJ_HasValue(resist,dmgtype) then
+						color = Color(110,0,0)
+						bonus = 2
+					end
+					if VJ_HasValue(block,dmgtype) then
+						color = Color(255,255,255)
+						bonus = 3
+					end
+					if VJ_HasValue(absorb,dmgtype) then
+						color = Color(95,63,127)
+						bonus = 4
+					end
+					if VJ_HasValue(reflect,dmgtype) then
+						color = Color(127,255,255)
+						bonus = 5
+					end
+				end
+				SpawnMarker_SV(dmg,dmgtype,dmginfo:GetDamagePosition(),dmginfo:GetDamageForce(),attacker:GetPersona():GetCritical() or false,color,bonus)
 			end
 
 			if IsValid(persona) then
@@ -739,6 +784,31 @@ if CLIENT then
 			local color = Color(248,60,64,255)
 			draw.SimpleText(text,"Persona",entPos.x -offset,entPos.y -offset,color)
 		end
+
+		-- if #Persona_DMGMarkers > 0 then
+			-- local marker
+			-- local scale = 0.0045
+			-- for i=1,#Persona_DMGMarkers do
+				-- marker = Persona_DMGMarkers[i]
+				-- scale = math.Clamp(scale *marker.dmg,0.5,3)
+				-- local pos = (marker.pos):ToScreen()
+				-- local offsetX = 100
+				-- local offsetY = 100
+				-- local ran = marker.initialized
+				-- if !ran then
+					-- marker.initialized = true
+					-- marker.activenums = {}
+				-- end
+				-- if #marker.activenums < #marker.numbers then
+					-- for _,num in pairs(marker.numbers) do
+						-- offsetX = offsetX +scale *15
+						-- surface.SetMaterial(Material("hud/persona/dmg/".. marker.text .. ".png"))
+						-- surface.SetDrawColor(Color(255,255,255,255))
+						-- surface.DrawTexturedRect(pos.x -offsetX,pos.y -offsetY,50,50)
+					-- end
+				-- end
+			-- end
+		-- end
 	end)
 
 	hook.Add("ShouldDrawLocalPlayer","Persona_DrawPlayer",function(ply)

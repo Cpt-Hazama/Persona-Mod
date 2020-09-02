@@ -127,30 +127,30 @@ function ENT:PersonaControls(ply,persona)
 	local r = ply:KeyDown(IN_RELOAD)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Laevateinn(owner,enemy)
-	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
-		self:SetTask("TASK_ATTACK")
-		if self.User:IsNPC() then
-			owner:VJ_ACT_PLAYACTIVITY("persona_attack",true,false,false)
-			VJ_CreateSound(owner,owner.SoundTbl_PersonaAttack,80)
-		end
-		local t = self:PlaySet("Laevateinn","melee",1)
-		self.Target = enemy
-		self:SetAngles(self.User:GetAngles())
-		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
-		timer.Simple(1.65,function()
-			if IsValid(self) then
-				self.AttackPosition = IsValid(enemy) && enemy:GetPos() or nil
-				self:MeleeAttackCode(DMG_P_COLOSSAL,300,120)
-			end
-		end)
-		timer.Simple(t,function()
-			if IsValid(self) then
-				self:DoIdle()
-			end
-		end)
-	end
-end
+-- function ENT:Laevateinn(owner,enemy)
+	-- if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		-- self:SetTask("TASK_ATTACK")
+		-- if self.User:IsNPC() then
+			-- owner:VJ_ACT_PLAYACTIVITY("persona_attack",true,false,false)
+			-- VJ_CreateSound(owner,owner.SoundTbl_PersonaAttack,80)
+		-- end
+		-- local t = self:PlaySet("Laevateinn","melee",1)
+		-- self.Target = enemy
+		-- self:SetAngles(self.User:GetAngles())
+		-- self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		-- timer.Simple(1.65,function()
+			-- if IsValid(self) then
+				-- self.AttackPosition = IsValid(enemy) && enemy:GetPos() or nil
+				-- self:MeleeAttackCode(DMG_P_COLOSSAL,300,120)
+			-- end
+		-- end)
+		-- timer.Simple(t,function()
+			-- if IsValid(self) then
+				-- self:DoIdle()
+			-- end
+		-- end)
+	-- end
+-- end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(owner)
 	if !IsValid(self.User) then

@@ -429,6 +429,28 @@ function ENT:Cleave(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Laevateinn(ply,persona)
+	local skill = "Laevateinn"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
+		timer.Simple(1.65,function()
+			if IsValid(self) then
+				self:MeleeAttackCode(DMG_P_COLOSSAL,1000,120)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GodsHand(ply,persona)
 	local skill = "God's Hand"
 	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
