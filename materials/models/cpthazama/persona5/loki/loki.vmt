@@ -24,16 +24,16 @@
 		"Sine"
 		{
 			"resultvar"	"$detailblendfactor"
-			"sineperiod" 4
-			"sinemin" 0.01
-			"sinemax" 0.05
+			"sineperiod" 1
+			"sinemin" 0
+			"sinemax" 0.1
 		}
-		"TextureScroll"
-		{
-			"texturescrollvar"	"$detailtexturetransform"
-			"texturescrollrate"	0.2
-			"texturescrollangle" 90
-		}
+		//"TextureScroll"
+		//{
+		//	"texturescrollvar"	"$detailtexturetransform"
+		//	"texturescrollrate"	0.2
+		//	"texturescrollangle" 90
+		//}
 	}
 
 	"$lightwarptexture" "models/cpthazama/persona5/cel_red"

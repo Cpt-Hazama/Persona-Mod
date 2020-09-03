@@ -1,5 +1,7 @@
 include("persona_xp.lua")
 
+local debug = 1
+
 local Persona_DMGMarkers = {}
 local Persona_HUDEffects = {
 	[1] = "hud/persona/png/ico_weak.png",
@@ -17,6 +19,7 @@ end
 if SERVER then
 	util.AddNetworkString("persona_csound")
 	util.AddNetworkString("persona_spawndmg")
+	util.AddNetworkString("persona_party")
 end
 
 if CLIENT then
@@ -320,6 +323,56 @@ if SERVER then
 		ply.Persona_ChaosT = 0
 		ply.Persona_ChargedT = 0
 		ply.Persona_FocusedT = 0
+		
+		if ply:IsBot() && debug == 1 then
+			ply:SetPersona("izanagi")
+			local function summon_persona(ply)
+				if !ply:Alive() then return end
+				if ply:HasPersona() && CurTime() > ply:GetNextPersonaSummonT() then
+					local persona = ply:GetPersona()
+					if !IsValid(persona) then
+						local class = "prop_persona_" .. ply:GetPersonaName()
+						local ent = ents.Create(class)
+						ent:SetModel(PERSONA[ply:GetPersonaName()].Model)
+						ent:SetPos(ent:GetSpawnPosition(ply) or ply:GetPos())
+						ent:SetAngles(ply:GetAngles())
+						ent:Spawn()
+						ply:SetPersonaEntity(ent)
+						ent:RequestAura(ply,PERSONA[ply:GetPersonaName()].Aura)
+						ent.User = ply
+						ent.Persona = ply:GetPersonaName()
+						ent:DoIdle()
+						ent:OnSummoned(ply)
+						ply:SetNWEntity("PersonaEntity",ent)
+						ent:SetFeedName(PERSONA[ply:GetPersonaName()].Name,class)
+
+						if PXP.IsLegendary(ply) then
+							ent:MakeLegendary()
+						end
+
+						local exp = PXP.GetPersonaData(ply,1)
+						local lvl = PXP.GetPersonaData(ply,2)
+						ent.EXP = exp != nil && exp or 0
+						ent.Level = lvl != nil && lvl or ent.Stats.LVL
+						if ent.Level < ent.Stats.LVL then
+							ent.Level = ent.Stats.LVL
+						end
+						PXP.AddToCompendium(ply,ply:GetPersonaName())
+						ent:CheckCards()
+						PXP.SavePersonaData(ply,ent.EXP,ent.Level,ent.CardTable)
+					else
+						if persona:GetTask() == "TASK_IDLE" then
+							if !persona.IsFlinching then
+								persona:SetTask("TASK_RETURN")
+								persona:OnRequestDisappear(ply)
+							end
+						end
+					end
+				end
+			end
+			summon_persona(ply)
+			-- ply:ConCommand("summon_persona")
+		end
 	end)
 
 	hook.Add("OnEntityCreated","Persona_EntitySpawn",function(ent)
@@ -908,6 +961,13 @@ if CLIENT then
 			Panel:AddControl("Button",{Label = "Print Persona Stats",Command = "persona_showstats"})
 			Panel:AddControl("Button",{Label = "Create Legendary Persona",Command = "persona_legendary"})
 			Panel:AddControl("Label",{Text = "Persona must be LVL 99 to become Legendary!"})
+		end,{})
+
+		spawnmenu.AddToolMenuOption("Persona","Party","Set-Up","Set-Up","","",function(Panel)
+			Panel:AddControl("Button",{Label = "Add To Party",Command = "persona_party"})
+			Panel:AddControl("Button",{Label = "Remove From Party",Command = "persona_partyremove"})
+			Panel:AddControl("Button",{Label = "Disband Party",Command = "persona_partyclear"})
+			Panel:AddControl("Label",{Text = "Must be looking at a Player to add/remove them!"})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Admin Settings","Cheats","Cheats","","",function(Panel)

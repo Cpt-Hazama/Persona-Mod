@@ -352,8 +352,9 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 		self:GodsHand(ply,persona)
 		return
 	else
-		if ply:IsPlayer() then
+		if ply:IsPlayer() && melee then
 			ply:ChatPrint("Sorry, " .. melee .. " has not been programmed yet. It will be available in the future!")
+			ply:EmitSound("cpthazama/persona5/misc/00103.wav")
 		end
 		return
 	end
@@ -553,8 +554,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		end
 		return
 	else
-		if ply:IsPlayer() then
+		if ply:IsPlayer() && self:GetCard() then
 			ply:ChatPrint("Sorry, " .. self:GetCard() .. " has not been programmed yet. It will be available in the future!")
+			ply:EmitSound("cpthazama/persona5/misc/00103.wav")
 		end
 		return
 	end
@@ -871,6 +873,9 @@ function ENT:FindEnemies(pos,dist)
 				if self.User:IsNPC() && self.User:Disposition(v) == 3 then
 					continue
 				end
+				if self.User:IsPlayer() && v:IsPlayer() && VJ_HasValue(self.User:GetParty(),v:UniqueID()) then
+					continue
+				end
 				table.insert(foundEnts,v)
 			end
 		end
@@ -915,8 +920,14 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 	end
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
-			if (v != self && v != self.User) && (((v:IsNPC() or (checkPlayers && v:IsPlayer() && v:Alive() && (self.User:IsNPC() && self.User:Disposition(v) != 3 or true)))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
+			if (v != self && v != self.User) && (((v:IsNPC() or (checkPlayers && v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
 				if (self:GetForward():Dot((Vector(v:GetPos().x,v:GetPos().y,0) - Vector(self:GetPos().x,self:GetPos().y,0)):GetNormalized()) > math.cos(math.rad(rad))) then
+					if self.User:IsNPC() && self.User:Disposition(v) == 3 then
+						continue
+					end
+					if self.User:IsPlayer() && v:IsPlayer() && VJ_HasValue(self.User:GetParty(),v:UniqueID()) then
+						continue
+					end
 					-- if math.random(1,100) > agility then
 						-- self:OnMissedEnemy(v)
 						-- return
