@@ -650,6 +650,24 @@ if CLIENT then
 		outline = true,
 	})
 
+	surface.CreateFont("Persona_Small",{
+		font = "p5hatty",
+		extended = false,
+		size = 22,
+		weight = 500,
+		blursize = 0,
+		scanlines = 0,
+		antialias = true,
+		underline = false,
+		italic = false,
+		strikeout = false,
+		symbol = false,
+		rotary = false,
+		shadow = false,
+		additive = false,
+		outline = true,
+	})
+
 	hook.Add("HUDPaint","Persona_HUD",function()
 		local ply = LocalPlayer()
 		local persona = ply:GetNWEntity("PersonaEntity")
@@ -990,30 +1008,34 @@ if CLIENT then
 end
 
 local function persona_setlevel(ply)
-	if !ply:IsAdmin() or !ply:IsSuperAdmin() then return end
-	PXP.SetLevel(ply,math.Clamp(GetConVarNumber("persona_i_setlevel"),1,99))
+	if ply:IsAdmin() or ply:IsSuperAdmin() then
+		PXP.SetLevel(ply,math.Clamp(GetConVarNumber("persona_i_setlevel"),1,99))
+	end
 end
 concommand.Add("persona_setlevel",persona_setlevel)
 
 local function persona_setexp(ply)
-	if !ply:IsAdmin() or !ply:IsSuperAdmin() then return end
-	PXP.SetEXP(ply,GetConVarNumber("persona_i_setexp"))
+	if ply:IsAdmin() or ply:IsSuperAdmin() then
+		PXP.SetEXP(ply,GetConVarNumber("persona_i_setexp"))
+	end
 end
 concommand.Add("persona_setexp",persona_setexp)
 
 local function persona_setsp(ply)
-	if !ply:IsAdmin() or !ply:IsSuperAdmin() then return end
-	local sp = GetConVarNumber("persona_i_setsp")
-	ply:SetSP(sp)
-	if sp > ply:GetMaxSP() then
-		ply:SetMaxSP(sp)
+	if ply:IsAdmin() or ply:IsSuperAdmin() then
+		local sp = GetConVarNumber("persona_i_setsp")
+		ply:SetSP(sp)
+		if sp > ply:GetMaxSP() then
+			ply:SetMaxSP(sp)
+		end
 	end
 end
 concommand.Add("persona_setsp",persona_setsp)
 
 local function persona_giveexp(ply)
-	if !ply:IsAdmin() or !ply:IsSuperAdmin() then return end
-	PXP.GiveRequiredEXP(ply)
+	if ply:IsAdmin() or ply:IsSuperAdmin() then
+		PXP.GiveRequiredEXP(ply)
+	end
 end
 concommand.Add("persona_giveexp",persona_giveexp)
 

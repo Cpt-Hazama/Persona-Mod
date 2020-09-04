@@ -17,6 +17,18 @@ ENT.Animations["range"] = "attack"
 ENT.Animations["range_idle"] = "range_loop"
 ENT.Animations["range_end"] = "range_end"
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.Stats = {
+	LVL = 21, -- Innate level
+	STR = 15, -- Effectiveness of phys. attacks
+	MAG = 15, -- Effectiveness of magic. attacks
+	END = 14, -- Effectiveness of defense
+	AGI = 15, -- Effectiveness of hit and evasion rates
+	LUC = 11, -- Chance of getting a critical
+	WK = {DMG_P_PSY,DMG_P_PSI},
+	RES = {DMG_P_NUCLEAR},
+	NUL = {},
+}
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:IdleAnimationCode(ply)
 	local ply = self.User
 	self.CurrentIdle = ply:IsMoving() && ply:GetSequenceName(ply:GetSequence()) or "idle"

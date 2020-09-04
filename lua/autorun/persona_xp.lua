@@ -41,7 +41,9 @@ PXP.SetLegendary = function(ply)
 
 	local persona = ply:GetPersona()
 	if IsValid(persona) then
-		persona:MakeLegendary()
+		if persona.MakeLegendary then
+			persona:MakeLegendary()
+		end
 		PXP.ManagePersonaStats(ply)
 	end
 	PXP.SetEXP(ply,0)
@@ -145,7 +147,10 @@ PXP.LevelUp = function(ply)
 
 	local persona = ply:GetPersona()
 	if IsValid(persona) then
-		persona:CheckSkillLevel()
+		print(ply,persona,persona.CheckSkillLevel)
+		if persona.CheckSkillLevel then
+			persona:CheckSkillLevel()
+		end
 		PXP.ManagePersonaStats(ply,chat)
 		-- persona:UpdateStats()
 	end

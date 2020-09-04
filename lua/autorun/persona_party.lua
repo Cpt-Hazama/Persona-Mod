@@ -175,6 +175,7 @@ if CLIENT then
 				local hpMax = ply:GetMaxHealth()
 				local sp = ply:GetSP()
 				local spMax = ply:GetMaxSP()
+				local lvl = ply:GetNWInt("PXP_Level")
 				local persona = PERSONA[ply:GetNWString("PersonaName")].Name
 
 				local corners = 1
@@ -226,6 +227,12 @@ if CLIENT then
 				local posY = boxHeight -70
 				local color = Color(200,0,255,255)
 				draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+
+				local text = "LVL " .. lvl
+				local posX = boxX -len +180
+				local posY = boxHeight -40
+				local color = Color(200,0,255,255)
+				draw.SimpleText(text,"Persona_Small",ScrW() -posX,ScrH() -posY,color)
 			end
 		end
 
