@@ -998,9 +998,9 @@ function ENT:OnKilledEnemy_EXP(ent)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AgiEffect(ent,dmg)
-	if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
-		continue
-	end
+	-- if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
+		-- continue
+	-- end
 	local dmg = dmg or DMG_P_HEAVY
 	local m = ents.Create("prop_vj_animatable")
 	m:SetModel("models/cpthazama/persona5/effects/agi.mdl")
@@ -1037,9 +1037,9 @@ function ENT:AgiEffect(ent,dmg)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MegidolaonEffect(ent,dmg)
-	if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
-		continue
-	end
+	-- if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
+		-- continue
+	-- end
 	local dmg = dmg or DMG_P_SEVERE
 	local m = ents.Create("prop_vj_animatable")
 	m:SetModel("models/cpthazama/persona5/effects/megidolaon.mdl")
@@ -1118,9 +1118,9 @@ function ENT:MaziodyneAttack(att,dist,eff,target)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Curse(ent,t,dmg)
-	if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
-		continue
-	end
+	-- if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
+		-- continue
+	-- end
 	ent.Persona_DMG_Curse = CurTime() +t
 	ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 	for i = 1, t do
@@ -1146,9 +1146,9 @@ function ENT:Curse(ent,t,dmg)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Fear(ent,t)
-	if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
-		continue
-	end
+	-- if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
+		-- continue
+	-- end
 	if ent:IsNPC() then
 		local prevDisp = ent:Disposition(self.User) != D_FR && ent:Disposition(self.User) or D_NU
 		ent.Persona_DMG_Fear = CurTime() +t
