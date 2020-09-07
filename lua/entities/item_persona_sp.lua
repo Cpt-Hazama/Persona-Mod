@@ -36,11 +36,15 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
-	
-	local phys = self:GetPhysicsObject()
-	if phys and IsValid(phys) then
-		phys:Wake()
-	end
+
+	timer.Simple(0,function()
+		self:SetPos(self:GetCreator():GetPos() +Vector(0,0,10))
+		local ply = self:GetCreator()
+		if IsValid(ply) then
+			self:Use(ply)
+			SafeRemoveEntity(self)
+		end
+	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Use(activator, caller)

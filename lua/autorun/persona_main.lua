@@ -126,6 +126,9 @@ if CLIENT then
 				if !ran then
 					marker.initialized = true
 				end
+				if marker.dmg > 999999999 then
+					draw.SimpleText("PLUS ULTRA!","PXP_EXP",0,-scale *2,Color(marker.col.r,marker.col.g,marker.col.b,((CurTime() -marker.spawntime /marker.duration) *alphamul)))
+				end
 				for _,num in pairs(marker.numbers) do
 					offsetX = offsetX +scale -(scale /4.25)
 					surface.SetMaterial(Material("hud/persona/dmg/".. num .. ".png"))

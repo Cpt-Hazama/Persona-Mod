@@ -46,6 +46,17 @@ ENT.AuraChance = 2
 ENT.IdleSpeed = 1
 ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB)
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HandleEvents(skill,animBlock,seq,t) -- Default events, override in your Persona
+	if animBlock == "melee" then
+		self:UserSound("cpthazama/persona5/joker/00" .. math.random(67,68) .. ".wav",80)
+		return
+	end
+	if animBlock == "range" then
+		self:UserSound("cpthazama/persona5/joker/00" .. math.random(68,70) .. ".wav",80)
+		return
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Initialize()
 	self:SetSolid(SOLID_OBB)
 	self:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
@@ -441,6 +452,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		return
 	elseif self:GetCard() == "Megidolaon" then
 		self:Megidolaon(ply,ply.Persona_EyeTarget)
+		return
+	elseif self:GetCard() == "Sinful Shell" then
+		self:SinfulShell(ply,persona)
 		return
 	elseif self:GetCard() == "Call of Chaos" then
 		self:CallOfChaos(ply,persona)
@@ -1041,19 +1055,20 @@ function ENT:MegidolaonEffect(ent,dmg)
 		-- continue
 	-- end
 	local dmg = dmg or DMG_P_SEVERE
+	local scale = 60 -- 100
 	local m = ents.Create("prop_vj_animatable")
 	m:SetModel("models/cpthazama/persona5/effects/megidolaon.mdl")
-	m:SetPos(ent:GetPos())
+	m:SetPos(ent:GetPos() +Vector(0,0,15))
 	m:Spawn()
 	m:DrawShadow(false)
 	m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 	m:ResetSequence("idle")
-	m:SetModelScale(100,5)
+	m:SetModelScale(scale,5)
 	VJ_CreateSound(m,"cpthazama/persona5/skills/megidolaon.wav",150)
 	-- m:EmitSound("PERSONA_MEGIDOLAON")
 	local Light = ents.Create("light_dynamic")
 	Light:SetKeyValue("brightness","7")
-	Light:SetKeyValue("distance","3800")
+	Light:SetKeyValue("distance",tostring(30 *scale))
 	Light:SetPos(m:GetPos())
 	Light:Fire("Color","180 255 255")
 	Light:SetParent(m)
@@ -1062,9 +1077,9 @@ function ENT:MegidolaonEffect(ent,dmg)
 	Light:Fire("TurnOn","",0)
 	Light:Fire("TurnOff","",5)
 	m:DeleteOnRemove(Light)
-	timer.Simple(4,function()
+	timer.Simple(4.5,function()
 		if IsValid(m) && IsValid(self) then
-			local ents = self:FindEnemies(m:GetPos(),3800)
+			local ents = self:FindEnemies(m:GetPos(),30 *scale)
 			if ents != nil then
 				for _,v in pairs(ents) do
 					if IsValid(v) then

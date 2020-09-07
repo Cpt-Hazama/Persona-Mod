@@ -60,6 +60,11 @@ PERSONA["satanael"].Model = "models/cpthazama/persona5/persona/satanael.mdl"
 PERSONA["satanael"].Aura = "jojo_aura_blue"
 PERSONA["satanael"].Name = "Satanael"
 
+PERSONA["satanael_small"] = {}
+PERSONA["satanael_small"].Model = "models/cpthazama/persona5/persona/satanael.mdl"
+PERSONA["satanael_small"].Aura = "jojo_aura_blue"
+PERSONA["satanael_small"].Name = "Satanael"
+
 PERSONA["loki"] = {}
 PERSONA["loki"].Model = "models/cpthazama/persona5/persona/loki.mdl"
 PERSONA["loki"].Aura = "jojo_aura_red"
@@ -114,6 +119,11 @@ PERSONA["robinhood"] = {}
 PERSONA["robinhood"].Model = "models/cpthazama/persona5/persona/robinhood.mdl"
 PERSONA["robinhood"].Aura = "jojo_aura_blue"
 PERSONA["robinhood"].Name = "Robin-Hood"
+
+PERSONA["arsene"] = {}
+PERSONA["arsene"].Model = "models/cpthazama/persona5/persona/arsene.mdl"
+PERSONA["arsene"].Aura = "jojo_aura_blue"
+PERSONA["arsene"].Name = "Arsene"
 
 -- PERSONA["hereward"] = {}
 -- PERSONA["hereward"].Model = "models/cpthazama/persona5/persona/hereward.mdl"

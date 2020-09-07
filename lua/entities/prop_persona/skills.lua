@@ -2195,3 +2195,79 @@ function ENT:Megidolaon(ply,ent)
 		end)
 	end
 end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SinfulShell(ply,persona)
+	local ent = ply.Persona_EyeTarget
+	if !IsValid(ent) then
+		return
+	end
+	local skill = "Sinful Shell"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1)
+		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(1) end
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+
+				self:DoChat(CurTime() > ply.Persona_HeatRiserT && "Increased ATK/DEF/Evasion for 1 minute!" or "Increased ATK/DEF/Evasion time extended!")
+
+				ply.Persona_HeatRiserT = CurTime() +60
+				self:EmitSound("cpthazama/persona5/skills/0343.wav",90)
+
+				local spawnparticle = ents.Create("info_particle_system")
+				spawnparticle:SetKeyValue("effect_name","vj_per_skill_heatriser")
+				spawnparticle:SetPos(self:GetPos())
+				spawnparticle:Spawn()
+				spawnparticle:Activate()
+				spawnparticle:Fire("Start","",0)
+				spawnparticle:Fire("Kill","",0.1)
+
+				local spawnparticle = ents.Create("info_particle_system")
+				spawnparticle:SetKeyValue("effect_name","vj_per_skill_heatriser")
+				spawnparticle:SetPos(self.User:GetPos())
+				spawnparticle:Spawn()
+				spawnparticle:Activate()
+				spawnparticle:Fire("Start","",0)
+				spawnparticle:Fire("Kill","",0.1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_end",1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"melee",1)
+								timer.Simple(1,function()
+									if IsValid(self) then
+										local ent = ent or ply.Persona_EyeTarget
+
+										local proj = ents.Create("obj_vj_per_sinfulshell")
+										proj:SetPos(self:GetAttachment(1).Pos or self:GetPos() +self:OBBCenter())
+										proj:SetAngles(IsValid(ent) && (ent:GetPos() +ent:OBBCenter() -proj:GetPos()):Angle())
+										proj:Spawn()
+										if self.Scaled then
+											proj:SetModelScale(0.25,0)
+										end
+										proj.Persona = self
+										proj:SetOwner(self.User)
+										proj:SetPhysicsAttacker(self.User)
+										proj:EmitSound("cpthazama/persona5/skills/0338.wav")
+										
+										if IsValid(proj:GetPhysicsObject()) then
+											proj:GetPhysicsObject():SetVelocity(IsValid(ent) && (ent:GetPos() +ent:OBBCenter() -proj:GetPos()) *5000)
+										end
+									end
+								end)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end

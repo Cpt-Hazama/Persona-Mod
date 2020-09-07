@@ -67,8 +67,7 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	self:UserSound("cpthazama/persona5/joker/0005.wav")
-	self.PersonaDistance = 999999999
+	self:UserSound("cpthazama/persona5/joker/0314.wav")
 
 	self:AddCard("Maeigaon",22,false,"curse")
 	self:AddCard("Megidolaon",38,false,"almighty")
