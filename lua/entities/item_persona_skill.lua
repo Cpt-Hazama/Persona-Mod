@@ -35,7 +35,7 @@ function ENT:Initialize()
 	self:SetUseType(SIMPLE_USE)
 
 	timer.Simple(0,function()
-		self:SetPos(self:GetCreator():GetPos() +Vector(0,0,10))
+		if IsValid(self:GetCreator()) then self:SetPos(self:GetCreator():GetPos() +Vector(0,0,10)) end
 		local ply = self:GetCreator()
 		if IsValid(ply) then
 			if !IsValid(ply:GetPersona()) then

@@ -78,7 +78,7 @@ end
 function ENT:PersonaControls(ply,persona)
 	if CurTime() > self.HeatUpT then
 		self.User:SetHealth(math.Clamp(self.User:Health() +(self.User:GetMaxHealth() *0.05),1,self.User:GetMaxHealth()))
-		self.User:SetSP(math.Clamp(self.User:GetSP() +10,0,999))
+		self.User:SetSP(math.Clamp(self.User:GetSP() +10,0,self.User:GetMaxSP()))
 		self.User:EmitSound("cpthazama/persona5/skills/0417.wav",65)
 		self.HeatUpT = CurTime() +30
 	end

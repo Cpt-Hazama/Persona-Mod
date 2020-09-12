@@ -273,6 +273,9 @@ function NPC:SummonPersona(persona)
 		ent:SetFeedName(PERSONA[persona] && PERSONA[persona].Name or ent.Name,class)
 		if self.OnSummonPersona then
 			self:OnSummonPersona(ent)
+			if self.UpdateCamera then
+				self:UpdateCamera(2)
+			end
 		end
 		if self.SoundTbl_Persona then
 			VJ_CreateSound(self,self.SoundTbl_Persona,80,100)
@@ -311,7 +314,7 @@ end)
 
 if SERVER then
 	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
-		ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
+		ply:SetSP(ply:GetMaxSP() or (ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150))
 		ply:SetMaxSP(ply:GetSP())
 		timer.Simple(0,function()
 			if IsValid(ply) then
@@ -715,6 +718,7 @@ if CLIENT then
 		-- end
 		
 		local sp = ply:GetSP()
+		local spMax = ply:GetMaxSP()
 		local target = ply:GetNWEntity("Persona_Target")
 
 		local corners = 1
@@ -763,7 +767,7 @@ if CLIENT then
 		local color = Color(200,0,255,255)
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color)
 
-		local text = sp
+		local text = sp .. "/" .. spMax
 		local posX = boxX -75
 		local posY = boxHeight -5
 		local color = Color(200,0,255,255)

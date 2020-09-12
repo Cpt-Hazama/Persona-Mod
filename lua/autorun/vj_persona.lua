@@ -32,6 +32,7 @@ if VJExists == true then
 	
 		-- Persona 4 - Protagonists --
 	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami | Theme: Reach Out To The Truth (Arena Ver.)
+	VJ.AddNPC("Labrys","npc_vj_per_labrys",vCat) -- Ariadne | Theme: Spirited Girl
 	
 	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat) -- Thanatos | Theme: Whims Of Everyone's Souls
 	-- VJ.AddNPC("Margaret","npc_vj_per_margaret",vCat) -- Yoshitsune | Theme: Electronica In The Velvet Room
@@ -39,6 +40,7 @@ if VJExists == true then
 		-- Persona 4 - Antagonists -- 
 	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi",vCat) -- Magatsu-Izanagi | Theme: A Fool or A Clown? / A New World Fool
 	-- VJ.AddNPC("Sho Minazuki","npc_vj_per_sho",vCat) -- Tsukiyomi | Theme: Blood Red Moon
+	VJ.AddNPC("Shadow Labrys","npc_vj_per_labrys_shadow",vCat) -- Asterius | Theme: Shadows of the Labrynth
 	
 		-- Persona 3 - Protagonists
 	VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat) -- Orpheos / Messiah | Theme: Mass Destruction

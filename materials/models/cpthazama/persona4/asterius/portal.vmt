@@ -1,0 +1,16 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona4/asterius/portal"
+
+	"Proxies"
+	{
+		"TextureScroll"
+		{
+			"texturescrollvar"	"$basetexturetransform"
+			"texturescrollrate"	0.05
+			"texturescrollangle" 90
+		}
+	}
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}

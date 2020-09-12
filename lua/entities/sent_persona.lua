@@ -31,7 +31,7 @@ function ENT:Initialize()
 	self:SetCollisionBounds(Vector(10,10,5),Vector(-10,-10,0))
 	timer.Simple(0,function()
 		-- self:SetPos(self:GetPos() +Vector(0,0,10))
-		self:SetPos(self:GetCreator():GetPos() +Vector(0,0,10))
+		if IsValid(self:GetCreator()) then self:SetPos(self:GetCreator():GetPos() +Vector(0,0,10)) end
 		self:GetPhysicsObject():Wake()
 		local ply = self:GetCreator()
 		if IsValid(ply) then

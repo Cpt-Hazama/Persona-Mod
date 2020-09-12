@@ -1,0 +1,19 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona4/labrys/eyes_shadow"
+	"$phongexponenttexture" "models/cpthazama/persona4/labrys/eyes_shadow_s"
+	
+	"$selfillum" "1"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[1 0 0]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "200"
+	"$rimmask" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/cel_red"
+}

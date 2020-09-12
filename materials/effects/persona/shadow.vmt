@@ -1,0 +1,8 @@
+"UnlitGeneric"
+{
+	"$basetexture" "effects/persona/shadow"
+	"$vertexalpha" 			1
+	"$vertexcolor" 			1
+	"$additive" 			1
+	"$translucent" 			1
+}

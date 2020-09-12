@@ -19,7 +19,7 @@ if CLIENT then
 				local ply = LocalPlayer()
 				local persona = ply:GetNWEntity("PersonaEntity")
 				
-				if persona == ent && IsValid(persona) && persona:GetCritical() then
+				if persona == ent && IsValid(persona) && persona:GetCriticalFX() then
 					local background = surface.GetTextureID("hud/persona/critical_adachi")
 					surface.SetTexture(background)
 					surface.SetDrawColor(255,255,255,255)

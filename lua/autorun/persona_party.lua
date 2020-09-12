@@ -1,6 +1,51 @@
 local PLY = FindMetaTable("Player")
 local NPC = FindMetaTable("NPC")
 
+function PLY:GetParty_NPC()
+	if self.Persona_NPC_Party == nil then
+		return {}
+	end
+	return self.Persona_NPC_Party
+end
+
+function PLY:CreateParty_NPC(ent)
+	self.Persona_NPC_Party = {}
+	table.insert(self.Persona_NPC_Party,ent)
+end
+
+function PLY:AddToParty_NPC(ent)
+	self:ChatPrint("Sent Party Invite To " .. ent:GetName() .. "!")
+
+	if self.Persona_NPC_Party == nil or #self:GetParty_NPC() == 0 then
+		self:CreateParty_NPC(ent)
+		return
+	end
+	if VJ_HasValue(self.Persona_NPC_Party,ent) then
+		return
+	end
+	table.insert(self.Persona_NPC_Party,ent)
+end
+
+function PLY:RemoveFromParty_NPC(ent)
+	self:ChatPrint("Removed " .. ent:GetName() .. " From The Party!")
+
+	if self.Persona_NPC_Party == nil or #self:GetParty_NPC() == 0 then
+		return
+	end
+	for i,v in pairs(self.Persona_NPC_Party) do
+		if v == ent then
+			table.remove(self.Persona_NPC_Party,i)
+			break
+		end
+	end
+end
+
+function PLY:ClearParty_NPC()
+	self:ChatPrint("Cleared Party!")
+	self.Persona_NPC_Party = self.Persona_NPC_Party or {}
+	table.Empty(self.Persona_NPC_Party)
+end
+
 function PLY:GetParty()
 	if self.Persona_SV_Party == nil then
 		return {}
@@ -254,8 +299,12 @@ if SERVER then
 		if ply:Alive() then
 			if CurTime() > ply.Persona_PartyCommand then
 				local ent = ply:GetEyeTrace().Entity
-				if ent:GetPos():Distance(ply:GetPos()) <= 150 && ent:IsPlayer() then
-					ply:AddToParty(ent)
+				if ent:GetPos():Distance(ply:GetPos()) <= 150 then
+					if ent:IsPlayer() then
+						ply:AddToParty(ent)
+					else
+						ply:AddToParty_NPC(ent)
+					end
 				end
 				ply.Persona_PartyCommand = CurTime() +0.5
 			end
@@ -268,8 +317,12 @@ if SERVER then
 		if ply:Alive() then
 			if CurTime() > ply.Persona_PartyCommand then
 				local ent = ply:GetEyeTrace().Entity
-				if ent:GetPos():Distance(ply:GetPos()) <= 150 && ent:IsPlayer() then
-					ply:RemoveFromParty(ent)
+				if ent:GetPos():Distance(ply:GetPos()) <= 150 then
+					if ent:IsPlayer() then
+						ply:RemoveFromParty(ent)
+					else
+						ply:RemoveFromParty_NPC(ent)
+					end
 				end
 				ply.Persona_PartyCommand = CurTime() +0.5
 			end
@@ -281,6 +334,7 @@ if SERVER then
 		ply.Persona_PartyCommand = ply.Persona_PartyCommand or CurTime()
 		if CurTime() > ply.Persona_PartyCommand then
 			ply:ClearParty()
+			ply:ClearParty_NPC()
 			ply.Persona_PartyCommand = CurTime() +0.5
 		end
 	end

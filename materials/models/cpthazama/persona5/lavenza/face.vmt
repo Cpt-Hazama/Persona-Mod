@@ -3,6 +3,10 @@
 	"$basetexture" "models/cpthazama/persona5/lavenza/face"
 	"$bumpmap" "models/cpthazama/persona5/lavenza/face_n"
 	"$phongexponenttexture" "models/cpthazama/persona5/lavenza/face_s"
+	
+	$selfillum "1"
+	$selfillummask "models/cpthazama/persona5/lavenza/face_g"
+	$selfillumtint "[1 1 0]"
 
 	"$phong"				"1"
 	"$phongboost"			"0.1"

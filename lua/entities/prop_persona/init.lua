@@ -187,10 +187,16 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoCritical(t)
 	self:SetCritical(true)
+	self:SetCriticalFX(true)
 	self.User:EmitSound("cpthazama/persona5/misc/00015_streaming.wav",0.2)
 	timer.Simple(t,function()
 		if IsValid(self) then
 			self:SetCritical(false)
+		end
+	end)
+	timer.Simple(t /2,function()
+		if IsValid(self) then
+			self:SetCriticalFX(false)
 		end
 	end)
 end
@@ -215,6 +221,8 @@ function ENT:IdleAnimationCode(ply)
 	self:SetPos(self:GetIdlePosition(ply))
 	self:FacePlayerAim(self.User)
 end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnThink(ply) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DefaultPersonaControls(ply,persona)
 	if ply:IsPlayer() then
@@ -356,6 +364,9 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 	elseif melee == "Cleave" then
 		self:Cleave(ply,persona)
 		return
+	elseif melee == "Gigantomachia" then
+		self:Gigantomachia(ply,persona)
+		return
 	elseif melee == "Bash" then
 		self:Bash(ply,persona)
 		return
@@ -380,6 +391,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		return
 	elseif self:GetCard() == "Maragidyne" then
 		self:Maragidyne(ply,persona)
+		return
+	elseif self:GetCard() == "Titanomachia" then
+		self:Titanomachia(ply,persona)
 		return
 	elseif self:GetCard() == "Maragion" then
 		self:Maragion(ply,persona)
@@ -561,6 +575,12 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
+	elseif self:GetCard() == "Gigantomachia" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
 	elseif self:GetCard() == "God's Hand" then
 		self.CurrentMeleeSkill = self:GetCard()
 		if ply:IsNPC() then
@@ -592,6 +612,9 @@ function ENT:Think()
 			self:MoveToPos(self.User:GetPos(),speed)
 			if dist <= 15 then
 				self.User:EmitSound("cpthazama/persona5/persona_disapper.wav",65)
+				-- if self.User:IsNPC() && self.User.OnDisablePersona then
+					-- self.User:OnDisablePersona(self)
+				-- end
 				SafeRemoveEntity(self)
 			end
 			return
@@ -617,6 +640,7 @@ function ENT:Think()
 			self:PersonaThink_NPC(self.User,self)
 		end
 		self:DefaultPersonaControls(self.User,self)
+		self:OnThink(self.User)
 	else
 		self:Remove()
 	end
@@ -756,7 +780,8 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeSP(sp)
 	if self.User:HasGodMode() then return end
-	self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,self.User:IsPlayer() && 999 or 9999))
+	-- self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,self.User:IsPlayer() && 999 or 9999))
+	self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,self.User:GetMaxSP()))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeHP(hp)
@@ -887,6 +912,9 @@ function ENT:FindEnemies(pos,dist)
 				if self.User:IsNPC() && self.User:Disposition(v) == 3 then
 					continue
 				end
+				if self.User:IsPlayer() && v:IsNPC() && VJ_HasValue(self.User:GetParty_NPC(),v) then
+					continue
+				end
 				if self.User:IsPlayer() && v:IsPlayer() && VJ_HasValue(self.User:GetParty(),v:UniqueID()) then
 					continue
 				end
@@ -937,6 +965,9 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 			if (v != self && v != self.User) && (((v:IsNPC() or (checkPlayers && v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
 				if (self:GetForward():Dot((Vector(v:GetPos().x,v:GetPos().y,0) - Vector(self:GetPos().x,self:GetPos().y,0)):GetNormalized()) > math.cos(math.rad(rad))) then
 					if self.User:IsNPC() && self.User:Disposition(v) == 3 then
+						continue
+					end
+					if self.User:IsPlayer() && v:IsNPC() && VJ_HasValue(self.User:GetParty_NPC(),v) then
 						continue
 					end
 					if self.User:IsPlayer() && v:IsPlayer() && VJ_HasValue(self.User:GetParty(),v:UniqueID()) then
@@ -1011,11 +1042,12 @@ function ENT:OnKilledEnemy_EXP(ent)
 	PXP.GiveEXP(ply,exp)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:AgiEffect(ent,dmg)
+function ENT:AgiEffect(ent,dmg,scale)
 	-- if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
 		-- continue
 	-- end
 	local dmg = dmg or DMG_P_HEAVY
+	local scale = scale or 1
 	local m = ents.Create("prop_vj_animatable")
 	m:SetModel("models/cpthazama/persona5/effects/agi.mdl")
 	m:SetPos(ent:GetPos())
@@ -1024,7 +1056,7 @@ function ENT:AgiEffect(ent,dmg)
 	m:DrawShadow(false)
 	m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 	m:ResetSequence("idle")
-	m:SetModelScale(ent:OBBMaxs().z *0.03,1)
+	m:SetModelScale((ent:OBBMaxs().z *0.03) *scale,1)
 	m:EmitSound("ambient/fire/ignite.wav",80)
 	timer.Simple(1,function()
 		if IsValid(m) then
@@ -1244,6 +1276,12 @@ function ENT:OnRemove()
 		PXP.SavePersonaData(self.User,self.EXP,self.Level,self.CardTable)
 	end
 	self:StopParticles()
+	if IsValid(self.User) && self.User:IsNPC() && self.User.OnDisablePersona then
+		self.User:OnDisablePersona(self)
+		if self.User.UpdateCamera then
+			self.User:UpdateCamera(1)
+		end
+	end
 	self:WhenRemoved()
 	if self.Loops then
 		for _,v in pairs(self.Loops) do

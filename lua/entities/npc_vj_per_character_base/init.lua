@@ -67,21 +67,58 @@ ENT.Animations["range_idle"] = "persona_attack_idle"
 ENT.Animations["range_end"] = "persona_attack_end"
 
 ENT.Persona = "izanagi"
+ENT.CriticalDownTime = 10
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaInit() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnTakeDamage_BeforeDamage(dmginfo,hitgroup)
 	local dmg = dmginfo:GetDamage()
 	local dmgtype = dmginfo:GetDamageType()
-	
+
 	if dmginfo:GetDamage() > 0 then
 		local canDodge = math.random(1,100) <= self.Stats.AGI
-		if canDodge && self:BusyWithActivity() == false && math.random(1,2) == 1 then
+		if canDodge && self:BusyWithActivity() == false && self:GetState() != VJ_STATE_ONLY_ANIMATION && math.random(1,2) == 1 then
 			if self:LookupSequence("dodge") then
 				self:VJ_ACT_PLAYACTIVITY("dodge",true,false,true)
 				self:ResetLoopAnimation()
 			end
 			dmginfo:SetDamage(0)
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SetCriticalState()
+	SafeRemoveEntity(self:GetPersona())
+	self.InCriticalState = true
+	self:VJ_ACT_PLAYACTIVITY("critical",true,false,true)
+	timer.Simple(self:DecideAnimationLength("critical",false),function()
+		if IsValid(self) then
+			self:StartLoopAnimation(self:GetSequenceActivity(self:LookupSequence("critical_idle")))
+			timer.Simple(self.CriticalDownTime,function()
+				if IsValid(self) then
+					self:VJ_ACT_PLAYACTIVITY("critical_end",true,false,true)
+					timer.Simple(self:DecideAnimationLength("critical_end",false),function()
+						if IsValid(self) then
+							self:ResetLoopAnimation()
+							self.InCriticalState = false
+						end
+					end)
+				end
+			end)
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnTakeDamage_OnBleed(dmginfo,hitgroup)
+	local dmg = dmginfo:GetDamage()
+	local dmgtype = dmginfo:GetDamageType()
+	local attacker = dmginfo:GetAttacker()
+	local inflictor = dmginfo:GetInflictor()
+
+	if dmginfo:GetDamage() > 0 && self:LookupSequence("critical") && IsValid(attacker) && (attacker:IsPlayer() or attacker:IsNPC()) && IsValid(attacker:GetPersona()) then
+		local persona = attacker:GetPersona()
+		if persona:GetCritical() && !self.InCriticalState && self:BusyWithActivity() == false && self:GetState() != VJ_STATE_ONLY_ANIMATION then
+			self:SetCriticalState(true)
 		end
 	end
 end
@@ -92,6 +129,7 @@ function ENT:CustomOnInitialize()
 	
 	self.HasDeathRagdoll = self.HasDeathAnimation
 	
+	self.InCriticalState = false
 	self.MetaVerseMode = false
 	self.NextMetaChangeT = 0
 
@@ -232,6 +270,18 @@ function ENT:OnSwitchMetaVerse(didSwitch) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummonPersona(persona) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnDisablePersona(persona) end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:UpdateCamera(index)
+	local ent = self.VJ_TheControllerEntity
+	local cam = ent.PropCamera
+	if IsValid(ent) && IsValid(cam) && self.CameraPosition != nil then
+		cam:SetParent(NULL)
+		cam:SetPos(self:GetPos() +self:GetRight() *self.CameraPosition[index].right +self:GetForward() *self.CameraPosition[index].forward +self:GetUp() *self.CameraPosition[index].up)
+		cam:SetParent(self)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:UseItem(class,t)
 	if CurTime() > self.NextUseT then
 		local ent = ents.Create(class)
@@ -289,6 +339,10 @@ end
 function ENT:CustomOnThink()
 	self:HandleAnimations()
 
+	self.DisableFindEnemy = self.InCriticalState
+	if self.InCriticalState then
+		self:SetEnemy(NULL)
+	end
 	self.ConstantlyFaceEnemyDistance = self.FarAttackDistance -500
 	self.NoChaseAfterCertainRange_FarDistance = self.CloseAttackDistance -50
 
@@ -342,7 +396,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
 	if self.HasDeathAnimation == false then return end
-	if self.CanRespawn == false then return end
+	local respawn = self.CanRespawn
 	GetCorpse:ResetSequence("death")
 	GetCorpse:SetCycle(1)
 	GetCorpse.SP = self.SP
@@ -350,6 +404,10 @@ function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
 	undo.ReplaceEntity(self,GetCorpse)
 	timer.Simple(20,function()
 		if IsValid(GetCorpse) then
+			if !respawn then
+				GetCorpse:Remove()
+				return
+			end
 			local e = ents.Create(GetCorpse.Class)
 			e:SetPos(GetCorpse:GetPos())
 			e:SetAngles(GetCorpse:GetAngles())
