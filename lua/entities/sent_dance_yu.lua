@@ -85,6 +85,7 @@ function ENT:PlayAnimation(seq,rate,cycle)
 		-- self:PlayMusic(self.SoundTracks[seq])
 	-- end
 	local t = self:GetSequenceDuration(self,seq)
+	self:OnPlayDance(seq,t)
 	return t
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,6 +99,24 @@ function ENT:GetSequenceDuration(argent,actname)
 end
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 if !(SERVER) then return end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnPlayDance(seq,t)
+	if seq == "dance_specialist" then
+		self:ChangeFace()
+		self:ChangeFace(2.4,1)
+		self:ChangeFace(t -2.5)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:ChangeFace(t,id)
+	local t = t or 0
+	local id = id or 0
+	timer.Simple(t,function()
+		if IsValid(self) then
+			self:SetBodygroup(1,id)
+		end
+	end)
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Initialize()
 	self:SetModel("models/cpthazama/persona4_dance/yu.mdl")

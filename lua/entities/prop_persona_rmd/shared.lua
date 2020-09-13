@@ -15,9 +15,14 @@ ENT.IsPersona = true
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PlaySet(skill,name,rate,cycle)
 	local seq = self.Animations[name]
-	if seq then
+	local canDo = {"idle","melee","range","idle_low"}
+	if VJ_HasValue(canDo,name) then
+		-- self.User:ChatPrint(name .. "/" .. seq)
+		-- self.User:ChatPrint("Regular")
 		return self:PlayAnimation(seq,rate,cycle,name,skill)
 	else
+		-- self.User:ChatPrint(name .. "/" .. seq)
+		-- self.User:ChatPrint("Set to Zero")
 		self:HandleEvents(skill or "BLANK",tbName or "N/A",nil,0)
 		if IsValid(self.User) && self.User:IsNPC() && self.User.OnPersonaAnimation then
 			self.User:OnPersonaAnimation(self,skill or "BLANK",tbName or "N/A",nil,0)

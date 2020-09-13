@@ -12,6 +12,12 @@ ENT.Stats = {
 	RES = {DMG_P_ICE}
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
+ENT.Animations = {}
+ENT.Animations["idle"] = "idle"
+ENT.Animations["idle_low"] = "idle"
+ENT.Animations["melee"] = "attack"
+ENT.Animations["range"] = "range_single"
+---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.LeveledSkills = {
 	{Level = 74, Name = "Agneyastra", Cost = 24, UsesHP = true, Icon = "phys"},
 	{Level = 70, Name = "God's Hand", Cost = 22, UsesHP = true, Icon = "phys"},
@@ -29,9 +35,9 @@ ENT.LeveledSkills = {
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.LegendaryMaterials = {}
-ENT.LegendaryMaterials[1] = "models/cpthazama/persona4/tomoe/tomoe1"
-ENT.LegendaryMaterials[2] = "models/cpthazama/persona4/tomoe/tomoe2"
-ENT.LegendaryMaterials[3] = "models/cpthazama/persona4/tomoe/tomoe3"
+ENT.LegendaryMaterials[1] = "models/cpthazama/persona4/tomoe/tomoe1_legendary"
+ENT.LegendaryMaterials[2] = "models/cpthazama/persona4/tomoe/tomoe2_legendary"
+ENT.LegendaryMaterials[3] = "models/cpthazama/persona4/tomoe/tomoe3_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
 	return ply:GetPos() +ply:GetForward() *-60

@@ -1,6 +1,5 @@
 AddCSLuaFile("shared.lua")
 include("shared.lua")
-include("skills.lua")
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.Animations = {}
 ENT.Animations["idle"] = "idle"
