@@ -1,4 +1,4 @@
-ENT.Base 			= "npc_vj_per_labrys"
+ENT.Base 			= "npc_vj_per_adachi"
 ENT.Type 			= "ai"
 ENT.PrintName 		= ""
 ENT.Author 			= "Cpt. Hazama"
@@ -35,15 +35,10 @@ if CLIENT then
 		end
 	end
 	
-	function ENT:Initialize()
-		self.Theme = "cpthazama/persona4/music/boss_labrys_shadow.mp3"
-		self.ThemeT = 230
-	end
-
 	local lerpHP = 0
 	function ENT:Think()
 		local entity = self
-		hook.Add("HUDPaint","VJ_Persona_ShadowHUD_Labrys",function()
+		hook.Add("HUDPaint","VJ_Persona_ShadowHUD_Adachi",function()
 			if GetConVarNumber("persona_hud_raidboss") == 0 then return end
 			local ent = LocalPlayer():GetNWEntity("VJ_Persona_ShadowBoss")
 			if IsValid(ent) && ent == entity then
@@ -61,7 +56,7 @@ if CLIENT then
 				lerpHP = Lerp(5 *FrameTime(),lerpHP,HP)
 				local bLenMod = (bLen *math.Clamp(lerpHP,0,HPMax)) /HPMax
 
-				local tPosX = bPosX -48
+				local tPosX = bPosX -38
 				local tPosY = bPosY +159
 				local tScale = 180 // 150
 
@@ -73,11 +68,11 @@ if CLIENT then
 				surface.SetDrawColor(Color(90,0,255,200))
 				surface.DrawTexturedRect(ScrW() -pPosX,ScrH() -pPosY,pScale,pScale)
 
-				surface.SetMaterial(Material("hud/persona/boss/labrys_shadow_outline.png"))
+				surface.SetMaterial(Material("hud/persona/boss/adachi_outline.png"))
 				surface.SetDrawColor(Color(255,255,255,255))
 				surface.DrawTexturedRect(ScrW() -tPosX -3,ScrH() -tPosY -5,tScale +5,tScale +5)
 
-				surface.SetMaterial(Material("hud/persona/boss/labrys_shadow.png"))
+				surface.SetMaterial(Material("hud/persona/boss/adachi.png"))
 				surface.SetDrawColor(Color(255,255,255,255))
 				surface.DrawTexturedRect(ScrW() -tPosX,ScrH() -tPosY,tScale,tScale)
 
@@ -105,8 +100,13 @@ if CLIENT then
 		end
 	end
 	
+	function ENT:Initialize()
+		self.Theme = "cpthazama/persona3/music/boss_shadow.mp3"
+		self.ThemeT = 165
+	end
+	
 	function ENT:OnRemove()
-		hook.Remove("HUDPaint","VJ_Persona_ShadowHUD_Labrys")
+		hook.Remove("HUDPaint","VJ_Persona_ShadowHUD_Adachi")
 		local found = false
 		for _,v in pairs(ents.FindByClass(self:GetClass())) do
 			if v != self then
@@ -122,10 +122,10 @@ if CLIENT then
 		end
 	end
 
-	net.Receive("vj_persona_hud_labrys_shadow",function(len,pl)
+	net.Receive("vj_persona_hud_adachi_shadow",function(len,pl)
 		local delete = net.ReadBool()
 		local ent = net.ReadEntity()
-		hook.Add("HUDPaint","VJ_Persona_HUD_Labrys_Shadow",function()
+		hook.Add("HUDPaint","vj_persona_hud_adachi_shadow",function()
 			local persona = ent:GetPersona()
 			local card = persona:GetNWString("SpecialAttack")
 			local name = ent:GetPersonaName()
@@ -155,6 +155,6 @@ if CLIENT then
 			end
 			draw.SimpleText(finalhp,"VJFont_Trebuchet24_SmallMedium", ScrW() /(1.6 -move),ScrH() -94,Color(255,255,255,255),0,0)
 		end)
-		if delete == true then hook.Remove("HUDPaint","VJ_Persona_HUD_Labrys_Shadow") end
+		if delete == true then hook.Remove("HUDPaint","vj_persona_hud_adachi_shadow") end
 	end)
 end

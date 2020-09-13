@@ -17,6 +17,13 @@ if VJExists == true then
 	local vCat = "Persona"
 	VJ.AddCategoryInfo(vCat,{Icon = "vj_icons/persona.png"})
 
+		-- Persona - Raid Bossess --
+	-- These all use the song Shadow as their theme --
+	-- VJ.AddNPC("Makoto Niijima (Shadow)","npc_vj_per_makoto_shadow",vCat)
+	-- VJ.AddNPC("Yu Narukami (Shadow)","npc_vj_per_yu_shadow",vCat)
+	-- VJ.AddNPC("Tohru Adachi (Shadow)","npc_vj_per_adachi_shadow",vCat)
+	-- VJ.AddNPC("Sho Minazuki (Shadow)","npc_vj_per_sho_shadow",vCat)
+
 		-- Persona 5 - Protagonists --
 	-- VJ.AddNPC("Ren Amamiya","npc_vj_per_ren",vCat) -- Persona: Arsène and Satanael | Theme: Last Surprise / Groovy
 	VJ.AddNPC("Makoto Niijima","npc_vj_per_makoto",vCat) -- Johanna and Anat | Theme: Price

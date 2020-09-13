@@ -7,7 +7,7 @@ include('shared.lua')
 -----------------------------------------------*/
 ENT.Model = {"models/cpthazama/persona5/adachi.mdl"} -- The game will pick a random model from the table when the SNPC is spawned | Add as many as you want 
 ENT.Stats = {
-	HP = 4200,
+	HP = 9500,
 	SP = 2200,
 	STR = 65,
 	MAG = 55,

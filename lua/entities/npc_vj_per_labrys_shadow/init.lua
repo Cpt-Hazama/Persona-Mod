@@ -69,6 +69,12 @@ function ENT:PersonaInit()
 
 	ParticleEffectAttach("vj_per_shadow_idle",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 
+	for _,v in pairs(player.GetAll()) do
+		if !IsValid(v:GetNWEntity("VJ_Persona_ShadowBoss")) then
+			v:SetNWEntity("VJ_Persona_ShadowBoss",self)
+		end
+	end
+
 	self.SoundTbl_Alert = {
 		"cpthazama/persona4/labrys/shadow/chr_ls_0.wav",
 		"cpthazama/persona4/labrys/shadow/chr_ls_1.wav",
@@ -228,6 +234,14 @@ function ENT:PersonaInit()
 		"cpthazama/persona4/labrys/shadow/ls504la.wav",
 	}
 	self.SoundTbl_FollowPlayer = {"cpthazama/persona4/labrys/shadow/ingame_ls_0.wav"}
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnRemove()
+	for _,v in pairs(player.GetAll()) do
+		if IsValid(v:GetNWEntity("VJ_Persona_ShadowBoss")) && v:GetNWEntity("VJ_Persona_ShadowBoss") == self then
+			v:SetNWEntity("VJ_Persona_ShadowBoss",NULL)
+		end
+	end
 end
 /*-----------------------------------------------
 	*** Copyright (c) 2012-2019 by Cpt. Hazama, All rights reserved. ***

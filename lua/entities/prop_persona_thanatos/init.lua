@@ -48,7 +48,7 @@ function ENT:GetIdlePosition(ply)
 	return ply:GetPos() +ply:GetForward() *-50 +ply:GetRight() *-15
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnSummoned(ply)
+function ENT:OnSummoned(owner)
 	self:UserSound("cpthazama/persona5/joker/0005.wav")
 	self.PersonaDistance = 999999999
 
@@ -57,12 +57,24 @@ function ENT:OnSummoned(ply)
 	self:AddCard("Mamudoon",34,false,"curse")
 	self:AddCard("Concentrate",15,false,"passive")
 	self:AddCard("One-shot Kill",17,true,"gun")
+	if owner:IsNPC() && owner:GetClass() == "npc_vj_per_elizabeth" then
+		self:AddCard("Maziodyne",COST_P_MAZIODYNE,false,"elec")
+		self:AddCard("Mabufudyne",1,false,"ice")
+		self:AddCard("Magarudyne",1,false,"wind")
+		self:AddCard("Maragidyne",1,false,"fire")
+		self:AddCard("Debilitate",1,false,"passive")
+		self:AddCard("Mind Charge",1,false,"sleep")
+		self:AddCard("Mahamaon",1,false,"bless")
+		self:AddCard("Diarahan",1,false,"heal")
+		self:AddCard("Ghastly Wail",1,true,"almighty")
+		self:AddCard("Megidolaon",38,false,"almighty")
+	end
 
 	self:SetCard("Maeigaon")
 	self:SetCard("One-shot Kill",true)
 
 	local v = {forward=-200,right=80,up=50}
-	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	owner:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

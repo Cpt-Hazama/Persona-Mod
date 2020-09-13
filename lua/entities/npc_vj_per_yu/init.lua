@@ -60,6 +60,13 @@ end
 function ENT:PersonaInit()
 	self:SetBodygroup(1,1)
 	self.CurrentIndex = 1
+	if math.random(1,1000) == 1 then
+		local dance = ents.Create("sent_dance_yu")
+		dance:SetPos(self:GetPos())
+		dance:SetAngles(self:GetAngles())
+		dance:Spawn()
+		undo.ReplaceEntity(self,dance)
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnAnimEvent(persona,skill,animBlock,seq,t)

@@ -26,6 +26,7 @@ if CLIENT then
 	CreateClientConVar("persona_hud_x","350",false,false)
 	CreateClientConVar("persona_hud_y","250",false,false)
 	CreateClientConVar("persona_hud_damage","1",false,false)
+	CreateClientConVar("persona_hud_raidboss","0",false,false)
 
 	net.Receive("persona_csound",function(len,pl)
 		local ply = net.ReadEntity()
@@ -975,11 +976,18 @@ if CLIENT then
 				persona_hud_x = "350",
 				persona_hud_y = "250",
 				persona_hud_damage = "1",
+				-- persona_hud_raidboss = "0",
 			}
 			Panel:AddControl("ComboBox",DefaultBox)
 			Panel:AddControl("Slider",{Label = "Box X Position",Command = "persona_hud_x",Min = 0,Max = 1920})
 			Panel:AddControl("Slider",{Label = "Box Y Position",Command = "persona_hud_y",Min = 0,Max = 1080})
 			Panel:AddControl("CheckBox",{Label = "Enable Damage Markers",Command = "persona_hud_damage"})
+			-- Panel:AddControl("CheckBox",{Label = "Enable Raid Boss Portraits",Command = "persona_hud_raidboss"})
+		end,{})
+
+		spawnmenu.AddToolMenuOption("Persona","Main Settings","NPCs","NPCs","","",function(Panel)
+			Panel:AddControl("CheckBox",{Label = "Enable NPC Themes",Command = "vj_persona_music"})
+			Panel:AddControl("Label",{Text = "Note: You can also enable/disable them per NPC!"})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)

@@ -25,3 +25,9 @@ SWEP.WorldModel_CustomPositionOrigin = Vector(0.5,3,-20)
 function SWEP:PrimaryAttack()
 	return false
 end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function SWEP:DecideBulletPosition()
+	local owner = self:GetOwner()
+	if !IsValid(owner) then return nil end
+	return owner:EyePos()
+end

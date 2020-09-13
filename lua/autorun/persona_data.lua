@@ -130,6 +130,11 @@ PERSONA["asterius"].Model = "models/cpthazama/persona4/persona/asterius.mdl"
 PERSONA["asterius"].Aura = "jojo_aura_red"
 PERSONA["asterius"].Name = "Asterius"
 
+PERSONA["tomoe"] = {}
+PERSONA["tomoe"].Model = "models/cpthazama/persona4/persona/tomoe.mdl"
+PERSONA["tomoe"].Aura = "jojo_aura_blue"
+PERSONA["tomoe"].Name = "Tomoe"
+
 -- PERSONA["hereward"] = {}
 -- PERSONA["hereward"].Model = "models/cpthazama/persona5/persona/hereward.mdl"
 -- PERSONA["hereward"].Aura = "jojo_aura_red"
