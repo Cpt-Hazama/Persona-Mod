@@ -2,7 +2,7 @@
 {
 	"$basetexture" "models/cpthazama/persona5/arsene/arsene"
 	"$bumpmap" "models/cpthazama/persona5/arsene/arsene_n"
-	"$phongexponenttexture" "models/cpthazama/arsene/ariadne_picaro/arsene_s"
+	"$phongexponenttexture" "models/cpthazama/arsene/arsene_s"
 
 	"$phong"				"1"
 	"$phongboost"			"0"

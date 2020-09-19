@@ -159,6 +159,11 @@ function ENT:OnSummonPersona(persona)
 	if self.IsGood then
 		persona:SetMaterial("models/cpthazama/persona5/loki/loki_good")
 	end
+	self.VJC_Data.ThirdP_Offset = Vector(-80, 80, 0)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnDisablePersona(persona)
+	self.VJC_Data.ThirdP_Offset = Vector(-15, 40, -35)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink()

@@ -26,6 +26,7 @@ if VJExists == true then
 
 		-- Persona 5 - Protagonists --
 	-- VJ.AddNPC("Ren Amamiya","npc_vj_per_ren",vCat) -- Persona: Arsène and Satanael | Theme: Last Surprise / Groovy
+	VJ.AddNPC("Ann Takamaki","npc_vj_per_ann",vCat) -- Carmen and Célestine | Theme: Wake Up, Get Up, Get Out There
 	VJ.AddNPC("Makoto Niijima","npc_vj_per_makoto",vCat) -- Johanna and Anat | Theme: Price
 	VJ.AddNPC("Goro Akechi","npc_vj_per_akechi_crow",vCat) -- Persona: Robin Hood | Theme: Ark
 	VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat) -- Persona: Thor, Berith and Atavaka | Theme: Rivers in The Desert

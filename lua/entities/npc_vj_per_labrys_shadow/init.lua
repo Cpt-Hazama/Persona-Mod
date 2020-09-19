@@ -36,11 +36,11 @@ ENT.Animations["range_start_idle"] = "persona_attack_start_idle"
 ENT.Animations["range"] = "persona_attack"
 ENT.Animations["range_idle"] = "persona_attack_idle"
 ENT.Animations["range_end"] = "persona_attack_end"
+ENT.Animations["critical_start"] = "critical"
+ENT.Animations["critical"] = "critical_idle"
+ENT.Animations["critical_end"] = "critical_end"
 
 ENT.Persona = "asterius"
-ENT.CameraPosition = {}
-ENT.CameraPosition[1] = {right = 30,forward = 20,up = 40}
-ENT.CameraPosition[2] = {right = 110,forward = -375,up = 180}
 ENT.CriticalDownTime = 20
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Controller_Initialize(ply)
@@ -55,8 +55,6 @@ function ENT:Controller_Initialize(ply)
 			net.WriteEntity(self)
 		net.Send(ply)
 	end
-	
-	timer.Simple(0,function() self:UpdateCamera(1) end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnDisablePersona(persona)

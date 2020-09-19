@@ -40,6 +40,13 @@ ENT.AnimTbl_Death = {ACT_DIESIMPLE}
 ENT.DeathCorpseEntityClass = "prop_vj_animatable"
 ENT.CanRespawn = false
 
+ENT.VJC_Data = {
+    CameraMode = 1, -- Sets the default camera mode | 1 = Third Person, 2 = First Person
+    ThirdP_Offset = Vector(-15, 40, -35), -- The offset for the controller when the camera is in third person
+    FirstP_Bone = "Bip01 Head", -- If left empty, the base will attempt to calculate a position for first person
+    FirstP_Offset = Vector(5, 0, 2), -- The offset for the controller when the camera is in first person
+}
+
 ENT.SoundTbl_FootStep = {}
 ENT.SoundTbl_CombatIdle = {}
 ENT.SoundTbl_Pain = {}
@@ -65,6 +72,9 @@ ENT.Animations["range_start_idle"] = "persona_attack_start_idle"
 ENT.Animations["range"] = "persona_attack"
 ENT.Animations["range_idle"] = "persona_attack_idle"
 ENT.Animations["range_end"] = "persona_attack_end"
+ENT.Animations["critical_start"] = "critical_start"
+ENT.Animations["critical"] = "critical"
+ENT.Animations["critical_end"] = "critical_end"
 
 ENT.Persona = "izanagi"
 ENT.CriticalDownTime = 10
@@ -90,14 +100,14 @@ end
 function ENT:SetCriticalState()
 	SafeRemoveEntity(self:GetPersona())
 	self.InCriticalState = true
-	self:VJ_ACT_PLAYACTIVITY("critical",true,false,true)
-	timer.Simple(self:DecideAnimationLength("critical",false),function()
+	self:VJ_ACT_PLAYACTIVITY(self.Animations["critical_start"],true,false,true)
+	timer.Simple(self:DecideAnimationLength(self.Animations["critical_start"],false),function()
 		if IsValid(self) then
-			self:StartLoopAnimation(self:GetSequenceActivity(self:LookupSequence("critical_idle")))
+			self:StartLoopAnimation(self:GetSequenceActivity(self:LookupSequence(self.Animations["critical"])))
 			timer.Simple(self.CriticalDownTime,function()
 				if IsValid(self) then
-					self:VJ_ACT_PLAYACTIVITY("critical_end",true,false,true)
-					timer.Simple(self:DecideAnimationLength("critical_end",false),function()
+					self:VJ_ACT_PLAYACTIVITY(self.Animations["critical_end"],true,false,true)
+					timer.Simple(self:DecideAnimationLength(self.Animations["critical_end"],false),function()
 						if IsValid(self) then
 							self:ResetLoopAnimation()
 							self.InCriticalState = false
@@ -117,7 +127,7 @@ function ENT:CustomOnTakeDamage_OnBleed(dmginfo,hitgroup)
 
 	if dmginfo:GetDamage() > 0 && self:LookupSequence("critical") && IsValid(attacker) && (attacker:IsPlayer() or attacker:IsNPC()) && IsValid(attacker:GetPersona()) then
 		local persona = attacker:GetPersona()
-		if persona:GetCritical() && !self.InCriticalState && self:BusyWithActivity() == false && self:GetState() != VJ_STATE_ONLY_ANIMATION then
+		if persona:GetCritical() && !self.InCriticalState then
 			self:SetCriticalState(true)
 		end
 	end
@@ -186,6 +196,7 @@ function ENT:OnAnimEvent(persona,skill,animBlock,seq,t) end
 function ENT:OnPersonaAnimation(persona,skill,animBlock,seq,t)
 	local myAnim = self.Animations[animBlock]
 	self:OnAnimEvent(persona,skill,animBlock,seq,t)
+	if self.InCriticalState then return end
 	if animBlock == "melee" then
 		local tStart = self:DecideAnimationLength(self.Animations["range_start"],false)
 		local tMelee = self:DecideAnimationLength(self.Animations["melee"],false)
@@ -193,10 +204,12 @@ function ENT:OnPersonaAnimation(persona,skill,animBlock,seq,t)
 		self:VJ_ACT_PLAYACTIVITY(self.Animations["range_start"],true,false,true)
 		timer.Simple(tStart,function()
 			if IsValid(self) then
+				if self.InCriticalState then return end
 				self:StartLoopAnimation("range_idle")
 				self:VJ_ACT_PLAYACTIVITY(myAnim,true,false,true)
 				timer.Simple(tMelee,function()
 					if IsValid(self) then
+						if self.InCriticalState then return end
 						self:SetState()
 						self:VJ_ACT_PLAYACTIVITY(self.Animations["range_end"],true,false,true)
 					end
@@ -268,18 +281,12 @@ function ENT:OnThink() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSwitchMetaVerse(didSwitch) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnSummonPersona(persona) end
+function ENT:OnSummonPersona(persona)
+	self.VJC_Data.ThirdP_Offset = Vector(-80, 80, 0)
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnDisablePersona(persona) end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:UpdateCamera(index)
-	local ent = self.VJ_TheControllerEntity
-	local cam = ent.PropCamera
-	if IsValid(ent) && IsValid(cam) && self.CameraPosition != nil then
-		cam:SetParent(NULL)
-		cam:SetPos(self:GetPos() +self:GetRight() *self.CameraPosition[index].right +self:GetForward() *self.CameraPosition[index].forward +self:GetUp() *self.CameraPosition[index].up)
-		cam:SetParent(self)
-	end
+function ENT:OnDisablePersona(persona)
+	self.VJC_Data.ThirdP_Offset = Vector(-15, 40, -35)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:UseItem(class,t)

@@ -30,8 +30,8 @@ ENT.LeveledSkills = {
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.LegendaryMaterials = {}
 ENT.LegendaryMaterials[1] = "models/cpthazama/persona4/sakuya/sakuya1_legendary"
-ENT.LegendaryMaterials[2] = "models/cpthazama/persona4/sakuya/sakuya2_legendary"
-ENT.LegendaryMaterials[3] = "models/cpthazama/persona4/sakuya/sakuya3_legendary"
+ENT.LegendaryMaterials[2] = "models/cpthazama/persona4/sakuya/sakuya3_legendary"
+ENT.LegendaryMaterials[3] = "models/cpthazama/persona4/sakuya/sakuya2_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
 	return ply:GetPos() +ply:GetForward() *-60

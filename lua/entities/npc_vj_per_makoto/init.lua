@@ -198,6 +198,11 @@ function ENT:OnSummonPersona(persona)
 			self:GetPersona():DoIdle()
 		end
 	end)
+	self.VJC_Data.ThirdP_Offset = Vector(-80, 80, 0)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnDisablePersona(persona)
+	self.VJC_Data.ThirdP_Offset = Vector(-15, 40, -35)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink()
