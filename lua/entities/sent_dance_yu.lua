@@ -1,147 +1,85 @@
 AddCSLuaFile()
 
-ENT.Base 			= "prop_vj_animatable"
+ENT.Base 			= "sent_dance_base"
 ENT.Type 			= "anim"
 ENT.PrintName 		= "Yu Narukami"
 ENT.Author 			= "Cpt. Hazama"
 ENT.Contact 		= "Atlus or some shit"
-ENT.Purpose 		= "Get Trolled, LOL"
+ENT.Purpose 		= ""
 ENT.Instructions 	= "To fucking dance like there's no tomorrow"
 ENT.Category		= "Persona - Dance"
 
 ENT.Spawnable = true
 ENT.AdminOnly = true
 
-ENT.SoundTracks = {}
-ENT.SoundTracks["dance_specialist"] = "cpthazama/persona4_dance/music/c001.mp3"
+ENT.Model = "models/cpthazama/persona4_dance/yu.mdl"
+ENT.HeightOffset = 1
+ENT.CollisionBounds = Vector(16,16,75)
+ENT.DelayBetweenAnimations = 0
+ENT.SongStartDelay = 0.45
+ENT.SongStartAnimationDelay = 0
+
+ENT.Animations = {}
+ENT.Animations["dance_specialist"] = {}
+ENT.Animations["dance_specialist"][1] = {anim = "dance_specialist",next = false}
+
+ENT.SoundTracks = {
+	[1] = {dance = "dance_specialist", song = "cpthazama/persona4_dance/music/c001.mp3"}
+}
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
-	util.AddNetworkString("Persona_Dance_Song")
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:SetupDataTables()
-	self:NetworkVar("String",0,"Song")
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-if (CLIENT) then
-	function ENT:Draw()
-		self:DrawModel()
+	function ENT:OnInit()
+		self:AddAnimationEvent("dance_specialist",0,"default",4167)
+		self:AddAnimationEvent("dance_specialist",1,"default",4167)
+		self:AddAnimationEvent("dance_specialist",2,"default",4167)
+		self:AddAnimationEvent("dance_specialist",69,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",164,"default",4167)
+		self:AddAnimationEvent("dance_specialist",380,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",447,"default",4167)
+		self:AddAnimationEvent("dance_specialist",601,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",650,"default",4167)
+		self:AddAnimationEvent("dance_specialist",742,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",754,"default",4167)
+		self:AddAnimationEvent("dance_specialist",908,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",945,"default",4167)
+		self:AddAnimationEvent("dance_specialist",1171,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",1305,"default",4167)
+		self:AddAnimationEvent("dance_specialist",1395,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",1628,"default",4167)
+		self:AddAnimationEvent("dance_specialist",1741,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",1760,"default",4167)
+		self:AddAnimationEvent("dance_specialist",1964,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",2060,"default",4167)
+		self:AddAnimationEvent("dance_specialist",2145,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",2175,"default",4167)
+		self:AddAnimationEvent("dance_specialist",2475,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",2507,"default",4167)
+		self:AddAnimationEvent("dance_specialist",2550,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",2575,"default",4167)
+		self:AddAnimationEvent("dance_specialist",3033,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",3097,"default",4167)
+		self:AddAnimationEvent("dance_specialist",3369,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",3426,"default",4167)
+		self:AddAnimationEvent("dance_specialist",3770,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",3871,"default",4167)
+		self:AddAnimationEvent("dance_specialist",4031,"smile",4167)
+		self:AddAnimationEvent("dance_specialist",4106,"default",4167)
 	end
 
-	net.Receive("Persona_Dance_Song",function(len)
-		local dir = net.ReadString()
-		local ply = net.ReadEntity()
-
-		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == dir then ply.VJ_Persona_Dance_Theme:Stop() end
-		timer.Simple(0.45,function()
-			if IsValid(ply) then
-				ply.VJ_Persona_Dance_ThemeDir = dir
-				ply.VJ_Persona_Dance_Theme = CreateSound(ply,dir)
-				ply.VJ_Persona_Dance_Theme:SetSoundLevel(0)
-				ply.VJ_Persona_Dance_Theme:ChangeVolume(60)
-				ply.VJ_Persona_Dance_Theme:Play()
-			end
-		end)
-	end)
-
-	function ENT:PlayMusic()
-		-- local ply = LocalPlayer()
-		-- if ply.VJ_Persona_Dance_Theme then ply.VJ_Persona_Dance_Theme:Stop() end
-		-- ply.VJ_Persona_Dance_Theme = CreateSound(ply,song)
-		-- ply.VJ_Persona_Dance_Theme:SetSoundLevel(0)
-		-- ply.VJ_Persona_Dance_Theme:ChangeVolume(60)
-		-- ply.VJ_Persona_Dance_Theme:Play()
-	end
-
-	function ENT:OnRemove()
-		local ply = LocalPlayer()
-		-- if ply.VJ_Persona_Dance_Theme then ply.VJ_Persona_Dance_Theme:Stop() end
-		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == self:GetSong() then
-			local cont = true
-			for _,v in pairs(ents.FindByClass("sent_dance_*")) do
-				if v:GetSong() != nil && v != self && v:GetSong() == self:GetSong() then
-					cont = false
-				end
-			end
-			if cont then
-				ply.VJ_Persona_Dance_Theme:FadeOut(2)
-			end
+	function ENT:HandleAnimationEvent(seq,event,frame)
+		if event == "default" then
+			self:SetBodygroup(1,0)
+		end
+		if event == "smile" then
+			self:SetBodygroup(1,1)
 		end
 	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:PlayAnimation(seq,rate,cycle)
-	self:ResetSequence(seq)
-	self:SetPlaybackRate(rate)
-	self:SetCycle(cycle or 0)
-	for _,v in pairs(player.GetAll()) do
-		net.Start("Persona_Dance_Song")
-			net.WriteString(self.SoundTracks[seq])
-			net.WriteEntity(v)
-		net.Broadcast()
-	end
-	self:SetSong(self.SoundTracks[seq])
-	-- if CLIENT then
-		-- self:PlayMusic(self.SoundTracks[seq])
-	-- end
-	local t = self:GetSequenceDuration(self,seq)
-	self:OnPlayDance(seq,t)
-	return t
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:GetSequenceDuration(argent,actname)
-	if isnumber(actname) then
-		return argent:SequenceDuration(argent:SelectWeightedSequence(actname))
-	elseif isstring(actname) then
-		return argent:SequenceDuration(argent:LookupSequence(actname))
-	end
-	return 0
-end
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-if !(SERVER) then return end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnPlayDance(seq,t)
-	if seq == "dance_specialist" then
-		self:ChangeFace()
-		self:ChangeFace(2.4,1)
-		self:ChangeFace(t -2.5)
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:ChangeFace(t,id)
-	local t = t or 0
-	local id = id or 0
-	timer.Simple(t,function()
-		if IsValid(self) then
-			self:SetBodygroup(1,id)
-		end
-	end)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Initialize()
-	self:SetModel("models/cpthazama/persona4_dance/yu.mdl")
-	self:SetSolid(SOLID_OBB)
-	self:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
-	self:SetCollisionBounds(Vector(16,16,75),Vector(-16,-16,0))
-	
-	self.NextDanceT = CurTime()
 
-	timer.Simple(0,function()
-		if IsValid(self) then
-			if IsValid(self:GetCreator()) && self:GetCreator():IsPlayer() then
-				-- self:GetCreator():ChatPrint("GET TROLLED, LOL!")
-			end
+	function ENT:OnPlayDance(seq,t)
+		if seq == "dance_specialist" then
+			self:ChangeFace()
 		end
-	end)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Think()
-	if CurTime() > self.NextDanceT then
-		local t = self:PlayAnimation("dance_specialist",1,1)
-		self.NextDanceT = CurTime() +t
 	end
-	self:NextThink(CurTime())
-	return true
 end
 /*--------------------------------------------------
 	*** Copyright (c) 2012-2020 by DrVrej, All rights reserved. ***

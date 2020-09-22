@@ -894,6 +894,9 @@ if CLIENT then
 		if IsValid(ply:GetNWEntity("PersonaEntity")) then return true end
 	end)
 
+
+	local P_LerpVec = Vector(0,0,0)
+	local P_LerpAng = Angle(0,0,0)
 	hook.Add("CalcView","Persona_ThirdPerson",function(ply,pos,angles,fov)
 		local persona = ply:GetNWEntity("PersonaEntity")
 		local cPos = ply:GetNWVector("Persona_CustomPos")
@@ -919,9 +922,13 @@ if CLIENT then
 				return tr.HitPos +tr.HitNormal *5
 			end
 
+			pos = Position(ply,pos,angles,40,cPos)
+			P_LerpVec = LerpVector(FrameTime() *15,P_LerpVec,pos)
+			P_LerpAng = LerpAngle(FrameTime() *15,P_LerpAng,ply:EyeAngles())
+
 			local view = {}
-			view.origin = Position(ply,pos,angles,40,cPos)
-			view.angles = ply:EyeAngles()
+			view.origin = P_LerpVec
+			view.angles = P_LerpAng
 			view.fov = fov
 			return view
 		end
