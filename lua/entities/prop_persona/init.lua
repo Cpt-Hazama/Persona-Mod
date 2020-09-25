@@ -57,6 +57,8 @@ function ENT:HandleEvents(skill,animBlock,seq,t) -- Default events, override in 
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HandleAnimationEvent(seq,event,frame) end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Initialize()
 	self:SetSolid(SOLID_OBB)
 	self:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
@@ -81,6 +83,7 @@ function ENT:Initialize()
 
 	self.Loops = {}
 	self.Flexes = {}
+	self.AnimationEvents = {}
 	
 	self.NextCardSwitchT = CurTime()
 	self.NextLockOnT = CurTime()
@@ -91,6 +94,9 @@ function ENT:Initialize()
 	self.BaseEND = self.Stats.END
 	self.BaseAGI = self.Stats.AGI
 	self.BaseLUC = self.Stats.LUC
+	
+	self.P_LerpVec = self:GetPos()
+	self.P_LerpAng = self:GetAngles()
 	
 	timer.Simple(0,function()
 		if self.User:IsPlayer() then
@@ -110,6 +116,9 @@ function ENT:Initialize()
 		end
 		self:CustomOnInitialize()
 	end)
+	
+	-- self:AddAnimationEvent("attack",35,"dmgtimer_1",65)
+	
 	-- PrintTable(self:GetMaterials())
 	-- timer.Simple(0,function()
 		-- if PXP.IsLegendary(self.User) then
@@ -218,7 +227,8 @@ function ENT:IdleAnimationCode(ply)
 	if self:GetSequenceName(self:GetSequence()) != self.Animations[self.CurrentIdle] then
 		self:DoIdle()
 	end
-	self:SetPos(self:GetIdlePosition(ply))
+	self.P_LerpVec = LerpVector(FrameTime() *50,self.P_LerpVec,self:GetIdlePosition(ply))
+	self:SetPos(self.P_LerpVec)
 	self:FacePlayerAim(self.User)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -267,7 +277,8 @@ function ENT:DefaultPersonaControls(ply,persona)
 			local speed = 3
 			local speedS = 2
 			if !w && !a && !d && !s then
-				self:SetAngles(self.User:GetAngles())
+				self.P_LerpAng = LerpAngle(FrameTime() *15,self.P_LerpAng,self.User:GetAngles())
+				self:SetAngles(self.P_LerpAng)
 			end
 			if w then
 				if self.CurrentForwardAng != 15 then
@@ -295,9 +306,11 @@ function ENT:DefaultPersonaControls(ply,persona)
 					self.CurrentSideAng = (self.CurrentSideAng > 0 && self.CurrentSideAng -speedS) or self.CurrentSideAng +speedS
 				end
 			end
-			self:SetAngles(Angle(self.CurrentForwardAng,ang.y,self.CurrentSideAng))
+			self.P_LerpAng = LerpAngle(FrameTime() *15,self.P_LerpAng,Angle(self.CurrentForwardAng,ang.y,self.CurrentSideAng))
+			self:SetAngles(self.P_LerpAng)
 		else
-			self:SetAngles(self.User:GetAngles())
+			self.P_LerpAng = LerpAngle(FrameTime() *15,self.P_LerpAng,self.User:GetAngles())
+			self:SetAngles(self.P_LerpAng)
 		end
 	elseif self:GetTask() == "TASK_ATTACK" then
 		-- if !IsValid(ply.Persona_EyeTarget) then self:FindTarget(ply) end
@@ -485,6 +498,27 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif self:GetCard() == "Makougaon" then
 		self:Makougaon(ply,persona)
 		return
+	elseif self:GetCard() == "Recover HP EX" then
+		self:RecoverHPEX(ply,persona)
+		return
+	elseif self:GetCard() == "Recover SP EX" then
+		self:RecoverSPEX(ply,persona)
+		return
+	elseif self:GetCard() == "Minor Buff" then
+		self:MinorBuff(ply,persona)
+		return
+	elseif self:GetCard() == "Minor Shield" then
+		self:MinorShield(ply,persona)
+		return
+	elseif self:GetCard() == "Minor Awareness" then
+		self:MinorAwareness(ply,persona)
+		return
+	elseif self:GetCard() == "Power Up" then
+		self:PowerUp(ply,persona)
+		return
+	elseif self:GetCard() == "Ultimate Charge" then
+		self:UltimateCharge(ply,persona)
+		return
 	elseif self:GetCard() == "Laevateinn" then
 		self.CurrentMeleeSkill = self:GetCard()
 		if ply:IsNPC() then
@@ -596,7 +630,54 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetEventCoolDown(seq,frame)
+	if self.EventCoolDown[seq] then
+		return self.EventCoolDown[seq][frame][1]
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:AddEventCoolDown(seq,frame)
+	if self.EventCoolDown[seq] then
+		self.EventCoolDown[seq][frame][1] = CurTime() +0.1
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:AddAnimationEvent(seq,frame,eventName,frameCount)
+	local seq = self:LookupSequence(seq)
+	self.AnimationEvents = self.AnimationEvents or {}
+	self.AnimationEvents[seq] = self.AnimationEvents[seq] or {}
+	self.AnimationEvents[seq][frame] = self.AnimationEvents[seq][frame] or {}
+	table.insert(self.AnimationEvents[seq][frame],eventName)
+	
+	self.EventCoolDown = self.EventCoolDown or {}
+	self.EventCoolDown[seq] = self.EventCoolDown[seq] or {}
+	self.EventCoolDown[seq][frame] = self.EventCoolDown[seq][frame] or {}
+	table.insert(self.EventCoolDown[seq][frame],CurTime())
+
+	if frameCount then
+		self.RegisteredSequences = self.RegisteredSequences or {}
+		self.RegisteredSequences[seq] = frameCount
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Think()
+	local seq = self:GetSequence()
+	if self.AnimationEvents[seq] && self.RegisteredSequences[seq] then
+		if self.LastSequence != seq then
+			self.LastSequence = seq
+			self.LastFrame = -1
+		end
+		local NextFrame = math.floor(self:GetCycle() *(self:GetPlaybackRate() *self.RegisteredSequences[seq]))
+		self.LastFrame = NextFrame
+		if self.AnimationEvents[seq][self.LastFrame] then
+			for _,v in pairs(self.AnimationEvents[seq][self.LastFrame]) do
+				if CurTime() > self:GetEventCoolDown(seq,self.LastFrame) then
+					self:HandleAnimationEvent(seq,v,self.LastFrame)
+					self:AddEventCoolDown(seq,self.LastFrame)
+				end
+			end
+		end
+	end
 	self:NextThink(CurTime() +(0.069696968793869 +FrameTime()))
 	if IsValid(self.User) then
 		if !self.User:Alive() then
@@ -875,6 +956,7 @@ function ENT:FacePlayerAim(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AdditionalInput(dmg,type)
+	dmg = self.User.Persona_TarukajaT > CurTime() && dmg *1.25 or dmg
 	dmg = self.User.Persona_TarundaT > CurTime() && dmg *0.5 or dmg
 	dmg = self.User.Persona_DebilitateT > CurTime() && dmg *0.5 or dmg
 	dmg = self.User.Persona_HeatRiserT > CurTime() && dmg *1.5 or dmg

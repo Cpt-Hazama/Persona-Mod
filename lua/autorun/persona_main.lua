@@ -1,6 +1,6 @@
 include("persona_xp.lua")
 
-local debug = 1
+local debug = 0
 
 local Persona_DMGMarkers = {}
 local Persona_HUDEffects = {
@@ -20,6 +20,7 @@ if SERVER then
 	util.AddNetworkString("persona_csound")
 	util.AddNetworkString("persona_spawndmg")
 	util.AddNetworkString("persona_party")
+	util.AddNetworkString("persona_party_npc")
 end
 
 if CLIENT then
@@ -305,7 +306,13 @@ hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
 	ply:SetMaxHealth(100)
 	ply.PXP_NextXPChange = CurTime()
 	
-	ply.Persona_TarundaT = 0
+	ply.Persona_TarukajaT = 0 -- Inc. ATK
+	ply.Persona_TarundaT = 0 -- Dec. ATK
+	ply.Persona_RakukajaT = 0 -- Inc. DEF
+	ply.Persona_RakundaT = 0 -- Dec. DEF
+	ply.Persona_SukukajaT = 0 -- Inc. AGI
+	ply.Persona_SukundaT = 0 -- Dec. AGI
+
 	ply.Persona_DebilitateT = 0
 	ply.Persona_HeatRiserT = 0
 	ply.Persona_ChaosT = 0
@@ -323,8 +330,14 @@ if SERVER then
 			end
 		end)
 		ply.PXP_NextXPChange = CurTime()
-	
-		ply.Persona_TarundaT = 0
+
+		ply.Persona_TarukajaT = 0 -- Inc. ATK
+		ply.Persona_TarundaT = 0 -- Dec. ATK
+		ply.Persona_RakukajaT = 0 -- Inc. DEF
+		ply.Persona_RakundaT = 0 -- Dec. DEF
+		ply.Persona_SukukajaT = 0 -- Inc. AGI
+		ply.Persona_SukundaT = 0 -- Dec. AGI
+
 		ply.Persona_DebilitateT = 0
 		ply.Persona_HeatRiserT = 0
 		ply.Persona_ChaosT = 0
@@ -386,7 +399,13 @@ if SERVER then
 		if ent:IsNPC() then
 			timer.Simple(0,function()
 				if IsValid(ent) then
-					ent.Persona_TarundaT = 0
+					ent.Persona_TarukajaT = 0 -- Inc. ATK
+					ent.Persona_TarundaT = 0 -- Dec. ATK
+					ent.Persona_RakukajaT = 0 -- Inc. DEF
+					ent.Persona_RakundaT = 0 -- Dec. DEF
+					ent.Persona_SukukajaT = 0 -- Inc. AGI
+					ent.Persona_SukundaT = 0 -- Dec. AGI
+
 					ent.Persona_DebilitateT = 0
 					ent.Persona_HeatRiserT = 0
 					ent.Persona_ChaosT = 0

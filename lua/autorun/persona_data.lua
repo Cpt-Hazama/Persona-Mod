@@ -145,6 +145,11 @@ PERSONA["sakuya"].Model = "models/cpthazama/persona4/persona/sakuya.mdl"
 PERSONA["sakuya"].Aura = "jojo_aura_blue"
 PERSONA["sakuya"].Name = "Konohana Sakuya"
 
+PERSONA["necronomicon"] = {}
+PERSONA["necronomicon"].Model = "models/cpthazama/persona5/persona/necronomicon.mdl"
+PERSONA["necronomicon"].Aura = "jojo_aura_blue"
+PERSONA["necronomicon"].Name = "Necronomicon"
+
 -- PERSONA["hereward"] = {}
 -- PERSONA["hereward"].Model = "models/cpthazama/persona5/persona/hereward.mdl"
 -- PERSONA["hereward"].Aura = "jojo_aura_red"

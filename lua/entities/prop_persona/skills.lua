@@ -2334,3 +2334,271 @@ function ENT:SinfulShell(ply,persona)
 		end)
 	end
 end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:RecoverHPEX(ply,persona)
+	local skill = "Recover HP EX"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range",1)
+		timer.Simple(t /4,function()
+			if IsValid(self) then
+				local allies = self.User:GetFullParty()
+				if allies && #allies > 0 then
+					for _,v in ipairs(allies) do
+						if IsValid(v) then
+							v:SetHealth(v:GetMaxHealth())
+							VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+					end
+					self:DoChat("Fully restored Party HP!")
+				end
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:SetTask("TASK_IDLE")
+						self:DoIdle()
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:RecoverSPEX(ply,persona)
+	local skill = "Recover SP EX"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range",1)
+		timer.Simple(t /4,function()
+			if IsValid(self) then
+				local allies = self.User:GetFullParty()
+				if allies && #allies > 0 then
+					for _,v in ipairs(allies) do
+						if IsValid(v) then
+							v:SetSP(v:GetMaxSP())
+							VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_def")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+					end
+					self:DoChat("Fully restored Party SP!")
+				end
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:SetTask("TASK_IDLE")
+						self:DoIdle()
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MinorBuff(ply,persona)
+	local skill = "Minor Buff"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range",1)
+		timer.Simple(t /4,function()
+			if IsValid(self) then
+				local allies = self.User:GetFullParty()
+				if allies && #allies > 0 then
+					for _,v in ipairs(allies) do
+						if IsValid(v) then
+							v.Persona_TarukajaT = CurTime() +60
+							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_atk")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+					end
+					self:DoChat("Buffed Party ATK!")
+				end
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:SetTask("TASK_IDLE")
+						self:DoIdle()
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MinorShield(ply,persona)
+	local skill = "Minor Shield"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range",1)
+		timer.Simple(t /4,function()
+			if IsValid(self) then
+				local allies = self.User:GetFullParty()
+				if allies && #allies > 0 then
+					for _,v in ipairs(allies) do
+						if IsValid(v) then
+							v.Persona_RakukajaT = CurTime() +60
+							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_def")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+					end
+					self:DoChat("Buffed Party DEF!")
+				end
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:SetTask("TASK_IDLE")
+						self:DoIdle()
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MinorAwareness(ply,persona)
+	local skill = "Minor Awareness"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range",1)
+		timer.Simple(t /4,function()
+			if IsValid(self) then
+				local allies = self.User:GetFullParty()
+				if allies && #allies > 0 then
+					for _,v in ipairs(allies) do
+						if IsValid(v) then
+							v.Persona_SukukajaT = CurTime() +60
+							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_evasion")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+					end
+					self:DoChat("Buffed Party AGI/Evasion!")
+				end
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:SetTask("TASK_IDLE")
+						self:DoIdle()
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PowerUp(ply,persona)
+	local skill = "Power Up"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range",1)
+		timer.Simple(t /4,function()
+			if IsValid(self) then
+				local allies = self.User:GetFullParty()
+				if allies && #allies > 0 then
+					for _,v in ipairs(allies) do
+						if IsValid(v) then
+							v.Persona_HeatRiserT = CurTime() +60
+							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heatriser")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+					end
+					self:DoChat("Buffed Party ATK/DEF/AGI/Accuracy!")
+				end
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:SetTask("TASK_IDLE")
+						self:DoIdle()
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:UltimateCharge(ply,persona)
+	local skill = "Ultimate Charge"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range",1)
+		timer.Simple(t /4,function()
+			if IsValid(self) then
+				local allies = self.User:GetFullParty()
+				if allies && #allies > 0 then
+					for _,v in ipairs(allies) do
+						if IsValid(v) then
+							v.Persona_ChargedT = CurTime() +30
+							v.Persona_FocusedT = CurTime() +30
+							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_atk")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_def")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+					end
+					self:DoChat("Buffed Party Physical/Magic Damage!")
+				end
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:SetTask("TASK_IDLE")
+						self:DoIdle()
+					end
+				end)
+			end
+		end)
+	end
+end
