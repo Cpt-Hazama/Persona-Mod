@@ -1,0 +1,40 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona5/enemies/kamoshidaguard"
+	"$bumpmap" "models/cpthazama/persona5/enemies/kamoshidaguard_n"
+	"$phongexponenttexture" "models/cpthazama/persona5/enemies/kamoshidaguard_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[1 0 0]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "200"
+	"$rimmask" "1"
+
+	$detail	"models/cpthazama/persona5/flow_shadow"
+	$detailscale "6"
+	$detailblendfactor "0.5"
+	$detailblendmode "2"
+
+	"Proxies"
+	{
+		"Sine"
+		{
+			"resultvar"	"$detailblendfactor"
+			"sineperiod" 4
+			"sinemin" 0.03
+			"sinemax" 0.2
+		}
+		"TextureScroll"
+		{
+			"texturescrollvar"	"$detailtexturetransform"
+			"texturescrollrate"	0.1
+			"texturescrollangle" 90
+		}
+	}
+
+	"$lightwarptexture" "models/cpthazama/persona5/cel_red"
+}

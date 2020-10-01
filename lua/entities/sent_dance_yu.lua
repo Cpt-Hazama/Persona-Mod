@@ -15,13 +15,12 @@ ENT.AdminOnly = true
 ENT.Model = "models/cpthazama/persona4_dance/yu.mdl"
 ENT.HeightOffset = 1
 ENT.CollisionBounds = Vector(16,16,75)
-ENT.DelayBetweenAnimations = 0
 ENT.SongStartDelay = 0.45
-ENT.SongStartAnimationDelay = 0
+ENT.ViewBone = "spine_01"
 
 ENT.Animations = {}
 ENT.Animations["dance_specialist"] = {}
-ENT.Animations["dance_specialist"][1] = {anim = "dance_specialist",next = false}
+ENT.Animations["dance_specialist"][1] = {anim = "dance_specialist",next = false,endEarlyTime = 0}
 
 ENT.SoundTracks = {
 	[1] = {dance = "dance_specialist", song = "cpthazama/persona4_dance/music/c001.mp3"}

@@ -15,19 +15,18 @@ ENT.AdminOnly = true
 ENT.Model = "models/cpthazama/persona5_dance/futaba.mdl"
 ENT.HeightOffset = 1
 ENT.CollisionBounds = Vector(16,16,75)
-ENT.DelayBetweenAnimations = 0.065
 ENT.SongStartDelay = 0
 ENT.SongStartAnimationDelay = 0.2
 
 ENT.Animations = {}
 ENT.Animations["dance_lastsurprise"] = {}
-ENT.Animations["dance_lastsurprise"][1] = {anim = "dance_lastsurprise",next = "dance_lastsurprise2"}
-ENT.Animations["dance_lastsurprise"][2] = {anim = "dance_lastsurprise2",next = "dance_lastsurprise4"}
-ENT.Animations["dance_lastsurprise"][3] = {anim = "dance_lastsurprise4",next = "dance_lastsurprise2"}
-ENT.Animations["dance_lastsurprise"][4] = {anim = "dance_lastsurprise2",next = "dance_lastsurprise5"}
-ENT.Animations["dance_lastsurprise"][5] = {anim = "dance_lastsurprise5",next = "dance_lastsurprise3"}
-ENT.Animations["dance_lastsurprise"][6] = {anim = "dance_lastsurprise3",next = "dance_lastsurprise6"}
-ENT.Animations["dance_lastsurprise"][7] = {anim = "dance_lastsurprise6",next = false}
+ENT.Animations["dance_lastsurprise"][1] = {anim = "dance_lastsurprise",next = "dance_lastsurprise2",endEarlyTime = 0.09}
+ENT.Animations["dance_lastsurprise"][2] = {anim = "dance_lastsurprise2",next = "dance_lastsurprise4",endEarlyTime = 0.05}
+ENT.Animations["dance_lastsurprise"][3] = {anim = "dance_lastsurprise4",next = "dance_lastsurprise2",endEarlyTime = 0.08}
+ENT.Animations["dance_lastsurprise"][4] = {anim = "dance_lastsurprise2",next = "dance_lastsurprise5",endEarlyTime = 0.05}
+ENT.Animations["dance_lastsurprise"][5] = {anim = "dance_lastsurprise5",next = "dance_lastsurprise3",endEarlyTime = 0.075}
+ENT.Animations["dance_lastsurprise"][6] = {anim = "dance_lastsurprise3",next = "dance_lastsurprise6",endEarlyTime = 0.2}
+ENT.Animations["dance_lastsurprise"][7] = {anim = "dance_lastsurprise6",next = false,endEarlyTime = 0}
 
 ENT.SoundTracks = {
 	[1] = {dance = "dance_lastsurprise", song = "cpthazama/persona5_dance/music/h015.mp3"}
@@ -35,8 +34,6 @@ ENT.SoundTracks = {
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
-		self:SetBodygroup(1,math.random(1,4) == 1 && 1 or 0)
-		
 		self:AddAnimationEvent("dance_lastsurprise",0,"default",917)
 		self:AddAnimationEvent("dance_lastsurprise",1,"default",917)
 		self:AddAnimationEvent("dance_lastsurprise",2,"default",917)
@@ -94,6 +91,8 @@ if SERVER then
 		self:AddAnimationEvent("dance_lastsurprise6",560,"smile",1012)
 		self:AddAnimationEvent("dance_lastsurprise6",878,"wink",1012)
 		self:AddAnimationEvent("dance_lastsurprise6",878,"default",1010)
+		
+		self:SetBodygroup(1,math.random(1,4) == 1 && 1 or 0)
 	end
 
 	function ENT:HandleAnimationEvent(seq,event,frame)
@@ -113,7 +112,7 @@ if SERVER then
 
 	function ENT:OnPlayDance(seq,t)
 		if seq == "dance_lastsurprise" then
-			self:ChangeFace()
+			self:ChangeFace(nil,nil,2)
 		end
 	end
 end

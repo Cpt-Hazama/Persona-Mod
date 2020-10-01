@@ -2,6 +2,183 @@ include("persona_xp.lua")
 
 local debug = 0
 
+PGM_Triggers = {}
+
+function PGM()
+	return gmod.GetGamemode()
+end
+
+function IsPersonaGamemode()
+	return PGM().Name == "Persona"
+end
+
+function PGM_SetTriggers()
+	PGM_Triggers = PGM_Triggers or {}
+	for _,v in pairs(PGM_Triggers) do
+		if IsValid(v) then
+			v:Remove()
+		end
+	end
+	table.Empty(PGM_Triggers)
+	
+	if game.GetMap() == "rp_persona" then
+		local tbl = {}
+		tbl[1] = {}
+		tbl[1].Model = "models/props_lab/blastdoor001c.mdl"
+		tbl[1].Pos = Vector(-2684.181640625,-2339.0239257813,664.61602783203)
+		tbl[1].Ang = Angle(0,-90,0)
+		tbl[1].Name = "Iwatodai Station"
+		-- tbl[1].Music = PGM_GetSoundTracks(2)
+		tbl[1].Music = 2
+		tbl[1].Scale = 3
+
+		tbl[2] = {}
+		tbl[2].Model = "models/props_lab/blastdoor001c.mdl"
+		tbl[2].Pos = Vector(-2687.8227539063,-2399.3266601563,664.63989257813)
+		tbl[2].Ang = Angle(0,-90,0)
+		tbl[2].Name = "The Hub (South-Area)"
+		-- tbl[2].Music = PGM_GetSoundTracks(1)
+		tbl[2].Music = 1
+		tbl[2].Scale = 3
+
+		tbl[3] = {}
+		tbl[3].Model = "models/props_lab/blastdoor001c.mdl"
+		tbl[3].Pos = Vector(-4543.6689453125,-2753.3674316406,470.3337097168)
+		tbl[3].Ang = Angle(-0.079000003635883,-90.106002807617,-0.0489999987185)
+		tbl[3].Name = "The Hub (South-Area)"
+		-- tbl[3].Music = PGM_GetSoundTracks(1)
+		tbl[3].Music = 1
+		tbl[3].Scale = 1
+
+		tbl[4] = {}
+		tbl[4].Model = "models/props_lab/blastdoor001c.mdl"
+		tbl[4].Pos = Vector(-5005.9697265625,-2515.7463378906,472.37841796875)
+		tbl[4].Ang = Angle(0.0020000000949949,89.950996398926,0.0010000000474975)
+		tbl[4].Name = "Mah Long Casino"
+		-- tbl[4].Music = PGM_GetSoundTracks(3)
+		tbl[4].Music = 3
+		tbl[4].Scale = 1
+
+		tbl[5] = {}
+		tbl[5].Model = "models/props_lab/blastdoor001c.mdl"
+		tbl[5].Pos = Vector(-4872.9770507813,-2889.7553710938,192.37619018555)
+		tbl[5].Ang = Angle(-0.0040000001899898,-90.025001525879,0.0010000000474975)
+		tbl[5].Name = "The Hub (South-Area)"
+		-- tbl[5].Music = PGM_GetSoundTracks(1)
+		tbl[5].Music = 1
+		tbl[5].Scale = 1
+
+		tbl[6] = {}
+		tbl[6].Model = "models/props_lab/blastdoor001c.mdl"
+		tbl[6].Pos = Vector(-4896.5727539063,-2613.7980957031,152.37109375)
+		tbl[6].Ang = Angle(0.0010000000474975,89.955001831055,0.0010000000474975)
+		tbl[6].Name = "Stray Sheep Bar"
+		-- tbl[6].Music =  PGM_GetSoundTracks(4)
+		tbl[6].Music =  4
+		tbl[6].Scale = 1
+
+		tbl[7] = {}
+		tbl[7].Model = "models/props_interiors/furniture_couch01a.mdl"
+		tbl[7].Pos = Vector(7488.7651367188,-2606.7563476563,657.79125976563)
+		tbl[7].Ang = Angle(-0.11100000143051,-87.297996520996,-0.028000000864267)
+		tbl[7].Name = "The Hub (North-Area)"
+		-- tbl[7].Music = PGM_GetSoundTracks(1)
+		tbl[7].Music = 1
+		tbl[7].Scale = 2
+
+		tbl[8] = {}
+		tbl[8].Model = "models/props_junk/wood_crate002a.mdl"
+		tbl[8].Pos = Vector(8320.0302734375,-3508.7370605469,659.02850341797)
+		tbl[8].Ang = Angle(-0.087999999523163,-149.14799499512,-0.090999998152256)
+		tbl[8].Name = "The Hub (North-Area)"
+		-- tbl[8].Music = PGM_GetSoundTracks(1)
+		tbl[8].Music = 1
+		tbl[8].Scale = 1
+
+		tbl[9] = {}
+		tbl[9].Model = "models/props_junk/wood_crate001a.mdl"
+		tbl[9].Pos = Vector(-3075.1628417969,-3871.4904785156,508.41165161133)
+		tbl[9].Ang = Angle(-0.0020000000949949,-90.03800201416,-0.0020000000949949)
+		tbl[9].Name = "The Hub (South-Area)"
+		-- tbl[9].Music = PGM_GetSoundTracks(1)
+		tbl[9].Music = 1
+		tbl[9].Scale = 2.5
+
+		tbl[10] = {}
+		tbl[10].Model = "models/props_lab/blastdoor001c.mdl"
+		tbl[10].Pos = Vector(8354.2431640625,-1939.7362060547,876.38592529297)
+		tbl[10].Ang = Angle(0.0010000000474975,-0.046000000089407,0.0010000000474975)
+		tbl[10].Name = "Iwatodai Station"
+		-- tbl[10].Music = PGM_GetSoundTracks(2)
+		tbl[10].Music = 2
+		tbl[10].Scale = 2
+
+		tbl[11] = {}
+		tbl[11].Model = "models/props_lab/blastdoor001c.mdl"
+		tbl[11].Pos = Vector(8061.6669921875,-1940.1870117188,684.38763427734)
+		tbl[11].Ang = Angle(-0.0040000001899898,179.94900512695,0.0010000000474975)
+		tbl[11].Name = "The Hub (North-Area)"
+		-- tbl[11].Music = PGM_GetSoundTracks(1)
+		tbl[11].Music = 1
+		tbl[11].Scale = 2
+
+		for i = 1,#tbl do
+			local d = tbl[i]
+			PGM_SpawnTrigger(d.Model,d.Pos,d.Ang,d.Name,d.Music,d.Scale)
+		end
+	end
+end
+
+function PGM_SpawnTrigger(mdl,pos,ang,name,tblMusic,scale,bounds)
+	local trigger = ents.Create("trigger_zone")
+	trigger:SetModel(mdl)
+	trigger:SetPos(pos)
+	trigger:SetAngles(ang)
+	trigger:Spawn()
+	trigger:SetZoneName(name)
+	trigger:SetMusicID(tblMusic)
+	-- trigger:SetMusic(tblMusic)
+	trigger:SetSize(scale)
+	if bounds then
+		trigger:SetBounds(bounds)
+	end
+
+	table.insert(PGM_Triggers,trigger)
+end
+
+-- function PGM_B()
+	-- local f = file.Open("sound/cpthazama/persona_resource/music/Awakening.mp3","rb","GAME")
+	-- for i = 1,8192 do
+		-- local uShort = f:ReadUShort()
+		-- print("Unassigned 16bit Int - " .. uShort)
+		-- print("Pointer Position - " .. tostring(f:Tell()))
+	-- end
+	-- f:Close()
+-- end
+
+function PGM_S()
+	local ent = Entity(1):GetEyeTrace().Entity
+	ent:SetModelScale(ent:GetModelScale() +0.5,0)
+end
+
+function PGM_D()
+	local tbl = {}
+	local ent = Entity(1):GetEyeTrace().Entity
+	tbl.Model = ent:GetModel()
+	local ePos = ent:GetPos()
+	tbl.Pos = "Vector(" .. ePos[1] .. "," .. ePos[2] .. "," .. ePos[3] .. ")"
+	local ang = ent:GetAngles()
+	if tostring(ang[1]) == "1.3911635221575e-07" then
+		ang[1] = 0
+	end
+	ang[1] = math.Round(ang[1],3)
+	ang[2] = math.Round(ang[2],3)
+	ang[3] = math.Round(ang[3],3)
+	tbl.Ang = "Angle(" .. ang[1] .."," .. ang[2] .."," .. ang[3] .. ")"
+	tbl.Scale = ent:GetModelScale()
+	PrintTable(tbl)
+end
+
 local Persona_DMGMarkers = {}
 local Persona_HUDEffects = {
 	[1] = "hud/persona/png/ico_weak.png",
@@ -910,9 +1087,9 @@ if CLIENT then
 	end)
 
 	hook.Add("ShouldDrawLocalPlayer","Persona_DrawPlayer",function(ply)
+		if IsPersonaGamemode() then return end
 		if IsValid(ply:GetNWEntity("PersonaEntity")) then return true end
 	end)
-
 
 	local P_LerpVec = Vector(0,0,0)
 	local P_LerpAng = Angle(0,0,0)
@@ -1014,6 +1191,11 @@ if CLIENT then
 		spawnmenu.AddToolMenuOption("Persona","Main Settings","NPCs","NPCs","","",function(Panel)
 			Panel:AddControl("CheckBox",{Label = "Enable NPC Themes",Command = "vj_persona_music"})
 			Panel:AddControl("Label",{Text = "Note: You can also enable/disable them per NPC!"})
+		end,{})
+
+		spawnmenu.AddToolMenuOption("Persona","Dance Settings","Dance","Dance","","",function(Panel)
+			Panel:AddControl("Slider",{Label = "Dancer Mode",Command = "vj_persona_dancemode",Min = 0,Max = 2})
+			Panel:AddControl("Label",{Text = "0 - Default, 1 - Spectate, 2 - Dance, Dance!"})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)

@@ -150,6 +150,11 @@ PERSONA["necronomicon"].Model = "models/cpthazama/persona5/persona/necronomicon.
 PERSONA["necronomicon"].Aura = "jojo_aura_blue"
 PERSONA["necronomicon"].Name = "Necronomicon"
 
+PERSONA["jack"] = {}
+PERSONA["jack"].Model = "models/cpthazama/persona5/persona/jack-o-lantern.mdl"
+PERSONA["jack"].Aura = "jojo_aura_red"
+PERSONA["jack"].Name = "Jack-o-Lantern"
+
 -- PERSONA["hereward"] = {}
 -- PERSONA["hereward"].Model = "models/cpthazama/persona5/persona/hereward.mdl"
 -- PERSONA["hereward"].Aura = "jojo_aura_red"

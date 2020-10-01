@@ -16,6 +16,7 @@ if VJExists == true then
 
 	local vCat = "Persona"
 	VJ.AddCategoryInfo(vCat,{Icon = "vj_icons/persona.png"})
+	VJ.AddCategoryInfo(vCat .. " - Shadows",{Icon = "vj_icons/persona.png"})
 
 		-- Persona - Raid Bossess --
 	-- These all use the song Shadow as their theme --
@@ -53,8 +54,12 @@ if VJExists == true then
 		-- Persona 3 - Protagonists
 	VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
 	-- VJ.AddNPC("Yukari Takeba","npc_vj_per_yukari",vCat) -- Isis | Theme: Pink Sniper
+	
+		-- Persona Gamemode Exclusives --
+	-- VJ.AddNPC("Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat .. " - Shadows")
 
 	VJ.AddClientConVar("vj_persona_music",1)
+	VJ.AddClientConVar("vj_persona_dancemode",0)
 
 	properties.Add("Toggle Music", {
 		MenuLabel = "#Toggle Music",

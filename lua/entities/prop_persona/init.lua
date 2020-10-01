@@ -324,6 +324,11 @@ function ENT:PersonaCards(lmb,rmb,r)
 	local ply = self.User
 	local persona = self
 	local melee = self.CurrentMeleeSkill
+	if IsPersonaGamemode() then
+		if ply:InBattle() && GMP().Battles[ply:CurrentBattle()] && GMP().Battles[ply:CurrentBattle()].CurrentTurn != ply then
+			return -- Not my turn, can't do anything
+		end
+	end
 	if r && CurTime() > self.NextCardSwitchT then
 		self:CycleCards()
 	end
@@ -398,6 +403,9 @@ end
 function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	if self:GetCard() == "Myriad Truths" then 
 		self:MyriadTruths(ply,persona)
+		return
+	elseif self:GetCard() == "Agi" then
+		self:Agi(ply,persona)
 		return
 	elseif self:GetCard() == "Agidyne" then
 		self:Agidyne(ply,persona)
@@ -1309,7 +1317,7 @@ function ENT:Fear(ent,t)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 hook.Add("OnNPCKilled","Persona_NPCKilled",function(ent,killer,weapon)
-	if killer:IsPlayer() then
+	if IsValid(killer) && killer:IsPlayer() then
 		local persona = killer:GetPersona()
 		if IsValid(persona) then
 			persona:OnKilledEnemy(ent)
@@ -1319,7 +1327,7 @@ hook.Add("OnNPCKilled","Persona_NPCKilled",function(ent,killer,weapon)
 end)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 hook.Add("PlayerDeath","Persona_PlayerKilled",function(ent,killer,weapon)
-	if killer:IsPlayer() && killer != ent then
+	if IsValid(killer) && killer:IsPlayer() && killer != ent then
 		local persona = killer:GetPersona()
 		if IsValid(persona) then
 			persona:OnKilledEnemy(ent)
