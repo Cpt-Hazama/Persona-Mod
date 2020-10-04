@@ -16,7 +16,7 @@ if VJExists == true then
 
 	local vCat = "Persona"
 	VJ.AddCategoryInfo(vCat,{Icon = "vj_icons/persona.png"})
-	VJ.AddCategoryInfo(vCat .. " - Shadows",{Icon = "vj_icons/persona.png"})
+	VJ.AddCategoryInfo(vCat .. " - Gamemode",{Icon = "vj_icons/persona.png"})
 
 		-- Persona - Raid Bossess --
 	-- These all use the song Shadow as their theme --
@@ -36,7 +36,7 @@ if VJExists == true then
 	-- VJ.AddNPC("Shido (Shadow)","npc_vj_per_shido",vCat) -- Theme: Rivers in The Desert -instrumental-
 	-- VJ.AddNPC("Sae Niijima (Shadow)","npc_vj_per_sae",vCat) -- Persona: Leviathan | Theme: The Whims Of Fate
 	-- VJ.AddNPC("Holy Grail","npc_vj_per_yaldabaoth_stage1",vCat) -- Theme: Yaldabaoth
-	-- VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCat) -- Theme: Yaldabaoth
+	VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCat) -- Theme: Yaldabaoth
 	VJ.AddNPC("Goro Akechi (Black Mask)","npc_vj_per_akechi",vCat) -- Persona: Loki and Hereward | Theme: Reincarnation (I'll Face Myself)
 	
 		-- Persona 4 - Protagonists --
@@ -54,12 +54,23 @@ if VJExists == true then
 		-- Persona 3 - Protagonists
 	VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
 	-- VJ.AddNPC("Yukari Takeba","npc_vj_per_yukari",vCat) -- Isis | Theme: Pink Sniper
-	
+
 		-- Persona Gamemode Exclusives --
-	-- VJ.AddNPC("Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat .. " - Shadows")
+	-- VJ.AddNPC("Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat .. " - Gamemode")
+	-- VJ.AddNPC("Munehisa Iwai","npc_vj_per_vendor_iwai",vCat .. " - Gamemode")
 
 	VJ.AddClientConVar("vj_persona_music",1)
 	VJ.AddClientConVar("vj_persona_dancemode",0)
+	
+	function VJ_AddSound(sName,sSound,iLevel)
+		sound.Add({
+			name = sName,
+			channel = CHAN_STATIC,
+			volume = 1.0,
+			level = iLevel or 180,
+			sound = sSound
+		})
+	end
 
 	properties.Add("Toggle Music", {
 		MenuLabel = "#Toggle Music",

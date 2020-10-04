@@ -1,3 +1,22 @@
+	//-- Functions --\\
+function P_ADDSKILL(data)
+	local canAdd = true
+	for _,v in pairs(PERSONA_SKILLS) do if v.Name == data.Name then canAdd = false end end
+	if canAdd then
+		table.insert(PERSONA_SKILLS,data)
+	end
+end
+
+function P_GETSKILL(name)
+	local data = {Name = "N/A", Cost = 0, UsesHP = false, Icon = "unknown"}
+	for _,v in pairs(PERSONA_SKILLS) do
+		if v.Name == name then
+			data = v
+		end
+	end
+	return data
+end
+
 	//-- Damage Types --\\
 DMG_P_ICE = 1000
 DMG_P_EARTH = 1001
@@ -64,3 +83,94 @@ COST_P_LIFE_DRAIN = 3
 COST_P_VORPAL_BLADE = 23
 COST_P_DIARAMA = 6
 COST_P_HASSOUTOBI = 25
+
+	--// Skills \\--
+PERSONA_SKILLS = {}
+
+	-- Physical --
+P_ADDSKILL({Name = "Cross Slash",Cost = 20,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Hassou Tobi",Cost = 25,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Vorpal Blade",Cost = 23,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Miracle Punch",Cost = 8,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Vajra Blast",Cost = 14,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Cleave",Cost = 6,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Bash",Cost = 6,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Gigantomachia",Cost = 25,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "God's Hand",Cost = 25,UsesHP = true,Icon = "phys"})
+
+	-- Gun --
+P_ADDSKILL({Name = "One-shot Kill",Cost = 17,UsesHP = true,Icon = "gun"})
+P_ADDSKILL({Name = "Riot Gun",Cost = 24,UsesHP = true,Icon = "gun"})
+
+	-- Fire --
+P_ADDSKILL({Name = "Agi",Cost = 4,UsesHP = false,Icon = "fire"})
+P_ADDSKILL({Name = "Agidyne",Cost = 12,UsesHP = false,Icon = "fire"})
+P_ADDSKILL({Name = "Maragion",Cost = 16,UsesHP = false,Icon = "fire"})
+P_ADDSKILL({Name = "Maragidyne",Cost = 22,UsesHP = false,Icon = "fire"})
+P_ADDSKILL({Name = "Titanomachia",Cost = 34,UsesHP = false,Icon = "fire"})
+P_ADDSKILL({Name = "Blazing Hell",Cost = 54,UsesHP = false,Icon = "fire"})
+
+	-- Electricity --
+P_ADDSKILL({Name = "Zio",Cost = 4,UsesHP = false,Icon = "elec"})
+P_ADDSKILL({Name = "Zionga",Cost = 8,UsesHP = false,Icon = "elec"})
+P_ADDSKILL({Name = "Ziodyne",Cost = 12,UsesHP = false,Icon = "elec"})
+P_ADDSKILL({Name = "Mazionga",Cost = 16,UsesHP = false,Icon = "elec"})
+P_ADDSKILL({Name = "Maziodyne",Cost = 22,UsesHP = false,Icon = "elec"})
+P_ADDSKILL({Name = "Wild Thunder",Cost = 54,UsesHP = false,Icon = "elec"})
+
+	-- Wind --
+P_ADDSKILL({Name = "Garu",Cost = 3,UsesHP = false,Icon = "wind"})
+P_ADDSKILL({Name = "Garudyne",Cost = 10,UsesHP = false,Icon = "wind"})
+P_ADDSKILL({Name = "Magarudyne",Cost = 20,UsesHP = false,Icon = "wind"})
+P_ADDSKILL({Name = "Vacuum Wave",Cost = 48,UsesHP = false,Icon = "wind"})
+
+	-- Nuclear --
+P_ADDSKILL({Name = "Freila",Cost = 8,UsesHP = false,Icon = "nuclear"})
+P_ADDSKILL({Name = "Freidyne",Cost = 12,UsesHP = false,Icon = "nuclear"})
+P_ADDSKILL({Name = "Mafreidyne",Cost = 22,UsesHP = false,Icon = "nuclear"})
+P_ADDSKILL({Name = "Cosmic Flare",Cost = 54,UsesHP = false,Icon = "nuclear"})
+
+	-- Psi. --
+P_ADDSKILL({Name = "Psi",Cost = 4,UsesHP = false,Icon = "psi"})
+P_ADDSKILL({Name = "Psiodyne",Cost = 12,UsesHP = false,Icon = "psi"})
+P_ADDSKILL({Name = "Mapsiodyne",Cost = 22,UsesHP = false,Icon = "psi"})
+P_ADDSKILL({Name = "Psycho Blast",Cost = 54,UsesHP = false,Icon = "psi"})
+
+	-- Bless --
+P_ADDSKILL({Name = "Kouga",Cost = 8,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Kougaon",Cost = 12,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Makougaon",Cost = 22,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Divine Judgement",Cost = 48,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Mahamaon",Cost = 34,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Shining Arrows",Cost = 22,UsesHP = false,Icon = "bless"})
+
+	-- Curse --
+P_ADDSKILL({Name = "Eiha",Cost = 4,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Eiga",Cost = 8,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Eigaon",Cost = 12,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Maeiha",Cost = 10,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Maeiga",Cost = 16,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Maeigaon",Cost = 22,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Demonic Decree",Cost = 48,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Mamudoon",Cost = 34,UsesHP = false,Icon = "curse"})
+
+	-- Healing --
+P_ADDSKILL({Name = "Diarama",Cost = 6,UsesHP = false,Icon = "heal"})
+P_ADDSKILL({Name = "Diarahan",Cost = 18,UsesHP = false,Icon = "heal"})
+P_ADDSKILL({Name = "Mediarahan",Cost = 30,UsesHP = false,Icon = "heal"})
+P_ADDSKILL({Name = "Salvation",Cost = 48,UsesHP = false,Icon = "heal"})
+
+	-- Support/Passive --
+P_ADDSKILL({Name = "Charge",Cost = 15,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Concentrate",Cost = 15,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Debilitate",Cost = 30,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Heat Riser",Cost = 30,UsesHP = false,Icon = "passive"})
+
+	-- Sleep/Ailemt --
+P_ADDSKILL({Name = "Evil Smile",Cost = 12,UsesHP = false,Icon = "sleep"})
+
+	-- Almighty --
+P_ADDSKILL({Name = "Megidola",Cost = 24,UsesHP = false,Icon = "almighty"})
+P_ADDSKILL({Name = "Megidolaon",Cost = 38,UsesHP = false,Icon = "almighty"})
+P_ADDSKILL({Name = "Laevateinn",Cost = 25,UsesHP = true,Icon = "almighty"})
+P_ADDSKILL({Name = "Ghastly Wail",Cost = 28,UsesHP = true,Icon = "almighty"})

@@ -27,6 +27,14 @@ end
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 if !SERVER then return end
 
+function ENT:SetSpawner(ply)
+	self.Spawner = ply
+end
+
+function ENT:GetSpawner()
+	return self.Spawner
+end
+
 function ENT:Initialize()
 	self:SetModel("models/props_lab/jar01a.mdl")
 	self:PhysicsInit(SOLID_VPHYSICS)
@@ -35,9 +43,9 @@ function ENT:Initialize()
 	self:SetUseType(SIMPLE_USE)
 
 	timer.Simple(0,function()
-		if IsValid(self:GetCreator()) then self:SetPos(self:GetCreator():GetPos() +Vector(0,0,10)) end
-		local ply = self:GetCreator()
+		local ply = self:GetSpawner() or self:GetCreator()
 		if IsValid(ply) then
+			self:SetPos(ply:GetPos() +Vector(0,0,10))
 			if !IsValid(ply:GetPersona()) then
 				ply:PrintMessage(HUD_PRINTTALK,"Summon your Persona first!")
 				SafeRemoveEntity(self)

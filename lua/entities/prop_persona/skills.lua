@@ -551,11 +551,13 @@ function ENT:BeastWeaver(ply,persona)
 		timer.Simple(1.3,function()
 			if IsValid(self) then
 				self:MeleeAttackCode(DMG_P_COLOSSAL,1200,90)
+				self.User:ChatPrint("Your ATK has been greatly reduced for 5 minutes!")
 			end
 		end)
 		timer.Simple(tA,function()
 			if IsValid(self) then
 				self:DoIdle()
+				self.User.Persona_TarundaT = CurTime() +300
 			end
 		end)
 	end
@@ -1887,7 +1889,21 @@ function ENT:Salvation(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						self.User:SetHealth(self.User:GetMaxHealth())
-						self:DoChat("Fully restored HP and cured all ailments!")
+						for _,v in pairs(self.User:GetFullParty(true)) do
+							v:SetHealth(v:GetMaxHealth())
+							v:EmitSound("cpthazama/persona5/skills/0318.wav",85)
+							v:RemoveAllDecals()
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+						self.User:RemoveAllDecals()
+						self:DoChat("Fully restored Party HP and cured all ailments!")
 						self:EmitSound("cpthazama/persona5/skills/0318.wav",85)
 
 						local spawnparticle = ents.Create("info_particle_system")
@@ -1927,17 +1943,38 @@ function ENT:Cadenza(ply,persona)
 				timer.Simple(t,function()
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
-						self.User:SetHealth(math.Clamp(self.User:Health() +(self.User:GetMaxHealth() *0.5),1,self.User:GetMaxHealth()))
-						self:DoChat("Restored 50% of your HP!")
-						self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+						local party = self.User:GetFullParty(true)
+						local ally = NULL
+						if #party > 0 then
+							ally = VJ_PICK(party)
+						end
+						if self.User:Health() > self.User:GetMaxHealth() *0.65 && IsValid(ally) then
+							ally:SetHealth(math.Clamp(ally:Health() +(ally:GetMaxHealth() *0.5),1,ally:GetMaxHealth()))
+							self:DoChat("Restored 50% of " .. (ally.Nick && ally:Nick() or ally:GetName()) .. "'s HP!")
+							ally:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+							ally:RemoveAllDecals()
 
-						local spawnparticle = ents.Create("info_particle_system")
-						spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
-						spawnparticle:SetPos(self.User:GetPos())
-						spawnparticle:Spawn()
-						spawnparticle:Activate()
-						spawnparticle:Fire("Start","",0)
-						spawnparticle:Fire("Kill","",0.1)
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
+							spawnparticle:SetPos(ally:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						else
+							self.User:SetHealth(math.Clamp(self.User:Health() +(self.User:GetMaxHealth() *0.5),1,self.User:GetMaxHealth()))
+							self:DoChat("Restored 50% of your HP!")
+							self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+							self.User:RemoveAllDecals()
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
+							spawnparticle:SetPos(self.User:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_end",1)
@@ -1968,17 +2005,39 @@ function ENT:Diarama(ply,persona)
 				timer.Simple(t,function()
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
-						self.User:SetHealth(math.Clamp(self.User:Health() +(self.User:GetMaxHealth() *0.2),1,self.User:GetMaxHealth()))
-						self:DoChat("Restored 20% of your HP!")
-						self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+						local party = self.User:GetFullParty(true)
+						local ally = NULL
+						if #party > 0 then
+							ally = VJ_PICK(party)
+						end
+						if self.User:Health() > self.User:GetMaxHealth() *0.65 && IsValid(ally) then
+							ally:SetHealth(math.Clamp(ally:Health() +(ally:GetMaxHealth() *0.2),1,ally:GetMaxHealth()))
+							self:DoChat("Restored 20% of " .. (ally.Nick && ally:Nick() or ally:GetName()) .. "'s HP!")
+							ally:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+							ally:RemoveAllDecals()
 
-						local spawnparticle = ents.Create("info_particle_system")
-						spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
-						spawnparticle:SetPos(self.User:GetPos())
-						spawnparticle:Spawn()
-						spawnparticle:Activate()
-						spawnparticle:Fire("Start","",0)
-						spawnparticle:Fire("Kill","",0.1)
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
+							spawnparticle:SetPos(ally:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						else
+							self.User:SetHealth(math.Clamp(self.User:Health() +(self.User:GetMaxHealth() *0.2),1,self.User:GetMaxHealth()))
+							self:DoChat("Restored 20% of your HP!")
+							self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+							self.User:RemoveAllDecals()
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
+							spawnparticle:SetPos(self.User:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_end",1)
@@ -2009,17 +2068,38 @@ function ENT:Diarahan(ply,persona)
 				timer.Simple(t,function()
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
-						self.User:SetHealth(self.User:GetMaxHealth())
-						self:DoChat("Fully restored HP!")
-						self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+						local party = self.User:GetFullParty(true)
+						local ally = NULL
+						if #party > 0 then
+							ally = VJ_PICK(party)
+						end
+						if self.User:Health() > self.User:GetMaxHealth() *0.65 && IsValid(ally) then
+							ally:SetHealth(ally:GetMaxHealth())
+							self:DoChat("Fully restored " .. (ally.Nick && ally:Nick() or ally:GetName()) .. "'s HP!")
+							ally:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+							ally:RemoveAllDecals()
 
-						local spawnparticle = ents.Create("info_particle_system")
-						spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
-						spawnparticle:SetPos(self.User:GetPos())
-						spawnparticle:Spawn()
-						spawnparticle:Activate()
-						spawnparticle:Fire("Start","",0)
-						spawnparticle:Fire("Kill","",0.1)
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
+							spawnparticle:SetPos(ally:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						else
+							self.User:SetHealth(self.User:GetMaxHealth())
+							self:DoChat("Fully restored HP!")
+							self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+							self.User:RemoveAllDecals()
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
+							spawnparticle:SetPos(self.User:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_end",1)
@@ -2051,7 +2131,21 @@ function ENT:Mediarahan(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						self.User:SetHealth(self.User:GetMaxHealth())
-						self:DoChat("Fully restored HP!")
+						for _,v in pairs(self.User:GetFullParty(true)) do
+							v:SetHealth(v:GetMaxHealth())
+							v:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+							v:RemoveAllDecals()
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal_mega")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+						self.User:RemoveAllDecals()
+						self:DoChat("Fully restored Party HP!")
 						self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
 
 						local spawnparticle = ents.Create("info_particle_system")
@@ -2150,9 +2244,21 @@ function ENT:HeatRiser(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet("Heat Riser","range_idle",1,1)
 
-						self:DoChat(CurTime() > ply.Persona_HeatRiserT && "Increased ATK/DEF/Evasion for 1 minute!" or "Increased ATK/DEF/Evasion time extended!")
+						self:DoChat(CurTime() > ply.Persona_HeatRiserT && "Increased Party ATK/DEF/Evasion for 1 minute!" or "Increased ATK/DEF/Evasion time extended!")
 
 						ply.Persona_HeatRiserT = CurTime() +60
+						for _,v in pairs(ply:GetFullParty(true)) do
+							v.Persona_HeatRiserT = CurTime() +60
+							v:EmitSound("cpthazama/persona5/skills/0343.wav",90)
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heatriser")
+							spawnparticle:SetPos(v:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
 						self:EmitSound("cpthazama/persona5/skills/0343.wav",90)
 						-- self:EmitSound("cpthazama/persona5/skills/0361.wav",90)
 

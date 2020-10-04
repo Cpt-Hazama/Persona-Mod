@@ -81,6 +81,13 @@ ENT.CriticalDownTime = 10
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaInit() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnEntityRelationshipCheck(argent,entisfri,entdist)
+	self.Persona_Party = self.Persona_Party or {}
+	if IsValid(argent) && entisfri && argent.VJ_CanBeAddedToParty && !VJ_HasValue(self.Persona_Party,argent) then
+		self:AddToParty(argent)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnTakeDamage_BeforeDamage(dmginfo,hitgroup)
 	local dmg = dmginfo:GetDamage()
 	local dmgtype = dmginfo:GetDamageType()

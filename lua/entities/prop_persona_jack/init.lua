@@ -28,11 +28,11 @@ ENT.LegendaryMaterials = {}
 ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/jack/jack_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)
-	return (ply:IsNPC() && ply:GetPos()) or ply:GetPos() +ply:GetForward() *-60
+	return (ply:IsNPC() && ply:GetPos()) or ply:GetPos() +ply:GetForward() *60
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetIdlePosition(ply)
-	return (ply:IsNPC() && ply:GetPos()) or ply:GetPos() +ply:GetForward() *-60
+	return (ply:IsNPC() && ply:GetPos()) or ply:GetPos() +ply:GetForward() *60
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
@@ -42,10 +42,16 @@ end
 function ENT:OnSummoned(owner)
 	self:AddCard("Agi",4,false,"fire")
 	self:AddCard("Bash",7,true,"phys")
+	
+	self:UserSound("cpthazama/persona5/joker/0173.wav",75,100)
 
 	self:SetCard("Agi")
-	self:SetCard("Agi",true)
+	self:SetCard("Bash",true)
 
-	local v = {forward=-120,right=60,up=35}
+	local v = {forward=-60,right=45,up=10}
 	self.User:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnRequestDisappear(ply)
+	self:UserSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
 end

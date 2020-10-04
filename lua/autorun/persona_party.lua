@@ -1,7 +1,43 @@
 local PLY = FindMetaTable("Player")
 local NPC = FindMetaTable("NPC")
 
-function PLY:GetFullParty()
+function NPC:GetFullParty(ignoreMe)
+	self.Persona_Party = self.Persona_Party or {}
+	local tbl = {}
+	for i,v in pairs(self.Persona_Party) do
+		if IsValid(v) then
+			if ignoreMe && v == self then continue end
+			table.insert(tbl,v)
+		else
+			table.remove(self.Persona_Party,i)
+		end
+	end
+	return tbl
+end
+
+function NPC:AddToParty(ent)
+	if ent.VJ_CanBeAddedToParty then
+		self.Persona_Party = self.Persona_Party or {}
+		table.insert(self.Persona_Party,ent)
+	end
+end
+
+function NPC:RemoveFromParty(ent)
+	self.Persona_Party = self.Persona_Party or {}
+	for i,v in pairs(self.Persona_Party) do
+		if v == self then
+			table.remove(self.Persona_Party,i)
+			break
+		end
+	end
+end
+
+function NPC:ClearParty()
+	self.Persona_Party = self.Persona_Party or {}
+	table.Empty(self.Persona_Party)
+end
+
+function PLY:GetFullParty(ignoreMe)
 	if self.Persona_NPC_Party == nil then
 		self.Persona_NPC_Party = {}
 	end
@@ -14,6 +50,23 @@ function PLY:GetFullParty()
 			if ply:UniqueID() == v then
 				table.insert(tbl,ply)
 			end
+		end
+	end
+	if ignoreMe then
+		for i,v in ipairs(tbl) do
+			if self == v then
+				table.remove(tbl,i)
+			end
+		end
+	end
+	for i,v in pairs(tbl) do
+		if !IsValid(v) then
+			table.remove(tbl,i)
+		end
+	end
+	for i,v in pairs(self.Persona_NPC_Party) do
+		if !IsValid(v) then
+			table.remove(self.Persona_NPC_Party,i)
 		end
 	end
 	table.Add(tbl,self.Persona_NPC_Party)
@@ -30,6 +83,10 @@ end
 function PLY:CreateParty_NPC(ent)
 	self.Persona_NPC_Party = {}
 	table.insert(self.Persona_NPC_Party,ent)
+	if ent.VJ_CanBeAddedToParty then
+		ent.Persona_Party = ent.Persona_Party or {}
+		table.insert(ent.Persona_Party,self)
+	end
 end
 
 function PLY:AddToParty_NPC(ent)
@@ -49,6 +106,10 @@ function PLY:AddToParty_NPC(ent)
 		return
 	end
 	table.insert(self.Persona_NPC_Party,ent)
+	if ent.VJ_CanBeAddedToParty then
+		ent.Persona_Party = ent.Persona_Party or {}
+		table.insert(ent.Persona_Party,self)
+	end
 end
 
 function PLY:RemoveFromParty_NPC(ent)
@@ -69,11 +130,33 @@ function PLY:RemoveFromParty_NPC(ent)
 			break
 		end
 	end
+	if ent.VJ_CanBeAddedToParty then
+		ent.Persona_Party = ent.Persona_Party or {}
+		for i,v in pairs(ent.Persona_Party) do
+			if v == self then
+				table.remove(ent.Persona_Party,i)
+				break
+			end
+		end
+	end
 end
 
 function PLY:ClearParty_NPC()
 	self:ChatPrint("Cleared Party!")
 	self.Persona_NPC_Party = self.Persona_NPC_Party or {}
+	for pi,ent in pairs(self.Persona_NPC_Party) do
+		if IsValid(ent) then
+			if ent.VJ_CanBeAddedToParty then
+				ent.Persona_Party = ent.Persona_Party or {}
+				for i,v in pairs(ent.Persona_Party) do
+					if v == self then
+						table.remove(ent.Persona_Party,i)
+						break
+					end
+				end
+			end
+		end
+	end
 	table.Empty(self.Persona_NPC_Party)
 	net.Start("persona_party_npc")
 		net.WriteEntity(self)
