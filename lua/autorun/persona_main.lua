@@ -20,6 +20,15 @@ end
 	-- f:Close()
 -- end
 
+function PGM_T()
+	local pos = Vector(-11736.241211,11697.136719,10969)
+	local e = ents.Create("prop_vj_animatable")
+	e:SetModel("models/cpthazama/persona5/maps/velvetroom_battle.mdl")
+	e:SetPos(pos)
+	e:Spawn()
+	e:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+end
+
 function PGM_S()
 	local ent = Entity(1):GetEyeTrace().Entity
 	ent:SetModelScale(ent:GetModelScale() +0.5,0)
