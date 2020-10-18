@@ -34,6 +34,53 @@ ENT.SoundTracks = {
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
+		// Bust
+		self:ManipulateBoneJiggle(110,1)
+
+		// Hair
+		self:ManipulateBoneJiggle(118,1)
+		self:ManipulateBoneJiggle(119,1)
+		self:ManipulateBoneJiggle(120,1)
+		self:ManipulateBoneJiggle(131,1)
+		self:ManipulateBoneJiggle(132,1)
+		self:ManipulateBoneJiggle(133,1)
+		self:ManipulateBoneJiggle(136,1)
+		self:ManipulateBoneJiggle(137,1)
+		self:ManipulateBoneJiggle(123,1)
+		self:ManipulateBoneJiggle(124,1)
+		self:ManipulateBoneJiggle(125,1)
+		self:ManipulateBoneJiggle(127,1)
+		self:ManipulateBoneJiggle(128,1)
+		self:ManipulateBoneJiggle(129,1)
+		self:ManipulateBoneJiggle(114,1)
+		self:ManipulateBoneJiggle(115,1)
+		self:ManipulateBoneJiggle(116,1)
+		
+		// Scarf
+		self:ManipulateBoneJiggle(10,1)
+		self:ManipulateBoneJiggle(11,1)
+		
+		// Jacket
+		self:ManipulateBoneJiggle(39,1)
+		self:ManipulateBoneJiggle(38,1)
+		self:ManipulateBoneJiggle(37,1)
+		self:ManipulateBoneJiggle(44,1)
+		self:ManipulateBoneJiggle(45,1)
+		self:ManipulateBoneJiggle(41,1)
+		self:ManipulateBoneJiggle(42,1)
+		self:ManipulateBoneJiggle(34,1)
+		self:ManipulateBoneJiggle(35,1)
+		self:ManipulateBoneJiggle(31,1)
+		self:ManipulateBoneJiggle(32,1)
+		self:ManipulateBoneJiggle(73,1)
+		self:ManipulateBoneJiggle(74,1)
+		self:ManipulateBoneJiggle(79,1)
+		self:ManipulateBoneJiggle(80,1)
+		self:ManipulateBoneJiggle(82,1)
+		self:ManipulateBoneJiggle(83,1)
+		self:ManipulateBoneJiggle(76,1)
+		self:ManipulateBoneJiggle(77,1)
+
 		self:AddAnimationEvent("dance_lastsurprise",0,"default",917)
 		self:AddAnimationEvent("dance_lastsurprise",1,"default",917)
 		self:AddAnimationEvent("dance_lastsurprise",2,"default",917)

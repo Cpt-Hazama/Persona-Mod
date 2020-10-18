@@ -19,6 +19,7 @@ ENT.VJ_NPC_Class = {"CLASS_YU","CLASS_INVESTIGATION_TEAM","CLASS_PLAYER_ALLY"}
 ENT.FriendsWithAllPlayerAllies = true
 
 util.AddNetworkString("vj_persona_hud_yu")
+util.AddNetworkString("vj_persona_okamisong")
 
 ENT.Animations = {}
 ENT.Animations["idle"] = ACT_IDLE
@@ -60,13 +61,7 @@ end
 function ENT:PersonaInit()
 	self:SetBodygroup(1,1)
 	self.CurrentIndex = 1
-	if math.random(1,1000) == 1 then
-		local dance = ents.Create("sent_dance_yu")
-		dance:SetPos(self:GetPos())
-		dance:SetAngles(self:GetAngles())
-		dance:Spawn()
-		undo.ReplaceEntity(self,dance)
-	end
+	self.HasOkami = false
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnAnimEvent(persona,skill,animBlock,seq,t)
@@ -79,7 +74,7 @@ function ENT:OnAnimEvent(persona,skill,animBlock,seq,t)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink()
-	if !IsValid(self.VJ_TheController) then
+	if !IsValid(self.VJ_TheController) && !self.HasOkami then
 		local max = self:GetMaxHealth()
 		if self:Health() > max *0.75 then
 			self.Persona = "izanagi"
@@ -165,6 +160,11 @@ end
 function ENT:SwitchPersona(persona)
 	if !self:BusyWithActivity() then
 		if IsValid(self:GetPersona()) then
+			-- self.HasOkami = self.Persona == "izanagi_okami"
+			-- net.Start("vj_persona_okamisong")
+				-- net.WriteBool(self.HasOkami)
+				-- net.WriteEntity(self)
+			-- net.Broadcast()
 			self:SummonPersona(self.Persona)
 		end
 		self:SummonAnimation()

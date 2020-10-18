@@ -28,6 +28,15 @@ ENT.SoundTracks = {
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
+		-- self:ManipulateBoneJiggle(1,1)
+		self:ManipulateBoneJiggle(2,1)
+		self:ManipulateBoneJiggle(3,1)
+		-- self:ManipulateBoneJiggle(4,1)
+		self:ManipulateBoneJiggle(5,1)
+		self:ManipulateBoneJiggle(6,1)
+		self:ManipulateBoneJiggle(39,1)
+		self:ManipulateBoneJiggle(61,1)
+	
 		self:AddAnimationEvent("dance_specialist",0,"default",4167)
 		self:AddAnimationEvent("dance_specialist",1,"default",4167)
 		self:AddAnimationEvent("dance_specialist",2,"default",4167)

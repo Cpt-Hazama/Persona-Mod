@@ -13,15 +13,18 @@ ENT.VJ_Persona_HasTheme = true
 if CLIENT then
 	local lerp_hp = 0
 	
-	function ENT:PlayMusic(bMode)
+	function ENT:PlayMusic(bMode,Okami)
 		if GetConVarNumber("vj_persona_music") == 1 then
+			-- if self.HasOkami then
+				-- Okami = true
+			-- end
 			local ply = LocalPlayer()
-			ply.VJ_Persona_ThemeTrack = self.Theme
+			ply.VJ_Persona_ThemeTrack = Okami && self.ThemeB or self.Theme
 			ply.VJ_Persona_Theme = CreateSound(ply,ply.VJ_Persona_ThemeTrack)
 			ply.VJ_Persona_Theme:SetSoundLevel(0)
 			ply.VJ_Persona_Theme:ChangeVolume(60)
 			ply.VJ_Persona_Theme:Play()
-			ply.VJ_Persona_ThemeT = CurTime() +self.ThemeT
+			ply.VJ_Persona_ThemeT = CurTime() +(Okami && self.ThemeBT or self.ThemeT)
 		end
 	end
 	
@@ -51,7 +54,9 @@ if CLIENT then
 	
 	function ENT:Initialize()
 		self.Theme = "cpthazama/persona4/music/boss_yu.mp3"
+		self.ThemeB = "cpthazama/persona_resource/music/Reach Out to the Truth (Arena ver.).mp3"
 		self.ThemeT = 168
+		self.ThemeBT = 134
 	end
 	
 	function ENT:OnRemove()
@@ -69,6 +74,16 @@ if CLIENT then
 			ply.VJ_Persona_ThemeTrack = "common/null.wav"
 		end
 	end
+
+	net.Receive("vj_persona_okamisong",function(len,pl)
+		local hasOkami = net.ReadBool()
+		local ent = net.ReadEntity()
+
+		if LocalPlayer().VJ_Persona_Theme then LocalPlayer().VJ_Persona_Theme:FadeOut(1) end
+		LocalPlayer().VJ_Persona_ThemeT = 0
+		ent.HasOkami = hasOkami
+		ent:PlayMusic(nil,hasOkami)
+	end)
 
 	net.Receive("vj_persona_hud_yu",function(len,pl)
 		local delete = net.ReadBool()

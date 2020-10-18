@@ -505,6 +505,7 @@ function ENT:Think()
 	self:HandleKeys(IsValid(self.Creator) && self.Creator)
 	if CurTime() > self.NextDanceT then
 		local song = VJ_PICK(self.SoundTracks)
+		-- PrintTable(self.Animations[song.dance])
 		local anim = self.Animations[song.dance][1].anim
 		local delay = self.SongStartAnimationDelay
 		self:StartLamp()
