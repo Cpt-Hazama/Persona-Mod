@@ -4,6 +4,7 @@ This mod adds a fully functioning, usable Persona system for players as well as 
 
 More Information:
 https://trello.com/b/8qYaZWHB/addon-development-board
+https://trello.com/b/oViEFpqB/persona-mod
 
 To obtain a Persona, go to Entities > Persona
 and click on the Persona you want to obtain!
