@@ -140,6 +140,7 @@ if (CLIENT) then
 		end
 	end)
 
+	local mat = Material("hud/persona/dance/star_b.png")
 	hook.Add("HUDPaint","Persona_DanceViewMode_HUD",function(ply)
 		local ply = LocalPlayer()
 		local dancer = ply:GetNWEntity("Persona_Dancer")
@@ -164,18 +165,32 @@ if (CLIENT) then
 		if ply.Persona_HitTime && ply.Persona_HitTime > CurTime() then
 			local nDir = ply.Persona_NoteDir
 			draw.SimpleText(nDir,"Persona",ScrW() /2 -30,ScrH() /2 -30,Color(255,0,0))
-			local mTbl = {}
-			mTbl["w"] = {scr = "H",dir = -50,div = 1}
-			mTbl["a"] = {scr = "W",dir = -50,div = 1}
-			mTbl["s"] = {scr = "H",dir = -50,div = 2}
-			mTbl["d"] = {scr = "W",dir = -50,div = 2}
 			local time = (ply.Persona_HitTime -CurTime())
 			draw.SimpleText(tostring(math.Round(time,3)),"Persona",ScrW() /2 -30,ScrH() /2,Color(255,0,0))
-			local col = nDir == "w" && Color(29,0,255,180) or nDir == "a" && Color(255,0,0,180) or nDir == "s" && Color(255,255,0,180) or nDir == "d" && Color(50,255,0,180)
-			local mul = mTbl[nDir].div == 1
-			local scrWData = (mTbl[nDir].scr == "W" && (mul == 1 && ScrW() or ScrW() /2) +(time *(mul == 1 && ScrW() or ScrW() /2)) +mTbl[nDir].dir) or ScrW() /2
-			local scrHData = (mTbl[nDir].scr == "H" && (mul == 1 && ScrH() or ScrH() /2) +(time *(mul == 1 && ScrH() or ScrH() /2)) +mTbl[nDir].dir) or ScrH() /2
-			draw.RoundedBox(8,scrWData -25,scrHData -25,50,50,col)
+			local col = Color(255,255,255,180)
+			local scrWData = ScrW() /2
+			local scrHData = ScrH() /2
+			if nDir == "w" then
+				col = Color(29,0,255,180)
+				scrWData = ScrW() /2
+				scrHData = ScrH() /2 -time *ScrH() +50
+			elseif nDir == "a" then
+				col = Color(255,0,0,180)
+				scrWData = ScrW() /2 -time *ScrH() +50
+				scrHData = ScrH() /2
+			elseif nDir == "s" then
+				col = Color(255,255,0,180)
+				scrWData = ScrW() /2
+				scrHData = ScrH() /2 +time *ScrH() -50
+			elseif nDir == "d" then
+				col = Color(50,255,0,180)
+				scrWData = ScrW() /2 +time *ScrW() -50
+				scrHData = ScrH() /2
+			end
+			local scale = 50
+			surface.SetMaterial(mat)
+			surface.SetDrawColor(col.r,col.g,col.b,col.a)
+			surface.DrawTexturedRect(scrWData -25,scrHData -25,scale,scale)
 		end
 	end)
 
