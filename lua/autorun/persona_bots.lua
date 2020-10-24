@@ -3,7 +3,7 @@ hook.Add("StartCommand","Persona_ControlBotAI",function(ply,cmd)
 	-- if !ply:Alive() then return end
 	-- if ply:IsFlagSet(FL_FROZEN) then return end
 
-	-- cmd:ClearMovement() 
+	-- cmd:ClearMovement()
 	-- cmd:ClearButtons()
 
 	-- if SERVER then

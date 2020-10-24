@@ -1,0 +1,22 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona4_dance/marie/face"
+	"$bumpmap" "models/cpthazama/persona4_dance/marie/face_n"
+	"$phongexponenttexture" "models/cpthazama/persona4_dance/marie/face_s"
+	
+	"$selfillum" "1"
+	"$selfillummask" "models/cpthazama/persona4_dance/marie/face_g"
+	"$selfillumtint" "[0 1 0.5]"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[1 1 1]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "30"
+	"$rimmask" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}
