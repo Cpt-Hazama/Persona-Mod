@@ -25,11 +25,8 @@ ENT.Animations["dance_signsoflove"][1] = {anim = "dance_signsoflove",next = "dan
 ENT.Animations["dance_signsoflove"][2] = {anim = "dance_signsoflove_b",next = false,endEarlyTime = 0}
 
 ENT.SoundTracks = {
-	[1] = {dance = "dance_signsoflove", song = "cpthazama/persona4_dance/music/c007.mp3", name = "Signs Of Love -Remix-"}
+	[1] = {dance = "dance_signsoflove", song = "cpthazama/persona4_dance/music/c007.mp3"}
 }
-
-ENT.SongLength = {}
-ENT.SongLength["dance_signsoflove"] = 175
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
