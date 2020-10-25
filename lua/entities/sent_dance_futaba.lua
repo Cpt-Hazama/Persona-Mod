@@ -29,8 +29,11 @@ ENT.Animations["dance_lastsurprise"][6] = {anim = "dance_lastsurprise3",next = "
 ENT.Animations["dance_lastsurprise"][7] = {anim = "dance_lastsurprise6",next = false,endEarlyTime = 0}
 
 ENT.SoundTracks = {
-	[1] = {dance = "dance_lastsurprise", song = "cpthazama/persona5_dance/music/h015.mp3"}
+	[1] = {dance = "dance_lastsurprise", song = "cpthazama/persona5_dance/music/h015.mp3", name = "Last Surprise -Remix-"}
 }
+
+ENT.SongLength = {}
+ENT.SongLength["dance_lastsurprise"] = 204
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()

@@ -25,8 +25,11 @@ ENT.Animations["dance_breakoutof"][1] = {anim = "dance_breakoutof",next = "dance
 ENT.Animations["dance_breakoutof"][2] = {anim = "dance_breakoutof_b",next = false,endEarlyTime = 0}
 
 ENT.SoundTracks = {
-	[1] = {dance = "dance_breakoutof", song = "cpthazama/persona4_dance/music/c012.mp3"}
+	[1] = {dance = "dance_breakoutof", song = "cpthazama/persona4_dance/music/c012.mp3", name = "Break Out Of"}
 }
+
+ENT.SongLength = {}
+ENT.SongLength["dance_breakoutof"] = 215
 
 BG_TOP = 1
 BG_BOTTOM = 2

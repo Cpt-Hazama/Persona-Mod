@@ -22,6 +22,8 @@ ENT.LampRGB = false
 ENT.ViewMode = 2 -- 0 = None, 1 = Follow, 2 = Dance, Dance!
 ENT.ViewBone = "Spine2"
 
+ENT.Difficulty = 2 -- 1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're stupid
+
 ENT.Animations = {}
 -- ENT.Animations["dance_lastsurprise"] = {}
 -- ENT.Animations["dance_lastsurprise"][1] = {anim = "dance_lastsurprise",next = "dance_lastsurprise2",endEarlyTime = 0.09}
@@ -32,10 +34,41 @@ ENT.Animations = {}
 -- ENT.Animations["dance_lastsurprise"][6] = {anim = "dance_lastsurprise3",next = "dance_lastsurprise6",endEarlyTime = 0.2}
 -- ENT.Animations["dance_lastsurprise"][7] = {anim = "dance_lastsurprise6",next = false,endEarlyTime = 0}
 
-
 ENT.SoundTracks = {
 	-- [1] = {dance = "dance_lastsurprise", song = "cpthazama/persona5_dance/music/h015.mp3"}
 }
+
+ENT.SongLength = {}
+-- ENT.SongLength["dance_lastsurprise"] = 300
+
+ENT.TrackNotes = {} -- Touch THIS one!
+
+ENT.Notes = {} -- Don't touch this!
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HSL(h,s,l)
+	h = h %256
+	if s == 0 then 
+		return Color(l,l,l)
+	end
+	h, s, l = h /256 *6, s /255, l /255
+	local c = (1 -math.abs(2 *l -1)) *s
+	local x = (1 - math.abs(h %2 -1)) *c
+	local m, r, g, b = (l -0.5 *c),0,0,0
+	if h < 1 then 
+		r,g,b = c,x,0
+	elseif h < 2 then
+		r,g,b = x,c,0
+	elseif h < 3 then
+		r,g,b = 0,c,x
+	elseif h < 4 then
+		r,g,b = 0,x,c
+	elseif h < 5 then
+		r,g,b = x,0,c
+	else
+		r,g,b = c,0,x
+	end
+	return Color(math.ceil((r +m) *256),math.ceil((g +m) *256),math.ceil((b +m) *256))
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:HandleKeys(ply) end
@@ -52,6 +85,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetupDataTables()
 	self:NetworkVar("String",0,"Song")
+	self:NetworkVar("String",1,"SongName")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if (CLIENT) then
@@ -59,73 +93,189 @@ if (CLIENT) then
 		self:DrawModel()
 	end
 
+	function ENT:Initialize()
+		self.DanceIndex = 0
+		self:ClientInit()
+	end
+
+	function ENT:AddNote(seq,dir,timer,spawnTime)
+		self.TrackNotes[seq] = self.TrackNotes[seq] or {}
+		table.insert(self.TrackNotes[seq],{Dir = dir,Life = timer,Activate = spawnTime})
+	end
+	
+	function ENT:ClientInit() end
+
+	function ENT:ReadNotes(name)
+		local f = file.Open("mns/" .. name .. ".bin","rb","GAME")
+			if !f then return MsgN("Unable to read file!") end
+			if f:QuickRead(3) == "MNS" then
+				local header = f:ReadULong()
+				f:Seek(0)
+				print(f:Read(3))
+			end
+		f:Close()
+	end
+
+	function ENT:ApplyNotes(anim,len)
+		if !self.TrackNotes[anim] then -- Random Notes
+			local adjust = math.random(1,self.Difficulty)
+			local clampMin = self.Difficulty == 1 && 1.25 or 0.75
+			local clampMax = self.Difficulty == 1 && 3 or 5
+			local subClamp = self.Difficulty == 1 && 0.95 or 0.5
+			for i = 1,len *adjust do
+				if i > 3 then
+					if math.random(1,2) == 1 then
+						for x = 1,math.random(1,self.Difficulty) do
+							local dir = VJ_PICK({"w","a","s","d"})
+							local ogTime = math.Rand(clampMin +0.5,clampMax) /adjust
+							local time = math.Clamp(math.Rand(ogTime -subClamp,ogTime +subClamp),clampMin,clampMax)
+							self:AddNote(anim,dir,time,i)
+							if math.random(1,5) == 1 then
+								dir = dir == "w" && "s" or dir == "s" && "w" or dir == "a" && "d" or dir == "d" && "a"
+								self:AddNote(anim,dir,time,i)
+							end
+						end
+					end
+				end
+			end
+			-- return
+		end
+		local index = self.DanceIndex
+		for _,v in pairs(self.TrackNotes[anim]) do
+			timer.Simple(v.Activate,function()
+				if IsValid(self) && self.DanceIndex == index then
+					self:SpawnNote(v.Dir,v.Life)
+				end
+			end)
+		end
+	end
+
+	function ENT:SpawnNote(dir,time)
+		local ind = #self.Notes +1
+		self.Notes[ind] = {}
+		self.Notes[ind].Direction = dir
+		self.Notes[ind].Timer = CurTime() +time
+	end
+
 	hook.Add("PlayerBindPress", "Persona_DanceViewScroll", function(ply,bind,pressed)
 		local dancer = ply:GetNWEntity("Persona_Dancer")
 		if !IsValid(dancer) then return end
 		local mode = ply:GetNWInt("Persona_DanceMode")
 		if mode == 0 then return end
-		
-		local w = bind == "+forward" && pressed
-		local a = bind == "+moveleft" && pressed
-		local s = bind == "+back" && pressed
-		local d = bind == "+moveright" && pressed
-		local e = bind == "+use" && pressed
-		
+
+		local usingController = GetConVarNumber("crosshair") == 1 -- Yeah idk
+		local bUp = usingController && "lastinv" or "+forward"
+		local bLeft = usingController && "+reload" or "+moveleft"
+		local bRight = usingController && "+use" or "+moveright"
+		local bDown = usingController && "+jump" or "+back"
+		local bScratch = usingController && "+attack" or "+use"
+		local w = bind == bUp && pressed
+		local a = bind == bLeft && pressed
+		local s = bind == bDown && pressed
+		local d = bind == bRight && pressed
+		local e = bind == bScratch && pressed
+
 		if mode == 2 then
 			ply.Persona_HitTime = ply.Persona_HitTime or 0
+			-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") or 0)
 			ply.Persona_Dance_Score = ply.Persona_Dance_Score or 0
 			ply.Persona_Dance_LastNoteT = ply.Persona_Dance_LastNoteT or 0
+			ply.Persona_Dance_HitTimes = ply.Persona_Dance_HitTimes or 0
+			ply.Persona_Dance_LastCheerT = ply.Persona_Dance_LastCheerT or 0
 			ply.Persona_NoteDir = ply.Persona_NoteDir or "e"
-			local function CheckHit()
+			local function CheckHit(dir)
 				local hNoMore = 0.03
 				local hPerfect = 0.075
 				local hGreat = 0.013
 				local hGood = 0.2
-				if ply.Persona_HitTime > CurTime() then
-					local tDif = ply.Persona_HitTime -CurTime()
-					local old = ply.Persona_Dance_Score
-					if tDif <= hPerfect && tDif > hNoMore then -- Perfect
-						ply:EmitSound("cpthazama/persona5_dance/clap_mega.wav")
-						ply:ChatPrint("PERFECT!")
-						ply.Persona_Dance_Score = ply.Persona_Dance_Score +math.Round(100 *(1 -tDif))
-					elseif tDif > hPerfect && tDif <= hGreat then -- Great
-						ply:EmitSound("cpthazama/persona5_dance/clap_cyl.wav")
-						ply:ChatPrint("GREAT!")
-						ply.Persona_Dance_Score = ply.Persona_Dance_Score +math.Round(50 *(1 -tDif))
-					elseif tDif > hGreat && tDif <= hGood then -- Good
-						ply:EmitSound("cpthazama/persona5_dance/clap.wav")
-						ply:ChatPrint("GOOD!")
-						ply.Persona_Dance_Score = ply.Persona_Dance_Score +math.Round(25 *(1 -tDif))
-					else
-						ply:EmitSound("cpthazama/persona5/misc/00103.wav")
-						ply:ChatPrint("MISS!")
+				local possibleHits = {}
+				-- Entity(1):ChatPrint(dir)
+				for ind,note in pairs(dancer.Notes) do
+					local rTime = note.Timer -CurTime()
+					if note && note.Direction == dir then 
+						if rTime <= 0.3 then
+							table.insert(possibleHits,note)
+						end
 					end
-					ply:ChatPrint("Gained " .. tostring(ply.Persona_Dance_Score -old) .. " points!")
-					ply.Persona_Dance_LastNoteT = CurTime() +5
-				else
-					ply:EmitSound("cpthazama/persona5/misc/00103.wav")
-					ply:ChatPrint("MISS!")
 				end
-				ply.Persona_HitTime = 0
+				if #possibleHits > 0 then
+					for _,v in pairs(possibleHits) do
+						local tDif = v.Timer -CurTime()
+						local didHit = false
+						local boost = CurTime() <= ply.Persona_Dance_LastCheerT
+						local mul = boost && 1.5 or 1
+						-- local old = ply:GetNWInt("Persona_Dance_Score")
+						local old = ply.Persona_Dance_Score
+						if tDif <= hPerfect && tDif > hNoMore then -- Perfect
+							ply:EmitSound("cpthazama/persona5_dance/clap_mega.wav")
+							ply:ChatPrint("PERFECT!")
+							didHit = true
+							-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") +math.Round(100 *(1 -tDif)))
+							ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(100 *(1 -tDif)) *mul)
+						elseif tDif > hPerfect && tDif <= hGreat then -- Great
+							ply:EmitSound("cpthazama/persona5_dance/clap_cyl.wav")
+							ply:ChatPrint("GREAT!")
+							didHit = true
+							ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(50 *(1 -tDif)) *mul)
+							-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") +math.Round(50 *(1 -tDif)))
+						elseif tDif > hGreat && tDif <= hGood then -- Good
+							ply:EmitSound("cpthazama/persona5_dance/clap.wav")
+							ply:ChatPrint("GOOD!")
+							didHit = true
+							ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(25 *(1 -tDif)) *mul)
+							-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") +math.Round(25 *(1 -tDif)))
+						else
+							ply:EmitSound("cpthazama/persona5/misc/00103.wav")
+							ply:ChatPrint("MISS!")
+							ply.Persona_Dance_HitTimes = 0
+							ply.Persona_Dance_LastNoteT = 0
+						end
+						if ply.Persona_Dance_LastNoteT < CurTime() then
+							ply.Persona_Dance_HitTimes = 0
+						end
+						if didHit then
+							if ply.Persona_Dance_LastCheerT > CurTime() then
+								ply.Persona_Dance_LastCheerT = math.Clamp(ply.Persona_Dance_LastCheerT +0.25,CurTime(),CurTime() +10)
+							else
+								ply.Persona_Dance_LastNoteT = CurTime() +5
+								ply.Persona_Dance_HitTimes = ply.Persona_Dance_HitTimes +1
+							end
+							if ply.Persona_Dance_HitTimes >= 25 && ply.Persona_Dance_LastNoteT > CurTime() && CurTime() > ply.Persona_Dance_LastCheerT then
+								ply.Persona_Dance_LastNoteT = 0
+								ply.Persona_Dance_LastCheerT = CurTime() +10
+								ply.Persona_Dance_HitTimes = 0
+								ply:ChatPrint("SCORE BOOST FOR 10 SECONDS!")
+								ply:EmitSound("cpthazama/persona4/ui_shufflebegin.wav")
+								ply:EmitSound("cpthazama/persona5_dance/crowd.wav")
+							end
+						end
+						-- ply:ChatPrint("Gained " .. tostring(ply:GetNWInt("Persona_Dance_Score") -old) .. " points!")
+						ply:ChatPrint("Gained " .. tostring(ply.Persona_Dance_Score -old) .. " points!")
+					-- else
+						-- ply:EmitSound("cpthazama/persona5/misc/00103.wav")
+						-- ply:ChatPrint("MISS!")
+					end
+				end
+				-- ply.Persona_HitTime = 0
 			end
 			if w then
-				if ply.Persona_NoteDir != "w" then return end
-				CheckHit()
+				-- if ply.Persona_NoteDir != "w" then return end
+				CheckHit("w")
 			end
 			if a then
-				if ply.Persona_NoteDir != "a" then return end
-				CheckHit()
+				-- if ply.Persona_NoteDir != "a" then return end
+				CheckHit("a")
 			end
 			if s then
-				if ply.Persona_NoteDir != "s" then return end
-				CheckHit()
+				-- if ply.Persona_NoteDir != "s" then return end
+				CheckHit("s")
 			end
 			if d then
-				if ply.Persona_NoteDir != "d" then return end
-				CheckHit()
+				-- if ply.Persona_NoteDir != "d" then return end
+				CheckHit("d")
 			end
 			if e then
-				ply:ChatPrint("E")
+				-- ply:ChatPrint("E")
 				ply:EmitSound("cpthazama/persona5_dance/mix.wav")
 			end
 		end
@@ -152,45 +302,75 @@ if (CLIENT) then
 		ply.Persona_NoteDir = ply.Persona_NoteDir or "w"
 		ply.Persona_HitTimeTotal = ply.Persona_HitTimeTotal or 0
 		ply.Persona_Dance_Score = ply.Persona_Dance_Score or 0
-		local noteT = dancer.Persona_NextNoteT
-		if CurTime() > noteT then
-			ply.Persona_NoteDir = VJ_PICK({"w","a","s","d"})
-			local pick = math.Rand(0.7,2)
-			ply.Persona_HitTimeTotal = pick
-			ply.Persona_HitTime = CurTime() +pick
-			dancer.Persona_NextNoteT = CurTime() +math.Rand(pick +0.1,2.5)
-		end
-		draw.RoundedBox(8,ScrW() /2 -30, ScrH() /2 -30,60,60,Color(0,255,255,150))
-		draw.SimpleText("Score - " .. ply.Persona_Dance_Score,"Persona",ScrW() /2 -30,ScrH() /2 -60,Color(255,0,0))
-		if ply.Persona_HitTime && ply.Persona_HitTime > CurTime() then
-			local nDir = ply.Persona_NoteDir
-			draw.SimpleText(nDir,"Persona",ScrW() /2 -30,ScrH() /2 -30,Color(255,0,0))
-			local time = (ply.Persona_HitTime -CurTime())
-			draw.SimpleText(tostring(math.Round(time,3)),"Persona",ScrW() /2 -30,ScrH() /2,Color(255,0,0))
-			local col = Color(255,255,255,180)
-			local scrWData = ScrW() /2
-			local scrHData = ScrH() /2
+		-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") or 0)
+		-- ply:SetNWInt("Persona_Dance_HighScore",ply:GetNWInt("Persona_Dance_HighScore") or 0)
+		-- if ply:GetNWInt("Persona_Dance_Score") > ply:GetNWInt("Persona_Dance_HighScore") then
+			-- ply:SetNWInt("Persona_Dance_HighScore",ply:GetNWInt("Persona_Dance_Score"))
+		-- end
+		
+		local function DrawNote(note)
+			local nDir = note.Direction
+			local nTime = note.Timer -CurTime()
+			local alpha = 220
+			local col = Color(255,255,255,alpha)
+			local dA = 2
+			local scrWData = ScrW() /dA
+			local scrHData = ScrH() /dA
 			if nDir == "w" then
-				col = Color(29,0,255,180)
-				scrWData = ScrW() /2
-				scrHData = ScrH() /2 -time *ScrH() +50
+				col = Color(255,240,0,alpha)
+				scrWData = ScrW() /dA
+				scrHData = ScrH() /dA -nTime *ScrH() +50
 			elseif nDir == "a" then
-				col = Color(255,0,0,180)
-				scrWData = ScrW() /2 -time *ScrH() +50
-				scrHData = ScrH() /2
+				col = Color(0,120,255,alpha)
+				scrWData = ScrW() /dA -nTime *ScrH() +50
+				scrHData = ScrH() /dA
 			elseif nDir == "s" then
-				col = Color(255,255,0,180)
-				scrWData = ScrW() /2
-				scrHData = ScrH() /2 +time *ScrH() -50
+				col = Color(0,255,157,alpha)
+				scrWData = ScrW() /dA
+				scrHData = ScrH() /dA +nTime *ScrH() -50
 			elseif nDir == "d" then
-				col = Color(50,255,0,180)
-				scrWData = ScrW() /2 +time *ScrW() -50
-				scrHData = ScrH() /2
+				col = Color(255,90,90,alpha)
+				scrWData = ScrW() /dA +nTime *ScrW() -50
+				scrHData = ScrH() /dA
 			end
 			local scale = 50
 			surface.SetMaterial(mat)
 			surface.SetDrawColor(col.r,col.g,col.b,col.a)
 			surface.DrawTexturedRect(scrWData -25,scrHData -25,scale,scale)
+			-- Entity(1):ChatPrint("DRAWING")
+		end
+
+		local boost = ply.Persona_Dance_LastCheerT > CurTime()
+		local mBoxCol = Color(0,255,255,150)
+		local sBoxHeight = boost && 190 or 130
+
+		local iDif = dancer.Difficulty
+		local dif = iDif == 1 && "Easy" or iDif == 2 && "Normal" or iDif == 3 && "Hard" or iDif == 4 && "Crazy" or "Insane"
+		draw.RoundedBox(8,ScrW() -360,ScrH() -770,350,sBoxHeight,Color(0,0,0,230)) // 200
+		draw.SimpleText(dancer:GetSongName(),"Persona",ScrW() -350,ScrH() -700 -60,Color(255,0,0))
+		draw.SimpleText("Difficulty - " .. dif,"Persona",ScrW() -350,ScrH() -660 -60,Color(255,0,0))
+		draw.SimpleText("Score - " .. ply.Persona_Dance_Score,"Persona",ScrW() -350,ScrH() -620 -60,Color(255,0,0))
+		-- draw.SimpleText("Score - " .. ply:GetNWInt("Persona_Dance_Score"),"Persona",ScrW() -350,ScrH() -660 -60,Color(255,0,0))
+		-- draw.SimpleText("High Score - " .. ply:GetNWInt("Persona_Dance_HighScore"),"Persona",ScrW() -350,ScrH() -620 -60,Color(255,0,0))
+
+
+		if boost then
+			mBoxCol = dancer:HSL((RealTime() *250 -(0 *15)),128,128)
+			local r = ply.Persona_Dance_LastCheerT -CurTime()
+			-- local r = 10
+			draw.RoundedBox(8,ScrW() -335, ScrH() -640,30 *r,45,mBoxCol)
+		end
+		draw.RoundedBox(8,ScrW() /2 -30, ScrH() /2 -30,60,60,mBoxCol)
+
+		for ind,note in pairs(dancer.Notes) do
+			if note then
+				if note.Timer < CurTime() then
+					-- Entity(1):ChatPrint("REMOVED")
+					table.remove(dancer.Notes,ind)
+				else
+					DrawNote(note)
+				end
+			end
 		end
 	end)
 
@@ -234,11 +414,20 @@ if (CLIENT) then
 		local dir = net.ReadString()
 		local ply = net.ReadEntity()
 		local me = net.ReadEntity()
+		local seq = net.ReadString()
+		local length = net.ReadInt(12)
 
+		me.Difficulty = GetConVarNumber("vj_persona_dancedifficulty")
+		me.DanceIndex = me.DanceIndex +1
+		me:ApplyNotes(seq,me.SongLength[seq] or length -4)
 		me.Persona_NextNoteT = CurTime() +3
+
+		ply.Persona_Dance_LastNoteT = 0
+		ply.Persona_Dance_LastCheerT = 0
+		ply.Persona_Dance_HitTimes = 0
 		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == dir then ply.VJ_Persona_Dance_Theme:Stop() end
 		timer.Simple(me.SongStartDelay,function()
-			if IsValid(ply) then
+			if IsValid(ply) && IsValid(me) then
 				ply.VJ_Persona_Dance_ThemeDir = dir
 				ply.VJ_Persona_Dance_Theme = CreateSound(ply,dir)
 				ply.VJ_Persona_Dance_Theme:SetSoundLevel(0)
@@ -253,13 +442,14 @@ if (CLIENT) then
 		local ply = net.ReadEntity()
 		local me = net.ReadEntity()
 
+		-- ply:SetNWInt("Persona_Dance_Score",0)
 		ply.Persona_Dance_Score = 0
 		ply.Persona_Dance_LastNoteT = 0
 		ply.Persona_Dance_StartSound = CreateSound(ply,"cpthazama/persona5_dance/crowd.wav")
 		ply.Persona_Dance_StartSound:SetSoundLevel(0)
 		ply.Persona_Dance_StartSound:Play()
 		ply.Persona_Dance_StartSound:ChangeVolume(60)
-		ply:ChatPrint("'Dance, Dance!' mode is very WIP right now! Currently, only one note appears at a time and the hit time is a bit off at times. The notes are randomly generated as well for the time being!")
+		ply:ChatPrint("'Dance, Dance!' mode is very WIP right now!")
 	end)
 
 	function ENT:Think()
@@ -271,6 +461,17 @@ if (CLIENT) then
 
 	function ENT:OnRemove()
 		local ply = LocalPlayer()
+		local song = self:GetSongName()
+
+		-- local oldData = PXP.GetDanceData(ply,song)
+		-- local s = ply:GetNWInt("Persona_Dance_Score")
+		-- local hs = ply:GetNWInt("Persona_Dance_HighScore")
+		-- if hs && hs > oldData then
+			-- PXP.SaveDanceData(ply,song,s)
+		-- end
+		-- ply:SetNWInt("Persona_Dance_Score",0)
+		-- ply:SetNWInt("Persona_Dance_HighScore",0)
+
 		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == self:GetSong() then
 			local cont = true
 			for _,v in pairs(ents.FindByClass("sent_dance_*")) do
@@ -298,10 +499,14 @@ function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
 			self:ResetSequence(seq)
 			self:SetAnimationRate(rate)
 			self:SetCycle(cycle or 0)
+			local dance = nil
 			local song = nil
+			local songName = nil
 			for _,v in pairs(self.SoundTracks) do
 				if v.dance == seq then
+					dance = v.dance
 					song = v.song
+					songName = v.name
 					break
 				end
 			end
@@ -311,9 +516,13 @@ function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
 						net.WriteString(song)
 						net.WriteEntity(v)
 						net.WriteEntity(self)
+						net.WriteString(dance)
+						net.WriteInt(self:GetSequenceDuration(self,dance),12)
 					net.Broadcast()
 				end
 				self:SetSong(song)
+				self.SongName = songName
+				self:SetSongName(songName)
 			end
 			self:OnPlayDance(seq,t)
 			local dur = self:GetSequenceDuration(self,seq)
@@ -491,41 +700,28 @@ function ENT:StartLamp()
 	if IsValid(phys) then phys:Sleep() end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:HSL(h,s,l)
-	h = h %256
-	if s == 0 then 
-		return Color(l,l,l)
-	end
-	h, s, l = h /256 *6, s /255, l /255
-	local c = (1 -math.abs(2 *l -1)) *s
-	local x = (1 - math.abs(h %2 -1)) *c
-	local m, r, g, b = (l -0.5 *c),0,0,0
-	if h < 1 then 
-		r,g,b = c,x,0
-	elseif h < 2 then
-		r,g,b = x,c,0
-	elseif h < 3 then
-		r,g,b = 0,c,x
-	elseif h < 4 then
-		r,g,b = 0,x,c
-	elseif h < 5 then
-		r,g,b = x,0,c
-	else
-		r,g,b = c,0,x
-	end
-	return Color(math.ceil((r +m) *256),math.ceil((g +m) *256),math.ceil((b +m) *256))
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Think()
 	self:HandleKeys(IsValid(self.Creator) && self.Creator)
 	if CurTime() > self.NextDanceT then
 		local song = VJ_PICK(self.SoundTracks)
 		-- PrintTable(self.Animations[song.dance])
 		local anim = self.Animations[song.dance][1].anim
+		local songName = song.name
 		local delay = self.SongStartAnimationDelay
 		self:StartLamp()
 		local t = self:PlayAnimation(anim,1,0,1,anim) +delay +0.1
 		if IsValid(self.Creator) && self.ViewMode == 2 then
+			local ply = self.Creator
+			ply:SetNWInt("Persona_Dance_Score",0)
+			-- local oldData = PXP.GetDanceData(ply,songName)
+			-- local s = ply:GetNWInt("Persona_Dance_Score")
+			-- local hs = ply:GetNWInt("Persona_Dance_HighScore")
+			-- if hs && hs > oldData then
+				-- PXP.SaveDanceData(ply,song,hs)
+			-- end
+			-- ply:SetNWInt("Persona_Dance_Score",0)
+			-- ply:SetNWInt("Persona_Dance_HighScore",0)
+
 			net.Start("Persona_Dance_ModeStart")
 				net.WriteEntity(self.Creator)
 				net.WriteEntity(self)

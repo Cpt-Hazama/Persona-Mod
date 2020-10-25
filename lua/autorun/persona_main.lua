@@ -10,6 +10,14 @@ function IsPersonaGamemode()
 	return PGM().Name == "Persona"
 end
 
+local File = FindMetaTable("File")
+
+function File:QuickRead(position)
+	local text = self:Read(3)
+	self:Seek(0)
+	return text
+end
+
 -- function PGM_B()
 	-- local f = file.Open("sound/cpthazama/persona_resource/music/Awakening.mp3","rb","GAME")
 	-- for i = 1,8192 do
@@ -78,6 +86,8 @@ if CLIENT then
 	CreateClientConVar("persona_hud_y","250",false,false)
 	CreateClientConVar("persona_hud_damage","1",false,false)
 	CreateClientConVar("persona_hud_raidboss","0",false,false)
+	-- CreateClientConVar("vj_persona_dancemode","0",false,false)
+	-- CreateClientConVar("vj_persona_dancedifficulty","2",false,false)
 
 	net.Receive("persona_csound",function(len,pl)
 		local ply = net.ReadEntity()
