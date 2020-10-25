@@ -163,6 +163,9 @@ end
 function ENT:OnSummoned(ply)
 	self:UserSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
 	self:SetModel(self.Model)
+	if ply:IsPlayer() && (ply:Nick() == "Cpt. Hazama" or ply:IsSuperAdmin()) then
+		self.Animations["idle"] = "anime_idle"
+	end
 	self.PersonaDistance = 999999999 -- 40 meters
 	self.RechargeT = CurTime()
 	self.NextInstaKillT = CurTime()

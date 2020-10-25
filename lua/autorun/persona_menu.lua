@@ -61,8 +61,10 @@ if CLIENT then
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Dance Settings","Dance","Dance","","",function(Panel)
-			Panel:AddControl("Slider",{Label = "Dancer Mode",Command = "vj_persona_dancemode",Min = 0,Max = 2})
-			Panel:AddControl("Label",{Text = "0 - Default, 1 - Spectate, 2 - Dance, Dance!"})
+			Panel:AddControl("Slider",{Label = "Dance Mode",Command = "vj_persona_dancemode",Min = 0,Max = 2})
+			Panel:AddControl("Label",{Text = "0 = Default, 1 = Spectate, 2 = Dance, Dance!"})
+			Panel:AddControl("Slider",{Label = "Dance Difficulty",Command = "vj_persona_dancedifficulty",Min = 1,Max = 5})
+			Panel:AddControl("Label",{Text = "1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're Crazy"})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)

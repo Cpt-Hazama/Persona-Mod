@@ -327,6 +327,26 @@ PXP.ReadCompendium = function(ply)
 	return PXP.ReadDataTable(PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_") .. "_COMPENDIUM.txt")
 end
 
+PXP.GetDanceDataStorage = function()
+	local dir = "persona/dance/"
+	file.CreateDir(dir)
+	return dir
+end
+
+PXP.GetDanceData = function(ply,song)
+	if !ply:IsPlayer() then return end
+	local dir = PXP.GetDanceDataStorage() .. string.gsub(ply:SteamID(),":","_")
+	print("Checking Dance Data for " .. song)
+	return tonumber(file.Read(dir .. "_" .. song .. ".txt","DATA") or 0) or 0
+end
+
+PXP.SaveDanceData = function(ply,song,val)
+	if !ply:IsPlayer() then return end
+	local dir = PXP.GetDanceDataStorage() .. string.gsub(ply:SteamID(),":","_")
+	print("Saving Dance Data for " .. song)
+	PXP.WriteFile(dir .. "_" .. song .. ".txt",val)
+end
+
 PXP.WriteFile = function(dir,cont)
 	file.Write(dir,tostring(cont))
 end
