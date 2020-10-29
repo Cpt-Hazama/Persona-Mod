@@ -1014,6 +1014,32 @@ if CLIENT then
 	end)
 end
 
+function VJ_PlaySound(argent,sound,soundlevel,soundpitch,stoplatestsound,sounddsp)
+	if not sound then return end
+	if istable(sound) then
+		if #sound < 1 then return end -- If the table is empty then end it
+		sound = sound[math.random(1,#sound)]
+	end
+	/*if stoplatestsound == true then -- If stopsounds is true, then the current sound
+		//if argent.CurrentSound then argent.CurrentSound:Stop() end
+		if soundid then
+			soundid:Stop()
+			soundid = nil
+		end
+	end*/
+	//print(sound)
+	soundid = CreateSound(argent, sound)
+	soundid:SetSoundLevel(soundlevel or 75)
+	soundid:PlayEx(1,soundpitch or 100)
+	if sounddsp then -- For modulation, like helmets(?)
+		soundid:SetDSP(sounddsp)
+	end
+	argent.LastPlayedVJSound = soundid
+	if argent.IsVJBaseSNPC == true then argent:OnPlayCreateSound(soundid,sound) end
+	local tbl = {soundid,sound}
+	return tbl
+end
+
 game.AddParticles("particles/magatsu_izanagi.pcf")
 
 game.AddParticles("particles/jojo_aura.pcf")

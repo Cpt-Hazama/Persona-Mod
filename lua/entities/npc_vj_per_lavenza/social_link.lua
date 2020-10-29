@@ -60,7 +60,7 @@ function ENT:DoSentence(ply,tblText,time,replies,rankup)
 				net.WriteString("")
 				net.WriteString("")
 			net.Send(ply)
-			
+
 			if rankup then
 				self:SetSpeaking(false)
 				self:GetSpeakingTo(NULL)

@@ -62,6 +62,7 @@ if VJExists == true then
 	VJ.AddClientConVar("vj_persona_music",1)
 	VJ.AddClientConVar("vj_persona_dancemode",0)
 	VJ.AddClientConVar("vj_persona_dancedifficulty",2)
+	VJ.AddClientConVar("vj_persona_dancevol",60)
 	
 	function VJ_AddSound(sName,sSound,iLevel)
 		sound.Add({

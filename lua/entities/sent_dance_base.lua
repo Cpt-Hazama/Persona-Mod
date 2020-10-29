@@ -77,7 +77,11 @@ if SERVER then
 
 	function ENT:HandleAnimationEvent(seq,event,frame) end
 
+	function ENT:OnThink() end
+
 	function ENT:OnPlayDance(seq,t) end
+
+	function ENT:OnStartDance(seq,song,songName,dance) end
 
 	util.AddNetworkString("Persona_Dance_Song")
 	util.AddNetworkString("Persona_Dance_ModeStart")
@@ -95,6 +99,7 @@ if (CLIENT) then
 
 	function ENT:Initialize()
 		self.DanceIndex = 0
+		self.NextSpeakT = 0
 		self:ClientInit()
 	end
 
@@ -178,6 +183,7 @@ if (CLIENT) then
 		if mode == 2 then
 			ply.Persona_HitTime = ply.Persona_HitTime or 0
 			-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") or 0)
+			ply.Persona_Dance_HitData = ply.Persona_Dance_HitData or {Perfect=0,Great=0,Good=0,Miss=0}
 			ply.Persona_Dance_Score = ply.Persona_Dance_Score or 0
 			ply.Persona_Dance_LastNoteT = ply.Persona_Dance_LastNoteT or 0
 			ply.Persona_Dance_HitTimes = ply.Persona_Dance_HitTimes or 0
@@ -210,18 +216,21 @@ if (CLIENT) then
 							ply:EmitSound("cpthazama/persona5_dance/clap_mega.wav")
 							ply:ChatPrint("PERFECT!")
 							didHit = true
+							ply.Persona_Dance_HitData.Perfect = ply.Persona_Dance_HitData.Perfect +1
 							-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") +math.Round(100 *(1 -tDif)))
 							ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(100 *(1 -tDif)) *mul)
 						elseif tDif > hPerfect && tDif <= hGreat then -- Great
 							ply:EmitSound("cpthazama/persona5_dance/clap_cyl.wav")
 							ply:ChatPrint("GREAT!")
 							didHit = true
+							ply.Persona_Dance_HitData.Great = ply.Persona_Dance_HitData.Great +1
 							ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(50 *(1 -tDif)) *mul)
 							-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") +math.Round(50 *(1 -tDif)))
 						elseif tDif > hGreat && tDif <= hGood then -- Good
 							ply:EmitSound("cpthazama/persona5_dance/clap.wav")
 							ply:ChatPrint("GOOD!")
 							didHit = true
+							ply.Persona_Dance_HitData.Good = ply.Persona_Dance_HitData.Good +1
 							ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(25 *(1 -tDif)) *mul)
 							-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") +math.Round(25 *(1 -tDif)))
 						else
@@ -229,11 +238,20 @@ if (CLIENT) then
 							ply:ChatPrint("MISS!")
 							ply.Persona_Dance_HitTimes = 0
 							ply.Persona_Dance_LastNoteT = 0
+							ply.Persona_Dance_HitData.Miss = ply.Persona_Dance_HitData.Miss +1
+							if CurTime() > dancer.NextSpeakT && math.random(1,15) == 1 then
+								local snd = dancer:PlaySound("failing")
+								dancer.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
+							end
 						end
 						if ply.Persona_Dance_LastNoteT < CurTime() then
 							ply.Persona_Dance_HitTimes = 0
 						end
 						if didHit then
+							if CurTime() > dancer.NextSpeakT && math.random(1,15) == 1 then
+								local snd = dancer:PlaySound("winning")
+								dancer.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
+							end
 							if ply.Persona_Dance_LastCheerT > CurTime() then
 								ply.Persona_Dance_LastCheerT = math.Clamp(ply.Persona_Dance_LastCheerT +0.25,CurTime(),CurTime() +10)
 							else
@@ -302,6 +320,7 @@ if (CLIENT) then
 		ply.Persona_NoteDir = ply.Persona_NoteDir or "w"
 		ply.Persona_HitTimeTotal = ply.Persona_HitTimeTotal or 0
 		ply.Persona_Dance_Score = ply.Persona_Dance_Score or 0
+		ply.Persona_Dance_HitData = ply.Persona_Dance_HitData or {Perfect=0,Great=0,Good=0,Miss=0}
 		-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") or 0)
 		-- ply:SetNWInt("Persona_Dance_HighScore",ply:GetNWInt("Persona_Dance_HighScore") or 0)
 		-- if ply:GetNWInt("Persona_Dance_Score") > ply:GetNWInt("Persona_Dance_HighScore") then
@@ -342,7 +361,13 @@ if (CLIENT) then
 
 		local boost = ply.Persona_Dance_LastCheerT > CurTime()
 		local mBoxCol = Color(0,255,255,150)
-		local sBoxHeight = boost && 190 or 130
+		local sBoxHeight = boost && 350 or 290 -- 60 dif | 130 | 160 dif
+
+		local hT = ply.Persona_Dance_HitData
+		local hP = hT.Perfect
+		local hGr = hT.Great
+		local hG = hT.Good
+		local hM = hT.Miss
 
 		local iDif = dancer.Difficulty
 		local dif = iDif == 1 && "Easy" or iDif == 2 && "Normal" or iDif == 3 && "Hard" or iDif == 4 && "Crazy" or "Insane"
@@ -350,6 +375,10 @@ if (CLIENT) then
 		draw.SimpleText(dancer:GetSongName(),"Persona",ScrW() -350,ScrH() -700 -60,Color(255,0,0))
 		draw.SimpleText("Difficulty - " .. dif,"Persona",ScrW() -350,ScrH() -660 -60,Color(255,0,0))
 		draw.SimpleText("Score - " .. ply.Persona_Dance_Score,"Persona",ScrW() -350,ScrH() -620 -60,Color(255,0,0))
+		draw.SimpleText("Perfects - " .. hP,"Persona",ScrW() -350,ScrH() -580 -60,Color(255,0,0))
+		draw.SimpleText("Greats - " .. hGr,"Persona",ScrW() -350,ScrH() -540 -60,Color(255,0,0))
+		draw.SimpleText("Goods - " .. hG,"Persona",ScrW() -350,ScrH() -500 -60,Color(255,0,0))
+		draw.SimpleText("Misses - " .. hM,"Persona",ScrW() -350,ScrH() -460 -60,Color(255,0,0))
 		-- draw.SimpleText("Score - " .. ply:GetNWInt("Persona_Dance_Score"),"Persona",ScrW() -350,ScrH() -660 -60,Color(255,0,0))
 		-- draw.SimpleText("High Score - " .. ply:GetNWInt("Persona_Dance_HighScore"),"Persona",ScrW() -350,ScrH() -620 -60,Color(255,0,0))
 
@@ -358,7 +387,7 @@ if (CLIENT) then
 			mBoxCol = dancer:HSL((RealTime() *250 -(0 *15)),128,128)
 			local r = ply.Persona_Dance_LastCheerT -CurTime()
 			-- local r = 10
-			draw.RoundedBox(8,ScrW() -335, ScrH() -640,30 *r,45,mBoxCol)
+			draw.RoundedBox(8,ScrW() -335, ScrH() -480,30 *r,45,mBoxCol)
 		end
 		draw.RoundedBox(8,ScrW() /2 -30, ScrH() /2 -30,60,60,mBoxCol)
 
@@ -425,6 +454,7 @@ if (CLIENT) then
 		ply.Persona_Dance_LastNoteT = 0
 		ply.Persona_Dance_LastCheerT = 0
 		ply.Persona_Dance_HitTimes = 0
+		ply.Persona_Dance_HitData = {Perfect=0,Great=0,Good=0,Miss=0}
 		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == dir then ply.VJ_Persona_Dance_Theme:Stop() end
 		timer.Simple(me.SongStartDelay,function()
 			if IsValid(ply) && IsValid(me) then
@@ -432,7 +462,7 @@ if (CLIENT) then
 				ply.VJ_Persona_Dance_Theme = CreateSound(ply,dir)
 				ply.VJ_Persona_Dance_Theme:SetSoundLevel(0)
 				ply.VJ_Persona_Dance_Theme:Play()
-				ply.VJ_Persona_Dance_Theme:ChangeVolume(60)
+				ply.VJ_Persona_Dance_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01) // 60
 				ply.VJ_Persona_Dance_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
 			end
 		end)
@@ -445,16 +475,18 @@ if (CLIENT) then
 		-- ply:SetNWInt("Persona_Dance_Score",0)
 		ply.Persona_Dance_Score = 0
 		ply.Persona_Dance_LastNoteT = 0
+		ply.Persona_Dance_HitData = {Perfect=0,Great=0,Good=0,Miss=0}
 		ply.Persona_Dance_StartSound = CreateSound(ply,"cpthazama/persona5_dance/crowd.wav")
 		ply.Persona_Dance_StartSound:SetSoundLevel(0)
 		ply.Persona_Dance_StartSound:Play()
-		ply.Persona_Dance_StartSound:ChangeVolume(60)
+		ply.Persona_Dance_StartSound:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01)
 		ply:ChatPrint("'Dance, Dance!' mode is very WIP right now!")
 	end)
 
 	function ENT:Think()
 		local ply = LocalPlayer()
 		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() then
+			ply.VJ_Persona_Dance_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01)
 			ply.VJ_Persona_Dance_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
 		end
 	end
@@ -523,6 +555,7 @@ function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
 				self:SetSong(song)
 				self.SongName = songName
 				self:SetSongName(songName)
+				self:OnStartDance(seq,song,songName,dance)
 			end
 			self:OnPlayDance(seq,t)
 			local dur = self:GetSequenceDuration(self,seq)
@@ -570,6 +603,10 @@ function ENT:GetSequenceDuration(argent,actname)
 	end
 	return 0
 end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PlaySound(name,vol,pit,notTable)
+	return VJ_PlaySound(self,(self.Sounds && self.Sounds[name] && VJ_PICK(self.Sounds[name])) or notTable,vol or 75,pit or 100)
+end
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 if !(SERVER) then return end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -584,6 +621,10 @@ function ENT:ChangeFace(t,id,sID)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PlaySound(name,vol,pit,notTable)
+	return VJ_PlaySound(self,(self.Sounds && self.Sounds[name] && VJ_PICK(self.Sounds[name])) or notTable,vol or 75,pit or 100)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Initialize()
 	self:SetModel(self.Model)
 	self:SetSolid(SOLID_OBB)
@@ -593,7 +634,10 @@ function ENT:Initialize()
 
 	self.DefaultPlaybackRate = 1
 	self.Index = 0
+	self.DanceIndex = 0
 	self.NextDanceT = CurTime()
+	self.NextSpeakT = 0
+
 	self.AnimationEvents = {}
 
 	timer.Simple(0,function()
@@ -765,6 +809,7 @@ function ENT:Think()
 			end
 		end
 	end
+	self:OnThink()
 	self:NextThink(CurTime())
 	return true
 end
