@@ -446,9 +446,11 @@ if (CLIENT) then
 		local seq = net.ReadString()
 		local length = net.ReadInt(12)
 
+		if !IsValid(me) then MsgN("Thanks GMod, very cool") end
 		me.Difficulty = GetConVarNumber("vj_persona_dancedifficulty")
-		me.DanceIndex = me.DanceIndex +1
-		me:ApplyNotes(seq,me.SongLength[seq] or length -4)
+		me.DanceIndex = (me.DanceIndex or 0) +1
+		if !me.ApplyNotes then ply:ChatPrint("A weird problem occured...respawn the Dancer and it will be fixed"); me:Remove() return end
+		me:ApplyNotes(seq,(seq && me.SongLength && me.SongLength[seq]) or length -4)
 		me.Persona_NextNoteT = CurTime() +3
 
 		ply.Persona_Dance_LastNoteT = 0
@@ -839,7 +841,7 @@ function ENT:OnRemove()
 	self.Creator = NULL
 end
 /*--------------------------------------------------
-	*** Copyright (c) 2012-2020 by DrVrej, All rights reserved. ***
+	*** Copyright (c) 2012-2021 by Cpt. Hazama, All rights reserved. ***
 	No parts of this code or any of its contents may be reproduced, copied, modified or adapted,
 	without the prior written consent of the author, unless otherwise indicated for persona-alone materials.
 --------------------------------------------------*/

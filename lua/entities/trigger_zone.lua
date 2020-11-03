@@ -107,7 +107,7 @@ function ENT:Think()
 	self:NextThink(CurTime())
 end
 /*--------------------------------------------------
-	*** Copyright (c) 2012-2020 by DrVrej, All rights reserved. ***
+	*** Copyright (c) 2012-2021 by Cpt. Hazama, All rights reserved. ***
 	No parts of this code or any of its contents may be reproduced, copied, modified or adapted,
 	without the prior written consent of the author, unless otherwise indicated for persona-alone materials.
 --------------------------------------------------*/
