@@ -5,14 +5,14 @@
 	"$phongexponenttexture" "models/cpthazama/persona5/akechi/body_starlight_s"
 
 	"$phong"				"1"
-	"$phongboost"			"0"
+	"$phongboost"			"0.05"
 	"$phongfresnelranges"	"[0 0.5 1]"
-	"$phongtint"			"[0 0.15 1]"
+	"$phongtint"			"[0.6 0.6 0.6]"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"
-	"$rimlightboost" "200"
+	"$rimlightboost" "15"
 	"$rimmask" "1"
 
-	"$lightwarptexture" "models/cpthazama/persona5/cel_blue"
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
 }

@@ -4,13 +4,13 @@
 	"$bumpmap" "models/cpthazama/persona4_dance/yu/bottom1_n"
 
 	"$phong"				"1"
-	"$phongboost"			"0"
+	"$phongboost"			"0.05"
 	"$phongfresnelranges"	"[0 0.5 1]"
-	"$phongtint"			"[1 1 1]"
+	"$phongtint"			"[0.6 0.6 0.6]"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"
-	"$rimlightboost" "30"
+	"$rimlightboost" "15"
 	"$rimmask" "1"
 
 	"$lightwarptexture" "models/cpthazama/persona5/warp2"

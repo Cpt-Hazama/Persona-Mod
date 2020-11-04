@@ -39,23 +39,16 @@ function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Call of Chaos" then
 		if animBlock == "range_start" then
 			if ply:IsNPC() && ply:GetClass() == "npc_vj_per_akechi" then
-				VJ_CreateSound(ply,"cpthazama/persona5/akechi/blackmask/00027_streaming [1].wav",78)
+				VJ_CreateSound(ply,"cpthazama/persona5/akechi/blackmask/persona01.wav",78)
 			else
-				self:UserSound("cpthazama/persona5/akechi/blackmask/00027_streaming [1].wav",80)
+				self:UserSound("cpthazama/persona5/akechi/blackmask/persona01.wav",80)
 			end
 		end
 		if animBlock == "range" then
 			if ply:IsNPC() && ply:GetClass() == "npc_vj_per_akechi" then
-				VJ_CreateSound(ply,"cpthazama/persona5/akechi/blackmask/00029_streaming [1].wav",78)
+				VJ_CreateSound(ply,"cpthazama/persona5/akechi/blackmask/warmtinglyfeeling.wav",78)
 			else
-				self:UserSound("cpthazama/persona5/akechi/blackmask/00029_streaming [1].wav",80)
-			end
-		end
-		if animBlock == "range_idle" then
-			if ply:IsNPC() && ply:GetClass() == "npc_vj_per_akechi" then
-				VJ_CreateSound(ply,"cpthazama/persona5/akechi/blackmask/00020_streaming [1].wav.wav",78)
-			else
-				self:UserSound("cpthazama/persona5/akechi/blackmask/00020_streaming [1].wav",80)
+				self:UserSound("cpthazama/persona5/akechi/blackmask/warmtinglyfeeling.wav",80)
 			end
 		end
 	end

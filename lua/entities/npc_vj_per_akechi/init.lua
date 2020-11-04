@@ -38,13 +38,22 @@ ENT.SoundTbl_Pain = {
 	"cpthazama/persona5/akechi/blackmask/00024_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00030_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00031_streaming [1].wav",
+	"cpthazama/persona5/akechi/blackmask/pain01.wav",
+	"cpthazama/persona5/akechi/blackmask/pain02.wav",
+	"cpthazama/persona5/akechi/blackmask/pain03.wav",
+	"cpthazama/persona5/akechi/blackmask/pain04.wav",
+	"cpthazama/persona5/akechi/blackmask/pain05.wav",
+	"cpthazama/persona5/akechi/blackmask/pain06.wav",
+	"cpthazama/persona5/akechi/blackmask/pain07.wav",
 }
 ENT.SoundTbl_Death = {
 	"cpthazama/persona5/akechi/blackmask/00018_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00019_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00020_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00026_streaming [1].wav",
+	"cpthazama/persona5/akechi/blackmask/pain09.wav",
 }
+ENT.SoundTbl_CallForMedic = {"cpthazama/persona5/akechi/blackmask/callforhelp01.wav"}
 ENT.SoundTbl_OnKilledEnemy = {
 	"cpthazama/persona5/akechi/blackmask/00000_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00013_streaming [1].wav",
@@ -53,6 +62,9 @@ ENT.SoundTbl_OnKilledEnemy = {
 	"cpthazama/persona5/akechi/00007_streaming [1].wav",
 	"cpthazama/persona5/akechi/00008_streaming [1].wav",
 	"cpthazama/persona5/akechi/00009_streaming [1].wav",
+	"cpthazama/persona5/akechi/blackmask/kill01.wav",
+	"cpthazama/persona5/akechi/blackmask/kill02.wav",
+	"cpthazama/persona5/akechi/blackmask/kill03.wav",
 }
 ENT.SoundTbl_Dodge = {
 	"cpthazama/persona5/akechi/blackmask/00011_streaming [1].wav",
@@ -60,6 +72,9 @@ ENT.SoundTbl_Dodge = {
 	"cpthazama/persona5/akechi/blackmask/00017_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00021_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00022_streaming [1].wav",
+	"cpthazama/persona5/akechi/blackmask/dodge01.wav",
+	"cpthazama/persona5/akechi/blackmask/dodge02.wav",
+	"cpthazama/persona5/akechi/blackmask/dodge03.wav",
 }
 ENT.SoundTbl_Persona = {
 	"cpthazama/persona5/akechi/blackmask/00010_streaming [1].wav",
@@ -73,6 +88,9 @@ ENT.SoundTbl_PersonaAttack = {
 	"cpthazama/persona5/akechi/blackmask/00006_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00007_streaming [1].wav",
 	"cpthazama/persona5/akechi/blackmask/00008_streaming [1].wav",
+	"cpthazama/persona5/akechi/blackmask/melee01.wav",
+	"cpthazama/persona5/akechi/blackmask/melee02.wav",
+	"cpthazama/persona5/akechi/blackmask/melee03.wav",
 }
 ENT.SoundTbl_GetUp = {
 	"cpthazama/persona5/akechi/blackmask/00009_streaming [1].wav",
@@ -98,6 +116,59 @@ ENT.Animations["range_idle"] = "persona_attack_idle"
 ENT.Animations["range_end"] = "persona_attack_end"
 
 ENT.Persona = "loki"
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnTakeDamage_AfterDamage(dmginfo,hitgroup)
+	local t = dmginfo:GetDamageType()
+	local tbl = {
+		"cpthazama/persona5/akechi/blackmask/00009_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00011_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00012_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00023_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00024_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00030_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/00031_streaming [1].wav",
+		"cpthazama/persona5/akechi/blackmask/pain01.wav",
+		"cpthazama/persona5/akechi/blackmask/pain02.wav",
+		"cpthazama/persona5/akechi/blackmask/pain03.wav",
+		"cpthazama/persona5/akechi/blackmask/pain04.wav",
+		"cpthazama/persona5/akechi/blackmask/pain05.wav",
+		"cpthazama/persona5/akechi/blackmask/pain06.wav",
+		"cpthazama/persona5/akechi/blackmask/pain07.wav",
+	}
+	
+	if math.random(1,2) == 1 then
+		if t == DMG_P_PSI then
+			tbl = {
+				"cpthazama/persona5/akechi/blackmask/pain_dizzy.wav",
+			}
+		elseif t == DMG_P_ELEC || t == DMG_SHOCK then
+			tbl = {
+				"cpthazama/persona5/akechi/blackmask/pain_elec.wav",
+			}
+		elseif t == DMG_P_SEAL then
+			tbl = {
+				"cpthazama/persona5/akechi/blackmask/pain_seal.wav",
+			}
+		elseif t == DMG_P_ICE || t == DMG_P_FROST || t == DMG_FROST || t == DMG_FREEZE then
+			tbl = {
+				"cpthazama/persona5/akechi/blackmask/pain_ice.wav",
+			}
+		elseif t == DMG_P_FIRE || t == DMG_P_BURN || t == DMG_BURN then
+			tbl = {
+				"cpthazama/persona5/akechi/blackmask/pain_fire.wav",
+			}
+		elseif t == DMG_P_FEAR then
+			tbl = {
+				"cpthazama/persona5/akechi/blackmask/pain_fear.wav",
+			}
+		elseif t == DMG_P_SLEEP || t == DMG_P_PARALYZE then
+			tbl = {
+				"cpthazama/persona5/akechi/blackmask/pain_sleep.wav",
+			}
+		end
+	end
+	self.SoundTbl_Pain = tbl
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Controller_Initialize(ply)
     net.Start("vj_persona_hud_akechi")

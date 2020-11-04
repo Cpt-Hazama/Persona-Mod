@@ -65,6 +65,12 @@ function ENT:Initialize()
 	self:SetRenderMode(RENDERMODE_TRANSADD)
 	self:DrawShadow(false)
 	
+	-- if self.IsPersonaRMD then
+		-- self:SetColor(Color(255,255,255,250))
+	-- else
+		-- self:SetColor(Color(255,255,255,250)) // Yes ma'am
+	-- end
+	
 	self.CurrentTask = "TASK_NONE"
 	self.CurrentTaskID = -1
 	
@@ -224,6 +230,7 @@ function ENT:PersonaThink_NPC(ply,persona) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:IdleAnimationCode(ply)
 	self.CurrentIdle = self.User:IsPlayer() && self.User:Crouching() && "idle_low" or "idle"
+	if self.IsPersonaRMD then self:FadeIn() end
 	if self:GetSequenceName(self:GetSequence()) != self.Animations[self.CurrentIdle] then
 		self:DoIdle()
 	end
