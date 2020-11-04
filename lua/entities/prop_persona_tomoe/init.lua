@@ -25,13 +25,13 @@ ENT.LeveledSkills = {
 	{Level = 52, Name = "Charge", Cost = 15, UsesHP = false, Icon = "passive"},
 	{Level = 46, Name = "Heat Wave", Cost = 16, UsesHP = true, Icon = "phys"},
 	{Level = 38, Name = "Black Spot", Cost = 16, UsesHP = true, Icon = "phys"},
-	{Level = 33, Name = "Bufula", Cost = 8, UsesHP = false, Icon = "ice"},
+	{Level = 33, Name = "Bufula", Cost = 8, UsesHP = false, Icon = "frost"},
 	{Level = 29, Name = "Gale Slash", Cost = 12, UsesHP = true, Icon = "phys"},
 	{Level = 22, Name = "Assault Dive", Cost = 9, UsesHP = true, Icon = "phys"},
 	{Level = 20, Name = "Rampage", Cost = 12, UsesHP = true, Icon = "phys"},
-	{Level = 14, Name = "Mabufu", Cost = 10, UsesHP = false, Icon = "ice"},
+	{Level = 14, Name = "Mabufu", Cost = 10, UsesHP = false, Icon = "frost"},
 	{Level = 11, Name = "Skull Cracker", Cost = 9, UsesHP = true, Icon = "phys"},
-	{Level = 7, Name = "Bufu", Cost = 4, UsesHP = false, Icon = "ice"}
+	{Level = 7, Name = "Bufu", Cost = 4, UsesHP = false, Icon = "frost"}
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.LegendaryMaterials = {}

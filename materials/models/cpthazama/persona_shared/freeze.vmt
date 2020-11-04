@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona_shared/freeze"
+
+	"$nocull" 1
+	"$translucent" 1
+}

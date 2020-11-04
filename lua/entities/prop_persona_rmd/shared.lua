@@ -54,6 +54,12 @@ function ENT:PlaySet(skill,name,rate,cycle)
 		if IsValid(self.User) && self.User:IsNPC() && self.User.OnPersonaAnimation then
 			self.User:OnPersonaAnimation(self,skill or "BLANK",tbName or "N/A",nil,0)
 		end
-		return name == "range_end" && self:GetSequenceDuration(self,self.Animations["range"]) *1.5 or 0
+		local t = name == "range_end" && self:GetSequenceDuration(self,self.Animations["range"]) *1.5 or 0
+		timer.Simple(t -0.01,function()
+			if IsValid(self) then
+				self:FadeIn()
+			end
+		end)
+		return t
 	end
 end

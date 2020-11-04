@@ -105,6 +105,16 @@ P_ADDSKILL({Name = "God's Hand",Cost = 25,UsesHP = true,Icon = "phys"})
 P_ADDSKILL({Name = "One-shot Kill",Cost = 17,UsesHP = true,Icon = "gun"})
 P_ADDSKILL({Name = "Riot Gun",Cost = 24,UsesHP = true,Icon = "gun"})
 
+	-- Frost --
+P_ADDSKILL({Name = "Bufu",Cost = 4,UsesHP = false,Icon = "frost"})
+P_ADDSKILL({Name = "Bufula",Cost = 8,UsesHP = false,Icon = "frost"})
+P_ADDSKILL({Name = "Bufudyne",Cost = 12,UsesHP = false,Icon = "frost"})
+P_ADDSKILL({Name = "Mabufu",Cost = 10,UsesHP = false,Icon = "frost"})
+P_ADDSKILL({Name = "Mabufula",Cost = 16,UsesHP = false,Icon = "frost"})
+P_ADDSKILL({Name = "Mabufudyne",Cost = 22,UsesHP = false,Icon = "frost"})
+P_ADDSKILL({Name = "Diamond Dust",Cost = 48,UsesHP = false,Icon = "frost"})
+P_ADDSKILL({Name = "Ice Age",Cost = 54,UsesHP = false,Icon = "frost"})
+
 	-- Fire --
 P_ADDSKILL({Name = "Agi",Cost = 4,UsesHP = false,Icon = "fire"})
 P_ADDSKILL({Name = "Agidyne",Cost = 12,UsesHP = false,Icon = "fire"})

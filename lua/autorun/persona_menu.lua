@@ -95,6 +95,8 @@ if CLIENT then
 				Panel.PCost:SetText("Cost: " .. tostring(data.Cost))
 				Panel.PHP:SetText(data.UsesHP == 1 && "Uses HP: Yes" or "Uses HP: No")
 				Panel.PIcon:SetImage("hud/persona/png/hud_" .. data.Icon .. ".png")
+				surface.PlaySound("cpthazama/persona4/ui_hover.wav")
+				-- surface.PlaySound("cpthazama/persona4/ui_newskill.wav")
 			end
 			Panel:AddPanel(skill_box_list)
 
@@ -158,9 +160,23 @@ local function persona_addskill(ply)
 		Data.Cost = GetConVarNumber("persona_skill_cost") or 0
 		Data.UsesHP = GetConVarNumber("persona_skill_useshp") == 1 && true or false
 		Data.Icon = GetConVarString("persona_skill_icon") or "unknown"
+		-- if CLIENT then
+			local snd = CreateSound(ply,"cpthazama/persona5/misc/00104.wav")
+			snd:SetSoundLevel(0)
+			snd:Play()
+			snd:ChangeVolume(0.5)
+			local snd = CreateSound(ply,"cpthazama/persona4/ui_newskill.wav")
+			snd:SetSoundLevel(0)
+			snd:Play()
+			snd:ChangeVolume(0.5)
+		-- end
 		if SERVER then
 			if Data.Name == "BLANK" then
 				ply:ChatPrint("Select A Skill First!")
+				local snd = CreateSound(ply,"cpthazama/persona5/misc/00103.wav")
+				snd:SetSoundLevel(0)
+				snd:Play()
+				snd:ChangeVolume(0.5)
 				return
 			end
 			local skill = ents.Create("item_persona_skill")

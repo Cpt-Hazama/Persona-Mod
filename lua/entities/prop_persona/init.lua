@@ -411,6 +411,30 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	if self:GetCard() == "Myriad Truths" then 
 		self:MyriadTruths(ply,persona)
 		return
+	elseif self:GetCard() == "Bufu" then
+		self:Bufu(ply,persona)
+		return
+	elseif self:GetCard() == "Bufula" then
+		self:Bufula(ply,persona)
+		return
+	elseif self:GetCard() == "Bufudyne" then
+		self:Bufudyne(ply,persona)
+		return
+	elseif self:GetCard() == "Mabufu" then
+		self:Mabufu(ply,persona)
+		return
+	elseif self:GetCard() == "Mabufula" then
+		self:Mabufula(ply,persona)
+		return
+	elseif self:GetCard() == "Mabufudyne" then
+		self:Mabufudyne(ply,persona)
+		return
+	elseif self:GetCard() == "Diamond Dust" then
+		self:DiamondDust(ply,persona)
+		return
+	elseif self:GetCard() == "Ice Age" then
+		self:IceAge(ply,persona)
+		return
 	elseif self:GetCard() == "Agi" then
 		self:Agi(ply,persona)
 		return
@@ -1137,6 +1161,46 @@ function ENT:OnKilledEnemy_EXP(ent)
 	local exp = ent:GetNWInt("PXP_EXP")
 	
 	PXP.GiveEXP(ply,exp)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:IceEffect(ent,dmg,scale)
+	local dmg = dmg or DMG_P_HEAVY
+	local snds = {
+		[DMG_P_MINISCULE] = "cpthazama/persona5/skills/0020.wav",
+		[DMG_P_LIGHT] = "cpthazama/persona5/skills/0020.wav",
+		[DMG_P_MEDIUM] = "cpthazama/persona5/skills/0021.wav",
+		[DMG_P_HEAVY] = "cpthazama/persona5/skills/0021.wav",
+		[DMG_P_SEVERE] = "cpthazama/persona5/skills/0022.wav",
+		[DMG_P_COLOSSAL] = "cpthazama/persona5/skills/0022.wav",
+	}
+	local scale = scale or 1
+	local m = ents.Create("prop_vj_animatable")
+	m:SetModel("models/cpthazama/persona5/effects/ice.mdl")
+	m:SetPos(ent:GetPos() +Vector(0,0,-15))
+	m:Spawn()
+	m:SetParent(ent)
+	m:DrawShadow(false)
+	-- m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+	m:ResetSequence("idle")
+	m:SetModelScale((ent:OBBMaxs().z *0.0175) *scale,0.25)
+	m:EmitSound(snds[dmg] or "cpthazama/persona5/skills/0021.wav",80)
+	timer.Simple(0.85,function()
+		if IsValid(ent) && IsValid(self) then
+			if math.random(1,4) == 1 then
+				-- ent:SetFrozen(20) -- No code for this yet!
+				if IsValid(self.User) && self.User:IsPlayer() then
+					self.User:ChatPrint("Inflicted Freeze!")
+				end
+			end
+			ent:EmitSound("cpthazama/persona5/skills/0210.wav",75)
+			self:DealDamage(ent,dmg,DMG_P_ICE,2)
+		end
+	end)
+	timer.Simple(1,function()
+		if IsValid(m) then
+			SafeRemoveEntity(m)
+		end
+	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AgiEffect(ent,dmg,scale)
