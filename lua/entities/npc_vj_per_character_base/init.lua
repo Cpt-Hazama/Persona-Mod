@@ -76,6 +76,9 @@ ENT.Animations["critical_start"] = "critical_start"
 ENT.Animations["critical"] = "critical"
 ENT.Animations["critical_end"] = "critical_end"
 
+ENT.Sounds = {}
+-- ENT.Sounds[CUE_BATTLE_DISADVANTAGE] = {}
+
 ENT.Persona = "izanagi"
 ENT.CriticalDownTime = 10
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -196,6 +199,10 @@ function ENT:ResetLoopAnimation()
 	self.AnimTbl_IdleStand = {self.CurrentIdle}
 	self.NextIdleStandTime = 0
 	-- self.DisableChasingEnemy = false
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PlaySoundCue(cue,vol,pit)
+	VJ_CreateSound(self,self.Sounds[cue],vol or 75,pit or 100)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnAnimEvent(persona,skill,animBlock,seq,t) end

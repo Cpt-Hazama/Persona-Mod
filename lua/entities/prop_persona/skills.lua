@@ -1562,6 +1562,82 @@ function ENT:Agi(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Agilao(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Agilao"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:AgiEffect(ent,DMG_P_MEDIUM)
+						end
+						t = 3
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Inferno(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Inferno"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:AgiEffect(ent,DMG_P_SEVERE,2.75,true)
+						end
+						t = 3
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Agidyne(ply,persona)
 	if !IsValid(ply.Persona_EyeTarget) then
 		return
@@ -1582,6 +1658,41 @@ function ENT:Agidyne(ply,persona)
 							self:AgiEffect(ent,DMG_P_HEAVY)
 						end
 						t = 3
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Maragi(ply,persona)
+	local skill = "Maragi"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) then
+								self:AgiEffect(v,DMG_P_LIGHT)
+							end
+						end
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_end",1)
@@ -1689,10 +1800,51 @@ function ENT:Titanomachia(ply,persona)
 								t = self:PlaySet(skill,"range_idle",1,1)
 								for _,v in pairs(self:FindEnemies(self:GetPos(),2500)) do
 									if IsValid(v) then
-										self:AgiEffect(v,DMG_P_SEVERE,2.5)
+										self:AgiEffect(v,DMG_P_SEVERE,2.75,true)
 									end
 								end
 								t = 4
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:SetTask("TASK_IDLE")
+												self:DoIdle()
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:BlazingHell(ply,persona)
+	local skill = "Blazing Hell"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1,1)
+				timer.Simple(4,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_idle",1,1)
+								for _,v in pairs(self:FindEnemies(self:GetPos(),2500)) do
+									if IsValid(v) then
+										self:AgiEffect(v,DMG_P_SEVERE,2.5,true)
+									end
+								end
+								t = 3.25
 								timer.Simple(t,function()
 									if IsValid(self) then
 										t = self:PlaySet(skill,"range_end",1)

@@ -117,7 +117,10 @@ P_ADDSKILL({Name = "Ice Age",Cost = 54,UsesHP = false,Icon = "frost"})
 
 	-- Fire --
 P_ADDSKILL({Name = "Agi",Cost = 4,UsesHP = false,Icon = "fire"})
+P_ADDSKILL({Name = "Agilao",Cost = 8,UsesHP = false,Icon = "fire"})
 P_ADDSKILL({Name = "Agidyne",Cost = 12,UsesHP = false,Icon = "fire"})
+P_ADDSKILL({Name = "Inferno",Cost = 48,UsesHP = false,Icon = "fire"})
+P_ADDSKILL({Name = "Maragi",Cost = 10,UsesHP = false,Icon = "fire"})
 P_ADDSKILL({Name = "Maragion",Cost = 16,UsesHP = false,Icon = "fire"})
 P_ADDSKILL({Name = "Maragidyne",Cost = 22,UsesHP = false,Icon = "fire"})
 P_ADDSKILL({Name = "Titanomachia",Cost = 34,UsesHP = false,Icon = "fire"})

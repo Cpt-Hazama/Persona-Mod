@@ -438,14 +438,26 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif self:GetCard() == "Agi" then
 		self:Agi(ply,persona)
 		return
+	elseif self:GetCard() == "Inferno" then
+		self:Inferno(ply,persona)
+		return
+	elseif self:GetCard() == "Agilao" then
+		self:Agilao(ply,persona)
+		return
 	elseif self:GetCard() == "Agidyne" then
 		self:Agidyne(ply,persona)
+		return
+	elseif self:GetCard() == "Maragi" then
+		self:Maragi(ply,persona)
 		return
 	elseif self:GetCard() == "Maragidyne" then
 		self:Maragidyne(ply,persona)
 		return
 	elseif self:GetCard() == "Titanomachia" then
 		self:Titanomachia(ply,persona)
+		return
+	elseif self:GetCard() == "Blazing Hell" then
+		self:BlazingHell(ply,persona)
 		return
 	elseif self:GetCard() == "Maragion" then
 		self:Maragion(ply,persona)
@@ -1203,7 +1215,7 @@ function ENT:IceEffect(ent,dmg,scale)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:AgiEffect(ent,dmg,scale)
+function ENT:AgiEffect(ent,dmg,scale,extraFX)
 	-- if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
 		-- continue
 	-- end
@@ -1219,6 +1231,17 @@ function ENT:AgiEffect(ent,dmg,scale)
 	m:ResetSequence("idle")
 	m:SetModelScale((ent:OBBMaxs().z *0.03) *scale,1)
 	m:EmitSound("ambient/fire/ignite.wav",80)
+	if extraFX then
+		local e = ents.Create("prop_vj_animatable")
+		e:SetModel("models/cpthazama/persona5/effects/agi_lava.mdl")
+		e:SetPos(ent:GetPos())
+		e:Spawn()
+		e:SetParent(ent)
+		e:DrawShadow(false)
+		e:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+		e:ResetSequence("idle")
+		-- e:SetModelScale((ent:OBBMaxs().z *0.03) *scale,1)
+	end
 	timer.Simple(1,function()
 		if IsValid(m) then
 			m:EmitSound("cpthazama/persona5/skills/0015.wav",95)
@@ -1239,6 +1262,9 @@ function ENT:AgiEffect(ent,dmg,scale)
 	timer.Simple(3,function()
 		if IsValid(m) then
 			SafeRemoveEntity(m)
+		end
+		if IsValid(e) then
+			SafeRemoveEntity(e)
 		end
 	end)
 end

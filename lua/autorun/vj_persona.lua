@@ -41,9 +41,8 @@ if VJExists == true then
 	
 		-- Persona 4 - Protagonists --
 	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami | Theme: Reach Out To The Truth (Arena Ver.)
+	-- VJ.AddNPC("Chie Satanoka","npc_vj_per_chie",vCat) -- Tomoe | Theme: 
 	VJ.AddNPC("Labrys","npc_vj_per_labrys",vCat) -- Ariadne | Theme: Spirited Girl
-	
-	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat) -- Thanatos | Theme: Whims Of Everyone's Souls
 	-- VJ.AddNPC("Margaret","npc_vj_per_margaret",vCat) -- Yoshitsune | Theme: Electronica In The Velvet Room
 	
 		-- Persona 4 - Antagonists -- 
@@ -53,7 +52,9 @@ if VJExists == true then
 	
 		-- Persona 3 - Protagonists
 	VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
+	-- VJ.AddNPC("Kotone Shiomi","npc_vj_per_kotone",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
 	-- VJ.AddNPC("Yukari Takeba","npc_vj_per_yukari",vCat) -- Isis | Theme: Pink Sniper
+	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat) -- Thanatos | Theme: Whims Of Everyone's Souls
 
 		-- Persona Gamemode Exclusives --
 	-- VJ.AddNPC("Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat .. " - Gamemode")
@@ -63,6 +64,49 @@ if VJExists == true then
 	VJ.AddClientConVar("vj_persona_dancemode",0)
 	VJ.AddClientConVar("vj_persona_dancedifficulty",2)
 	VJ.AddClientConVar("vj_persona_dancevol",60)
+	
+	CUE_BATTLE_DISADVANTAGE = 1
+	CUE_BATTLE_ADVANTAGE = 2
+	CUE_BATTLE_ALLOUTATTACK = 3
+	CUE_BATTLE_ = 4
+	CUE_BATTLE_MELEEATTACK = 21
+	CUE_BATTLE_GETUP = 22
+	CUE_BATTLE_PERSONA_PHYS_A = 23
+	CUE_BATTLE_PERSONA_PHYS_B = 34
+	CUE_BATTLE_PERSONA_PHYS_C = 1004
+	CUE_BATTLE_PERSONA_MAGIC = 24
+	CUE_BATTLE_MISSENEMY_A = 25
+	CUE_BATTLE_MISSENEMY_B = 31
+	CUE_BATTLE_ENEMYRESIST = 26
+	CUE_BATTLE_ENEMYCOUNT_FOUR = 27
+	CUE_BATTLE_ENEMYCOUNT_THREE = 28
+	CUE_BATTLE_ENEMYCOUNT_TWO = 29
+	CUE_BATTLE_ENEMYCOUNT_ONE = 30
+	CUE_BATTLE_ENEMYCOUNT_ONE_B = 66
+	CUE_BATTLE_PERSONA_SUMMON_A = 32
+	CUE_BATTLE_PERSONA_SUMMON_B = 104
+	CUE_BATTLE_PERSONA_SUMMON_C = 80
+	CUE_BATTLE_GIVE_ITEM = 33
+	CUE_BATTLE_KILLENEMY = 35
+	CUE_BATTLE_SELFPAIN_A = 36
+	CUE_BATTLE_SELFPAIN_B = 37
+	CUE_BATTLE_SELFPAIN_C = 50
+	CUE_BATTLE_DEATH = 38
+	CUE_BATTLE_CRITICAL_ENTER = 39
+	CUE_BATTLE_DODGE = 51
+	CUE_BATTLE_BATON_OTHER = 52
+	CUE_BATTLE_BATON_SELF = 53
+	CUE_BATTLE_ASSISTBRAINWASH_START = 64
+	CUE_BATTLE_ASSISTBRAINWASH = 65
+	CUE_BATTLE_HEAL_RECIEVE = 81
+	CUE_BATTLE_FINISH = 82
+	CUE_BATTLE_LEVELUP = 85
+	CUE_BATTLE_PLAYERTURN_IDLE = 1001
+	CUE_BATTLE_SKILL_TAUNT = 1003
+	CUE_BATTLE_HITENEMY = 1007
+	CUE_BATTLE_ENEMYRESIST_GUN = 1008
+	CUE_BATTLE_ACCEPTCOMMAND = 1022
+	CUE_BATTLE_OPEN_SKILLMENU = 104
 	
 	function VJ_AddSound(sName,sSound,iLevel)
 		sound.Add({
