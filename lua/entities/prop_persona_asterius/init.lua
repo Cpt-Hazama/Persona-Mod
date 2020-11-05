@@ -70,6 +70,13 @@ function ENT:GetIdlePosition(ply)
 	return ply:GetPos() +ply:GetForward() *-350
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnRunDamageCode(dmginfo,pos,hitEnts)
+	if self:GetAnimation() == self.Animations["melee"] then
+		util.ScreenShake(self:GetPos(),16,100,3,4000)
+		sound.Play("cpthazama/persona4/labrys/sfx/asterius_impact.wav",pos,110)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(owner)	
 	self:UserSound("cpthazama/persona5/joker/0025.wav",75,100)
 	

@@ -224,6 +224,8 @@ function ENT:GetIdlePosition(ply)
 	return ply:GetPos() +ply:GetForward() *25
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnRunDamageCode(dmginfo,pos,hitEnts) end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaThink_NPC(ply,persona) end
@@ -1146,6 +1148,7 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 		self:EmitSound("npc/zombie/claw_miss1.wav",math.random(50,65),math.random(100,125))
 		if self.CustomOnMissEntity then self:CustomOnMissEntity() end
 	end
+	self:OnRunDamageCode(doactualdmg,attackPos,hitEnts)
 	return hitEnts
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1240,6 +1243,7 @@ function ENT:AgiEffect(ent,dmg,scale,extraFX)
 		e:DrawShadow(false)
 		e:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 		e:ResetSequence("idle")
+		m:DeleteOnRemove(e)
 		-- e:SetModelScale((ent:OBBMaxs().z *0.03) *scale,1)
 	end
 	timer.Simple(1,function()
@@ -1260,12 +1264,8 @@ function ENT:AgiEffect(ent,dmg,scale,extraFX)
 		end
 	end)
 	timer.Simple(3,function()
-		if IsValid(m) then
-			SafeRemoveEntity(m)
-		end
-		if IsValid(e) then
-			SafeRemoveEntity(e)
-		end
+		SafeRemoveEntity(m)
+		SafeRemoveEntity(e)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
