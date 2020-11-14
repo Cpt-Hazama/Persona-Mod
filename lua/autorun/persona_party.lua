@@ -332,6 +332,7 @@ if CLIENT then
 
 	hook.Add("EntityRemoved","Persona_Party_NPC",function(ent)
 		local ply = LocalPlayer()
+		if !IsValid(ply) then return end
 		if ent:IsNPC() && ply:GetParty() then
 			if VJ_HasValue(ply.Persona_Party,ent) then
 				ply:RemoveFromParty(ent)
@@ -339,10 +340,36 @@ if CLIENT then
 			end
 		end
 	end)
+	
+	local function HSL(h,s,l)
+		h = h %256
+		if s == 0 then 
+			return Color(l,l,l)
+		end
+		h, s, l = h /256 *6, s /255, l /255
+		local c = (1 -math.abs(2 *l -1)) *s
+		local x = (1 - math.abs(h %2 -1)) *c
+		local m, r, g, b = (l -0.5 *c),0,0,0
+		if h < 1 then 
+			r,g,b = c,x,0
+		elseif h < 2 then
+			r,g,b = x,c,0
+		elseif h < 3 then
+			r,g,b = 0,c,x
+		elseif h < 4 then
+			r,g,b = 0,x,c
+		elseif h < 5 then
+			r,g,b = x,0,c
+		else
+			r,g,b = c,0,x
+		end
+		return Color(math.ceil((r +m) *256),math.ceil((g +m) *256),math.ceil((b +m) *256))
+	end
 
+	local color = Color
 	hook.Add("HUDPaint","Persona_HUD_Party",function()
 		local ply = LocalPlayer()
-		local persona = ply:GetNWEntity("PersonaEntity")
+		local persona = ply:GetNW2Entity("PersonaEntity")
 
 		if #ply:GetParty() <= 0 then
 			return
@@ -383,83 +410,137 @@ if CLIENT then
 
 		local function Persona_DrawHUD(ply,memberCount,memberPos,leader)
 			if IsValid(ply) then
+				local personaEnt = ply:GetNW2Entity("PersonaEntity")
 				local hp = ply:Health()
 				local hpMax = ply:GetMaxHealth()
 				local sp = ply:GetSP()
 				local spMax = ply:GetMaxSP()
-				local lvl = ply:GetNWInt("PXP_Level")
-				local persona = ply:IsPlayer() && PERSONA[ply:GetNWString("PersonaName")].Name or (ply:GetPersonaName() && PERSONA[ply:GetPersonaName()] && PERSONA[ply:GetPersonaName()].Name or ply:GetPersonaName() or "BLANK")
+				local usesHP = IsValid(personaEnt) && personaEnt:GetNW2Bool("SpecialAttackUsesHP") or false
+				local cost = IsValid(personaEnt) && personaEnt:GetNW2Int("SpecialAttackCost") or 0
+				local lvl = ply:GetNW2Int("PXP_Level")
+				local persona = ply:IsPlayer() && PERSONA[ply:GetNW2String("PersonaName")].Name or (ply:GetPersonaName() && PERSONA[ply:GetPersonaName()] && PERSONA[ply:GetPersonaName()].Name or ply:GetPersonaName() or "BLANK")
 
 				local corners = 1
-				local posX = 275
+				local posX = 340
 				-- local posY = math.ceil(memberPos +30 +(memberPos *0.75 +15) *(memberCount -1))
-				local posY = 1150 -((110 *memberCount))
-				local len = 250
+				local posY = 1450 -((110 *memberCount))
+				local len = posX -15
 				local height = 100
 				local colM = 35
-				local color = Color(colM,colM,colM,255)
 				local boxX = posX
 				local boxHeight = posY
-				draw.RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,color)
+				draw.RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,color(colM,colM,colM,255))
+
+				if ply.csp_lerp_hp == nil then
+					ply.csp_lerp_hp = 1
+					ply.csp_lerp_sp = 1
+				end
+				ply.csp_lerp_hp = Lerp(5 *FrameTime(), ply.csp_lerp_hp, hp)
+				ply.csp_lerp_sp = Lerp(5 *FrameTime(), ply.csp_lerp_sp, sp)
+				local perHPB = ply.csp_lerp_hp *100 /hpMax
+				local perSPB = ply.csp_lerp_sp *100 /spMax
 				
-				Persona_DrawAvatar(ply,60,boxX,boxHeight,leader)
+				Persona_DrawAvatar(ply,90,boxX -5,boxHeight -5,leader)
 
-				local text = ply:IsPlayer() && ply:Nick() or language.GetPhrase(ply:GetClass())
-				local posX = boxX -5
-				local posY = boxHeight -68
-				local color = Color(248,60,64,255)
-				draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+				local r,g,b = 107, 255, 222
+				local posX = boxX -105
+				local posY = posY -5
+				local len = posX -25
+				local height = 20
 
-				local text = persona
-				local posX = boxX -len +180
-				local posY = boxHeight -10
-				local color = Color(0,100,255,255)
-				draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+				// HP Bar
+				local f = math.Clamp(perHPB *0.01 *len,0,len)
+				draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, len, height, color(0, 0, 0, 150))
+				draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, f, height, color(r, g, b, 255))
+				
+				r,g,b = 255, 101, 239
+				if usesHP then
+					r,g,b = 107, 255, 222
+				end
+				local posX = boxX -105
+				local posY = posY -25
+				local len = posX -25
+				local height = 20
 
-				local text = "HP:"
-				local posX = boxX -len +100
-				local posY = boxHeight -45
-				local color = Color(33,200,0,255)
-				draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+				// SP Bar
+				draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, len, height, color(0, 0, 0, 150))
+				draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, math.Clamp(perSPB *0.01 *len,0,len), height, color(r, g, b, 255))
 
-				local text = hp < 1000 && hp or "999"
-				local posX = boxX -len +50
-				local posY = boxHeight -45
-				local color = Color(33,200,0,255)
-				draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+				r,g,b = 200, 0, 0
+				local text = "Level " .. lvl
+				local posX = boxX -105
+				local posY = posY -30
+				local canShowXP = true
+				if lvl == 99 then
+					text = "MAX"
+					local rgb = HSL((RealTime() *150 -(0 *15)),128,128)
+					r,g,b = rgb.r, rgb.g, rgb.b
+					canShowXP = false
+				end
+				draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 
-				local text = "SP:"
-				local posX = boxX -len +99
-				local posY = boxHeight -70
-				local color = Color(200,0,255,255)
-				draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+				-- r,g,b = 200, 0, 0
+				-- local text = ply:IsPlayer() && ply:Nick() or language.GetPhrase(ply:GetClass())
+				-- local posX = boxX -105
+				-- local posY = posY -40
+				-- draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 
-				local text = sp
-				local posX = boxX -len +50
-				local posY = boxHeight -70
-				local color = Color(200,0,255,255)
-				draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+				-- local text = ply:IsPlayer() && ply:Nick() or language.GetPhrase(ply:GetClass())
+				-- local posX = boxX -5
+				-- local posY = boxHeight -68
+				-- local color = Color(248,60,64,255)
+				-- draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
 
-				local text = "LVL " .. lvl
-				local posX = boxX -len +180
-				local posY = boxHeight -40
-				local color = Color(200,0,255,255)
-				draw.SimpleText(text,"Persona_Small",ScrW() -posX,ScrH() -posY,color)
+				-- local text = persona
+				-- local posX = boxX -len +180
+				-- local posY = boxHeight -10
+				-- local color = Color(0,100,255,255)
+				-- draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+
+				-- local text = "HP:"
+				-- local posX = boxX -len +100
+				-- local posY = boxHeight -45
+				-- local color = Color(33,200,0,255)
+				-- draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+
+				-- local text = hp < 1000 && hp or "999"
+				-- local posX = boxX -len +50
+				-- local posY = boxHeight -45
+				-- local color = Color(33,200,0,255)
+				-- draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+
+				-- local text = "SP:"
+				-- local posX = boxX -len +99
+				-- local posY = boxHeight -70
+				-- local color = Color(200,0,255,255)
+				-- draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+
+				-- local text = sp
+				-- local posX = boxX -len +50
+				-- local posY = boxHeight -70
+				-- local color = Color(200,0,255,255)
+				-- draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color)
+
+				-- local text = "LVL " .. lvl
+				-- local posX = boxX -len +180
+				-- local posY = boxHeight -40
+				-- local color = Color(200,0,255,255)
+				-- draw.SimpleText(text,"Persona_Small",ScrW() -posX,ScrH() -posY,color)
 			end
 		end
 
 		local memberCount = 0
 		local memberPos = 950
 		for _,v in pairs(ply:GetParty()) do
-			if v:IsPlayer() then
+			if type(v) != "string" && v:IsNPC() then
+				memberCount = memberCount +1
+				Persona_DrawHUD(v,memberCount,memberPos,ply)
+			else
 				local member = player.GetByUniqueID(v)
 				if member then
 					memberCount = memberCount +1
 					Persona_DrawHUD(member,memberCount,memberPos,ply)
 				end
-			else
-				memberCount = memberCount +1
-				Persona_DrawHUD(v,memberCount,memberPos,ply)
 			end
 		end
 	end)

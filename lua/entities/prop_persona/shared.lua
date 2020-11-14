@@ -12,7 +12,8 @@ ENT.AdminOnly = false
 ENT.AutomaticFrameAdvance = true
 
 ENT.IsPersona = true
-ENT.ControlType = 1 -- 1 = Follow User, 2 = User Controls
+
+ENT.AllowFading = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	util.AddNetworkString("Persona_SetName")
@@ -83,8 +84,41 @@ if CLIENT then
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:FadeIn()
+	self:SetRenderMode(RENDERMODE_TRANSADD)
+	-- self:SetRenderFX(kRenderFxSolidSlow)
+	self:SetKeyValue("RenderFX",kRenderFxSolidSlow)
+	-- self:SetColor(Color(255,255,255,255))
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:FadeOut()
+	self:SetRenderMode(RENDERMODE_TRANSADD)
+	self:SetKeyValue("RenderFX",kRenderFxFadeSlow)
+	-- self:SetRenderFX(kRenderFxFadeSlow)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PlaySet(skill,name,rate,cycle)
 	local seq = self.Animations[name]
+	if self.AllowFading then
+		if name == "idle" then
+			self:FadeIn()
+		end
+		if name == "melee" then
+			timer.Simple(self:GetSequenceDuration(self,self.Animations["melee"]) *0.65,function()
+				if IsValid(self) then self:FadeOut() end
+			end)
+		end
+		if name == "range_end" then
+			-- self:FadeOut()
+			local t = self:GetSequenceDuration(self,seq)
+			timer.Simple(t *0.3,function()
+				if IsValid(self) then self:FadeOut() end
+			end)
+			timer.Simple(t -0.01,function()
+				if IsValid(self) then self:FadeIn() end
+			end)
+		end
+	end
 	return self:PlayAnimation(seq,rate,cycle,name,skill)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------

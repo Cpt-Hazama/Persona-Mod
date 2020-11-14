@@ -28,7 +28,7 @@ hook.Add("StartCommand","Persona_ControlBotAI",function(ply,cmd)
 			-- ent:DoIdle()
 			-- ent:OnSummoned(ply)
 			-- ent:CheckCards()
-			-- ply:SetNWEntity("PersonaEntity",ent)
+			-- ply:SetNW2Entity("PersonaEntity",ent)
 			-- ent:SetFeedName(PERSONA[ply:GetPersonaName()].Name,class)
 
 			-- local exp = PXP.GetPersonaData(ply,1)

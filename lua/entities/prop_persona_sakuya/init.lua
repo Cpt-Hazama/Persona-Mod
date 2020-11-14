@@ -56,5 +56,5 @@ function ENT:OnSummoned(owner)
 	self:SetCard("Cleave",true)
 
 	local v = {forward=-250,right=120,up=100}
-	self.User:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	self.User:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end

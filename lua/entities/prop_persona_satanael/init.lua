@@ -80,7 +80,7 @@ function ENT:OnSummoned(ply)
 	self:SetCard("Riot Gun",true)
 
 	local v = {forward=-600,right=300,up=300}
-	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	ply:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

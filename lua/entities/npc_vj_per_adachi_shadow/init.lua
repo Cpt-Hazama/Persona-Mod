@@ -35,8 +35,8 @@ function ENT:PersonaInit()
 	self.WeaponSpread = 1
 
 	for _,v in pairs(player.GetAll()) do
-		if !IsValid(v:GetNWEntity("VJ_Persona_ShadowBoss")) then
-			v:SetNWEntity("VJ_Persona_ShadowBoss",self)
+		if !IsValid(v:GetNW2Entity("VJ_Persona_ShadowBoss")) then
+			v:SetNW2Entity("VJ_Persona_ShadowBoss",self)
 		end
 	end
 
@@ -62,8 +62,8 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnRemove()
 	for _,v in pairs(player.GetAll()) do
-		if IsValid(v:GetNWEntity("VJ_Persona_ShadowBoss")) && v:GetNWEntity("VJ_Persona_ShadowBoss") == self then
-			v:SetNWEntity("VJ_Persona_ShadowBoss",NULL)
+		if IsValid(v:GetNW2Entity("VJ_Persona_ShadowBoss")) && v:GetNW2Entity("VJ_Persona_ShadowBoss") == self then
+			v:SetNW2Entity("VJ_Persona_ShadowBoss",NULL)
 		end
 	end
 end

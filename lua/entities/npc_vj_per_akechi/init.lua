@@ -7,7 +7,7 @@ include('shared.lua')
 -----------------------------------------------*/
 ENT.Model = {"models/cpthazama/persona5/akechi_royal.mdl"} -- The game will pick a random model from the table when the SNPC is spawned | Add as many as you want 
 ENT.Stats = {
-	HP = 5000,
+	HP = 10000, // 5000
 	SP = 999,
 	STR = 80,
 	MAG = 30,
@@ -21,81 +21,192 @@ ENT.HasDeathAnimation = true
 ENT.CanRespawn = true
 
 ENT.SoundTbl_CombatIdle = {
-	"cpthazama/persona5/akechi/00000_streaming [1].wav",
-	"cpthazama/persona5/akechi/00018_streaming [1].wav",
-	"cpthazama/persona5/akechi/00021_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00000_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00005_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00007_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00013_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00015_streaming [1].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [134].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [136].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [14].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [151].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [152].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [153].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [156].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [157].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [158].wav",
 }
-ENT.SoundTbl_Pain = {
-	"cpthazama/persona5/akechi/blackmask/00009_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00011_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00012_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00023_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00024_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00030_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00031_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/pain01.wav",
-	"cpthazama/persona5/akechi/blackmask/pain02.wav",
-	"cpthazama/persona5/akechi/blackmask/pain03.wav",
-	"cpthazama/persona5/akechi/blackmask/pain04.wav",
-	"cpthazama/persona5/akechi/blackmask/pain05.wav",
-	"cpthazama/persona5/akechi/blackmask/pain06.wav",
-	"cpthazama/persona5/akechi/blackmask/pain07.wav",
+ENT.SoundTbl_Alert = {
+	"cpthazama/vo/akechi/blackmask/bp09_01 [134].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [136].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [153].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [154].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [155].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [156].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [157].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [180].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [181].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [192].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [195].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [196].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [208].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [209].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [211].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [212].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [221].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [223].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [2].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [43].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [6].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [74].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [8].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [9].wav",
 }
 ENT.SoundTbl_Death = {
-	"cpthazama/persona5/akechi/blackmask/00018_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00019_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00020_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00026_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/pain09.wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [59].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [63].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [90].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [91].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [92].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [93].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [94].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [95].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [96].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [98].wav",
 }
-ENT.SoundTbl_CallForMedic = {"cpthazama/persona5/akechi/blackmask/callforhelp01.wav"}
+ENT.SoundTbl_CallForMedic = {"cpthazama/vo/akechi/blackmask/bp09_01 [99].wav"}
 ENT.SoundTbl_OnKilledEnemy = {
-	"cpthazama/persona5/akechi/blackmask/00000_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00013_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00014_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00016_streaming [1].wav",
-	"cpthazama/persona5/akechi/00007_streaming [1].wav",
-	"cpthazama/persona5/akechi/00008_streaming [1].wav",
-	"cpthazama/persona5/akechi/00009_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/kill01.wav",
-	"cpthazama/persona5/akechi/blackmask/kill02.wav",
-	"cpthazama/persona5/akechi/blackmask/kill03.wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [164].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [165].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [166].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [167].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [168].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [187].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [193].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [194].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [197].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [198].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [199].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [200].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [201].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [202].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [213].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [214].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [30].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [78].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [79].wav",
 }
 ENT.SoundTbl_Dodge = {
-	"cpthazama/persona5/akechi/blackmask/00011_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00015_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00017_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00021_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00022_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/dodge01.wav",
-	"cpthazama/persona5/akechi/blackmask/dodge02.wav",
-	"cpthazama/persona5/akechi/blackmask/dodge03.wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [114].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [115].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [116].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [117].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [118].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [140].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [97].wav",
 }
 ENT.SoundTbl_Persona = {
-	"cpthazama/persona5/akechi/blackmask/00010_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00028_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00029_streaming [1].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [127].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [13].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [151].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [152].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [224].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [64].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [65].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [66].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [67].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [68].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [75].wav",
 }
 ENT.SoundTbl_PersonaAttack = {
-	"cpthazama/persona5/akechi/blackmask/00003_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00004_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00005_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00006_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00007_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00008_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/melee01.wav",
-	"cpthazama/persona5/akechi/blackmask/melee02.wav",
-	"cpthazama/persona5/akechi/blackmask/melee03.wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [175].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [177].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [223].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [22].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [23].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [25].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [27].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [28].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [31].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [32].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [33].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [34].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [35].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [36].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [37].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [38].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [39].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [40].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [76].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [77].wav",
 }
 ENT.SoundTbl_GetUp = {
-	"cpthazama/persona5/akechi/blackmask/00009_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00025_streaming [1].wav",
-	"cpthazama/persona5/akechi/blackmask/00027_streaming [1].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [143].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [170].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [171].wav",
+}
+ENT.SoundTbl_MedicReceiveHeal = {
+	"cpthazama/vo/akechi/blackmask/bp09_01 [161].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [162].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [163].wav",
+}
+ENT.SoundTbl_OnReceiveOrder = {
+	"cpthazama/vo/akechi/blackmask/bp09_01 [144].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [145].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [146].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [147].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [148].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [149].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [14].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [150].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [158].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [210].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [217].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [218].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [219].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [220].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [221].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [5].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [62].wav",
+}
+ENT.SoundTbl_IdleDialogueAnswer = {
+	"cpthazama/vo/akechi/blackmask/bp09_01 [119].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [11].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [120].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [128].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [135].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [138].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [139].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [141].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [145].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [156].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [169].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [172].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [173].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [174].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [182].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [183].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [184].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [185].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [186].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [188].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [189].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [190].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [191].wav",
+}
+ENT.SoundTbl_SwitchFaction_Good = {
+	"cpthazama/vo/akechi/blackmask/bp09_01 [122].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [125].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [132].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [133].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [130].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [12].wav",
+}
+ENT.SoundTbl_SwitchFaction_Evil = {
+	"cpthazama/vo/akechi/blackmask/bp09_01 [11].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [123].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [124].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [127].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [128].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [131].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [134].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [135].wav",
+	"cpthazama/vo/akechi/blackmask/bp09_01 [136].wav",
 }
 
 util.AddNetworkString("vj_persona_hud_akechi")
@@ -120,50 +231,64 @@ ENT.Persona = "loki"
 function ENT:CustomOnTakeDamage_AfterDamage(dmginfo,hitgroup)
 	local t = dmginfo:GetDamageType()
 	local tbl = {
-		"cpthazama/persona5/akechi/blackmask/00009_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00011_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00012_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00023_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00024_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00030_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00031_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/pain01.wav",
-		"cpthazama/persona5/akechi/blackmask/pain02.wav",
-		"cpthazama/persona5/akechi/blackmask/pain03.wav",
-		"cpthazama/persona5/akechi/blackmask/pain04.wav",
-		"cpthazama/persona5/akechi/blackmask/pain05.wav",
-		"cpthazama/persona5/akechi/blackmask/pain06.wav",
-		"cpthazama/persona5/akechi/blackmask/pain07.wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [109].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [10].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [110].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [111].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [112].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [113].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [178].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [179].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [80].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [81].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [82].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [83].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [84].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [85].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [86].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [87].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [88].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [89].wav",
 	}
 	
 	if math.random(1,2) == 1 then
 		if t == DMG_P_PSI then
 			tbl = {
-				"cpthazama/persona5/akechi/blackmask/pain_dizzy.wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [104].wav",
 			}
 		elseif t == DMG_P_ELEC || t == DMG_SHOCK then
 			tbl = {
-				"cpthazama/persona5/akechi/blackmask/pain_elec.wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [15].wav",
 			}
 		elseif t == DMG_P_SEAL then
 			tbl = {
-				"cpthazama/persona5/akechi/blackmask/pain_seal.wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [106].wav",
 			}
 		elseif t == DMG_P_ICE || t == DMG_P_FROST || t == DMG_FROST || t == DMG_FREEZE then
 			tbl = {
-				"cpthazama/persona5/akechi/blackmask/pain_ice.wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [101].wav",
 			}
 		elseif t == DMG_P_FIRE || t == DMG_P_BURN || t == DMG_BURN then
 			tbl = {
-				"cpthazama/persona5/akechi/blackmask/pain_fire.wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [100].wav",
 			}
 		elseif t == DMG_P_FEAR then
 			tbl = {
-				"cpthazama/persona5/akechi/blackmask/pain_fear.wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [105].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [17].wav",
 			}
-		elseif t == DMG_P_SLEEP || t == DMG_P_PARALYZE then
+		elseif t == DMG_P_SLEEP then
 			tbl = {
-				"cpthazama/persona5/akechi/blackmask/pain_sleep.wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [103].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [107].wav",
+			}
+		elseif t == DMG_P_BRAINWASH then
+			tbl = {
+				"cpthazama/vo/akechi/blackmask/bp09_01 [108].wav",
+			}
+		elseif t == DMG_POISON || t == DMG_P_PARALYZE then
+			tbl = {
+				"cpthazama/vo/akechi/blackmask/bp09_01 [102].wav",
 			}
 		end
 	end
@@ -204,6 +329,7 @@ function ENT:ChangeFaction(bEvil)
 				end
 			end
 		end
+		VJ_CreateSound(self,self.SoundTbl_SwitchFaction_Evil,75)
 		self.VJ_NPC_Class = {"CLASS_PLAYER_ALLY","CLASS_PHANTOMTHIEVES"}
 		self.Animations["idle_combat"] = ACT_IDLE
 		self.IsGood = true
@@ -220,6 +346,7 @@ function ENT:ChangeFaction(bEvil)
 				end
 			end
 		end
+		VJ_CreateSound(self,self.SoundTbl_SwitchFaction_Good,75)
 		self.VJ_NPC_Class = {"CLASS_BLACKMASK","CLASS_SHIDO"}
 		self.Animations["idle_combat"] = ACT_IDLE_ANGRY
 		self.IsGood = false

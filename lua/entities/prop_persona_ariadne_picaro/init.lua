@@ -25,28 +25,28 @@ function ENT:HandleEvents(skill,animBlock,seq,t)
 		self:UserSound("cpthazama/persona5/joker/00" .. math.random(23,24) .. ".wav")
 		timer.Simple(1.28,function()
 			if IsValid(self) then
+				self:SetBodygroup(2,1)
 				self:SetBodygroup(3,1)
-				self:SetBodygroup(4,1)
 				self:EmitSound("cpthazama/persona5/skills/0222.wav",80)
 			end
 		end)
 		timer.Simple(1.9,function()
 			if IsValid(self) then
+				self:SetBodygroup(2,0)
 				self:SetBodygroup(3,0)
-				self:SetBodygroup(4,0)
 			end
 		end)
 	end
 	if animBlock == "range_start" then
 		timer.Simple(1.7,function()
 			if IsValid(self) then
-				self:SetBodygroup(2,1)
+				self:SetBodygroup(1,1)
 				self:EmitSound("cpthazama/persona5/skills/0375.wav",80)
 			end
 		end)
 		timer.Simple(2.3,function()
 			if IsValid(self) then
-				self:SetBodygroup(2,0)
+				self:SetBodygroup(1,0)
 			end
 		end)
 	end
@@ -95,7 +95,7 @@ function ENT:OnSummoned(owner)
 	self:SetCard("Beast Weaver",true)
 
 	local v = {forward=-200,right=80,up=50}
-	self.User:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	self.User:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()

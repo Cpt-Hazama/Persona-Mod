@@ -5,6 +5,7 @@ ENT.Model = "models/cpthazama/persona5/persona/loki.mdl"
 ENT.Name = "Loki"
 ENT.Aura = "jojo_aura_red"
 ENT.DamageTypes = DMG_P_PHYS
+ENT.ShadowVariant = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.Animations = {}
 ENT.Animations["idle"] = "idle"
@@ -101,14 +102,14 @@ function ENT:GetAttackPosition()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnHitEntity(entities,dmginfo)
-	for _,v in pairs(entities) do
-		if IsValid(v) then
-			VJ_EmitSound(v,"cpthazama/persona5/misc/00050.wav",75)
-			if v:Health() > 0 then
-				self:Curse(v,10,5)
-			end
-		end
-	end
+	-- for _,v in pairs(entities) do
+		-- if IsValid(v) then
+			-- VJ_EmitSound(v,"cpthazama/persona5/misc/00050.wav",75)
+			-- if v:Health() > 0 then
+				-- self:Curse(v,10,5)
+			-- end
+		-- end
+	-- end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
@@ -152,9 +153,13 @@ function ENT:OnSummoned(owner)
 	self:SetModel(self.Model)
 	if owner:IsNPC() then VJ_CreateSound(owner,owner.SoundTbl_Persona,78) end
 	self:UserSound(VJ_PICK({
-		"cpthazama/persona5/akechi/blackmask/00028_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00029_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00027_streaming [1].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [159].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [158].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [156].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [160].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [13].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [151].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [152].wav",
 	}),80)
 	
 	self:AddCard("Laevateinn",25,true,"almighty")
@@ -166,16 +171,23 @@ function ENT:OnSummoned(owner)
 
 	self:SetCard("Charge")
 	self:SetCard("Laevateinn",true)
+	
+	if self.ShadowVariant then
+		self:SetSubMaterial(0,"models/cpthazama/persona5/loki/loki_shadow")
+	end
 
 	local v = {forward=-200,right=80,up=50}
-	self.User:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	self.User:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
 	self:UserSound(VJ_PICK({
-		"cpthazama/persona5/akechi/blackmask/00016_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00017_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00015_streaming [1].wav",
-		"cpthazama/persona5/akechi/blackmask/00013_streaming [1].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [137].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [142].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [163].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [164].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [187].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [188].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [190].wav",
 	}),80)
 end

@@ -130,7 +130,7 @@ function ENT:OnSummoned(ply)
 	self:SetCard("Vorpal Blade",true)
 
 	local v = {forward=-125,right=60,up=35}
-	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	ply:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

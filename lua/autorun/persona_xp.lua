@@ -3,9 +3,9 @@ PXP = {}
 PXP.SetEXP = function(ply,xp)
 	if !ply:IsPlayer() then return end
 	local oldXP = PXP.GetEXP(ply)
-	-- ply:SetNWInt("PXP_EXP",xp)
+	-- ply:SetNW2Int("PXP_EXP",xp)
 	PXP.SetPersonaData(ply,1,xp)
-	ply:SetNWInt("PXP_EXP",xp)
+	ply:SetNW2Int("PXP_EXP",xp)
 	if PXP.GetLevel(ply) < 99 && PXP.GetPersonaData(ply,1) >= PXP.GetRequiredXP(ply) then
 		PXP.LevelUp(ply)
 	end
@@ -62,14 +62,14 @@ end
 
 PXP.SetLevel = function(ply,lvl,chat)
 	if !ply:IsPlayer() then return end
-	-- ply:SetNWInt("PXP_Level",lvl)
+	-- ply:SetNW2Int("PXP_Level",lvl)
 	PXP.SetPersonaData(ply,2,lvl)
-	-- if lvl != ply:GetNWInt("PXP_Level") then PXP.CalculateRequiredXP(ply) end
+	-- if lvl != ply:GetNW2Int("PXP_Level") then PXP.CalculateRequiredXP(ply) end
 	if ply:IsPlayer() && chat then
 		ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " is now level " .. lvl)
 		ply:EmitSound("cpthazama/persona4/ui_skillup.wav")
 	end
-	ply:SetNWInt("PXP_Level",lvl)
+	ply:SetNW2Int("PXP_Level",lvl)
 	-- PXP.SavePersonaData(ply)
 end
 
@@ -80,7 +80,7 @@ end
 
 PXP.SetRequiredXP = function(ply,amount)
 	if !ply:IsPlayer() then return end
-	ply:SetNWInt("PXP_RequiredEXP",amount)
+	ply:SetNW2Int("PXP_RequiredEXP",amount)
 	PXP.SetPersonaData(ply,6,amount)
 	-- PXP.SavePersonaData(ply)
 end
@@ -208,7 +208,7 @@ end
 
 PXP.ResetXPStats = function(ply)
 	if !ply:IsPlayer() then return end
-	ply:SetNWInt("PXP_NextEXPChange",CurTime() +1)
+	ply:SetNW2Int("PXP_NextEXPChange",CurTime() +1)
 	PXP.SetEXP(ply,0)
 	PXP.SetLevel(ply,0)
 	PXP.SetRequiredXP(ply,200)
@@ -287,17 +287,17 @@ PXP.SetPersonaData = function(ply,type,val)
 	if name then
 		if type == 1 then -- EXP
 			PXP.WriteFile(dir .. "_" .. ply:GetPersonaName() .. "_EXP.txt",val)
-			ply:SetNWInt("PXP_EXP",val)
+			ply:SetNW2Int("PXP_EXP",val)
 		elseif type == 2 then -- Level
 			PXP.WriteFile(dir .. "_" .. ply:GetPersonaName() .. "_LEVEL.txt",val)
-			ply:SetNWInt("PXP_Level",val)
+			ply:SetNW2Int("PXP_Level",val)
 		elseif type == 3 then -- Skills
 			PXP.WriteTable(dir .. "_" .. ply:GetPersonaName() .. "_SKILLS.txt","Skills",val,true)
 		elseif type == 4 then -- Compendium
 			PXP.WriteTable(dir .. "_COMPENDIUM.txt","Compendium",val,true)
 		elseif type == 6 then -- Req
 			PXP.WriteFile(dir .. "_" .. ply:GetPersonaName() .. "_REQ.txt",val)
-			ply:SetNWInt("PXP_RequiredEXP",val)
+			ply:SetNW2Int("PXP_RequiredEXP",val)
 		elseif type == 7 then -- Stats
 			PXP.WriteTable(dir .. "_" .. ply:GetPersonaName() .. "_STATS.txt","Stats",val,true)
 		elseif type == 8 then -- Legendary/Velvet

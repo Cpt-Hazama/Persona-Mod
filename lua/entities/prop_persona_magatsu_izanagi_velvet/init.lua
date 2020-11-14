@@ -45,18 +45,18 @@ ENT.IsVelvetPersona = true
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Ghostly Wail" then
 		if animBlock == "melee" then
-			self:UserSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
+			self:UserSound("cpthazama/vo/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
 		end
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnHitEntity(hitEnts,dmginfo)
 	-- if dmginfo:GetDamageType() == DMG_P_FEAR then
-		for _,v in pairs(hitEnts) do
-			if IsValid(v) && v:Health() > 0 then
-				self:Fear(v,15)
-			end
-		end
+		-- for _,v in pairs(hitEnts) do
+			-- if IsValid(v) && v:Health() > 0 then
+				-- self:Fear(v,15)
+			-- end
+		-- end
 	-- end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	self:UserSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
+	self:UserSound("cpthazama/vo/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
 
 	self:AddCard("Velvet Mandala",48,false,"almighty")
 	self:AddCard("Ghastly Wail",19,true,"almighty")
@@ -96,7 +96,7 @@ function ENT:OnSummoned(ply)
 	self:SetCard("Ghastly Wail",true)
 
 	local v = {forward=-200,right=80,up=50}
-	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	ply:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

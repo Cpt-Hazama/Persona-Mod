@@ -30,21 +30,23 @@ ENT.Stats = {
 	END = 1, -- Effectiveness of defense
 	AGI = 1, -- Effectiveness of hit and evasion rates
 	LUC = 1, -- Chance of getting a critical
-	WK = {},
-	RES = {},
-	NUL = {},
-	REF = {},
-	ABS = {},
+	WK = {}, -- Weak to
+	RES = {}, -- Resistent to
+	NUL = {}, -- Nullifies
+	REF = {}, -- Reflects
+	ABS = {}, -- Absorbs and converts into health
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.LeveledSkills = {} -- Skills must be place in a specific order! Top of table must be the highest level req. and the last one in the table must be the lowest level req.
 -- ENT.LegendaryMaterials = {}
 ENT.IsVelvetPersona = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
-ENT.MovesWithUser = true
-ENT.AuraChance = 2
-ENT.IdleSpeed = 1
-ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB)
+ENT.MovesWithUser = true -- Should it lean when the player moves?
+ENT.AuraChance = 2 -- Obsolete
+ENT.IdleSpeed = 1 -- The playback rate of the idle animation
+ENT.StartMeleeDamageCode = false -- If set to a number, overrides the built-in start timer for melee skills
+ENT.FirstMeleeDamageTime = false -- If set to a number, overrides the built-in initial damage timer for melee skills
+ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB) -- Obsolete
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t) -- Default events, override in your Persona
 	if animBlock == "melee" then
@@ -113,7 +115,7 @@ function ENT:Initialize()
 				end
 				PXP.SetPersonaData(self.User,8,2)
 			end
-			PXP.SetPersonaData(self.User,5,self.User:GetNWString("PersonaName"))
+			PXP.SetPersonaData(self.User,5,self.User:GetNW2String("PersonaName"))
 
 			self:CheckSkillLevel(true)
 			PXP.ManagePersonaStats(self.User)
@@ -232,7 +234,7 @@ function ENT:PersonaThink_NPC(ply,persona) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:IdleAnimationCode(ply)
 	self.CurrentIdle = self.User:IsPlayer() && self.User:Crouching() && "idle_low" or "idle"
-	if self.IsPersonaRMD then self:FadeIn() end
+	if self.AllowFading then self:FadeIn() end
 	if self:GetSequenceName(self:GetSequence()) != self.Animations[self.CurrentIdle] then
 		self:DoIdle()
 	end
@@ -245,7 +247,9 @@ function ENT:OnThink(ply) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DefaultPersonaControls(ply,persona)
 	if ply:IsPlayer() then
-		ply:SetNWEntity("Persona_Target",ply.Persona_EyeTarget)
+		local ent = ply.Persona_EyeTarget
+		ply:SetNW2Entity("Persona_Target",ent)
+		ply:SetNW2Int("Persona_TargetHealth",IsValid(ent) && ent:Health() or 100)
 		-- if ply:KeyReleased(IN_WALK) && CurTime() > self.NextLockOnT then
 			-- if IsValid(ply.Persona_EyeTarget) then
 				-- ply.Persona_EyeTarget = NULL
@@ -400,6 +404,8 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 	elseif melee == "God's Hand" then
 		self:GodsHand(ply,persona)
 		return
+	elseif melee == "Terror Claw" then
+		self:TerrorClaw(ply,persona)
 	else
 		if ply:IsPlayer() && melee then
 			ply:ChatPrint("Sorry, " .. melee .. " has not been programmed yet. It will be available in the future!")
@@ -436,6 +442,30 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		return
 	elseif self:GetCard() == "Ice Age" then
 		self:IceAge(ply,persona)
+		return
+	elseif self:GetCard() == "Psi" then
+		self:Psi(ply,persona)
+		return
+	elseif self:GetCard() == "Psio" then
+		self:Psio(ply,persona)
+		return
+	elseif self:GetCard() == "Psiodyne" then
+		self:Psiodyne(ply,persona)
+		return
+	elseif self:GetCard() == "Mapsi" then
+		self:Mapsi(ply,persona)
+		return
+	elseif self:GetCard() == "Mapsio" then
+		self:Mapsio(ply,persona)
+		return
+	elseif self:GetCard() == "Mapsiodyne" then
+		self:Mapsiodyne(ply,persona)
+		return
+	elseif self:GetCard() == "Psycho Force" then
+		self:PsychoForce(ply,persona)
+		return
+	elseif self:GetCard() == "Psycho Blast" then
+		self:PsychoBlast(ply,persona)
 		return
 	elseif self:GetCard() == "Agi" then
 		self:Agi(ply,persona)
@@ -494,6 +524,12 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif self:GetCard() == "Heat Riser" then
 		self:HeatRiser(ply,persona)
 		return
+	-- elseif self:GetCard() == "Mamudoon" then
+		-- self:Mamudoon(ply,persona)
+		-- return
+	-- elseif self:GetCard() == "Die For Me!" then
+		-- self:DieForMe(ply,persona)
+		-- return
 	elseif self:GetCard() == "Salvation" then
 		self:Salvation(ply,persona)
 		return
@@ -545,6 +581,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif self:GetCard() == "Freila" then
 		self:Freila(ply,persona)
 		return
+	elseif self:GetCard() == "Freidyne" then
+		self:Freidyne(ply,persona)
+		return
 	elseif self:GetCard() == "Kougaon" then
 		self:Kougaon(ply,persona)
 		return
@@ -571,6 +610,12 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		return
 	elseif self:GetCard() == "Ultimate Charge" then
 		self:UltimateCharge(ply,persona)
+		return
+	elseif self:GetCard() == "Terror Claw" then
+		self.CurrentMeleeSkill = self:GetCard()
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
 		return
 	elseif self:GetCard() == "Laevateinn" then
 		self.CurrentMeleeSkill = self:GetCard()
@@ -761,7 +806,7 @@ function ENT:Think()
 				if !self.CurrentCardUsesHP then
 					self.CurrentCardCost = self.CurrentCardCost /2
 				end
-				self:SetNWInt("SpecialAttackCost",self.CurrentCardCost)
+				self:SetNW2Int("SpecialAttackCost",self.CurrentCardCost)
 			end
 		end
 		if self.User:IsPlayer() then
@@ -873,10 +918,10 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetActiveCard(name,cost,useHP,icon,index)
 	cost = (!useHP && (IsValid(self.User) && self.User.Persona_ChaosT && self.User.Persona_ChaosT > CurTime())) && cost *2 or cost
-	self:SetNWString("SpecialAttack",name)
-	self:SetNWInt("SpecialAttackCost",cost)
-	self:SetNWBool("SpecialAttackUsesHP",useHP or false)
-	self:SetNWString("SpecialAttackIcon",icon or "unknown")
+	self:SetNW2String("SpecialAttack",name)
+	self:SetNW2Int("SpecialAttackCost",cost)
+	self:SetNW2Bool("SpecialAttackUsesHP",useHP or false)
+	self:SetNW2String("SpecialAttackIcon",icon or "unknown")
 	self.CurrentCardCost = cost
 	self.CurrentCardUsesHP = useHP
 	self.CurrentCardID = index
@@ -900,16 +945,16 @@ function ENT:SetCard(name,isMelee)
 		end
 	end
 	-- if self.Cards[name] then
-		-- self:SetNWString("SpecialAttack",name)
-		-- self:SetNWInt("SpecialAttackCost",self.Cards[name].Cost)
-		-- self:SetNWBool("SpecialAttackUsesHP",self.Cards[name].UsesHP or false)
+		-- self:SetNW2String("SpecialAttack",name)
+		-- self:SetNW2Int("SpecialAttackCost",self.Cards[name].Cost)
+		-- self:SetNW2Bool("SpecialAttackUsesHP",self.Cards[name].UsesHP or false)
 		-- self.CurrentCardCost = self.Cards[name].Cost
 		-- self.CurrentCardUsesHP = self.Cards[name].UsesHP
 	-- end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetCard()
-	return self:GetNWString("SpecialAttack")
+	return self:GetNW2String("SpecialAttack")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeSP(sp)
@@ -1081,7 +1126,7 @@ function ENT:DealDamage(ent,dmg,dmgtype,type)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
+function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd,inflict,inflictT)
 	local AttackDist = dmgdist
 	local attackPos = self:GetAttackPosition()
 	local FindEnts = ents.FindInSphere(attackPos,AttackDist)
@@ -1095,6 +1140,8 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 	if (self.User:IsNPC() && GetConVarNumber("ai_ignoreplayers") == 1) then
 		checkPlayers = false
 	end
+	inflict = inflict or false
+	inflictT = inflictT or 1
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
 			if (v != self && v != self.User) && (((v:IsNPC() or (checkPlayers && v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
@@ -1121,6 +1168,14 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd)
 					v:TakeDamageInfo(doactualdmg,self.User)
 					if v:IsPlayer() then
 						v:ViewPunch(Angle(math.random(-1,1) *dmg,math.random(-1,1) *dmg,math.random(-1,1) *dmg))
+					end
+					
+					if inflict then
+						if inflict == "Fear" then
+							self:Fear(v,inflictT)
+						elseif inflict == "Curse" then
+							self:Curse(v,inflictT,5)
+						end
 					end
 
 					local effectdata = EffectData()
@@ -1172,8 +1227,8 @@ function ENT:OnKilledEnemy(ent) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnKilledEnemy_EXP(ent)
 	local ply = self.User
-	local level = ent:GetNWInt("PXP_Level")
-	local exp = ent:GetNWInt("PXP_EXP")
+	local level = ent:GetNW2Int("PXP_Level")
+	local exp = ent:GetNW2Int("PXP_EXP")
 	
 	PXP.GiveEXP(ply,exp)
 end
@@ -1266,6 +1321,138 @@ function ENT:AgiEffect(ent,dmg,scale,extraFX)
 	timer.Simple(3,function()
 		SafeRemoveEntity(m)
 		SafeRemoveEntity(e)
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:NuclearEffect(ent,dmg,t,sc)
+	local dmg = dmg or DMG_P_SEVERE
+	local scale = sc or 2.5
+	local time = t or 1
+	time = math.Clamp(time,0.55,time)
+	local m = ents.Create("prop_vj_animatable")
+	m:SetModel("models/cpthazama/persona5/effects/megidolaon.mdl")
+	m:SetPos(ent:GetPos() +Vector(0,0,15))
+	m:Spawn()
+	m:SetColor(Color(0,100,255))
+	m:DrawShadow(false)
+	m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+	m:ResetSequence("idle")
+	m:SetModelScale(scale,time)
+	VJ_CreateSound(m,"cpthazama/persona5/skills/0338.wav",90)
+	-- m:EmitSound("PERSONA_MEGIDOLAON")
+	local Light = ents.Create("light_dynamic")
+	Light:SetKeyValue("brightness","7")
+	Light:SetKeyValue("distance",tostring(30 *scale))
+	Light:SetPos(m:GetPos())
+	Light:Fire("Color","0 100 255")
+	Light:SetParent(m)
+	Light:Spawn()
+	Light:Activate()
+	Light:Fire("TurnOn","",0)
+	Light:Fire("TurnOff","",5)
+	m:DeleteOnRemove(Light)
+	-- timer.Simple(time -0.5,function()
+		-- if IsValid(m) && IsValid(self) then
+			-- local ents = self:FindEnemies(m:GetPos(),30 *scale)
+			-- if ents != nil then
+				-- for _,v in pairs(ents) do
+					-- if IsValid(v) then
+						-- local dmginfo = DamageInfo()
+						-- dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
+						-- dmginfo:SetDamageType(DMG_P_NUCLEAR)
+						-- dmginfo:SetInflictor(IsValid(self) && self or v)
+						-- dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or v)
+						-- dmginfo:SetDamagePosition(m:NearestPoint(v:GetPos() +v:OBBCenter()))
+						-- v:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or v)
+						-- v:EmitSound("cpthazama/persona5/skills/0014.wav",70)
+					-- end
+				-- end
+			-- end
+		-- end
+	-- end)
+	timer.Simple(time -0.5,function()
+		if IsValid(ent) && IsValid(self) then
+			local dmginfo = DamageInfo()
+			dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
+			dmginfo:SetDamageType(DMG_P_NUCLEAR)
+			dmginfo:SetInflictor(IsValid(self) && self or v)
+			dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
+			dmginfo:SetDamagePosition(m:NearestPoint(ent:GetPos() +ent:OBBCenter()))
+			ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)
+			ent:EmitSound("cpthazama/persona5/skills/0230.wav",90)
+		end
+	end)
+	timer.Simple(time,function()
+		if IsValid(m) then
+			SafeRemoveEntity(m)
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PsiEffect(ent,dmg,t,sc,cnt,sound)
+	local dmg = dmg or DMG_P_SEVERE
+	local tbl = {}
+	local scale = sc or 1
+	local count = cnt && math.Clamp(cnt,3,cnt) or 5
+	local time = t or 3
+	local snd = sound or "cpthazama/persona5/skills/0190.wav"
+	time = math.Clamp(time,0.55,time)
+	for i = 1,math.random(3,count) do
+		local m = ents.Create("prop_vj_animatable")
+		m:SetModel("models/cpthazama/persona5/effects/megidolaon.mdl")
+		local cent = ent:GetPos() +ent:OBBCenter()
+		local vec = VectorRand() *math.random(30,60) *i
+		-- if vec.z < ent:GetPos().z then
+			-- vec.z = cent.z
+		-- end
+		m:SetPos(cent +vec)
+		m:SetAngles(Angle(math.random(0,360),math.random(0,360),math.random(0,360)))
+		m:Spawn()
+		m:SetParent(ent)
+		m:SetModelScale(0.01,0)
+		m:SetMaterial("models/cpthazama/persona_shared/psy")
+		m:DrawShadow(false)
+		m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+		m:ResetSequence("idle")
+		m:SetPlaybackRate(math.random(2,6))
+		m:SetModelScale(scale,time /2)
+		VJ_CreateSound(m,"cpthazama/persona5/skills/0190.wav",90)
+		table.insert(tbl,m)
+	end
+	local spawnparticle = ents.Create("info_particle_system")
+	spawnparticle:SetKeyValue("effect_name","vj_per_skill_psy")
+	spawnparticle:SetPos(ent:GetPos())
+	spawnparticle:Spawn()
+	spawnparticle:Activate()
+	spawnparticle:Fire("Start","",0)
+	spawnparticle:Fire("SetParent",ent:GetName())
+	timer.Simple(time *0.75,function()
+		for _,m in pairs(tbl) do
+			if IsValid(m) then
+				m:SetModelScale(0.01,time *0.25)
+				m:EmitSound(snd,90)
+				spawnparticle:Fire("Kill","",0.1)
+			end
+		end
+	end)
+	timer.Simple(time -0.5,function()
+		if IsValid(ent) && IsValid(self) then
+			local dmginfo = DamageInfo()
+			dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
+			dmginfo:SetDamageType(DMG_P_PSI)
+			dmginfo:SetInflictor(IsValid(self) && self or v)
+			dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
+			dmginfo:SetDamagePosition(self:NearestPoint(ent:GetPos() +ent:OBBCenter()))
+			ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)
+			ent:EmitSound("cpthazama/persona5/skills/0190.wav",90)
+		end
+	end)
+	timer.Simple(time,function()
+		for _,m in pairs(tbl) do
+			if IsValid(m) then
+				SafeRemoveEntity(m)
+			end
+		end
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1447,7 +1634,7 @@ function ENT:WhenRemoved() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRemove()
 	if IsValid(self.User) then
-		self.User:SetNWVector("Persona_CustomPos",Vector(0,0,0))
+		self.User:SetNW2Vector("Persona_CustomPos",Vector(0,0,0))
 		self.User:StopParticles()
 
 		local exp = PXP.GetPersonaData(self.User,1)

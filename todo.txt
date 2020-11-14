@@ -1,0 +1,6 @@
+Skills
+	- Revamp Zio skills (make the current ones exclusive to Izanagi Personae)
+	- Add missing skills
+	- Add visual effect for skill range/radius (like Scramble)
+Models
+	- Revamp facial animations on characters

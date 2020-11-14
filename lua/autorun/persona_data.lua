@@ -75,6 +75,16 @@ PERSONA["cendrillon"].Model = "models/cpthazama/persona5/persona/cendrillon.mdl"
 PERSONA["cendrillon"].Aura = "jojo_aura_blue"
 PERSONA["cendrillon"].Name = "Cendrillon"
 
+PERSONA["alice"] = {}
+PERSONA["alice"].Model = "models/cpthazama/persona5/persona/alice.mdl"
+PERSONA["alice"].Aura = "jojo_aura_purple"
+PERSONA["alice"].Name = "Alice"
+
+PERSONA["ariadne"] = {}
+PERSONA["ariadne"].Model = "models/cpthazama/persona5/persona/ariadne.mdl"
+PERSONA["ariadne"].Aura = "jojo_aura_blue"
+PERSONA["ariadne"].Name = "Ariadne"
+
 PERSONA["ariadne_picaro"] = {}
 PERSONA["ariadne_picaro"].Model = "models/cpthazama/persona5/persona/ariadne_picaro.mdl"
 PERSONA["ariadne_picaro"].Aura = "jojo_aura_blue"
@@ -154,6 +164,11 @@ PERSONA["jack"] = {}
 PERSONA["jack"].Model = "models/cpthazama/persona5/persona/jack-o-lantern.mdl"
 PERSONA["jack"].Aura = "jojo_aura_red"
 PERSONA["jack"].Name = "Jack-o-Lantern"
+
+PERSONA["loki_shadow"] = {}
+PERSONA["loki_shadow"].Model = "models/cpthazama/persona5/persona/loki.mdl"
+PERSONA["loki_shadow"].Aura = "jojo_aura_red"
+PERSONA["loki_shadow"].Name = "Loki (Shadow)"
 
 -- PERSONA["hereward"] = {}
 -- PERSONA["hereward"].Model = "models/cpthazama/persona5/persona/hereward.mdl"

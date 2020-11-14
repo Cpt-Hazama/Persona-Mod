@@ -9,7 +9,7 @@ ENT.Category		= "Projectiles"
 if CLIENT then
 	local col = Color(255,229,0)
 	function ENT:Think()
-		local Magatsu = self:GetNWBool("Magatsu")
+		local Magatsu = self:GetNW2Bool("Magatsu")
 		if Magatsu then
 			col = Color(255,0,0)
 		end

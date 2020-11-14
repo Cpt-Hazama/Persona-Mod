@@ -163,9 +163,9 @@ if (CLIENT) then
 	end
 
 	hook.Add("PlayerBindPress", "Persona_DanceViewScroll", function(ply,bind,pressed)
-		local dancer = ply:GetNWEntity("Persona_Dancer")
+		local dancer = ply:GetNW2Entity("Persona_Dancer")
 		if !IsValid(dancer) then return end
-		local mode = ply:GetNWInt("Persona_DanceMode")
+		local mode = ply:GetNW2Int("Persona_DanceMode")
 		if mode == 0 then return end
 
 		local usingController = GetConVarNumber("crosshair") == 1 -- Yeah idk
@@ -182,7 +182,7 @@ if (CLIENT) then
 
 		if mode == 2 then
 			ply.Persona_HitTime = ply.Persona_HitTime or 0
-			-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") or 0)
+			-- ply:SetNW2Int("Persona_Dance_Score",ply:GetNW2Int("Persona_Dance_Score") or 0)
 			ply.Persona_Dance_HitData = ply.Persona_Dance_HitData or {Perfect=0,Great=0,Good=0,Miss=0}
 			ply.Persona_Dance_Score = ply.Persona_Dance_Score or 0
 			ply.Persona_Dance_LastNoteT = ply.Persona_Dance_LastNoteT or 0
@@ -210,14 +210,14 @@ if (CLIENT) then
 						local didHit = false
 						local boost = CurTime() <= ply.Persona_Dance_LastCheerT
 						local mul = boost && 1.5 or 1
-						-- local old = ply:GetNWInt("Persona_Dance_Score")
+						-- local old = ply:GetNW2Int("Persona_Dance_Score")
 						local old = ply.Persona_Dance_Score
 						if tDif <= hPerfect && tDif > hNoMore then -- Perfect
 							ply:EmitSound("cpthazama/persona5_dance/clap_mega.wav")
 							ply:ChatPrint("PERFECT!")
 							didHit = true
 							ply.Persona_Dance_HitData.Perfect = ply.Persona_Dance_HitData.Perfect +1
-							-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") +math.Round(100 *(1 -tDif)))
+							-- ply:SetNW2Int("Persona_Dance_Score",ply:GetNW2Int("Persona_Dance_Score") +math.Round(100 *(1 -tDif)))
 							ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(100 *(1 -tDif)) *mul)
 						elseif tDif > hPerfect && tDif <= hGreat then -- Great
 							ply:EmitSound("cpthazama/persona5_dance/clap_cyl.wav")
@@ -225,14 +225,14 @@ if (CLIENT) then
 							didHit = true
 							ply.Persona_Dance_HitData.Great = ply.Persona_Dance_HitData.Great +1
 							ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(50 *(1 -tDif)) *mul)
-							-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") +math.Round(50 *(1 -tDif)))
+							-- ply:SetNW2Int("Persona_Dance_Score",ply:GetNW2Int("Persona_Dance_Score") +math.Round(50 *(1 -tDif)))
 						elseif tDif > hGreat && tDif <= hGood then -- Good
 							ply:EmitSound("cpthazama/persona5_dance/clap.wav")
 							ply:ChatPrint("GOOD!")
 							didHit = true
 							ply.Persona_Dance_HitData.Good = ply.Persona_Dance_HitData.Good +1
 							ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(25 *(1 -tDif)) *mul)
-							-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") +math.Round(25 *(1 -tDif)))
+							-- ply:SetNW2Int("Persona_Dance_Score",ply:GetNW2Int("Persona_Dance_Score") +math.Round(25 *(1 -tDif)))
 						else
 							ply:EmitSound("cpthazama/persona5/misc/00103.wav")
 							ply:ChatPrint("MISS!")
@@ -267,7 +267,7 @@ if (CLIENT) then
 								ply:EmitSound("cpthazama/persona5_dance/crowd.wav")
 							end
 						end
-						-- ply:ChatPrint("Gained " .. tostring(ply:GetNWInt("Persona_Dance_Score") -old) .. " points!")
+						-- ply:ChatPrint("Gained " .. tostring(ply:GetNW2Int("Persona_Dance_Score") -old) .. " points!")
 						ply:ChatPrint("Gained " .. tostring(ply.Persona_Dance_Score -old) .. " points!")
 					-- else
 						-- ply:EmitSound("cpthazama/persona5/misc/00103.wav")
@@ -311,9 +311,9 @@ if (CLIENT) then
 	local mat = Material("hud/persona/dance/star_b.png")
 	hook.Add("HUDPaint","Persona_DanceViewMode_HUD",function(ply)
 		local ply = LocalPlayer()
-		local dancer = ply:GetNWEntity("Persona_Dancer")
+		local dancer = ply:GetNW2Entity("Persona_Dancer")
 		if !IsValid(dancer) then return end
-		local mode = ply:GetNWInt("Persona_DanceMode")
+		local mode = ply:GetNW2Int("Persona_DanceMode")
 		if mode != 2 then return end
 
 		dancer.Persona_NextNoteT = dancer.Persona_NextNoteT or 0
@@ -321,10 +321,10 @@ if (CLIENT) then
 		ply.Persona_HitTimeTotal = ply.Persona_HitTimeTotal or 0
 		ply.Persona_Dance_Score = ply.Persona_Dance_Score or 0
 		ply.Persona_Dance_HitData = ply.Persona_Dance_HitData or {Perfect=0,Great=0,Good=0,Miss=0}
-		-- ply:SetNWInt("Persona_Dance_Score",ply:GetNWInt("Persona_Dance_Score") or 0)
-		-- ply:SetNWInt("Persona_Dance_HighScore",ply:GetNWInt("Persona_Dance_HighScore") or 0)
-		-- if ply:GetNWInt("Persona_Dance_Score") > ply:GetNWInt("Persona_Dance_HighScore") then
-			-- ply:SetNWInt("Persona_Dance_HighScore",ply:GetNWInt("Persona_Dance_Score"))
+		-- ply:SetNW2Int("Persona_Dance_Score",ply:GetNW2Int("Persona_Dance_Score") or 0)
+		-- ply:SetNW2Int("Persona_Dance_HighScore",ply:GetNW2Int("Persona_Dance_HighScore") or 0)
+		-- if ply:GetNW2Int("Persona_Dance_Score") > ply:GetNW2Int("Persona_Dance_HighScore") then
+			-- ply:SetNW2Int("Persona_Dance_HighScore",ply:GetNW2Int("Persona_Dance_Score"))
 		-- end
 		
 		local function DrawNote(note)
@@ -379,8 +379,8 @@ if (CLIENT) then
 		draw.SimpleText("Greats - " .. hGr,"Persona",ScrW() -350,ScrH() -540 -60,Color(255,0,0))
 		draw.SimpleText("Goods - " .. hG,"Persona",ScrW() -350,ScrH() -500 -60,Color(255,0,0))
 		draw.SimpleText("Misses - " .. hM,"Persona",ScrW() -350,ScrH() -460 -60,Color(255,0,0))
-		-- draw.SimpleText("Score - " .. ply:GetNWInt("Persona_Dance_Score"),"Persona",ScrW() -350,ScrH() -660 -60,Color(255,0,0))
-		-- draw.SimpleText("High Score - " .. ply:GetNWInt("Persona_Dance_HighScore"),"Persona",ScrW() -350,ScrH() -620 -60,Color(255,0,0))
+		-- draw.SimpleText("Score - " .. ply:GetNW2Int("Persona_Dance_Score"),"Persona",ScrW() -350,ScrH() -660 -60,Color(255,0,0))
+		-- draw.SimpleText("High Score - " .. ply:GetNW2Int("Persona_Dance_HighScore"),"Persona",ScrW() -350,ScrH() -620 -60,Color(255,0,0))
 
 
 		if boost then
@@ -406,9 +406,9 @@ if (CLIENT) then
 	local P_LerpVec = Vector(0,0,0)
 	local P_LerpAng = Angle(0,0,0)
 	hook.Add("CalcView","Persona_DanceViewMode",function(ply,pos,angles,fov)
-		local dancer = ply:GetNWEntity("Persona_Dancer")
-		local danceMode = ply:GetNWInt("Persona_DanceMode")
-		local danceBone = ply:GetNWString("Persona_DanceBone")
+		local dancer = ply:GetNW2Entity("Persona_Dancer")
+		local danceMode = ply:GetNW2Int("Persona_DanceMode")
+		local danceBone = ply:GetNW2String("Persona_DanceBone")
 		local enabled = IsValid(dancer) && danceMode != 0 && danceBone
 		if enabled then
 			if IsValid(ply:GetViewEntity()) && ply:GetViewEntity():GetClass() == "gmod_cameraprop" then
@@ -474,7 +474,7 @@ if (CLIENT) then
 		local ply = net.ReadEntity()
 		local me = net.ReadEntity()
 
-		-- ply:SetNWInt("Persona_Dance_Score",0)
+		-- ply:SetNW2Int("Persona_Dance_Score",0)
 		ply.Persona_Dance_Score = 0
 		ply.Persona_Dance_LastNoteT = 0
 		ply.Persona_Dance_HitData = {Perfect=0,Great=0,Good=0,Miss=0}
@@ -498,13 +498,13 @@ if (CLIENT) then
 		local song = self:GetSongName()
 
 		-- local oldData = PXP.GetDanceData(ply,song)
-		-- local s = ply:GetNWInt("Persona_Dance_Score")
-		-- local hs = ply:GetNWInt("Persona_Dance_HighScore")
+		-- local s = ply:GetNW2Int("Persona_Dance_Score")
+		-- local hs = ply:GetNW2Int("Persona_Dance_HighScore")
 		-- if hs && hs > oldData then
 			-- PXP.SaveDanceData(ply,song,s)
 		-- end
-		-- ply:SetNWInt("Persona_Dance_Score",0)
-		-- ply:SetNWInt("Persona_Dance_HighScore",0)
+		-- ply:SetNW2Int("Persona_Dance_Score",0)
+		-- ply:SetNW2Int("Persona_Dance_HighScore",0)
 
 		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == self:GetSong() then
 			local cont = true
@@ -648,9 +648,9 @@ function ENT:Initialize()
 				self:SetPos(self:GetPos() +Vector(0,0,self.HeightOffset))
 				self.ViewMode = GetConVarNumber("vj_persona_dancemode")
 				if self.ViewMode != 0 then
-					self:GetCreator():SetNWEntity("Persona_Dancer",self)
-					self:GetCreator():SetNWInt("Persona_DanceMode",self.ViewMode)
-					self:GetCreator():SetNWString("Persona_DanceBone",self.ViewBone)
+					self:GetCreator():SetNW2Entity("Persona_Dancer",self)
+					self:GetCreator():SetNW2Int("Persona_DanceMode",self.ViewMode)
+					self:GetCreator():SetNW2String("Persona_DanceBone",self.ViewBone)
 					self.Creator = self:GetCreator()
 					self.Creator:Spectate(OBS_MODE_CHASE)
 					self.Creator:SpectateEntity(self)
@@ -758,15 +758,15 @@ function ENT:Think()
 		local t = self:PlayAnimation(anim,1,0,1,anim) +delay +0.1
 		if IsValid(self.Creator) && self.ViewMode == 2 then
 			local ply = self.Creator
-			ply:SetNWInt("Persona_Dance_Score",0)
+			ply:SetNW2Int("Persona_Dance_Score",0)
 			-- local oldData = PXP.GetDanceData(ply,songName)
-			-- local s = ply:GetNWInt("Persona_Dance_Score")
-			-- local hs = ply:GetNWInt("Persona_Dance_HighScore")
+			-- local s = ply:GetNW2Int("Persona_Dance_Score")
+			-- local hs = ply:GetNW2Int("Persona_Dance_HighScore")
 			-- if hs && hs > oldData then
 				-- PXP.SaveDanceData(ply,song,hs)
 			-- end
-			-- ply:SetNWInt("Persona_Dance_Score",0)
-			-- ply:SetNWInt("Persona_Dance_HighScore",0)
+			-- ply:SetNW2Int("Persona_Dance_Score",0)
+			-- ply:SetNW2Int("Persona_Dance_HighScore",0)
 
 			net.Start("Persona_Dance_ModeStart")
 				net.WriteEntity(self.Creator)
@@ -819,9 +819,9 @@ end
 function ENT:OnRemove()
 	SafeRemoveEntity(self.Lamp)
 	if IsValid(self.Creator) then
-		self.Creator:SetNWEntity("Persona_Dancer",NULL)
-		self.Creator:SetNWInt("Persona_DanceMode",0)
-		self.Creator:SetNWString("Persona_DanceBone",nil)
+		self.Creator:SetNW2Entity("Persona_Dancer",NULL)
+		self.Creator:SetNW2Int("Persona_DanceMode",0)
+		self.Creator:SetNW2String("Persona_DanceBone",nil)
 		self.Creator:UnSpectate()
 		self.Creator:KillSilent()
 		self.Creator:Spawn()

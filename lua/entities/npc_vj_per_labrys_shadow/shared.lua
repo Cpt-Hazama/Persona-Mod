@@ -45,7 +45,7 @@ if CLIENT then
 		local entity = self
 		hook.Add("HUDPaint","VJ_Persona_ShadowHUD_Labrys",function()
 			if GetConVarNumber("persona_hud_raidboss") == 0 then return end
-			local ent = LocalPlayer():GetNWEntity("VJ_Persona_ShadowBoss")
+			local ent = LocalPlayer():GetNW2Entity("VJ_Persona_ShadowBoss")
 			if IsValid(ent) && ent == entity then
 				local function line(posX,posY,len,height)
 					draw.RoundedBox(3,ScrW() -posX,ScrH() -posY,len,height,Color(90,0,255,200))
@@ -126,8 +126,9 @@ if CLIENT then
 		local delete = net.ReadBool()
 		local ent = net.ReadEntity()
 		hook.Add("HUDPaint","VJ_Persona_HUD_Labrys_Shadow",function()
+			if !IsValid(ent) then return end
 			local persona = ent:GetPersona()
-			local card = persona:GetNWString("SpecialAttack")
+			local card = (IsValid(persona) && persona:GetNW2String("SpecialAttack")) or "BLANK"
 			local name = ent:GetPersonaName()
 			draw.RoundedBox(1,ScrW() /1.79,ScrH() -120,220,80,Color(0,0,0,150))
 			draw.SimpleText("Persona: " .. string.SetChar(name,1,string.upper(string.sub(name,1,1))),"VJFont_Trebuchet24_SmallMedium",ScrW() /1.75,ScrH() -115,Color(255,255,255,255),0,0)

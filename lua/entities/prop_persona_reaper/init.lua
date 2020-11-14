@@ -75,5 +75,5 @@ function ENT:OnSummoned(owner)
 	self:SetCard("One-shot Kill",true)
 
 	local v = {forward=-400,right=80,up=130}
-	self.User:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	self.User:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end

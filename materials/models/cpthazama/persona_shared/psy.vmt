@@ -1,0 +1,27 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona_shared/psy"
+	
+	"$nocull" "1"
+	"$selfillum" "1"
+
+	"$emissiveBlendEnabled" "1"
+	"$emissiveBlendTexture" "models/cpthazama/persona_shared/psy"
+	"$emissiveBlendBaseTexture" "models/cpthazama/persona_shared/psy"
+	"$emissiveBlendFlowTexture" "models/cpthazama/persona_shared/psy"
+	"$emissiveBlendTint" "[3 3 3]"
+	"$emissiveBlendStrength" "6"
+	"$emissiveBlendScrollVector" "[2 -2]"
+
+	"$phong"				"1"
+	"$phongboost"			"0"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[0 0.15 1]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "200"
+	"$rimmask" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona_shared/psy"
+}

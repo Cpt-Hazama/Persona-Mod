@@ -148,8 +148,12 @@ P_ADDSKILL({Name = "Cosmic Flare",Cost = 54,UsesHP = false,Icon = "nuclear"})
 
 	-- Psi. --
 P_ADDSKILL({Name = "Psi",Cost = 4,UsesHP = false,Icon = "psi"})
+P_ADDSKILL({Name = "Psio",Cost = 8,UsesHP = false,Icon = "psi"})
 P_ADDSKILL({Name = "Psiodyne",Cost = 12,UsesHP = false,Icon = "psi"})
+P_ADDSKILL({Name = "Mapsi",Cost = 10,UsesHP = false,Icon = "psi"})
+P_ADDSKILL({Name = "Mapsio",Cost = 16,UsesHP = false,Icon = "psi"})
 P_ADDSKILL({Name = "Mapsiodyne",Cost = 22,UsesHP = false,Icon = "psi"})
+P_ADDSKILL({Name = "Psycho Force",Cost = 48,UsesHP = false,Icon = "psi"})
 P_ADDSKILL({Name = "Psycho Blast",Cost = 54,UsesHP = false,Icon = "psi"})
 
 	-- Bless --

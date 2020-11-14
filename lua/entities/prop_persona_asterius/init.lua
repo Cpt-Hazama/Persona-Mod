@@ -18,13 +18,13 @@ ENT.MovesWithUser = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if animBlock == "melee" then
-		VJ_CreateSound(self,"cpthazama/persona4/labrys/sfx/asterius_roar.wav",150)
+		VJ_CreateSound(self,"cpthazama/vo/labrys/sfx/asterius_roar.wav",150)
 	end
 	if animBlock == "range_start" then
-		VJ_CreateSound(self,"cpthazama/persona4/labrys/sfx/asterius_growl" .. math.random(1,2) .. ".wav",150)
+		VJ_CreateSound(self,"cpthazama/vo/labrys/sfx/asterius_growl" .. math.random(1,2) .. ".wav",150)
 	end
 	if animBlock == "range" then
-		VJ_CreateSound(self,"cpthazama/persona4/labrys/sfx/asterius_growl3.wav",150)
+		VJ_CreateSound(self,"cpthazama/vo/labrys/sfx/asterius_growl3.wav",150)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ end
 function ENT:OnRunDamageCode(dmginfo,pos,hitEnts)
 	if self:GetAnimation() == self.Animations["melee"] then
 		util.ScreenShake(self:GetPos(),16,100,3,4000)
-		sound.Play("cpthazama/persona4/labrys/sfx/asterius_impact.wav",pos,110)
+		sound.Play("cpthazama/vo/labrys/sfx/asterius_impact.wav",pos,110)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ function ENT:OnSummoned(owner)
 	self:SetCard("Gigantomachia",true)
 
 	local v = {forward=-500,right=150,up=50}
-	self.User:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	self.User:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

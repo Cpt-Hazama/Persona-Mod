@@ -18,7 +18,7 @@ function ENT:OnSummoned(ply)
 	self:SetCard("Riot Gun",true)
 
 	local v = {forward=-650,right=200,up=200}
-	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	ply:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSpawnPosition(ply)

@@ -118,8 +118,9 @@ if CLIENT then
 		local delete = net.ReadBool()
 		local ent = net.ReadEntity()
 		hook.Add("HUDPaint","vj_persona_hud_ann",function()
+			if !IsValid(ent) then return end
 			local persona = ent:GetPersona()
-			local card = persona:GetNWString("SpecialAttack")
+			local card = (IsValid(persona) && persona:GetNW2String("SpecialAttack")) or "BLANK"
 			local name = ent:GetPersonaName()
 			draw.RoundedBox(1,ScrW() /1.79,ScrH() -120,220,80,Color(0,0,0,150))
 			draw.SimpleText("Persona: " .. string.SetChar(name,1,string.upper(string.sub(name,1,1))),"VJFont_Trebuchet24_SmallMedium",ScrW() /1.75,ScrH() -115,Color(255,255,255,255),0,0)

@@ -1,17 +1,85 @@
+	--// Thanks NPP, very cool \\--
+if SERVER then
+	util.AddNetworkString("Persona_ShowStatsMenu")
+end
+
+if CLIENT then
+	net.Receive("Persona_ShowStatsMenu",function(len,ply)
+		local pName = net.ReadString()
+		-- local pSTR = net.ReadInt(32)
+		-- local pMAG = net.ReadInt(32)
+		-- local pEND = net.ReadInt(32)
+		-- local pAGI = net.ReadInt(32)
+		-- local pLUC = net.ReadInt(32)
+		local tbl = {}
+		tbl[1] = {t="STR",val=net.ReadInt(32)}
+		tbl[2] = {t="MAG",val=net.ReadInt(32)}
+		tbl[3] = {t="END",val=net.ReadInt(32)}
+		tbl[4] = {t="AGI",val=net.ReadInt(32)}
+		tbl[5] = {t="LUC",val=net.ReadInt(32)}
+
+		local Frame = vgui.Create("DFrame")
+		Frame:SetSize(225,175)
+		Frame:SetPos(ScrW() *0.5, ScrH() *0.5)
+		Frame:SetTitle(pName .. "'s Stats")
+		Frame:SetBackgroundBlur(true)
+		Frame:SetSizable(false)
+		Frame:SetDeleteOnClose(false)
+		Frame:MakePopup()
+		Frame.OnClose = function()
+			if IsValid(ply) then
+				ply:EmitSound("cpthazama/persona4/ui_hover.wav",65)
+			end
+		end
+
+		local posChange = 30
+		for _,v in pairs(tbl) do
+			local label = vgui.Create("DLabel",Frame)
+			label:SetPos(10,posChange)
+			label:SetText(v.t .. " - " .. v.val .. " / 99")
+			label:SizeToContents()
+			posChange = posChange +30
+		end
+	end)
+end
+
 local function ShowStats(ply)
-	local persona = ply:GetPersona()
-	if IsValid(persona) then
+	-- if SERVER then
+		local persona = ply:GetPersona()
+		if !IsValid(persona) then
+			ply:ChatPrint("Summon your Persona first!")
+			return
+		end
+		net.Start("Persona_ShowStatsMenu")
+			net.WriteString(PERSONA[ply:GetPersonaName()].Name)
+			net.WriteInt(persona.Stats.STR,32)
+			net.WriteInt(persona.Stats.MAG,32)
+			net.WriteInt(persona.Stats.END,32)
+			net.WriteInt(persona.Stats.AGI,32)
+			net.WriteInt(persona.Stats.LUC,32)
+		net.Send(ply)
 		local stats = persona.Stats
-		ply:ChatPrint(persona.FeedName .. " Stats:")
+		ply:ChatPrint(persona.FeedName .. "'s Stats:")
 		ply:ChatPrint("STR - " .. stats.STR)
 		ply:ChatPrint("MAG - " .. stats.MAG)
 		ply:ChatPrint("END - " .. stats.END)
 		ply:ChatPrint("AGI - " .. stats.AGI)
 		ply:ChatPrint("LUC - " .. stats.LUC)
-	else
-		ply:ChatPrint("Summon your Persona first!")
-	end
-	ply:EmitSound(Sound("cpthazama/persona4/ui_changepersona.wav"))
+		ply:EmitSound(Sound("cpthazama/persona4/ui_shufflebegin.wav"))
+	-- end
+	-- local persona = ply:GetPersona()
+	-- if IsValid(persona) then
+		-- local stats = persona.Stats
+		-- ply:ChatPrint(persona.FeedName .. " Stats:")
+		-- ply:ChatPrint("STR - " .. stats.STR)
+		-- ply:ChatPrint("MAG - " .. stats.MAG)
+		-- ply:ChatPrint("END - " .. stats.END)
+		-- ply:ChatPrint("AGI - " .. stats.AGI)
+		-- ply:ChatPrint("LUC - " .. stats.LUC)
+	-- else
+		-- ply:ChatPrint("Summon your Persona first!")
+	-- end
+	-- ply:EmitSound(Sound("cpthazama/persona4/ui_changepersona.wav"))
 end
 concommand.Add("persona_showstats",ShowStats)
 
@@ -44,7 +112,7 @@ if CLIENT then
 			local DefaultBox = {Options = {},CVars = {},Label = "#Presets",MenuButton = "1",Folder = "Main Settings"}
 			DefaultBox.Options["#Default"] = {
 				persona_hud_x = "350",
-				persona_hud_y = "250",
+				persona_hud_y = "350",
 				persona_hud_damage = "1",
 				-- persona_hud_raidboss = "0",
 			}
@@ -122,6 +190,31 @@ if CLIENT then
 
 			Panel:AddControl("Button",{Label = "Add Skill",Command = "persona_addskill"})
 		end,{})
+
+		-- spawnmenu.AddToolMenuOption("Persona","Persona","Skill Select","Skill Select","","",function(Panel)
+			-- Panel:AddControl("Label",{Text = "Don't like pressing R to cycle skills? Here's your low-quality Skill Menu because I suck at GUI! :D"})
+
+			-- Panel.SkillList = vgui.Create("DComboBox")
+			-- Panel.SkillList:SetSize(100,30)
+			-- Panel.SkillList:SetValue("Select A Skill")
+			-- for index,data in pairs(skills) do
+				-- local sName = data.Name
+				-- local sCost = data.Cost
+				-- local sHP = data.UsesHP
+				-- local sIcon = data.Icon
+				-- Panel.SkillList:AddChoice(sName,{Index = index,Name = sName,Cost = sCost,UsesHP = sHP,Icon = sIcon},false,"hud/persona/png/hud_" .. sIcon .. ".png")
+			-- end
+			-- Panel.SkillList.OnSelect = function(comboIndex,comboName,comboData)
+				-- local data = Panel.SkillList:GetOptionData(comboName)
+				-- if IsValid(ply) then
+					
+				-- end
+				-- if IsValid(persona) then
+					-- persona:SetActiveCard(data.Name,data.Cost,data.UsesHP,data.Icon,data.index)
+				-- end
+			-- end
+			-- Panel:AddPanel(Panel.SkillList)
+		-- end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Party","Set-Up","Set-Up","","",function(Panel)
 			Panel:AddControl("Button",{Label = "Add To Party",Command = "persona_party"})

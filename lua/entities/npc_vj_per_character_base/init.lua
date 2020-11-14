@@ -55,6 +55,7 @@ ENT.SoundTbl_OnKilledEnemy = {}
 ENT.SoundTbl_Dodge = {}
 ENT.SoundTbl_Persona = {}
 ENT.SoundTbl_PersonaAttack = {}
+ENT.SoundTbl_Critical = {}
 ENT.SoundTbl_GetUp = {}
 
 ENT.GeneralSoundPitch1 = 100
@@ -111,12 +112,14 @@ function ENT:SetCriticalState()
 	SafeRemoveEntity(self:GetPersona())
 	self.InCriticalState = true
 	self:VJ_ACT_PLAYACTIVITY(self.Animations["critical_start"],true,false,true)
+	VJ_CreateSound(self,self.SoundTbl_Critical,80,self:VJ_DecideSoundPitch(self.GeneralSoundPitch1,self.GeneralSoundPitch2))
 	timer.Simple(self:DecideAnimationLength(self.Animations["critical_start"],false),function()
 		if IsValid(self) then
 			self:StartLoopAnimation(self:GetSequenceActivity(self:LookupSequence(self.Animations["critical"])))
 			timer.Simple(self.CriticalDownTime,function()
 				if IsValid(self) then
 					self:VJ_ACT_PLAYACTIVITY(self.Animations["critical_end"],true,false,true)
+					VJ_CreateSound(self,self.SoundTbl_GetUp,80,self:VJ_DecideSoundPitch(self.GeneralSoundPitch1,self.GeneralSoundPitch2))
 					timer.Simple(self:DecideAnimationLength(self.Animations["critical_end"],false),function()
 						if IsValid(self) then
 							self:ResetLoopAnimation()
@@ -135,7 +138,7 @@ function ENT:CustomOnTakeDamage_OnBleed(dmginfo,hitgroup)
 	local attacker = dmginfo:GetAttacker()
 	local inflictor = dmginfo:GetInflictor()
 
-	if dmginfo:GetDamage() > 0 && self:LookupSequence("critical") && IsValid(attacker) && (attacker:IsPlayer() or attacker:IsNPC()) && IsValid(attacker:GetPersona()) then
+	if dmginfo:GetDamage() > 0 && VJ_AnimationExists(self,self.Animations["critical"]) && IsValid(attacker) && (attacker:IsPlayer() or attacker:IsNPC()) && IsValid(attacker:GetPersona()) then
 		local persona = attacker:GetPersona()
 		if persona:GetCritical() && !self.InCriticalState then
 			self:SetCriticalState(true)

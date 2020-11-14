@@ -1,0 +1,19 @@
+"Refract"
+{
+	"$basetexture" "models/cpthazama/persona_shared/scramble/aoe_a"
+	"$dudvmap" "models/cpthazama/persona_shared/scramble/aoe_dudv"
+
+	"$translucent" "1"
+	"$refractamount" "0.2"
+	"$refracttint" "[1 1 1]"
+
+	"Proxies"
+	{
+		"TextureScroll"
+		{
+			"texturescrollvar" "$basetexturetransform"
+			"texturescrollangle" "-90"
+			"texturescrollrate" "0.2"
+		}
+	}
+}

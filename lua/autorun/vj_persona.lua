@@ -33,27 +33,20 @@ if VJExists == true then
 	VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat) -- Persona: Thor, Berith and Atavaka | Theme: Rivers in The Desert
 
 		-- Persona 5 - Antagonists --
-	-- VJ.AddNPC("Shido (Shadow)","npc_vj_per_shido",vCat) -- Theme: Rivers in The Desert -instrumental-
-	-- VJ.AddNPC("Sae Niijima (Shadow)","npc_vj_per_sae",vCat) -- Persona: Leviathan | Theme: The Whims Of Fate
 	-- VJ.AddNPC("Holy Grail","npc_vj_per_yaldabaoth_stage1",vCat) -- Theme: Yaldabaoth
 	VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCat) -- Theme: Yaldabaoth
 	VJ.AddNPC("Goro Akechi (Black Mask)","npc_vj_per_akechi",vCat) -- Persona: Loki and Hereward | Theme: Reincarnation (I'll Face Myself)
 	
 		-- Persona 4 - Protagonists --
 	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami | Theme: Reach Out To The Truth (Arena Ver.)
-	-- VJ.AddNPC("Chie Satanoka","npc_vj_per_chie",vCat) -- Tomoe | Theme: 
 	VJ.AddNPC("Labrys","npc_vj_per_labrys",vCat) -- Ariadne | Theme: Spirited Girl
-	-- VJ.AddNPC("Margaret","npc_vj_per_margaret",vCat) -- Yoshitsune | Theme: Electronica In The Velvet Room
 	
 		-- Persona 4 - Antagonists -- 
 	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi",vCat) -- Magatsu-Izanagi | Theme: A Fool or A Clown? / A New World Fool
-	-- VJ.AddNPC("Sho Minazuki","npc_vj_per_sho",vCat) -- Tsukiyomi | Theme: Blood Red Moon
 	VJ.AddNPC("Shadow Labrys","npc_vj_per_labrys_shadow",vCat) -- Asterius | Theme: Shadows of the Labrynth
 	
 		-- Persona 3 - Protagonists
 	VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
-	-- VJ.AddNPC("Kotone Shiomi","npc_vj_per_kotone",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
-	-- VJ.AddNPC("Yukari Takeba","npc_vj_per_yukari",vCat) -- Isis | Theme: Pink Sniper
 	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat) -- Thanatos | Theme: Whims Of Everyone's Souls
 
 		-- Persona Gamemode Exclusives --

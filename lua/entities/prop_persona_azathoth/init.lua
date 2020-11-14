@@ -56,5 +56,5 @@ function ENT:OnSummoned(owner)
 	self:SetCard("Raining Seeds",true)
 
 	local v = {forward=-350,right=80,up=90}
-	self.User:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	self.User:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end

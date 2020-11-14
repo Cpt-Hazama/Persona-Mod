@@ -17,7 +17,7 @@ if CLIENT then
 			local ent = self
 			hook.Add("HUDPaint","Persona_HUD_MagatsuIzanagi_FX",function()
 				local ply = LocalPlayer()
-				local persona = ply:GetNWEntity("PersonaEntity")
+				local persona = ply:GetNW2Entity("PersonaEntity")
 				
 				if persona == ent && IsValid(persona) && persona:GetCriticalFX() then
 					local background = surface.GetTextureID("hud/persona/critical_adachi")
@@ -30,7 +30,7 @@ if CLIENT then
 		-- if IsValid(self) then
 			-- hook.Add("HUDPaint","Persona_HUD_MagatsuIzanagi",function()
 				-- local ply = LocalPlayer()
-				-- local persona = ply:GetNWEntity("PersonaEntity")
+				-- local persona = ply:GetNW2Entity("PersonaEntity")
 
 				-- if !IsValid(persona) then
 					-- if ply.PersonaRender then

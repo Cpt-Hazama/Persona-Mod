@@ -6,15 +6,19 @@ if (!file.Exists("autorun/vj_base_autorun.lua","LUA")) then return end
 --------------------------------------------------*/
 function EFFECT:Init(data)
 	self.Pos = data:GetOrigin()
-	self.Dir = data:GetStart()
+	-- self.Dir = data:GetStart()
 	self.Ent = data:GetEntity()
 	local Emitter = ParticleEmitter(self.Pos)
 	if Emitter == nil then return end
 
+	local pos,ang = self.Ent:GetBonePosition(self.Ent:LookupBone("rot_head"))
+	ang = ang +Angle(90,100,0)
 	for i = 1,60 do
 		local EffectCode = Emitter:Add("effects/persona/evoker_fx",self.Pos)
-		EffectCode:SetVelocity(self.Dir +VectorRand() *50)
-		EffectCode:SetAirResistance(160)
+		EffectCode:SetVelocity(ang:Right() *500 +VectorRand() *200)
+		-- EffectCode:SetVelocity(pos +ang:Forward() *500 +VectorRand() *100)
+		-- EffectCode:SetVelocity(self.Dir +self.Dir:Angle():Forward() *50)
+		EffectCode:SetAirResistance(200)
 		EffectCode:SetDieTime(0.75)
 		EffectCode:SetStartAlpha(255)
 		EffectCode:SetEndAlpha(0)

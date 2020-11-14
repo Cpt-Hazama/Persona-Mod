@@ -74,7 +74,7 @@ function ENT:OnSummoned(owner)
 	self:SetCard("One-shot Kill",true)
 
 	local v = {forward=-200,right=80,up=50}
-	owner:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	owner:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

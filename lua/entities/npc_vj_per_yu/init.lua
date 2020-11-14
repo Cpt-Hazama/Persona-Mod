@@ -36,6 +36,27 @@ ENT.Animations["range"] = "range"
 ENT.Animations["range_idle"] = "range_idle"
 ENT.Animations["range_end"] = "range_end"
 
+ENT.SoundTbl_CombatIdle = {
+	"cpthazama/vo/yu/be_boss_0745 [16].wav",
+	"cpthazama/vo/yu/be_boss_0745 [17].wav",
+	"cpthazama/vo/yu/combat1.wav",
+	"cpthazama/vo/yu/combat2.wav",
+	"cpthazama/vo/yu/combat3.wav",
+}
+ENT.SoundTbl_Pain = {
+	"cpthazama/vo/yu/be_boss_0745 [10].wav",
+	"cpthazama/vo/yu/be_boss_0745 [11].wav",
+	"cpthazama/vo/yu/be_boss_0745 [12].wav",
+	"cpthazama/vo/yu/be_boss_0745 [18].wav",
+}
+ENT.SoundTbl_Death = {"cpthazama/vo/yu/death.wav"}
+ENT.SoundTbl_OnKilledEnemy = {}
+ENT.SoundTbl_Dodge = {"cpthazama/vo/yu/be_boss_0745 [13].wav","cpthazama/vo/yu/be_boss_0745 [14].wav"}
+ENT.SoundTbl_Persona = {"cpthazama/vo/yu/be_boss_0745 [4].wav"}
+ENT.SoundTbl_PersonaAttack = {"cpthazama/vo/yu/be_boss_0745 [2].wav","cpthazama/vo/yu/be_boss_0745 [7].wav"}
+ENT.SoundTbl_Critical = {"cpthazama/vo/yu/be_boss_0745 [8].wav","cpthazama/vo/yu/be_boss_0745 [9].wav","cpthazama/vo/yu/be_boss_0745 [1].wav"}
+ENT.SoundTbl_GetUp = {"cpthazama/vo/yu/be_boss_0745 [15].wav"}
+
 ENT.Persona = "izanagi"
 ENT.Personas = {
 	[1] = "izanagi",
@@ -43,6 +64,8 @@ ENT.Personas = {
 	[3] = "yoshitsune",
 	[4] = "izanagi_okami",
 }
+
+ENT.NextSoundTime_Pain = VJ_Set(0.2,0.5)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Controller_Initialize(ply)
     net.Start("vj_persona_hud_yu")
@@ -126,16 +149,16 @@ end
 function ENT:SummonAnimation()
 	self:StartLoopAnimation("range_idle")
 	self:VJ_ACT_PLAYACTIVITY(self.Animations["range_start"],true,false,true)
-	VJ_CreateSound(self,"cpthazama/persona4/yu/skill_ziodyne2.wav")
+	VJ_CreateSound(self,"cpthazama/vo/yu/skill_ziodyne2.wav")
 	self:CreateTarot()
 	timer.Simple(self:DecideAnimationLength(self.Animations["range_start"],false),function()
 		if IsValid(self) then
 			self:VJ_ACT_PLAYACTIVITY(self.Animations["range"],true,false,true)
-			local snd = "cpthazama/persona4/yu/summon_generic" .. math.random(1,2) .. ".wav"
+			local snd = "cpthazama/vo/yu/summon_generic" .. math.random(1,2) .. ".wav"
 			if self.Persona == "izanagi" then
-				snd = "cpthazama/persona4/yu/summon_izanagi" .. math.random(1,2) .. ".wav"
+				snd = "cpthazama/vo/yu/be_boss_0745 [" .. math.random(5,6) .. "].wav"
 			elseif self.Persona == "izanagi_okami" then
-				snd = "cpthazama/persona4/yu/summon_izanagi_okami" .. math.random(1,2) .. ".wav"
+				snd = "cpthazama/vo/yu/summon_izanagi_okami" .. math.random(1,2) .. ".wav"
 			end
 			VJ_CreateSound(self,snd,80)
 			timer.Simple(self:DecideAnimationLength(self.Animations["range"],false),function()

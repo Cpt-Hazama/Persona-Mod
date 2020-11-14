@@ -48,18 +48,18 @@ ENT.LegendaryMaterials[4] = "models/cpthazama/persona5/magatsuizanagi/magatsuiza
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	if skill == "Ghostly Wail" then
 		if animBlock == "melee" then
-			self:UserSound("cpthazama/persona5/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
+			self:UserSound("cpthazama/vo/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
 		end
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnHitEntity(hitEnts,dmginfo)
 	-- if dmginfo:GetDamageType() == DMG_P_FEAR then
-		for _,v in pairs(hitEnts) do
-			if IsValid(v) && v:Health() > 0 then
-				self:Fear(v,15)
-			end
-		end
+		-- for _,v in pairs(hitEnts) do
+			-- if IsValid(v) && v:Health() > 0 then
+				-- self:Fear(v,15)
+			-- end
+		-- end
 	-- end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ function ENT:Maziodyne_NPC(ply,enemy)
 			self:TakeSP(self.CurrentCardCost)
 			self:SetTask("TASK_PLAY_ANIMATION")
 			self:PlayAnimation("atk_magatsu_mandala_pre",1)
-			VJ_CreateSound(ply,"cpthazama/persona5/adachi/vo/curse.wav")
+			VJ_CreateSound(ply,"cpthazama/vo/adachi/vo/curse.wav")
 			if math.random(1,2) == 1 then self:DoCritical(1) end
 			timer.Simple(self:GetSequenceDuration(self,"atk_magatsu_mandala_pre"),function()
 				if IsValid(self) then
@@ -85,7 +85,7 @@ function ENT:Maziodyne_NPC(ply,enemy)
 								-- self.TimeToMazionga = CurTime() +3.5
 								self:EmitSound("beams/beamstart5.wav",90)
 								local tbl = {
-									"cpthazama/persona5/adachi/vo/blast.wav",
+									"cpthazama/vo/adachi/vo/blast.wav",
 									"cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",
 									"cpthazama/vox/adachi/kill/vbtl_pad_0#122 (pad166_0).wav"
 								}
@@ -161,7 +161,7 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	self:UserSound("cpthazama/persona5/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
+	self:UserSound("cpthazama/vo/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
 	self:SetModel(self.Model)
 	if ply:IsPlayer() && (ply:Nick() == "Cpt. Hazama" or ply:IsSuperAdmin()) then
 		self.Animations["idle"] = "anime_idle"
@@ -193,7 +193,7 @@ function ENT:OnSummoned(ply)
 	self:SetCard("Ghastly Wail",true)
 
 	local v = {forward=-200,right=80,up=50}
-	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	ply:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

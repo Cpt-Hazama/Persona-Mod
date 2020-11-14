@@ -42,7 +42,7 @@ function ENT:OnSummoned(owner)
 	self:SetCard("Bash",true)
 
 	local v = {forward=-200,right=80,up=50}
-	self.User:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	self.User:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

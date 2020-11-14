@@ -28,7 +28,7 @@ function ENT:CustomOnInitialize()
 	self:DrawShadow(false)
 
 	local col = "255 229 0"
-	local Magatsu = self:GetNWBool("Magatsu")
+	local Magatsu = self:GetNW2Bool("Magatsu")
 	if Magatsu then
 		col = "255 0 0"
 	end

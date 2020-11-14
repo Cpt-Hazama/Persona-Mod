@@ -13,19 +13,8 @@ ENT.AutomaticFrameAdvance = true
 
 ENT.IsPersona = true
 ENT.IsPersonaRMD = true
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:FadeIn()
-	self:SetRenderMode(RENDERMODE_TRANSADD)
-	-- self:SetRenderFX(kRenderFxSolidSlow)
-	self:SetKeyValue("RenderFX",kRenderFxSolidSlow)
-	-- self:SetColor(Color(255,255,255,255))
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:FadeOut()
-	self:SetRenderMode(RENDERMODE_TRANSADD)
-	self:SetKeyValue("RenderFX",kRenderFxFadeSlow)
-	-- self:SetRenderFX(kRenderFxFadeSlow)
-end
+
+ENT.AllowFading = true
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PlaySet(skill,name,rate,cycle)
 	local seq = self.Animations[name]

@@ -14,7 +14,7 @@ ENT.AutomaticFrameAdvance = true
 -- if CLIENT then
 	-- hook.Add("HUDPaint","Persona_HUD_IzanagiOkami",function()
 		-- local ply = LocalPlayer()
-		-- local persona = ply:GetNWEntity("PersonaEntity")
+		-- local persona = ply:GetNW2Entity("PersonaEntity")
 
 		-- if !IsValid(persona) then
 			-- if ply.PersonaRender then

@@ -60,7 +60,7 @@ function ENT:OnSummoned(ply)
 	self:SetCard("Magatsu Blade",true)
 
 	local v = {forward=-200,right=80,up=110}
-	ply:SetNWVector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	ply:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnKilledEnemy(ent)
