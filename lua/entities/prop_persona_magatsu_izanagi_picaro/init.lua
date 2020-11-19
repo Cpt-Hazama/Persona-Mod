@@ -5,6 +5,8 @@ ENT.Bot_StopDistance = 100
 ENT.Bot_Buttons = {
 	[1] = {but={IN_ATTACK},dist=100,chance=1},
 }
+
+ENT.IzanagiType = true
 ENT.Model = "models/cpthazama/persona5/persona/magatsu_izanagi_picaro.mdl"
 ENT.Name = "Magatsu-Izanagi Picaro"
 ENT.Aura = "jojo_aura_blue"

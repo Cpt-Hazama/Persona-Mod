@@ -1,5 +1,7 @@
 AddCSLuaFile("shared.lua")
 include("shared.lua")
+
+ENT.IzanagiType = true
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.Animations = {}
 ENT.Animations["idle"] = "idle"

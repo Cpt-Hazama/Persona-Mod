@@ -5,6 +5,8 @@ ENT.Bot_StopDistance = 100
 ENT.Bot_Buttons = {
 	[1] = {but={IN_ATTACK},dist=100,chance=1},
 }
+
+ENT.IzanagiType = true
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.Animations = {}
 ENT.Animations["idle"] = "idle"

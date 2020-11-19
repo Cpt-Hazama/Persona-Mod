@@ -722,7 +722,7 @@ function ENT:AlmightySlash(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_COLOSSAL,850,90,DMG_P_ALMIGHTY)
+						self:MeleeAttackCode(DMG_P_COLOSSAL,1200,90,DMG_P_ALMIGHTY)
 					end
 				end)
 			end
@@ -749,12 +749,12 @@ function ENT:CrossSlash(ply,persona) // Izanagi Skill
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple(t,function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_HEAVY,600,90)
+						self:MeleeAttackCode(DMG_P_HEAVY,1200,90)
 					end
 				end)
 				timer.Simple(t +0.2,function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_HEAVY,600,90)
+						self:MeleeAttackCode(DMG_P_HEAVY,1200,90)
 					end
 				end)
 			end
@@ -1106,42 +1106,192 @@ function ENT:Magarudyne(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Zio(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then return end
+
+	local skill = "Zio"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1.5)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1,1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_idle",1,1)
+								local v = ply.Persona_EyeTarget
+								if IsValid(v) then
+									self:ZioEffect(v,DMG_P_LIGHT)
+								end
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:DoIdle()
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Zionga(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then return end
+
 	local skill = "Zionga"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1.5)
-		-- ply:EmitSound("cpthazama/vo/adachi/vo/curse.wav")
-		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
-		timer.Simple(t -(t *0.5),function()
+		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1,1)
-				timer.Simple(0.5,function()
+				timer.Simple(t,function()
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
-								self:EmitSound("beams/beamstart5.wav",90)
-								-- local tbl = {
-									-- "cpthazama/vo/adachi/vo/blast.wav",
-									-- "cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",
-									-- "cpthazama/vox/adachi/kill/vbtl_pad_0#122 (pad166_0).wav"
-								-- }
-								-- ply:EmitSound(VJ_PICK(tbl))
-								self.ZioCount = 0
-								for a = 1,3 do
-									for i = 1,10 do
-										self.ZioCount = self.ZioCount +1
-										timer.Simple(i *0.15,function()
+								local v = ply.Persona_EyeTarget
+								if IsValid(v) then
+									self:ZioEffect(v,DMG_P_MEDIUM)
+								end
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
 											if IsValid(self) then
-												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil)
+												self:DoIdle()
 											end
 										end)
 									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Ziodyne(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then return end
+
+	local skill = "Ziodyne"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1.5)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1,1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_idle",1,1)
+								local v = ply.Persona_EyeTarget
+								if IsValid(v) then
+									self:ZioEffect(v,DMG_P_HEAVY)
 								end
-								timer.Simple(1.5,function()
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:DoIdle()
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:ThunderReign(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then return end
+
+	local skill = "Thunder Reign"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1.5)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1,1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_idle",1,1)
+								local v = ply.Persona_EyeTarget
+								if IsValid(v) then
+									self:ZioEffect(v,DMG_P_SEVERE)
+								end
+								timer.Simple(t *2,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:DoIdle()
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Mazio(ply,persona)
+	local skill = "Mazio"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1.5)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1,1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_idle",1,1)
+								for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+									if IsValid(v) then
+										self:ZioEffect(v,DMG_P_LIGHT)
+									end
+								end
+								timer.Simple(t,function()
 									if IsValid(self) then
 										t = self:PlaySet(skill,"range_end",1)
 										timer.Simple(t,function()
@@ -1166,37 +1316,22 @@ function ENT:Mazionga(ply,persona)
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1.5)
-		-- ply:EmitSound("cpthazama/vo/adachi/vo/curse.wav")
-		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
-		timer.Simple(t -(t *0.5),function()
+		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1,1)
-				timer.Simple(0.5,function()
+				timer.Simple(t,function()
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
-								self:EmitSound("beams/beamstart5.wav",90)
-								-- local tbl = {
-									-- "cpthazama/vo/adachi/vo/blast.wav",
-									-- "cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",
-									-- "cpthazama/vox/adachi/kill/vbtl_pad_0#122 (pad166_0).wav"
-								-- }
-								-- ply:EmitSound(VJ_PICK(tbl))
-								self.ZioCount = 0
-								for a = 1,5 do
-									-- local target = VJ_PICK(self:FindEnemies(self:GetPos(),7000))
-									for i = 1,10 do
-										self.ZioCount = self.ZioCount +1
-										timer.Simple(i *0.15,function()
-											if IsValid(self) then
-												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil)
-											end
-										end)
+								for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+									if IsValid(v) then
+										self:ZioEffect(v,DMG_P_MEDIUM)
 									end
 								end
-								timer.Simple(1.5,function()
+								timer.Simple(t,function()
 									if IsValid(self) then
 										t = self:PlaySet(skill,"range_end",1)
 										timer.Simple(t,function()
@@ -1221,37 +1356,102 @@ function ENT:Maziodyne(ply,persona)
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1)
-		-- ply:EmitSound("cpthazama/vo/adachi/vo/curse.wav")
-		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1,1)
-				timer.Simple(0.5,function()
+				timer.Simple(t,function()
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
-								self:EmitSound("beams/beamstart5.wav",90)
-								-- local tbl = {
-									-- "cpthazama/vo/adachi/vo/blast.wav",
-									-- "cpthazama/vox/adachi/kill/vbtl_pad_0#178 (pad300_0).wav",
-									-- "cpthazama/vox/adachi/kill/vbtl_pad_0#122 (pad166_0).wav"
-								-- }
-								-- ply:EmitSound(VJ_PICK(tbl))
-								self.ZioCount = 0
-								for a = 1,5 do
-									local target = VJ_PICK(self:FindEnemies(self:GetPos(),7000))
-									for i = 1,20 do
-										self.ZioCount = self.ZioCount +1
-										timer.Simple(i *0.15,function()
+								for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+									if IsValid(v) then
+										self:ZioEffect(v,DMG_P_HEAVY)
+									end
+								end
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
 											if IsValid(self) then
-												self:MaziodyneAttack(a,30000,self.Magatsu && "fo4_libertyprime_laser" or nil,target)
+												self:DoIdle()
 											end
 										end)
 									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:WildThunder(ply,persona)
+	local skill = "Wild Thunder"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1,1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_idle",1,1)
+								for _,v in pairs(self:FindEnemies(self:GetPos(),2000)) do
+									if IsValid(v) then
+										self:ZioEffect(v,DMG_P_SEVERE)
+									end
 								end
-								timer.Simple(3,function()
+								timer.Simple(t *2,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:DoIdle()
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:ColossalStorm(ply,persona)
+	local skill = "Colossal Storm"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1,1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_idle",1,1)
+								for _,v in pairs(self:FindEnemies(self:GetPos(),2200)) do
+									if IsValid(v) then
+										self:ZioEffect(v,DMG_P_COLOSSAL)
+									end
+								end
+								timer.Simple(t *2.5,function()
 									if IsValid(self) then
 										t = self:PlaySet(skill,"range_end",1)
 										timer.Simple(t,function()

@@ -503,8 +503,26 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif self:GetCard() == "Maziodyne" then
 		self:Maziodyne(ply,persona,rmb)
 		return
+	elseif self:GetCard() == "Thunder Reign" then
+		self:ThunderReign(ply,persona,rmb)
+		return
+	elseif self:GetCard() == "Wild Thunder" then
+		self:WildThunder(ply,persona,rmb)
+		return
+	elseif self:GetCard() == "Colossal Storm" then
+		self:ColossalStorm(ply,persona,rmb)
+		return
+	elseif self:GetCard() == "Zio" then
+		self:Zio(ply,persona,rmb)
+		return
 	elseif self:GetCard() == "Zionga" then
 		self:Zionga(ply,persona,rmb)
+		return
+	elseif self:GetCard() == "Ziodyne" then
+		self:Ziodyne(ply,persona,rmb)
+		return
+	elseif self:GetCard() == "Mazio" then
+		self:Mazio(ply,persona,rmb)
 		return
 	elseif self:GetCard() == "Mazionga" then
 		self:Mazionga(ply,persona,rmb)
@@ -1509,7 +1527,106 @@ function ENT:MegidolaonEffect(ent,dmg)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:MaziodyneAttack(att,dist,eff,target)
+function ENT:ZioEffect(ent,dmg,eff) -- att,dist,eff,target
+	-- if self.IzanagiType then
+		-- self:ZioEffect_P4AU(att,dist,eff,target) -- As much as I love the P4AU styled Zio skills, it's too much of an annoyance to keep adding support for custom variations for specific Personae
+		-- return
+	-- end
+	if self.IzanagiType then
+		eff = self.Magatsu && "maziodyne_red" or "maziodyne_blue"
+	end
+	local dmg = dmg or DMG_P_HEAVY
+	local snds = {
+		[DMG_P_MINISCULE] = "cpthazama/persona5/skills/0040.wav",
+		[DMG_P_LIGHT] = "cpthazama/persona5/skills/0040.wav",
+		[DMG_P_MEDIUM] = "cpthazama/persona5/skills/0041.wav",
+		[DMG_P_HEAVY] = "cpthazama/persona5/skills/0042.wav",
+		[DMG_P_SEVERE] = "cpthazama/persona5/skills/0042.wav",
+		[DMG_P_COLOSSAL] = "cpthazama/persona5/skills/0042.wav",
+	}
+	local timeDMG = dmg >= DMG_P_HEAVY && 1.65 or 0
+	local pos = ent:GetPos()
+	local dist = math.Clamp(ent:OBBMaxs().z *5,100,2500)
+	-- local dist = ent:OBBMaxs().z *5
+	local tr = util.TraceLine({
+		start = pos,
+		endpos = pos +Vector(0,0,dist),
+		filter = {ent,self}
+	})
+	pos = tr.HitPos or pos +Vector(0,0,200)
+	local m = ents.Create("prop_vj_animatable")
+	m:SetModel("models/cpthazama/persona5/effects/ice.mdl")
+	m:SetPos(pos)
+	m:Spawn()
+	m:SetNoDraw(true)
+	m:DrawShadow(false)
+	m:SetParent(ent)
+	m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+	m:SetModelScale(0.01)
+	ent:EmitSound(snds[dmg] or "cpthazama/persona5/skills/0041.wav",95)
+	if timeDMG > 0 then
+		local quickMaths = timeDMG /8
+		local base = math.Clamp(quickMaths,timeDMG < quickMaths && quickMaths or 0,timeDMG)
+		for i = base,8 do
+			timer.Simple(i *quickMaths,function()
+				if IsValid(m) then
+					local rand = VectorRand() *math.random(-10000,10000)
+					-- rand.z = rand.z > m:GetPos() && rand.z /2 or rand.z
+					local tr = util.TraceLine({
+						start = m:GetPos(),
+						endpos = m:GetPos() +rand,
+						filter = m,
+					})
+					local spawnparticle = ents.Create("info_particle_system")
+					spawnparticle:SetKeyValue("effect_name","maziodyne_default_impact_glow")
+					spawnparticle:SetPos(m:GetPos())
+					spawnparticle:Spawn()
+					spawnparticle:Activate()
+					spawnparticle:Fire("Start","",0)
+					spawnparticle:Fire("Kill","",0.1)
+					util.ParticleTracerEx(eff or "maziodyne_default",m:GetPos(),tr.HitPos,false,m:EntIndex(),0)
+					local spawnparticle = ents.Create("info_particle_system")
+					spawnparticle:SetKeyValue("effect_name","maziodyne_default_impact")
+					spawnparticle:SetPos(tr.HitPos)
+					spawnparticle:Spawn()
+					spawnparticle:Activate()
+					spawnparticle:Fire("Start","",0)
+					spawnparticle:Fire("Kill","",0.1)
+				end
+			end)
+		end
+	end
+	timer.Simple(timeDMG,function()
+		if IsValid(ent) && IsValid(self) then
+			if math.random(1,4) == 1 then
+				-- ent:SetShock(20) -- No code for this yet!
+				if IsValid(self.User) && self.User:IsPlayer() then
+					self.User:ChatPrint("Inflicted Shock!")
+				end
+			end
+			ent:EmitSound("cpthazama/persona5/skills/0040.wav",95)
+			self:DealDamage(ent,dmg,bit.bor(DMG_P_ELEC,DMG_SHOCK),2)
+			local spawnparticle = ents.Create("info_particle_system")
+			spawnparticle:SetKeyValue("effect_name","maziodyne_default_impact_glow")
+			spawnparticle:SetPos(m:GetPos())
+			spawnparticle:Spawn()
+			spawnparticle:Activate()
+			spawnparticle:Fire("Start","",0)
+			spawnparticle:Fire("Kill","",0.1)
+			util.ParticleTracerEx(eff or "maziodyne_default",pos,ent:GetPos(),false,m:EntIndex(),0)
+			local spawnparticle = ents.Create("info_particle_system")
+			spawnparticle:SetKeyValue("effect_name","maziodyne_default_impact")
+			spawnparticle:SetPos(ent:GetPos())
+			spawnparticle:Spawn()
+			spawnparticle:Activate()
+			spawnparticle:Fire("Start","",0)
+			spawnparticle:Fire("Kill","",0.1)
+			SafeRemoveEntity(m)
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:ZioEffect_P4AU(att,dist,eff,target)
 	local pos = self:GetAttachment(att).Pos
 	local ent = self.User:IsNPC() && IsValid(self.User:GetEnemy()) && self.User:GetEnemy() or self.User:IsPlayer() && IsValid(self.User.Persona_EyeTarget) && self.User.Persona_EyeTarget or NULL
 	if IsValid(target) then

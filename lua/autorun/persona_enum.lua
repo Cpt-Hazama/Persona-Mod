@@ -130,9 +130,12 @@ P_ADDSKILL({Name = "Blazing Hell",Cost = 54,UsesHP = false,Icon = "fire"})
 P_ADDSKILL({Name = "Zio",Cost = 4,UsesHP = false,Icon = "elec"})
 P_ADDSKILL({Name = "Zionga",Cost = 8,UsesHP = false,Icon = "elec"})
 P_ADDSKILL({Name = "Ziodyne",Cost = 12,UsesHP = false,Icon = "elec"})
+P_ADDSKILL({Name = "Mazio",Cost = 10,UsesHP = false,Icon = "elec"})
 P_ADDSKILL({Name = "Mazionga",Cost = 16,UsesHP = false,Icon = "elec"})
 P_ADDSKILL({Name = "Maziodyne",Cost = 22,UsesHP = false,Icon = "elec"})
+P_ADDSKILL({Name = "Thunder Reign",Cost = 48,UsesHP = false,Icon = "elec"})
 P_ADDSKILL({Name = "Wild Thunder",Cost = 54,UsesHP = false,Icon = "elec"})
+P_ADDSKILL({Name = "Colossal Storm",Cost = 62,UsesHP = false,Icon = "elec"})
 
 	-- Wind --
 P_ADDSKILL({Name = "Garu",Cost = 3,UsesHP = false,Icon = "wind"})

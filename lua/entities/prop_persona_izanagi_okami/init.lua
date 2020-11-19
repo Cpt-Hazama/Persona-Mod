@@ -1,5 +1,7 @@
 AddCSLuaFile("shared.lua")
 include("shared.lua")
+
+ENT.IzanagiType = true
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.Bot_StopDistance = 100
 ENT.Bot_Buttons = {
