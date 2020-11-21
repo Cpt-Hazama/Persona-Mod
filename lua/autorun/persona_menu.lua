@@ -1,9 +1,16 @@
 	--// Thanks NPP, very cool \\--
 if SERVER then
 	util.AddNetworkString("Persona_ShowStatsMenu")
+	util.AddNetworkString("Persona_UpdateSkillMenu")
 end
 
 if CLIENT then
+	net.Receive("Persona_UpdateSkillMenu",function(len,ply)
+		local p = net.ReadEntity()
+		local pSkills = net.ReadTable()
+		p.Persona_CSSkills = pSkills
+	end)
+
 	net.Receive("Persona_ShowStatsMenu",function(len,ply)
 		local pName = net.ReadString()
 		-- local pSTR = net.ReadInt(32)
@@ -42,6 +49,22 @@ if CLIENT then
 		end
 	end)
 end
+
+local function UpdateTable(ply)
+	local persona = ply:GetPersona()
+	if !IsValid(persona) then
+		return
+	end
+	local old = ply:GetNW2Bool("Persona_SkillMenu")
+	ply:SetNW2Bool("Persona_SkillMenu",!old)
+	if ply:GetNW2Bool("Persona_SkillMenu") then
+		net.Start("Persona_UpdateSkillMenu")
+			net.WriteEntity(ply)
+			net.WriteTable(persona.CardTable)
+		net.Send(ply)
+	end
+end
+concommand.Add("persona_updateskilltable",UpdateTable)
 
 local function ShowStats(ply)
 	-- if SERVER then
@@ -126,6 +149,8 @@ if CLIENT then
 		spawnmenu.AddToolMenuOption("Persona","Main Settings","NPCs","NPCs","","",function(Panel)
 			Panel:AddControl("CheckBox",{Label = "Enable NPC Themes",Command = "vj_persona_music"})
 			Panel:AddControl("Label",{Text = "Note: You can also enable/disable them per NPC!"})
+			-- Panel:AddControl("CheckBox",{Label = "Enable Battle Mode",Command = "vj_persona_battle"})
+			-- Panel:AddControl("Label",{Text = "Battle Mode occurs when you attack an enemy, leading you into a turn-based fight!"})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Dance Settings","Dance","Dance","","",function(Panel)
@@ -135,6 +160,8 @@ if CLIENT then
 			Panel:AddControl("Label",{Text = "0 = Default, 1 = Spectate, 2 = Dance, Dance!"})
 			Panel:AddControl("Slider",{Label = "Dance Difficulty",Command = "vj_persona_dancedifficulty",Min = 1,Max = 5})
 			Panel:AddControl("Label",{Text = "1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're Crazy"})
+			Panel:AddControl("CheckBox",{Label = "Controller Mode",Command = "persona_dance_controller"})
+			Panel:AddControl("Label",{Text = "Enable this to play with a controller!"})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)
@@ -151,6 +178,8 @@ if CLIENT then
 				local cost = skill.Cost
 				local useshp = skill.UsesHP
 				local icon = skill.Icon
+				local canAdd = skill.CanObtain or true
+				if canAdd == false then return end
 				skill_box_list:AddChoice(name,{Name = name,Cost = cost,UsesHP = useshp,Icon = icon},false,"hud/persona/png/hud_" .. icon .. ".png")
 			end
 			skill_box_list.OnSelect = function(comboIndex,comboName,comboData)

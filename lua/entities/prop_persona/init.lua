@@ -416,330 +416,340 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoSpecialAttack(ply,persona,melee,rmb)
-	if self:GetCard() == "Myriad Truths" then 
+	local card = self:GetCard()
+	if card == "Myriad Truths" then 
 		self:MyriadTruths(ply,persona)
 		return
-	elseif self:GetCard() == "Bufu" then
+	elseif card == "Tentacle of Protection" then
+		self:SummonTentacle(ply,persona,1,card)
+		return
+	elseif card == "Tentacle of Healing" then
+		self:SummonTentacle(ply,persona,2,card)
+		return
+	elseif card == "Tentacle of Assistance" then
+		self:SummonTentacle(ply,persona,3,card)
+		return
+	elseif card == "Bufu" then
 		self:Bufu(ply,persona)
 		return
-	elseif self:GetCard() == "Bufula" then
+	elseif card == "Bufula" then
 		self:Bufula(ply,persona)
 		return
-	elseif self:GetCard() == "Bufudyne" then
+	elseif card == "Bufudyne" then
 		self:Bufudyne(ply,persona)
 		return
-	elseif self:GetCard() == "Mabufu" then
+	elseif card == "Mabufu" then
 		self:Mabufu(ply,persona)
 		return
-	elseif self:GetCard() == "Mabufula" then
+	elseif card == "Mabufula" then
 		self:Mabufula(ply,persona)
 		return
-	elseif self:GetCard() == "Mabufudyne" then
+	elseif card == "Mabufudyne" then
 		self:Mabufudyne(ply,persona)
 		return
-	elseif self:GetCard() == "Diamond Dust" then
+	elseif card == "Diamond Dust" then
 		self:DiamondDust(ply,persona)
 		return
-	elseif self:GetCard() == "Ice Age" then
+	elseif card == "Ice Age" then
 		self:IceAge(ply,persona)
 		return
-	elseif self:GetCard() == "Psi" then
+	elseif card == "Psi" then
 		self:Psi(ply,persona)
 		return
-	elseif self:GetCard() == "Psio" then
+	elseif card == "Psio" then
 		self:Psio(ply,persona)
 		return
-	elseif self:GetCard() == "Psiodyne" then
+	elseif card == "Psiodyne" then
 		self:Psiodyne(ply,persona)
 		return
-	elseif self:GetCard() == "Mapsi" then
+	elseif card == "Mapsi" then
 		self:Mapsi(ply,persona)
 		return
-	elseif self:GetCard() == "Mapsio" then
+	elseif card == "Mapsio" then
 		self:Mapsio(ply,persona)
 		return
-	elseif self:GetCard() == "Mapsiodyne" then
+	elseif card == "Mapsiodyne" then
 		self:Mapsiodyne(ply,persona)
 		return
-	elseif self:GetCard() == "Psycho Force" then
+	elseif card == "Psycho Force" then
 		self:PsychoForce(ply,persona)
 		return
-	elseif self:GetCard() == "Psycho Blast" then
+	elseif card == "Psycho Blast" then
 		self:PsychoBlast(ply,persona)
 		return
-	elseif self:GetCard() == "Agi" then
+	elseif card == "Agi" then
 		self:Agi(ply,persona)
 		return
-	elseif self:GetCard() == "Inferno" then
+	elseif card == "Inferno" then
 		self:Inferno(ply,persona)
 		return
-	elseif self:GetCard() == "Agilao" then
+	elseif card == "Agilao" then
 		self:Agilao(ply,persona)
 		return
-	elseif self:GetCard() == "Agidyne" then
+	elseif card == "Agidyne" then
 		self:Agidyne(ply,persona)
 		return
-	elseif self:GetCard() == "Maragi" then
+	elseif card == "Maragi" then
 		self:Maragi(ply,persona)
 		return
-	elseif self:GetCard() == "Maragidyne" then
+	elseif card == "Maragidyne" then
 		self:Maragidyne(ply,persona)
 		return
-	elseif self:GetCard() == "Titanomachia" then
+	elseif card == "Titanomachia" then
 		self:Titanomachia(ply,persona)
 		return
-	elseif self:GetCard() == "Blazing Hell" then
+	elseif card == "Blazing Hell" then
 		self:BlazingHell(ply,persona)
 		return
-	elseif self:GetCard() == "Maragion" then
+	elseif card == "Maragion" then
 		self:Maragion(ply,persona)
 		return
-	elseif self:GetCard() == "Yomi Drop" then
+	elseif card == "Yomi Drop" then
 		self:YomiDrop(ply,persona)
 		return
-	elseif self:GetCard() == "Myriad Mandala" then
+	elseif card == "Myriad Mandala" then
 		self:MyriadMandala(ply,persona)
 		return
-	elseif self:GetCard() == "Maziodyne" then
+	elseif card == "Maziodyne" then
 		self:Maziodyne(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Thunder Reign" then
+	elseif card == "Thunder Reign" then
 		self:ThunderReign(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Wild Thunder" then
+	elseif card == "Wild Thunder" then
 		self:WildThunder(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Colossal Storm" then
+	elseif card == "Colossal Storm" then
 		self:ColossalStorm(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Zio" then
+	elseif card == "Zio" then
 		self:Zio(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Zionga" then
+	elseif card == "Zionga" then
 		self:Zionga(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Ziodyne" then
+	elseif card == "Ziodyne" then
 		self:Ziodyne(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Mazio" then
+	elseif card == "Mazio" then
 		self:Mazio(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Mazionga" then
+	elseif card == "Mazionga" then
 		self:Mazionga(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Evil Smile" then
+	elseif card == "Evil Smile" then
 		self:EvilSmile(ply,persona,rmb)
 		return
-	elseif self:GetCard() == "Teleport" then
+	elseif card == "Teleport" then
 		self:Teleport(ply,persona)
 		return
-	elseif self:GetCard() == "Charge" then
+	elseif card == "Charge" then
 		self:Charge(ply,persona)
 		return
-	elseif self:GetCard() == "Concentrate" then
+	elseif card == "Concentrate" then
 		self:Concentrate(ply,persona)
 		return
-	elseif self:GetCard() == "Heat Riser" then
+	elseif card == "Heat Riser" then
 		self:HeatRiser(ply,persona)
 		return
-	-- elseif self:GetCard() == "Mamudoon" then
+	-- elseif card == "Mamudoon" then
 		-- self:Mamudoon(ply,persona)
 		-- return
-	-- elseif self:GetCard() == "Die For Me!" then
+	-- elseif card == "Die For Me!" then
 		-- self:DieForMe(ply,persona)
 		-- return
-	elseif self:GetCard() == "Salvation" then
+	elseif card == "Salvation" then
 		self:Salvation(ply,persona)
 		return
-	elseif self:GetCard() == "Cadenza" then
+	elseif card == "Cadenza" then
 		self:Cadenza(ply,persona)
 		return
-	elseif self:GetCard() == "Diarama" then
+	elseif card == "Diarama" then
 		self:Diarama(ply,persona)
 		return
-	elseif self:GetCard() == "Diarahan" then
+	elseif card == "Diarahan" then
 		self:Diarahan(ply,persona)
 		return
-	elseif self:GetCard() == "Mediarahan" then
+	elseif card == "Mediarahan" then
 		self:Mediarahan(ply,persona)
 		return
-	elseif self:GetCard() == "Debilitate" then
+	elseif card == "Debilitate" then
 		self:Debilitate(ply,persona)
 		return
-	elseif self:GetCard() == "Eigaon" then
+	elseif card == "Eigaon" then
 		self:Eigaon(ply,persona)
 		return
-	elseif self:GetCard() == "Maeigaon" then
+	elseif card == "Maeigaon" then
 		self:Maeigaon(ply,persona)
 		return
-	elseif self:GetCard() == "Garu" then
+	elseif card == "Garu" then
 		self:Garu(ply,persona)
 		return
-	elseif self:GetCard() == "Garudyne" then
+	elseif card == "Garudyne" then
 		self:Garudyne(ply,persona)
 		return
-	elseif self:GetCard() == "Magarudyne" then
+	elseif card == "Magarudyne" then
 		self:Magarudyne(ply,persona)
 		return
-	elseif self:GetCard() == "Megidola" then
+	elseif card == "Megidola" then
 		self:Megidola(ply,persona)
 		return
-	elseif self:GetCard() == "Megidolaon" then
+	elseif card == "Megidolaon" then
 		self:Megidolaon(ply,ply.Persona_EyeTarget)
 		return
-	elseif self:GetCard() == "Sinful Shell" then
+	elseif card == "Sinful Shell" then
 		self:SinfulShell(ply,persona)
 		return
-	elseif self:GetCard() == "Call of Chaos" then
+	elseif card == "Call of Chaos" then
 		self:CallOfChaos(ply,persona)
 		return
-	elseif self:GetCard() == "Abyssal Wings" then
+	elseif card == "Abyssal Wings" then
 		self:AbyssalWings(ply,persona)
 		return
-	elseif self:GetCard() == "Freila" then
+	elseif card == "Freila" then
 		self:Freila(ply,persona)
 		return
-	elseif self:GetCard() == "Freidyne" then
+	elseif card == "Freidyne" then
 		self:Freidyne(ply,persona)
 		return
-	elseif self:GetCard() == "Kougaon" then
+	elseif card == "Kougaon" then
 		self:Kougaon(ply,persona)
 		return
-	elseif self:GetCard() == "Makougaon" then
+	elseif card == "Makougaon" then
 		self:Makougaon(ply,persona)
 		return
-	elseif self:GetCard() == "Recover HP EX" then
+	elseif card == "Recover HP EX" then
 		self:RecoverHPEX(ply,persona)
 		return
-	elseif self:GetCard() == "Recover SP EX" then
+	elseif card == "Recover SP EX" then
 		self:RecoverSPEX(ply,persona)
 		return
-	elseif self:GetCard() == "Minor Buff" then
+	elseif card == "Minor Buff" then
 		self:MinorBuff(ply,persona)
 		return
-	elseif self:GetCard() == "Minor Shield" then
+	elseif card == "Minor Shield" then
 		self:MinorShield(ply,persona)
 		return
-	elseif self:GetCard() == "Minor Awareness" then
+	elseif card == "Minor Awareness" then
 		self:MinorAwareness(ply,persona)
 		return
-	elseif self:GetCard() == "Power Up" then
+	elseif card == "Power Up" then
 		self:PowerUp(ply,persona)
 		return
-	elseif self:GetCard() == "Ultimate Charge" then
+	elseif card == "Ultimate Charge" then
 		self:UltimateCharge(ply,persona)
 		return
-	elseif self:GetCard() == "Terror Claw" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Terror Claw" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Laevateinn" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Laevateinn" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Magatsu Blade" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Magatsu Blade" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Hassou Tobi" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Hassou Tobi" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Heaven's Blade" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Heaven's Blade" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Cross Slash" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Cross Slash" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Ghastly Wail" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Ghastly Wail" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "One-shot Kill" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "One-shot Kill" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Riot Gun" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Riot Gun" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Vorpal Blade" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Vorpal Blade" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Beast Weaver" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Beast Weaver" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Miracle Punch" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Miracle Punch" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Almighty Slash" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Almighty Slash" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Vajra Blast" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Vajra Blast" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Cleave" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Cleave" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Bash" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Bash" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "Gigantomachia" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "Gigantomachia" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
-	elseif self:GetCard() == "God's Hand" then
-		self.CurrentMeleeSkill = self:GetCard()
+	elseif card == "God's Hand" then
+		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
 		end
 		return
 	else
-		if ply:IsPlayer() && self:GetCard() then
-			ply:ChatPrint("Sorry, " .. self:GetCard() .. " has not been programmed yet. It will be available in the future!")
+		if ply:IsPlayer() && card then
+			ply:ChatPrint("Sorry, " .. card .. " has not been programmed yet. It will be available in the future!")
 			ply:EmitSound("cpthazama/persona5/misc/00103.wav")
 		end
 		return
@@ -812,6 +822,7 @@ function ENT:Think()
 				-- if self.User:IsNPC() && self.User.OnDisablePersona then
 					-- self.User:OnDisablePersona(self)
 				-- end
+				-- self.User:SetNW2Bool("Persona_SkillMenu",false)
 				SafeRemoveEntity(self)
 			end
 			return
@@ -1751,6 +1762,7 @@ function ENT:WhenRemoved() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRemove()
 	if IsValid(self.User) then
+		self.User:SetNW2Bool("Persona_SkillMenu",false)
 		self.User:SetNW2Vector("Persona_CustomPos",Vector(0,0,0))
 		self.User:StopParticles()
 

@@ -82,8 +82,11 @@ if SERVER then
 end
 
 if CLIENT then
+	CreateClientConVar("persona_dance_controller","0",false,false)
 	CreateClientConVar("persona_hud_x","350",false,false)
 	CreateClientConVar("persona_hud_y","350",false,false)
+	-- CreateClientConVar("persona_hud_skills_x","700",false,false)
+	-- CreateClientConVar("persona_hud_skills_y","350",false,false)
 	CreateClientConVar("persona_hud_damage","1",false,false)
 	CreateClientConVar("persona_hud_raidboss","0",false,false)
 	-- CreateClientConVar("vj_persona_dancemode","0",false,false)
@@ -363,6 +366,8 @@ hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
 
 	ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
 	ply:SetMaxSP(ply:GetSP())
+	ply:SetNW2Bool("Persona_BattleMode",false)
+	ply:SetNW2Bool("Persona_SkillMenu",false)
 	ply.Persona_MaxHealth = 100
 	ply:SetMaxHealth(100)
 	ply.PXP_NextXPChange = CurTime()
@@ -385,6 +390,8 @@ if SERVER then
 	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
 		ply:SetSP(ply:GetMaxSP() or (ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150))
 		ply:SetMaxSP(ply:GetSP())
+		ply:SetNW2Bool("Persona_BattleMode",false)
+		ply:SetNW2Bool("Persona_SkillMenu",false)
 		timer.Simple(0,function()
 			if IsValid(ply) then
 				ply:SetHealth(ply.Persona_MaxHealth)
@@ -807,6 +814,7 @@ if CLIENT then
 		["hud_psi"] = "Psychokinesis",
 		["hud_sleep"] = "Physiological",
 		["hud_wind"] = "Wind",
+		["hud_azathoth"] = "Summoning",
 		["hud_unknown"] = "Unknown"
 	}
 	local color = Color
@@ -836,6 +844,8 @@ if CLIENT then
 		local lvl = ply:GetNW2Int("PXP_Level")
 		local xp = ply:GetNW2Int("PXP_EXP")
 		local req_xp = ply:GetNW2Int("PXP_RequiredEXP")
+		local hasSkillMenu = ply:GetNW2Bool("Persona_SkillMenu")
+		local skillMenu = ply.Persona_CSSkills or {}
 
 		local corners = 1
 		local posX = GetConVarNumber("persona_hud_x") or 350
@@ -997,6 +1007,45 @@ if CLIENT then
 
 			local text = (tostring(target:GetNW2Int("PXP_EXP")) or "0") .. " EXP"
 			draw.SimpleText(text,"PXP_EXP",boxX +5,boxY +70,color(248,60,64,255))
+		end
+
+		// Skill Menu
+		if !hasSkillMenu then return end
+		local mCount = #skillMenu
+		local posX = GetConVarNumber("persona_hud_x") +350
+		local posY = GetConVarNumber("persona_hud_y")
+		if mCount > 13 then
+			for i = 1,mCount -13 do
+				posY = posY +25
+			end
+		end
+		local len = 325
+		local height = 35 +(mCount *23)
+		local colM = 35
+		local bColor = color(colM,colM,colM,255)
+		local boxX = posX
+		local boxHeight = posY
+		draw.RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,bColor)
+
+		posX = boxX -10
+		posY = boxHeight -10
+		len = 325
+		height = 30
+		colM = 80
+		bColor = color(colM,colM,colM,80)
+		for i,v in pairs(skillMenu) do
+			if v then
+				local name = v.Name
+				local cost = v.Cost
+				local doHP = v.UsesHP
+				if doHP then r,g,b = 107, 255, 222 else r,g,b = 255, 101, 239 end
+				local strCost = doHP && " HP)" or " SP)" -- Okay GMod, this exact code causes an error if its not a local variable. Dumbest shit I've ever seen Morty
+				if skillName == name then
+					draw.RoundedBox(corners,ScrW() -posX -10,ScrH() -posY -5,len,height,bColor)
+				end
+				draw.SimpleText(name .. " (" .. cost .. strCost,"PXP_EXP",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
+				posY = posY -25
+			end
 		end
 	end)
 

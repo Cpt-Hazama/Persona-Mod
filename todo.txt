@@ -1,6 +1,9 @@
 Skills
-	- Revamp Zio skills (make the current ones exclusive to Izanagi Personae)
 	- Add missing skills
 	- Add visual effect for skill range/radius (like Scramble)
 Models
 	- Revamp facial animations on characters
+Other
+	- "Battle Mode"
+		- When a player attacks another player or enemy, find the closest D_LI to the target and enters them into battle
+		- Make the player spectate a animatable for easy anim use (maybe)

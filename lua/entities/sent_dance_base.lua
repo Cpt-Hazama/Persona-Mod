@@ -168,7 +168,7 @@ if (CLIENT) then
 		local mode = ply:GetNW2Int("Persona_DanceMode")
 		if mode == 0 then return end
 
-		local usingController = GetConVarNumber("crosshair") == 1 -- Yeah idk
+		local usingController = GetConVarNumber("persona_dance_controller") == 1
 		local bUp = usingController && "lastinv" or "+forward"
 		local bLeft = usingController && "+reload" or "+moveleft"
 		local bRight = usingController && "+use" or "+moveright"
@@ -449,7 +449,7 @@ if (CLIENT) then
 		if !IsValid(me) then MsgN("Thanks GMod, very cool") end
 		me.Difficulty = GetConVarNumber("vj_persona_dancedifficulty")
 		me.DanceIndex = (me.DanceIndex or 0) +1
-		if !me.ApplyNotes then ply:ChatPrint("A weird problem occured...respawn the Dancer and it will be fixed"); me:Remove() return end
+		if !me.ApplyNotes then ply:ChatPrint("A weird problem occured...respawn the Dancer and it will be fixed"); SafeRemoveEntity(me) return end
 		me:ApplyNotes(seq,(seq && me.SongLength && me.SongLength[seq]) or length -4)
 		me.Persona_NextNoteT = CurTime() +3
 
@@ -607,7 +607,7 @@ function ENT:GetSequenceDuration(argent,actname)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PlaySound(name,vol,pit,notTable)
-	return VJ_PlaySound(self,(self.Sounds && self.Sounds[name] && VJ_PICK(self.Sounds[name])) or notTable,vol or 75,pit or 100)
+	return VJ_PlaySound(self,(self.Sounds && self.Sounds[name] && VJ_PICK(self.Sounds[name])) or notTable,vol or 75,pit or 100) or {0,0}
 end
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 if !(SERVER) then return end

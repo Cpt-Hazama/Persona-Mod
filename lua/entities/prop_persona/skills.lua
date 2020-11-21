@@ -1498,6 +1498,239 @@ end
 	-- end
 -- end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SummonTentacle(ply,persona,type,name)
+	local skill = name
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						if type == 1 && !IsValid(self.P_Tentacle01) then
+							self.P_Tentacle01 = ents.Create("prop_vj_animatable")
+							self.P_Tentacle01:SetModel("models/cpthazama/persona5/persona/azathoth_hand.mdl")
+							self.P_Tentacle01:SetPos(self:GetPos() +self:GetForward() *150)
+							self.P_Tentacle01:SetAngles(self:GetAngles())
+							self.P_Tentacle01:Spawn()
+							self.P_Tentacle01:DrawShadow(false)
+							self.P_Tentacle01:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+							self.P_Tentacle01:SetParent(self)
+							self:DeleteOnRemove(self.P_Tentacle01)
+							
+							self:DoChat("Summoned " .. name .. " for 3 minutes!")
+							
+							function self.P_Tentacle01:Think()
+								self:NextThink(CurTime())
+								local persona = self:GetParent()
+								self.NextSkillT = self.NextSkillT or CurTime() +10
+								self.DespawnT = self.DespawnT or CurTime() +180
+								if CurTime() > self.DespawnT then
+									for i = 1,self:GetBoneCount() -1 do
+										ParticleEffect("vj_impact1_blue",self:GetBonePosition(i),Angle(math.Rand(0,360),math.Rand(0,360),math.Rand(0,360)),nil)
+									end
+									self:Remove()
+								end
+								if IsValid(persona) then
+									local ply = persona.User
+
+									if CurTime() > self.NextSkillT && math.random(1,15) == 1 then
+										ply.Persona_RakukajaT = CurTime() +60
+										persona:DoChat("[Tentacle of Protection] Increased DEF for 60 seconds!")
+										ply:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+
+										local spawnparticle = ents.Create("info_particle_system")
+										spawnparticle:SetKeyValue("effect_name","vj_per_skill_def")
+										spawnparticle:SetPos(ply:GetPos())
+										spawnparticle:Spawn()
+										spawnparticle:Activate()
+										spawnparticle:Fire("Start","",0)
+										spawnparticle:Fire("Kill","",0.1)
+										
+										self:PlayAnimation("flinch",1,0,true)
+
+										self.NextSkillT = CurTime() +60
+									end
+								end
+								return true
+							end
+							
+							function self.P_Tentacle01:PlayAnimation(anim,rate,cycle,restart)
+								self:ResetSequence(anim)
+								self:SetPlaybackRate(rate or 1)
+								self:SetCycle(cycle or 0)
+								
+								local t = VJ_GetSequenceDuration(self,anim)
+								if restart then
+									timer.Simple(t,function()
+										if IsValid(self) then
+											self:PlayAnimation("idle",1,1)
+										end
+									end)
+								end
+								return t
+							end
+							
+							local tentacle = self.P_Tentacle01
+							tentacle:PlayAnimation("summon",1,0,true)
+						elseif type == 2 && !IsValid(self.P_Tentacle02) then
+							self.P_Tentacle02 = ents.Create("prop_vj_animatable")
+							self.P_Tentacle02:SetModel("models/cpthazama/persona5/persona/azathoth_hand.mdl")
+							self.P_Tentacle02:SetPos(self:GetPos() +self:GetForward() *55 +self:GetRight() *100)
+							self.P_Tentacle02:SetAngles(self:GetAngles())
+							self.P_Tentacle02:Spawn()
+							self.P_Tentacle02:DrawShadow(false)
+							self.P_Tentacle02:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+							self.P_Tentacle02:SetParent(self)
+							self:DeleteOnRemove(self.P_Tentacle02)
+							
+							self:DoChat("Summoned " .. name .. " for 3 minutes!")
+							
+							function self.P_Tentacle02:Think()
+								self:NextThink(CurTime())
+								local persona = self:GetParent()
+								self.NextSkillT = self.NextSkillT or CurTime() +10
+								self.DespawnT = self.DespawnT or CurTime() +180
+								if CurTime() > self.DespawnT then
+									for i = 1,self:GetBoneCount() -1 do
+										ParticleEffect("vj_impact1_blue",self:GetBonePosition(i),Angle(math.Rand(0,360),math.Rand(0,360),math.Rand(0,360)),nil)
+									end
+									self:Remove()
+								end
+								if IsValid(persona) then
+									local ply = persona.User
+
+									if CurTime() > self.NextSkillT && math.random(1,15) == 1 then
+										ply:SetHealth(math.Clamp(ply:Health() +(ply:GetMaxHealth() *0.35),1,ply:GetMaxHealth()))
+										persona:DoChat("[Tentacle of Healing] Restored 35% of your HP!")
+										ply:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+										ply:RemoveAllDecals()
+
+										local spawnparticle = ents.Create("info_particle_system")
+										spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
+										spawnparticle:SetPos(ply:GetPos())
+										spawnparticle:Spawn()
+										spawnparticle:Activate()
+										spawnparticle:Fire("Start","",0)
+										spawnparticle:Fire("Kill","",0.1)
+										
+										self:PlayAnimation("flinch",1,0,true)
+
+										self.NextSkillT = CurTime() +30
+									end
+								end
+								return true
+							end
+							
+							function self.P_Tentacle02:PlayAnimation(anim,rate,cycle,restart)
+								self:ResetSequence(anim)
+								self:SetPlaybackRate(rate or 1)
+								self:SetCycle(cycle or 0)
+								
+								local t = VJ_GetSequenceDuration(self,anim)
+								if restart then
+									timer.Simple(t,function()
+										if IsValid(self) then
+											self:PlayAnimation("idle",1,1)
+										end
+									end)
+								end
+								return t
+							end
+							
+							local tentacle = self.P_Tentacle02
+							tentacle:PlayAnimation("summon",1,0,true)
+						elseif type == 3 && !IsValid(self.P_Tentacle03) then
+							self.P_Tentacle03 = ents.Create("prop_vj_animatable")
+							self.P_Tentacle03:SetModel("models/cpthazama/persona5/persona/azathoth_hand.mdl")
+							self.P_Tentacle03:SetPos(self:GetPos() +self:GetForward() *55 +self:GetRight() *-100)
+							self.P_Tentacle03:SetAngles(self:GetAngles())
+							self.P_Tentacle03:Spawn()
+							self.P_Tentacle03:DrawShadow(false)
+							self.P_Tentacle03:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+							self.P_Tentacle03:SetParent(self)
+							self:DeleteOnRemove(self.P_Tentacle03)
+							
+							self:DoChat("Summoned " .. name .. " for 3 minutes!")
+							
+							function self.P_Tentacle03:Think()
+								self:NextThink(CurTime())
+								local persona = self:GetParent()
+								self.NextSkillT = self.NextSkillT or CurTime() +10
+								self.DespawnT = self.DespawnT or CurTime() +180
+								if CurTime() > self.DespawnT then
+									for i = 1,self:GetBoneCount() -1 do
+										ParticleEffect("vj_impact1_blue",self:GetBonePosition(i),Angle(math.Rand(0,360),math.Rand(0,360),math.Rand(0,360)),nil)
+									end
+									self:Remove()
+								end
+								if IsValid(persona) then
+									local ply = persona.User
+									local ent = ply:IsNPC() && ply:GetEnemy() or ply:GetNW2Entity("Persona_Target")
+
+									if IsValid(ent) then
+										if CurTime() > self.NextSkillT && math.random(1,30) == 1 then
+											ent.Persona_DebilitateT = CurTime() +60
+											local spawnparticle = ents.Create("info_particle_system")
+											spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_all")
+											spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+											spawnparticle:Spawn()
+											spawnparticle:Activate()
+											spawnparticle:Fire("Start","",0)
+											spawnparticle:Fire("Kill","",0.1)
+											ent:EmitSound("cpthazama/persona5/skills/0361.wav",90)
+											
+											persona:DoChat("[Tentacle of Assistance] Decreased target's ATK/DEF/Evasion for 1 minute!")
+											
+											self:PlayAnimation("attack",1,0,true)
+
+											self.NextSkillT = CurTime() +25
+										end
+									end
+								end
+								return true
+							end
+							
+							function self.P_Tentacle03:PlayAnimation(anim,rate,cycle,restart)
+								self:ResetSequence(anim)
+								self:SetPlaybackRate(rate or 1)
+								self:SetCycle(cycle or 0)
+								
+								local t = VJ_GetSequenceDuration(self,anim)
+								if restart then
+									timer.Simple(t,function()
+										if IsValid(self) then
+											self:PlayAnimation("idle",1,1)
+										end
+									end)
+								end
+								return t
+							end
+							
+							local tentacle = self.P_Tentacle03
+							tentacle:PlayAnimation("summon",1,0,true)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:EvilSmile(ply,persona)
 	if !IsValid(ply.Persona_EyeTarget) then
 		return

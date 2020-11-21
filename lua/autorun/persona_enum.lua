@@ -2,13 +2,16 @@
 function P_ADDSKILL(data)
 	local canAdd = true
 	for _,v in pairs(PERSONA_SKILLS) do if v.Name == data.Name then canAdd = false end end
+	if data.CanObtain == nil then
+		data.CanObtain = true
+	end
 	if canAdd then
 		table.insert(PERSONA_SKILLS,data)
 	end
 end
 
 function P_GETSKILL(name)
-	local data = {Name = "N/A", Cost = 0, UsesHP = false, Icon = "unknown"}
+	local data = {Name = "N/A", Cost = 0, UsesHP = false, Icon = "unknown", CanObtain = true}
 	for _,v in pairs(PERSONA_SKILLS) do
 		if v.Name == name then
 			data = v
@@ -197,3 +200,8 @@ P_ADDSKILL({Name = "Megidola",Cost = 24,UsesHP = false,Icon = "almighty"})
 P_ADDSKILL({Name = "Megidolaon",Cost = 38,UsesHP = false,Icon = "almighty"})
 P_ADDSKILL({Name = "Laevateinn",Cost = 25,UsesHP = true,Icon = "almighty"})
 P_ADDSKILL({Name = "Ghastly Wail",Cost = 28,UsesHP = true,Icon = "almighty"})
+
+	-- Unique --
+-- P_ADDSKILL({Name = "Tentacle of Protection",Cost = 100,UsesHP = false,Icon = "azathoth",CanObtain = false})
+-- P_ADDSKILL({Name = "Tentacle of Healing",Cost = 100,UsesHP = false,Icon = "azathoth",CanObtain = false})
+-- P_ADDSKILL({Name = "Tentacle of Assistance",Cost = 100,UsesHP = false,Icon = "azathoth",CanObtain = false})
