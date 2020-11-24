@@ -881,7 +881,6 @@ function ENT:GetMeleeCost()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AddCard(name,req,isHP,icon)
-	self.CardTable = self.CardTable or {}
 	self.CardTable[#self.CardTable +1] = {Name=name,Cost=req,UsesHP=isHP,Icon=(icon or "unknown")}
 
 	self.Cards = self.Cards or {}
@@ -889,6 +888,11 @@ function ENT:AddCard(name,req,isHP,icon)
 	self.Cards[name].Cost = req
 	self.Cards[name].UsesHP = isHP
 	self.Cards[name].Icon = icon or "unknown"
+
+	net.Start("Persona_UpdateCards")
+		net.WriteEntity(self)
+		net.WriteTable(self.CardTable)
+	net.Broadcast()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CheckCards()

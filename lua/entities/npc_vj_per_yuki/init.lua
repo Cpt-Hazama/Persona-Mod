@@ -62,7 +62,7 @@ ENT.Personas = {
 	[4] = "messiah",
 }
 
-ENT.NextSoundTime_Pain = VJ_Set(0.2,0.5)
+-- ENT.NextSoundTime_Pain = VJ_Set(0.2,0.5)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Controller_Initialize(ply)
     net.Start("vj_persona_hud_yuki")

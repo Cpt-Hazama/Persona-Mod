@@ -178,7 +178,6 @@ function PLY:CreateParty(ent)
 end
 
 function PLY:AddToParty(ent)
-	-- print(ent)
 	net.Start("persona_party")
 		net.WriteEntity(self)
 		net.WriteEntity(ent)
@@ -283,7 +282,8 @@ if CLIENT then
 	function PLY:DisbandParty()
 		self.Persona_Party = self.Persona_Party or {}
 		for _,v in pairs(self.Persona_Party) do
-			if v:IsPlayer() then
+			-- if v:IsPlayer() then
+			if type(v) == "string" then
 				local member = player.GetByUniqueID(v)
 				if member && member.Persona_HUD_Avatar then
 					member.Persona_HUD_Avatar:Remove()

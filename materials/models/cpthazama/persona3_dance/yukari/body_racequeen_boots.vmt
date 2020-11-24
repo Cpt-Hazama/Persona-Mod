@@ -1,0 +1,27 @@
+"VertexlitGeneric"
+{
+	"$basetexture" 				"models/cpthazama/persona3_dance/yukari/body_racequeen"
+	//"$bumpmap" 					"models/cpthazama/persona3_dance/yukari/body_racequeen_n"
+	"$phongexponenttexture" 	"models/cpthazama/persona3_dance/yukari/body_racequeen_s"
+	
+	"$normalmapalphaenvmapmask"	"1"
+	"$phong"					"1"
+	"$phongexponent"			"15"
+	"$phongboost"				"20"
+	"$phongtint"				"[0.4 0.4 0.5]"
+	"$phongfresnelranges"		"[0.67 0.83 1]"
+	"$phongalbedotint" 			"1"
+
+	"$blendtintbybasealpha" 	"1"
+	"$blendtintcoloroverbase" 	"0"
+
+	"$envmap"					"env_cubemap"
+	"$envmaptint"				"[0.4 0.4 0.5]"
+
+	"$rimlight" 				"1"
+	"$rimlightexponent" 		"2"
+	"$rimlightboost" 			"15"
+	"$rimmask" 					"1"
+
+	"$lightwarptexture"			"models/cpthazama/persona5/warp2"
+}

@@ -14,6 +14,13 @@ local VJExists = file.Exists("lua/autorun/vj_base_autorun.lua","GAME")
 if VJExists == true then
 	include('autorun/vj_controls.lua')
 
+	if CLIENT then
+		VJ.AddClientConVar("vj_persona_music",1)
+		VJ.AddClientConVar("vj_persona_dancemode",0)
+		VJ.AddClientConVar("vj_persona_dancedifficulty",2)
+		VJ.AddClientConVar("vj_persona_dancevol",60)
+	end
+
 	local vCat = "Persona"
 	VJ.AddCategoryInfo(vCat,{Icon = "vj_icons/persona.png"})
 	VJ.AddCategoryInfo(vCat .. " - Gamemode",{Icon = "vj_icons/persona.png"})
@@ -52,11 +59,6 @@ if VJExists == true then
 		-- Persona Gamemode Exclusives --
 	-- VJ.AddNPC("Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat .. " - Gamemode")
 	-- VJ.AddNPC("Munehisa Iwai","npc_vj_per_vendor_iwai",vCat .. " - Gamemode")
-
-	VJ.AddClientConVar("vj_persona_music",1)
-	VJ.AddClientConVar("vj_persona_dancemode",0)
-	VJ.AddClientConVar("vj_persona_dancedifficulty",2)
-	VJ.AddClientConVar("vj_persona_dancevol",60)
 	
 	CUE_BATTLE_DISADVANTAGE = 1
 	CUE_BATTLE_ADVANTAGE = 2

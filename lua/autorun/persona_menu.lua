@@ -4,6 +4,23 @@ if SERVER then
 	util.AddNetworkString("Persona_UpdateSkillMenu")
 end
 
+local function UpdateTable(ply)
+	local persona = ply:GetPersona()
+	if !IsValid(persona) then
+		return
+	end
+	local old = ply:GetNW2Bool("Persona_SkillMenu")
+	ply:SetNW2Bool("Persona_SkillMenu",!old)
+	if ply:GetNW2Bool("Persona_SkillMenu") then
+		-- if SERVER then persona:UpdateCardTable() end
+		net.Start("Persona_UpdateSkillMenu")
+			net.WriteEntity(ply)
+			net.WriteTable(persona.CardTable)
+		net.Send(ply)
+	end
+end
+concommand.Add("persona_updateskilltable",UpdateTable)
+
 if CLIENT then
 	net.Receive("Persona_UpdateSkillMenu",function(len,ply)
 		local p = net.ReadEntity()
@@ -50,22 +67,6 @@ if CLIENT then
 	end)
 end
 
-local function UpdateTable(ply)
-	local persona = ply:GetPersona()
-	if !IsValid(persona) then
-		return
-	end
-	local old = ply:GetNW2Bool("Persona_SkillMenu")
-	ply:SetNW2Bool("Persona_SkillMenu",!old)
-	if ply:GetNW2Bool("Persona_SkillMenu") then
-		net.Start("Persona_UpdateSkillMenu")
-			net.WriteEntity(ply)
-			net.WriteTable(persona.CardTable)
-		net.Send(ply)
-	end
-end
-concommand.Add("persona_updateskilltable",UpdateTable)
-
 local function ShowStats(ply)
 	-- if SERVER then
 		local persona = ply:GetPersona()
@@ -73,14 +74,17 @@ local function ShowStats(ply)
 			ply:ChatPrint("Summon your Persona first!")
 			return
 		end
-		net.Start("Persona_ShowStatsMenu")
-			net.WriteString(PERSONA[ply:GetPersonaName()].Name)
-			net.WriteInt(persona.Stats.STR,32)
-			net.WriteInt(persona.Stats.MAG,32)
-			net.WriteInt(persona.Stats.END,32)
-			net.WriteInt(persona.Stats.AGI,32)
-			net.WriteInt(persona.Stats.LUC,32)
-		net.Send(ply)
+		local stats = persona.Stats
+		if stats then
+			net.Start("Persona_ShowStatsMenu")
+				net.WriteString(PERSONA[ply:GetPersonaName()].Name)
+				net.WriteInt(stats.STR,32)
+				net.WriteInt(stats.MAG,32)
+				net.WriteInt(stats.END,32)
+				net.WriteInt(stats.AGI,32)
+				net.WriteInt(stats.LUC,32)
+			net.Send(ply)
+		end
 		local stats = persona.Stats
 		ply:ChatPrint(persona.FeedName .. "'s Stats:")
 		ply:ChatPrint("STR - " .. stats.STR)

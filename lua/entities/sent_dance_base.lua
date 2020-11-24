@@ -21,6 +21,7 @@ ENT.HasLamp = true
 ENT.LampRGB = false
 ENT.ViewMode = 2 -- 0 = None, 1 = Follow, 2 = Dance, Dance!
 ENT.ViewBone = "Spine2"
+ENT.WaitForNextSongToStartTime = 0.01
 
 ENT.Difficulty = 2 -- 1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're stupid
 
@@ -83,6 +84,10 @@ if SERVER then
 
 	function ENT:OnStartDance(seq,song,songName,dance) end
 
+	function ENT:OnWaitForNextSong() end
+
+	function ENT:OnEndWaitForNextSong() end
+
 	util.AddNetworkString("Persona_Dance_Song")
 	util.AddNetworkString("Persona_Dance_ModeStart")
 end
@@ -90,6 +95,12 @@ end
 function ENT:SetupDataTables()
 	self:NetworkVar("String",0,"Song")
 	self:NetworkVar("String",1,"SongName")
+	self:NetworkVar("Float",1,"ViewMode")
+	
+	if CLIENT then
+		self.ViewMode = GetConVarNumber("vj_persona_dancemode")
+		self:SetViewMode(GetConVarNumber("vj_persona_dancemode"))
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if (CLIENT) then
@@ -101,6 +112,9 @@ if (CLIENT) then
 		self.DanceIndex = 0
 		self.NextSpeakT = 0
 		self:ClientInit()
+		
+		self.ViewMode = GetConVarNumber("vj_persona_dancemode")
+		self:SetViewMode(GetConVarNumber("vj_persona_dancemode"))
 	end
 
 	function ENT:AddNote(seq,dir,timer,spawnTime)
@@ -255,7 +269,7 @@ if (CLIENT) then
 							if ply.Persona_Dance_LastCheerT > CurTime() then
 								ply.Persona_Dance_LastCheerT = math.Clamp(ply.Persona_Dance_LastCheerT +0.25,CurTime(),CurTime() +10)
 							else
-								ply.Persona_Dance_LastNoteT = CurTime() +5
+								ply.Persona_Dance_LastNoteT = CurTime() +10
 								ply.Persona_Dance_HitTimes = ply.Persona_Dance_HitTimes +1
 							end
 							if ply.Persona_Dance_HitTimes >= 25 && ply.Persona_Dance_LastNoteT > CurTime() && CurTime() > ply.Persona_Dance_LastCheerT then
@@ -360,8 +374,9 @@ if (CLIENT) then
 		end
 
 		local boost = ply.Persona_Dance_LastCheerT > CurTime()
+		local canExpand = ply.Persona_Dance_LastNoteT > CurTime() || boost
 		local mBoxCol = Color(0,255,255,150)
-		local sBoxHeight = boost && 350 or 290 -- 60 dif | 130 | 160 dif
+		local sBoxHeight = canExpand && 350 or 290 -- 60 dif | 130 | 160 dif
 
 		local hT = ply.Persona_Dance_HitData
 		local hP = hT.Perfect
@@ -383,11 +398,11 @@ if (CLIENT) then
 		-- draw.SimpleText("High Score - " .. ply:GetNW2Int("Persona_Dance_HighScore"),"Persona",ScrW() -350,ScrH() -620 -60,Color(255,0,0))
 
 
-		if boost then
-			mBoxCol = dancer:HSL((RealTime() *250 -(0 *15)),128,128)
-			local r = ply.Persona_Dance_LastCheerT -CurTime()
+		if canExpand then
+			mBoxCol = boost && dancer:HSL((RealTime() *250 -(0 *15)),128,128) or mBoxCol
+			local r = boost && ply.Persona_Dance_LastCheerT -CurTime() or (ply.Persona_Dance_LastNoteT -CurTime())
 			-- local r = 10
-			draw.RoundedBox(8,ScrW() -335, ScrH() -480,30 *r,45,mBoxCol)
+			draw.RoundedBox(8,ScrW() -335, ScrH() -480,30 *r,45,boost && mBoxCol or Color(0,175,80,245))
 		end
 		draw.RoundedBox(8,ScrW() /2 -30, ScrH() /2 -30,60,60,mBoxCol)
 
@@ -447,6 +462,11 @@ if (CLIENT) then
 		local length = net.ReadInt(12)
 
 		if !IsValid(me) then MsgN("Thanks GMod, very cool") end
+		if LocalPlayer() != ply then return end
+		-- if me.ViewMode != 0 then
+			-- if ply != me.Persona_Player then return end
+		-- end
+		me.Persona_Player = ply
 		me.Difficulty = GetConVarNumber("vj_persona_dancedifficulty")
 		me.DanceIndex = (me.DanceIndex or 0) +1
 		if !me.ApplyNotes then ply:ChatPrint("A weird problem occured...respawn the Dancer and it will be fixed"); SafeRemoveEntity(me) return end
@@ -506,6 +526,8 @@ if (CLIENT) then
 		-- ply:SetNW2Int("Persona_Dance_Score",0)
 		-- ply:SetNW2Int("Persona_Dance_HighScore",0)
 
+		if ply != self.Persona_Player then return end
+		print(ply,self.Persona_Player)
 		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == self:GetSong() then
 			local cont = true
 			for _,v in pairs(ents.FindByClass("sent_dance_*")) do
@@ -554,6 +576,7 @@ function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
 						net.WriteInt(self:GetSequenceDuration(self,dance),12)
 					net.Broadcast()
 				end
+				self.DanceIndex = self.DanceIndex +1
 				self:SetSong(song)
 				self.SongName = songName
 				self:SetSongName(songName)
@@ -646,7 +669,8 @@ function ENT:Initialize()
 		if IsValid(self) then
 			if IsValid(self:GetCreator()) && self:GetCreator():IsPlayer() then
 				self:SetPos(self:GetPos() +Vector(0,0,self.HeightOffset))
-				self.ViewMode = GetConVarNumber("vj_persona_dancemode")
+				self.ViewMode = GetConVarNumber("vj_persona_dancemode") or 2
+				-- self.ViewMode = self:GetViewMode()
 				if self.ViewMode != 0 then
 					self:GetCreator():SetNW2Entity("Persona_Dancer",self)
 					self:GetCreator():SetNW2Int("Persona_DanceMode",self.ViewMode)
@@ -749,6 +773,16 @@ end
 function ENT:Think()
 	self:HandleKeys(IsValid(self.Creator) && self.Creator)
 	if CurTime() > self.NextDanceT then
+		if self.DanceIndex != 0 && !self.WaitingToStart then
+			self.WaitingToStart = true
+			self:OnWaitForNextSong()
+			self.NextDanceT = CurTime() +self.WaitForNextSongToStartTime
+			return
+		end
+		if self.WaitingToStart then
+			self.WaitingToStart = false
+			self:OnEndWaitForNextSong()
+		end
 		local song = VJ_PICK(self.SoundTracks)
 		-- PrintTable(self.Animations[song.dance])
 		local anim = self.Animations[song.dance][1].anim

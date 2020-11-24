@@ -12,13 +12,23 @@ ENT.AdminOnly = false
 ENT.AutomaticFrameAdvance = true
 
 ENT.IsPersona = true
+ENT.CardTable = {}
 
 ENT.AllowFading = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	util.AddNetworkString("Persona_SetName")
 	util.AddNetworkString("Persona_InstaKill")
+	util.AddNetworkString("Persona_UpdateCards")
 end
+---------------------------------------------------------------------------------------------------------------------------------------------
+-- if CLIENT then
+	-- net.Receive("Persona_UpdateCards",function(len)
+		-- local tb = net.ReadTable()
+
+		-- self.CardTable = tb
+	-- end)
+-- end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t)
 	// Custom code here
