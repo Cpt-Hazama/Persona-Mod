@@ -61,6 +61,44 @@ function ENT:MyriadMandala(ply,persona)
 	self:MyriadTruths(ply,persona,DMG_P_CURSE)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MarinKarin(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Marin Karin"
+	local chance = 75
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:BrainWash(ent,75,100)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GhostlyWail(ply) // Magatsu-Izanagi Skill
 	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
 		self:SetTask("TASK_ATTACK")

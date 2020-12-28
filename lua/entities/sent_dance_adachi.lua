@@ -28,6 +28,9 @@ ENT.SoundTracks = {
 	[1] = {dance = "dance_thefog", song = "cpthazama/persona4_dance/music/c013.mp3", name = "The Fog"}
 }
 
+ENT.Outfits = {}
+ENT.Outfits[1] = {Name = "Detective Uniform", Model = "", Offset = 0.1, ReqSong = nil, ReqScore = 0}
+
 ENT.SongLength = {}
 ENT.SongLength["dance_thefog"] = 249
 
@@ -40,6 +43,10 @@ F_TF_B = 2400
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
+		local function Cinematic(frame,data,seq,maxFrames)
+			self:AddCinematicEvent(seq,frame,data,maxFrames)
+		end
+	
 		self:ManipulateBoneJiggle(24,1) -- Suit
 		self:ManipulateBoneJiggle(25,1)
 		self:ManipulateBoneJiggle(26,1)
@@ -62,6 +69,13 @@ if SERVER then
 		-- self:ManipulateBoneJiggle(39,1)
 		-- self:ManipulateBoneJiggle(40,1)
 		-- self:ManipulateBoneJiggle(41,1)
+
+		self:SetCinematicData()
+		Cinematic(1,{f=90,r=0,u=0,dist=0,speed=15},"dance_thefog",F_TF)
+		Cinematic(200,{f=40,r=15,u=20,dist=0,speed=100},"dance_thefog",F_TF)
+		Cinematic(400,{f=60,r=-20,u=15,dist=0,speed=3},"dance_thefog",F_TF)
+		Cinematic(1756,{f=40,r=-0,u=15,dist=0,speed=100},"dance_thefog",F_TF)
+		Cinematic(1785,{f=60,r=-0,u=20,dist=0,speed=2},"dance_thefog",F_TF)
 
 		self:AddAnimationEvent("dance_thefog",1,"default",F_TF)
 		self:AddAnimationEvent("dance_thefog",20,"neutral",F_TF)

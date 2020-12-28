@@ -194,6 +194,7 @@ P_ADDSKILL({Name = "Heat Riser",Cost = 30,UsesHP = false,Icon = "passive"})
 
 	-- Sleep/Ailemt --
 P_ADDSKILL({Name = "Evil Smile",Cost = 12,UsesHP = false,Icon = "sleep"})
+P_ADDSKILL({Name = "Marin Karin",Cost = 5,UsesHP = false,Icon = "sleep"})
 
 	-- Almighty --
 P_ADDSKILL({Name = "Megidola",Cost = 24,UsesHP = false,Icon = "almighty"})

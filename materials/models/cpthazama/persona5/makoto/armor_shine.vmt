@@ -1,32 +1,19 @@
 "VertexlitGeneric"
 {
 	"$basetexture" "models/cpthazama/persona5/makoto/armor"
-	"$bumpmap" "models/cpthazama/persona5/makoto/armor_n"
-	"$phongexponenttexture" "models/cpthazama/persona5/makoto/armor_s"
+	"$bumpmap" "models/cpthazama/persona5/makoto/armor_n2"
+	"$phongexponenttexture" "models/cpthazama/persona5/makoto/armor_s2"
 
 	"$phong"				"1"
-	"$phongboost"			"0.1"
+	"$phongboost"			"0.15"
 	"$phongfresnelranges"	"[1 1 1]"
 	"$phongtint"			"[0 0.15 1]"
 
-	"$rimlight" "1"
-	"$rimlightexponent" "1"
-	"$rimlightboost" "200"
-	"$rimmask" "1"
-
-	//"$phong"				"1"
-	//"$phongboost"			"0.1"
-	//"$phongfresnelranges"	"[1 1 1]"
-
-	//"$rimlight" "1"
-	//"$rimlightexponent" "1"
-	//"$rimlightboost" "1"
-	//"$rimmask" "1"
-
+	"$normalmapalphaenvmapmask"	"1"
 	"$envmap" "models/cpthazama/persona5/makoto/envmap"
-	"$envmaptint" "[0.001 0.001 0.002]"
+	"$envmaptint" "[0.001 0.001 0.0035]"
 	"$envmapfresnel" "1"
 
-	"$lightwarptexture" "models/cpthazama/persona5/cel_blue"
-	//"$lightwarptexture" "models/cpthazama/persona5/warp2"
+	//"$lightwarptexture" "models/cpthazama/persona5/cel_blue"
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
 }

@@ -26,6 +26,9 @@ ENT.SoundTracks = {
 	[1] = {dance = "dance_specialist", song = "cpthazama/persona4_dance/music/c001.mp3", name = "Specialist -Remix-"}
 }
 
+ENT.Outfits = {}
+ENT.Outfits[1] = {Name = "Yasogami Winter Uniform", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
+
 ENT.TrackNotes = {}
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if CLIENT then
@@ -124,6 +127,10 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
+		local function Cinematic(frame,data,seq,maxFrames)
+			self:AddCinematicEvent(seq,frame,data,maxFrames)
+		end
+
 		-- self:ManipulateBoneJiggle(1,1)
 		self:ManipulateBoneJiggle(2,1)
 		self:ManipulateBoneJiggle(3,1)
@@ -132,6 +139,26 @@ if SERVER then
 		self:ManipulateBoneJiggle(6,1)
 		self:ManipulateBoneJiggle(39,1)
 		self:ManipulateBoneJiggle(61,1)
+
+		self:SetCinematicData()
+		Cinematic(1,{f=90,r=0,u=0,dist=0,speed=15},"dance_specialist",4167)
+		Cinematic(5,{f=70,r=0,u=0,dist=0,speed=1},"dance_specialist",4167)
+		Cinematic(15,{f=50,r=0,u=0,dist=0,speed=1},"dance_specialist",4167)
+		Cinematic(30,{f=30,r=0,u=0,dist=0,speed=1},"dance_specialist",4167)
+		Cinematic(45,{f=10,r=0,u=0,dist=0,speed=1,bone="neck"},"dance_specialist",4167)
+		Cinematic(70,{f=10,r=0,u=0,dist=0,speed=false,bone="head"},"dance_specialist",4167)
+		Cinematic(108,{f=25,r=-25,u=0,dist=0,speed=false,bone="head"},"dance_specialist",4167)
+		Cinematic(180,{f=80,r=25,u=0,dist=0,speed=false},"dance_specialist",4167)
+		Cinematic(290,{f=15,r=25,u=0,dist=0,speed=false,bone="head"},"dance_specialist",4167)
+		Cinematic(390,{f=25,r=-8,u=20,dist=0,speed=false,bone="head"},"dance_specialist",4167)
+		Cinematic(420,{f=25,r=15,u=-10,dist=0,speed=false,bone="head"},"dance_specialist",4167)
+		Cinematic(435,{f=35,r=0,u=-5,dist=0,speed=false,bone="R_Knee"},"dance_specialist",4167)
+		Cinematic(500,{f=55,r=-5,u=0,dist=0,speed=false},"dance_specialist",4167)
+		Cinematic(610,{f=20,r=-10,u=0,dist=0,speed=false,bone="R_hand"},"dance_specialist",4167)
+		Cinematic(630,{f=20,r=10,u=0,dist=0,speed=false,bone="L_hand"},"dance_specialist",4167)
+		Cinematic(660,{f=50,r=0,u=0,dist=0,speed=false,bone="head"},"dance_specialist",4167)
+		Cinematic(745,{f=20,r=10,u=0,dist=0,speed=false,bone="head"},"dance_specialist",4167)
+		Cinematic(785,{f=20,r=-10,u=0,dist=0,speed=false,bone="head"},"dance_specialist",4167)
 	
 		self:AddAnimationEvent("dance_specialist",0,"default",4167)
 		self:AddAnimationEvent("dance_specialist",1,"default",4167)

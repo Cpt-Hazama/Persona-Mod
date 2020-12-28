@@ -82,15 +82,27 @@ if SERVER then
 end
 
 if CLIENT then
-	CreateClientConVar("persona_dance_controller","0",false,false)
-	CreateClientConVar("persona_hud_x","350",false,false)
-	CreateClientConVar("persona_hud_y","350",false,false)
-	-- CreateClientConVar("persona_hud_skills_x","700",false,false)
-	-- CreateClientConVar("persona_hud_skills_y","350",false,false)
-	CreateClientConVar("persona_hud_damage","1",false,false)
-	CreateClientConVar("persona_hud_raidboss","0",false,false)
-	-- CreateClientConVar("vj_persona_dancemode","0",false,false)
-	-- CreateClientConVar("vj_persona_dancedifficulty","2",false,false)
+	local function CConVar(name,val,save,min,max)
+		CreateClientConVar(name,val,save,true,nil,min,max)
+	end
+
+	CConVar("vj_persona_music","1",true,0,1)
+	CConVar("vj_persona_dancemode","1",true,0,2)
+	CConVar("vj_persona_dancedifficulty","2",true,1,5)
+	CConVar("vj_persona_dancevol","60",true,15,100)
+	CConVar("persona_dance_controller","0",true,0,1)
+	CConVar("persona_dance_cinematic","0",true,0,1)
+
+	CConVar("persona_dance_hud_r","255",true,0,255)
+	CConVar("persona_dance_hud_g","255",true,0,255)
+	CConVar("persona_dance_hud_b","255",true,0,255)
+
+	CConVar("persona_hud_x","350",true)
+	CConVar("persona_hud_y","350",true)
+	-- CConVar("persona_hud_skills_x","700",true)
+	-- CConVar("persona_hud_skills_y","350",true)
+	CConVar("persona_hud_damage","1",true,0,1)
+	CConVar("persona_hud_raidboss","0",true,0,1)
 
 	net.Receive("persona_csound",function(len,pl)
 		local ply = net.ReadEntity()
@@ -557,6 +569,14 @@ if SERVER then
 			local dmg = dmginfo:GetDamage()
 			local attacker = dmginfo:GetAttacker()
 			local persona = ent:GetPersona()
+			
+			if ent.Persona_BrainWashed then
+				if ent.Persona_BrainWashers then
+					if IsValid(attacker) && VJ_HasValue(ent.Persona_BrainWashers,attacker) then
+						dmginfo:SetDamage(0)
+					end
+				end
+			end
 			
 			if IsValid(attacker) && (attacker:IsNPC() or attacker:IsPlayer()) && IsValid(attacker:GetPersona()) && useMarkers() then
 				local color = Color(0,161,255)

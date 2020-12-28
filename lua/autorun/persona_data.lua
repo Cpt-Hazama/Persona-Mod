@@ -170,6 +170,11 @@ PERSONA["loki_shadow"].Model = "models/cpthazama/persona5/persona/loki.mdl"
 PERSONA["loki_shadow"].Aura = "jojo_aura_red"
 PERSONA["loki_shadow"].Name = "Loki (Shadow)"
 
+PERSONA["pandora"] = {}
+PERSONA["pandora"].Model = "models/cpthazama/persona5_strikers/persona/pandora.mdl"
+PERSONA["pandora"].Aura = "jojo_aura_blue"
+PERSONA["pandora"].Name = "Pandora"
+
 -- PERSONA["hereward"] = {}
 -- PERSONA["hereward"].Model = "models/cpthazama/persona5/persona/hereward.mdl"
 -- PERSONA["hereward"].Aura = "jojo_aura_red"

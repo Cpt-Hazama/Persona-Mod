@@ -1,20 +1,19 @@
 "VertexlitGeneric"
 {
 	"$basetexture" "models/cpthazama/persona3_dance/yukari/body_dance"
-	"$bumpmap" "models/cpthazama/persona3_dance/yukari/body_dance_n"
+	//"$bumpmap" "models/cpthazama/persona3_dance/yukari/body_dance_n"
 	"$phongexponenttexture" "models/cpthazama/persona3_dance/yukari/body_dance_s"
 	
 	"$translucent" "1"
 
 	"$phong"				"1"
-	"$phongboost"			"0.05"
-	"$phongfresnelranges"	"[0 0.5 1]"
-	"$phongtint"			"[0.6 0.6 0.6]"
+	"$phongboost"			"4"
+	"$phongfresnelranges"	"[0.67 0.83 1]"
+	"$phongtint"			"{255 126 178}"
 
-	"$rimlight" "1"
-	"$rimlightexponent" "1"
-	"$rimlightboost" "15"
-	"$rimmask" "1"
+	"$envmap" "models/cpthazama/persona5/makoto/envmap"
+	"$envmaptint" "[0.01 0.0045 0.0075]"
+	"$envmapfresnel" "10"
 
 	"$lightwarptexture" "models/cpthazama/persona5/warp2"
 }

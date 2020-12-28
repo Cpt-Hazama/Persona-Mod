@@ -1,0 +1,18 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona3_dance/fuuka/misc"
+	"$bumpmap" "models/cpthazama/persona3_dance/fuuka/misc_n"
+	"$phongexponenttexture" "models/cpthazama/persona3_dance/fuuka/misc_s"
+
+	"$phong"				"1"
+	"$phongboost"			"0.05"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongtint"			"[0.6 0.6 0.6]"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "15"
+	"$rimmask" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}

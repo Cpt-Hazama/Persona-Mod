@@ -26,6 +26,9 @@ ENT.SoundTracks = {
 	[1] = {dance = "dance_willpower", song = "cpthazama/persona5_dance/music/h024.mp3", name = "Will Power"}
 }
 
+ENT.Outfits = {}
+ENT.Outfits[1] = {Name = "Detective Uniform", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
+
 ENT.Sounds = {}
 ENT.Sounds["start"] = {
 	"cpthazama/persona5_dance/akechi/24-005.wav",
@@ -139,6 +142,42 @@ BG_BROW_HAPPY = 2
 BG_EYES_DEFAULT = 0
 BG_EYES_SMALL = 1
 ---------------------------------------------------------------------------------------------------------------------------------------------
+if CLIENT then
+	function ENT:ClientInit()
+		local seq = "dance_willpower"
+		local lifeTime = 1
+		local offset = 0.5 -- Lazy be like
+		self:AddNote(seq,"s",lifeTime,8 -lifeTime -offset)
+		self:AddNote(seq,"a",lifeTime,9 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,9.625 -lifeTime -offset)
+		self:AddNote(seq,"d",lifeTime,10.5 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,11.5 -lifeTime -offset)
+		self:AddNote(seq,"a",lifeTime,12.25 -lifeTime -offset)
+		self:AddNote(seq,"d",lifeTime,13 -lifeTime -offset)
+		self:AddNote(seq,"a",lifeTime,13.75 -lifeTime -offset)
+		self:AddNote(seq,"d",lifeTime,14 -lifeTime -offset)
+		self:AddNote(seq,"d",lifeTime,14.25 -lifeTime -offset)
+		self:AddNote(seq,"a",lifeTime,14.5 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,15 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,15.25 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,15.5 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,16 -lifeTime -offset)
+		self:AddNote(seq,"a",lifeTime,16.5 -lifeTime -offset)
+		self:AddNote(seq,"d",lifeTime,17 -lifeTime -offset)
+		self:AddNote(seq,"a",lifeTime,17.5 -lifeTime -offset)
+		self:AddNote(seq,"a",lifeTime,17.75 -lifeTime -offset)
+		self:AddNote(seq,"a",lifeTime,18 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,18.5 -lifeTime -offset)
+		self:AddNote(seq,"d",lifeTime,18.75 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,19.25 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,19.5 -lifeTime -offset)
+		self:AddNote(seq,"a",lifeTime,19.75 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,20 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,21 -lifeTime -offset)
+		self:AddNote(seq,"s",lifeTime,21.25 -lifeTime -offset)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnStartDance(seq,song,songName,dance)
 		local mode = GetConVarNumber("vj_persona_dancemode")
@@ -236,6 +275,32 @@ if SERVER then
 		self:AddAnimationEvent("dance_willpower",4744,"insane",F_WP)
 		self:AddAnimationEvent("dance_willpower",4824,"neutral",F_WP)
 		self:AddAnimationEvent("dance_willpower",4928,"default",F_WP)
+
+		local function Cinematic(frame,data,seq,maxFrames)
+			self:AddCinematicEvent(seq,frame,data,maxFrames)
+		end
+
+		self:SetCinematicData()
+		Cinematic(1,{f=90,r=-180,u=40,dist=0,speed=100},"dance_willpower",F_WP)
+		Cinematic(4,{f=25,r=80,u=0,dist=0,speed=0.01},"dance_willpower",F_WP)
+		Cinematic(100,{f=25,r=10,u=20,dist=0,speed=2},"dance_willpower",F_WP)
+		Cinematic(175,{f=35,r=0,u=0,dist=0,speed=2},"dance_willpower",F_WP)
+		Cinematic(230,{f=35,r=15,u=25,dist=0,speed=2},"dance_willpower",F_WP)
+		Cinematic(325,{f=35,r=0,u=0,dist=0,speed=15},"dance_willpower",F_WP)
+		Cinematic(410,{f=45,r=-50,u=-15,dist=0,speed=20},"dance_willpower",F_WP)
+		Cinematic(570,{f=28,r=20,u=15,dist=0,speed=5},"dance_willpower",F_WP)
+		Cinematic(710,{f=50,r=160,u=-40,dist=0,speed=100},"dance_willpower",F_WP)
+		Cinematic(713,{f=50,r=-100,u=-40,dist=0,speed=0.0001},"dance_willpower",F_WP)
+		Cinematic(800,{f=35,r=25,u=25,dist=0,speed=100},"dance_willpower",F_WP)
+		Cinematic(815,{f=120,r=30,u=-40,dist=0,speed=1},"dance_willpower",F_WP)
+		Cinematic(880,{f=45,r=0,u=-25,dist=0,speed=1},"dance_willpower",F_WP)
+		Cinematic(955,{f=50,r=0,u=25,dist=0,speed=4},"dance_willpower",F_WP)
+		Cinematic(1060,{f=35,r=-15,u=10,dist=0,speed=10},"dance_willpower",F_WP)
+		Cinematic(1100,{f=15,r=5,u=10,dist=0,speed=10},"dance_willpower",F_WP)
+		Cinematic(1120,{f=35,r=15,u=0,dist=0,speed=100},"dance_willpower",F_WP)
+		Cinematic(1122,{f=25,r=-30,u=40,dist=0,speed=100},"dance_willpower",F_WP)
+		
+		Cinematic(4700,{f=15,r=8,u=15,dist=0,speed=1},"dance_willpower",F_WP)
 	end
 
 	function ENT:SetFace(top,bottom,brow,eyes)

@@ -28,6 +28,9 @@ ENT.SoundTracks = {
 	[1] = {dance = "dance_breakoutof", song = "cpthazama/persona4_dance/music/c012.mp3", name = "Break Out Of"}
 }
 
+ENT.Outfits = {}
+ENT.Outfits[1] = {Name = "Velvet Room Attire", Model = "", Offset = 0.1, ReqSong = nil, ReqScore = 0}
+
 ENT.SongLength = {}
 ENT.SongLength["dance_breakoutof"] = 215
 

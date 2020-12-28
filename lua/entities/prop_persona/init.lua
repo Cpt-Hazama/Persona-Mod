@@ -477,6 +477,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif card == "Psycho Blast" then
 		self:PsychoBlast(ply,persona)
 		return
+	elseif card == "Marin Karin" then
+		self:MarinKarin(ply,persona)
+		return
 	elseif card == "Agi" then
 		self:Agi(ply,persona)
 		return
@@ -1177,7 +1180,7 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd,inflict,inflictT)
 	inflictT = inflictT or 1
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
-			if (v != self && v != self.User) && (((v:IsNPC() or (checkPlayers && v:IsPlayer() && v:Alive()))) or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
+			if (v != self && v != self.User) && (((v:IsNPC() or (checkPlayers && v:IsPlayer() && v:Alive()))) or v:IsNextBot() or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
 				if (self:GetForward():Dot((Vector(v:GetPos().x,v:GetPos().y,0) - Vector(self:GetPos().x,self:GetPos().y,0)):GetNormalized()) > math.cos(math.rad(rad))) then
 					if self.User:IsNPC() && self.User:Disposition(v) == 3 then
 						continue
@@ -1264,6 +1267,63 @@ function ENT:OnKilledEnemy_EXP(ent)
 	local exp = ent:GetNW2Int("PXP_EXP")
 	
 	PXP.GiveEXP(ply,exp)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:BrainWash(ent,min,max)
+	if !IsValid(ent) then return end
+	local ply = self.User
+
+	local spawnparticle = ents.Create("info_particle_system")
+	spawnparticle:SetKeyValue("effect_name","vj_per_skill_brainwash")
+	spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+	spawnparticle:Spawn()
+	spawnparticle:Activate()
+	spawnparticle:Fire("Start","",0)
+	spawnparticle:Fire("SetParent",ent:GetName())
+
+	ent:EmitSound("cpthazama/persona5/skills/0096.wav",80)
+
+	timer.Simple(1.25,function()
+		if IsValid(ent) && IsValid(self) then
+			if math.random(1,max) <= min && !ent.Persona_BrainWashed then
+				spawnparticle:Fire("Kill","",0.1)
+				if ent:IsNPC() && ent:Disposition(ply) != D_LI then
+					ent:AddEntityRelationship(ply,D_LI,99)
+					ent.Persona_BrainWashed = true
+					local oldVal = ent.PlayerFriendly
+					local oldValB = ent.FriendsWithAllPlayerAllies
+					ent.PlayerFriendly = true
+					ent.FriendsWithAllPlayerAllies = true
+					if ent.VJ_AddCertainEntityAsFriendly then table.insert(ent.VJ_AddCertainEntityAsFriendly,ply) end
+					timer.Simple(20,function()
+						if IsValid(ent) then
+							ent.Persona_BrainWashed = false
+							for i,v in pairs(ent.VJ_AddCertainEntityAsFriendly) do
+								if v == ply then table.remove(ent.VJ_AddCertainEntityAsFriendly,i) end
+							end
+							ent.PlayerFriendly = oldVal
+							ent.FriendsWithAllPlayerAllies = oldValB
+						end
+					end)
+				elseif ent:IsPlayer() && !ent.Persona_BrainWashed && ent:Alive() then
+					ent.Persona_BrainWashed = true
+					ent.Persona_BrainWashers = ent.Persona_BrainWashers or {}
+					table.insert(ent.Persona_BrainWashers,ply)
+					timer.Simple(20,function()
+						if IsValid(ent) then
+							ent.Persona_BrainWashed = false
+							for i,v in pairs(ent.Persona_BrainWashers) do
+								if v == ply then table.remove(ent.Persona_BrainWashers,i) end
+							end
+						end
+					end)
+				end
+				ply:ChatPrint("Successfully brainwashed " .. (ent:IsPlayer() && ent:Nick() or ent:IsNPC() && (ent.PrintName != nil && ent.PrintName or "target")) .. "!")
+			else
+				ply:ChatPrint("Missed!")
+			end
+		end
+	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:IceEffect(ent,dmg,scale)

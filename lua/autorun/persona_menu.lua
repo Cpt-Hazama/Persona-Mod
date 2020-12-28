@@ -159,13 +159,24 @@ if CLIENT then
 
 		spawnmenu.AddToolMenuOption("Persona","Dance Settings","Dance","Dance","","",function(Panel)
 			Panel:AddControl("Slider",{Label = "Music Volume",Command = "vj_persona_dancevol",Min = 15,Max = 100})
-			Panel:AddControl("Label",{Text = "Default = 60"})
+			Panel:AddControl("Label",{Text = "Default = 60%"})
 			Panel:AddControl("Slider",{Label = "Dance Mode",Command = "vj_persona_dancemode",Min = 0,Max = 2})
 			Panel:AddControl("Label",{Text = "0 = Default, 1 = Spectate, 2 = Dance, Dance!"})
 			Panel:AddControl("Slider",{Label = "Dance Difficulty",Command = "vj_persona_dancedifficulty",Min = 1,Max = 5})
 			Panel:AddControl("Label",{Text = "1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're Crazy"})
 			Panel:AddControl("CheckBox",{Label = "Controller Mode",Command = "persona_dance_controller"})
 			Panel:AddControl("Label",{Text = "Enable this to play with a controller!"})
+			Panel:AddControl("CheckBox",{Label = "Cinematic Mode",Command = "persona_dance_cinematic"})
+			Panel:AddControl("Label",{Text = "If the Dancer has a Cinematic Mode, this will give Dance Mode 1 & 2 an authentic feel!"})
+			Panel:AddControl("Color",{
+				Label = "HUD Color", 
+				Red = "persona_dance_hud_r",
+				Green = "persona_dance_hud_g",
+				Blue = "persona_dance_hud_b",
+				ShowAlpha = "0", 
+				ShowHSV = "1",
+				ShowRGB = "1"
+			})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)
