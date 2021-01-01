@@ -87,6 +87,10 @@ if SERVER then
 
 	function ENT:OnThink() end
 
+	function ENT:OnChangedOutfit(old,new,outfit) end
+
+	function ENT:OnPlayPreview(ply) end
+
 	function ENT:OnPlayDance(seq,t) end
 
 	function ENT:OnStartDance(seq,song,songName,dance) end
@@ -112,6 +116,10 @@ function ENT:SetupDataTables()
 		self.ViewMode = GetConVarNumber("vj_persona_dancemode")
 		self:SetViewMode(GetConVarNumber("vj_persona_dancemode"))
 	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetAnimation()
+	return self:GetSequenceName(self:GetSequence())
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if (CLIENT) then
@@ -148,6 +156,7 @@ if (CLIENT) then
 
 	function ENT:Draw()
 		self:DrawModel()
+		self:OnDraw()
 		
 		for ind,flex in ipairs(self.Flexes) do
 			if flex then
@@ -193,6 +202,10 @@ if (CLIENT) then
 		self.TrackNotes[seq] = self.TrackNotes[seq] or {}
 		table.insert(self.TrackNotes[seq],{Dir = dir,Life = timer,Activate = spawnTime})
 	end
+	
+	function ENT:CustomCalcView(ply,pos,angles,fov,danceBone) end
+	
+	function ENT:OnDraw() end
 	
 	function ENT:ClientInit() end
 	
@@ -771,6 +784,9 @@ if (CLIENT) then
 			if IsValid(ply:GetViewEntity()) && ply:GetViewEntity():GetClass() == "gmod_cameraprop" then
 				return
 			end
+			if dancer:GetNW2Bool("CustomView") == true && dancer.CustomCalcView then
+				return dancer:CustomCalcView(ply,pos,angles,fov,danceBone)
+			end
 			if cCinematic then
 				local pos = dancer:GetNW2Vector("LastCinematicPos")
 				local dist = dancer:GetNW2Int("LastCinematicDist")
@@ -972,16 +988,24 @@ function ENT:ChangeOutfit(outfit)
 	local mdl = string.Replace(self.Model,".mdl","")
 	local pos = self:GetPos() +Vector(0,0,-self.HeightOffset)
 	if type(outfit) == "number" && self.Outfits[outfit] then
+		local oldMdl = self:GetModel()
+		local newMdl = oldMdl
 		self:SetModel(mdl .. self.Outfits[outfit].Model .. ".mdl")
 		self.HeightOffset = self.Outfits[outfit].Offset
 		self:SetPos(pos +Vector(0,0,self.HeightOffset))
+		local newMdl = self:GetModel()
+		self:OnChangedOutfit(oldMdl,newMdl,outfit)
 		return
 	end
 	for _,v in pairs(self.Outfits) do
 		if v.Name == outfit then
+			local oldMdl = self:GetModel()
+			local newMdl = oldMdl
 			self:SetModel(mdl .. v.Model .. ".mdl")
 			self.HeightOffset = v.Offset
 			self:SetPos(pos +Vector(0,0,self.HeightOffset))
+			local newMdl = self:GetModel()
+			self:OnChangedOutfit(oldMdl,newMdl,outfit)
 			break
 		end
 	end
@@ -992,6 +1016,7 @@ function ENT:PlayPreview(ply)
 		self:ResetSequence("preview")
 		self:SetPlaybackRate(1)
 		self:SetCycle(1)
+		self:OnPlayPreview(ply)
 	end
 	net.Start("Persona_Dance_PreviewSong")
 		net.WriteEntity(self)
@@ -1006,6 +1031,7 @@ function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
 	local t = self:GetSequenceDuration(self,seq)
 	timer.Simple(sT,function()
 		if IsValid(self) then
+			local cycle = self.Animations[name][index].cycle or 0
 			self:ResetSequence(seq)
 			self:SetAnimationRate(rate)
 			self:SetCycle(cycle or 0)
@@ -1061,7 +1087,7 @@ function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
 						-- Entity(1):ChatPrint("Now Playing - " .. anim)
 						-- Entity(1):ChatPrint("Next To Playing - " .. (self.Animations[name][index +1] != nil && self.Animations[name][index +1].next) or " N/A")
 						-- Entity(1):ChatPrint("Delay For Next - " .. tostring(self.Animations[name][index +1].endEarlyTime))
-						local t = self:PlayAnimation(anim,1,0,self.Index,name,true)
+						local t = self:PlayAnimation(anim,1,cycle,self.Index,name,true)
 						self.NextDanceT = CurTime() +t +0.1
 					end
 				end)
@@ -1136,6 +1162,8 @@ function ENT:Initialize()
 	self:SetCinematicData()
 
 	self.AnimationEvents = {}
+	
+	self:SetNW2Bool("CustomView",false)
 
 	timer.Simple(0,function()
 		if IsValid(self) then
