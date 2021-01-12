@@ -102,6 +102,7 @@ if SERVER then
 	util.AddNetworkString("Persona_Dance_SendScore")
 	util.AddNetworkString("Persona_Dance_SongEnd")
 	util.AddNetworkString("Persona_Dance_ModeStart")
+	util.AddNetworkString("Persona_Dance_ChangeFlex")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetupDataTables()
@@ -149,6 +150,7 @@ if (CLIENT) then
 		local nameID = self:GetFlexIDByName(name)
 		if nameID then
 			local oldVal = self:GetFlexWeight(nameID)
+			val = math.Clamp(val,0,1)
 			self:SetFlexWeight(nameID,val)
 			self:OnChangeFlex(name,oldVal,val)
 		end
@@ -162,7 +164,11 @@ if (CLIENT) then
 			if flex then
 				local id = self:GetFlexIDByName(flex.Name)
 				local oldVal = self:GetFlexWeight(id)
-				if oldVal != flex.Target then
+				local target = flex.Target
+				-- if oldVal != flex.Target then
+				-- if (target > oldVal && oldVal < target) or (target < oldVal && oldVal > target) then
+				if (math.abs(target -oldVal) > 0.05) then
+					-- Entity(1):ChatPrint("Changing " .. flex.Name .. " from " .. oldVal .. " to " .. flex.Target)
 					self:SetFlex(flex.Name,Lerp(FrameTime() *flex.Speed,oldVal,flex.Target))
 				else
 					table.remove(self.Flexes,ind)
@@ -364,6 +370,7 @@ if (CLIENT) then
 								-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(25 *(1 -tDif)) *mul)
 								ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
 							else
+								hType = 0
 								ply:EmitSound("cpthazama/persona5/misc/00103.wav")
 								ply.Persona_Dance_HitTimes = 0
 								ply.Persona_Dance_LastNoteT = 0
@@ -723,7 +730,7 @@ if (CLIENT) then
 
 				if note.CanDelete /*note.Timer < CurTime()*/ or note.Hit == true then
 					-- Entity(1):ChatPrint("REMOVED")
-					if !note.Hit then
+					if note.Hit == false then
 						dancer:OnNoteHit(ply,ind,note,0)
 					end
 					table.remove(dancer.Notes,ind)
@@ -918,6 +925,15 @@ if (CLIENT) then
 		net.SendToServer()
 
 		ply.Persona_HUD_SaveT = CurTime() +math.Rand(0.4,1)
+	end)
+
+	net.Receive("Persona_Dance_ChangeFlex",function(len)
+		local dancer = net.ReadEntity()
+		local flex = net.ReadString()
+		local val = net.ReadInt(32)
+		local speed = net.ReadInt(32)
+		
+		dancer:ChangeFlex(flex,val,speed)
 	end)
 
 	function ENT:Think()
@@ -1126,6 +1142,31 @@ function ENT:ChangeFace(t,id,sID)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:RandomizeExpressions(flexes,anim,frames,chance)
+	local chance = chance or 50
+	
+	for i = 1,frames do
+		if math.random(1,chance) == 1 then
+			for _,flex in pairs(flexes) do
+				self:AddFlexEvent(anim,i,{Name=flex,Value=math.Rand(0,1),Speed=math.Rand(0.5,6)},frames)
+			end
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:RandomizeCinematics(anim,frames,chance)
+	local chance = chance or 100
+	
+	for i = 1,frames do
+		if i == 1 then
+			self:AddCinematicEvent(anim,1,{f=65,r=math.Rand(-15,15),u=math.Rand(-15,15),dist=0,speed=math.random(1,25),bone=self.ViewBone},frames)
+		end
+		if math.random(1,chance) == 1 && i != 1 then
+			self:AddCinematicEvent(anim,i,{f=math.Rand(25,120),r=math.Rand(-60,60),u=math.Rand(-15,15),dist=0,speed=math.random(1,25),bone=self.ViewBone},frames)
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PlaySound(name,vol,pit,notTable)
 	return VJ_PlaySound(self,(self.Sounds && self.Sounds[name] && VJ_PICK(self.Sounds[name])) or notTable,vol or 75,pit or 100)
 end
@@ -1242,6 +1283,40 @@ function ENT:AddCinematicEvent(seq,frame,data,frameCount)
 	self.CinematicCoolDown[seq] = self.CinematicCoolDown[seq] or {}
 	self.CinematicCoolDown[seq][frame] = self.CinematicCoolDown[seq][frame] or {}
 	table.insert(self.CinematicCoolDown[seq][frame],CurTime())
+
+	if frameCount then
+		self.RegisteredSequences = self.RegisteredSequences or {}
+		self.RegisteredSequences[seq] = frameCount
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HandleRandomFlex(seq,frame)
+	for _,v in pairs(self.RandomFlex[seq][frame]) do
+		net.Start("Persona_Dance_ChangeFlex")
+			net.WriteEntity(self)
+			net.WriteString(v.Name)
+			net.WriteInt(v.Value,32)
+			net.WriteInt(v.Speed,32)
+		net.Broadcast()
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:AddFlexEvent(seq,frame,flexData,frameCount)
+	local seq = self:LookupSequence(seq)
+	self.AnimationEvents = self.AnimationEvents or {}
+	self.AnimationEvents[seq] = self.AnimationEvents[seq] or {}
+	self.AnimationEvents[seq][frame] = self.AnimationEvents[seq][frame] or {}
+	table.insert(self.AnimationEvents[seq][frame],"rand_flex")
+	
+	self.EventCoolDown = self.EventCoolDown or {}
+	self.EventCoolDown[seq] = self.EventCoolDown[seq] or {}
+	self.EventCoolDown[seq][frame] = self.EventCoolDown[seq][frame] or {}
+	table.insert(self.EventCoolDown[seq][frame],CurTime())
+	
+	self.RandomFlex = self.RandomFlex or {}
+	self.RandomFlex[seq] = self.RandomFlex[seq] or {}
+	self.RandomFlex[seq][frame] = self.RandomFlex[seq][frame] or {}
+	table.insert(self.RandomFlex[seq][frame],flexData)
 
 	if frameCount then
 		self.RegisteredSequences = self.RegisteredSequences or {}
@@ -1370,15 +1445,16 @@ function ENT:Think()
 	local seq = self:GetSequence()
 	local findSeq = self.RegisteredSequences && self.RegisteredSequences[seq]
 	local eventSeq = self.AnimationEvents && self.AnimationEvents[seq]
-	if eventSeq && findSeq then
+	local cinSeq = self.CinematicEvents && self.CinematicEvents[seq]
+	if (cinSeq && findSeq) or (eventSeq && findSeq) then
 		if self.LastSequence != seq then
 			self.LastSequence = seq
 			self.LastFrame = -1
 		end
 		local NextFrame = math.floor(self:GetCycle() *(self:GetPlaybackRate() *findSeq))
 		self.LastFrame = NextFrame
-		-- Entity(1):ChatPrint(self.LastFrame)
-		if self.CinematicEvents && self.CinematicEvents[seq] && self.CinematicEvents[seq][self.LastFrame] then
+		-- if self.LastFrame then Entity(1):ChatPrint(self.LastFrame) end
+		if cinSeq && self.CinematicEvents[seq][self.LastFrame] then
 			for _,v in pairs(self.CinematicEvents[seq][self.LastFrame]) do
 				if CurTime() > self:GetCinematicEventCoolDown(seq,self.LastFrame) then
 					self:SetCinematicData(Vector(v.r,v.f,v.u),v.dist,v.speed,v.bone or nil)
@@ -1387,10 +1463,13 @@ function ENT:Think()
 				end
 			end
 		end
-		if eventSeq[self.LastFrame] then
+		if eventSeq && eventSeq[self.LastFrame] then
 			for _,v in pairs(eventSeq[self.LastFrame]) do
 				if CurTime() > self:GetEventCoolDown(seq,self.LastFrame) then
 					self:HandleAnimationEvent(seq,v,self.LastFrame)
+					if v == "rand_flex" then
+						self:HandleRandomFlex(seq,self.LastFrame)
+					end
 					self:AddEventCoolDown(seq,self.LastFrame)
 				end
 			end

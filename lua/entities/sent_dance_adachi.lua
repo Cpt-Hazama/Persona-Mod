@@ -71,11 +71,13 @@ if SERVER then
 		-- self:ManipulateBoneJiggle(41,1)
 
 		self:SetCinematicData()
-		Cinematic(1,{f=90,r=0,u=0,dist=0,speed=15},"dance_thefog",F_TF)
-		Cinematic(200,{f=40,r=15,u=20,dist=0,speed=100},"dance_thefog",F_TF)
-		Cinematic(400,{f=60,r=-20,u=15,dist=0,speed=3},"dance_thefog",F_TF)
-		Cinematic(1756,{f=40,r=-0,u=15,dist=0,speed=100},"dance_thefog",F_TF)
-		Cinematic(1785,{f=60,r=-0,u=20,dist=0,speed=2},"dance_thefog",F_TF)
+		self:RandomizeCinematics("dance_thefog",F_TF)
+		self:RandomizeCinematics("dance_thefog_b",F_TF_B)
+		-- Cinematic(1,{f=90,r=0,u=0,dist=0,speed=15},"dance_thefog",F_TF)
+		-- Cinematic(200,{f=40,r=15,u=20,dist=0,speed=100},"dance_thefog",F_TF)
+		-- Cinematic(400,{f=60,r=-20,u=15,dist=0,speed=3},"dance_thefog",F_TF)
+		-- Cinematic(1756,{f=40,r=-0,u=15,dist=0,speed=100},"dance_thefog",F_TF)
+		-- Cinematic(1785,{f=60,r=-0,u=20,dist=0,speed=2},"dance_thefog",F_TF)
 
 		self:AddAnimationEvent("dance_thefog",1,"default",F_TF)
 		self:AddAnimationEvent("dance_thefog",20,"neutral",F_TF)

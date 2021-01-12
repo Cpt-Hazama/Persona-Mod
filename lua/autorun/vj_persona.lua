@@ -23,6 +23,7 @@ if VJExists == true then
 
 	local vCat = "Persona"
 	VJ.AddCategoryInfo(vCat,{Icon = "vj_icons/persona.png"})
+	VJ.AddCategoryInfo(vCat .. " - Bosses",{Icon = "vj_icons/persona.png"})
 	VJ.AddCategoryInfo(vCat .. " - Gamemode",{Icon = "vj_icons/persona.png"})
 
 		-- Persona - Raid Bossess --
@@ -59,6 +60,11 @@ if VJExists == true then
 		-- Persona Gamemode Exclusives --
 	-- VJ.AddNPC("Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat .. " - Gamemode")
 	-- VJ.AddNPC("Munehisa Iwai","npc_vj_per_vendor_iwai",vCat .. " - Gamemode")
+
+		-- Bosses --
+
+		-- Persona 4 - Antagonists -- 
+	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi_boss",vCat .. " - Bosses")
 	
 	CUE_BATTLE_DISADVANTAGE = 1
 	CUE_BATTLE_ADVANTAGE = 2

@@ -51,34 +51,11 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
-		-- timer.Simple(5,function() self:ChangeOutfit(2) end)
-	end
-
-	function ENT:HandleAnimationEvent(seq,event,frame)
-		if event == "default" then
-			
-		end
-		if event == "smile" then
-			
-		end
-		if event == "neutral" then
-			
-		end
-		if event == "open" then
-			
-		end
-		if event == "open_wide" then
-			
-		end
-		if event == "wink" then
-			
-		end
-		if event == "squint" then
-			
-		end
-		if event == "sexy" then
-			
-		end
+		self:SetCinematicData()
+		self:RandomizeCinematics("dance_whenthemoonsreachingoutstars",1160)
+		self:RandomizeCinematics("dance_whenthemoonsreachingoutstars_2",619)
+		self:RandomizeCinematics("dance_whenthemoonsreachingoutstars_3",1775)
+		self:RandomizeCinematics("dance_whenthemoonsreachingoutstars_4",1138)
 	end
 end
 /*--------------------------------------------------

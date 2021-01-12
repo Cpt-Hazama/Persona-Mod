@@ -82,6 +82,7 @@ ENT.Sounds = {}
 
 ENT.Persona = "izanagi"
 ENT.CriticalDownTime = 10
+ENT.DisablePersona = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaInit() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -148,7 +149,11 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()
 	self:SetHealth((GetConVarNumber("vj_npc_allhealth") > 0) and GetConVarNumber("vj_npc_allhealth") or self:VJ_GetDifficultyValue(self.Stats.HP))
-	self.SP = self.Stats.SP
+	local mul = self.SelectedDifficulty +3
+	if mul <= 0 then
+		mul = 0.5
+	end
+	self.SP = self.Stats.SP *mul
 	
 	self.HasDeathRagdoll = self.HasDeathAnimation
 	
@@ -318,6 +323,7 @@ function ENT:UseItem(class,t)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaCode()
+	if self.DisablePersona then return end
 	if self.MetaVerseMode && self:Health() > 0 then
 		if !IsValid(self:GetPersona()) then
 			if self.VJ_IsBeingControlled then

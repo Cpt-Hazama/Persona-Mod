@@ -87,6 +87,14 @@ if SERVER then
 		self:ManipulateBoneJiggle(76,1)
 		self:ManipulateBoneJiggle(77,1)
 
+		self:SetCinematicData()
+		self:RandomizeCinematics("dance_lastsurprise",917)
+		self:RandomizeCinematics("dance_lastsurprise2",1268)
+		self:RandomizeCinematics("dance_lastsurprise3",406)
+		self:RandomizeCinematics("dance_lastsurprise4",235)
+		self:RandomizeCinematics("dance_lastsurprise5",1152)
+		self:RandomizeCinematics("dance_lastsurprise6",1012)
+
 		self:AddAnimationEvent("dance_lastsurprise",0,"default",917)
 		self:AddAnimationEvent("dance_lastsurprise",1,"default",917)
 		self:AddAnimationEvent("dance_lastsurprise",2,"default",917)

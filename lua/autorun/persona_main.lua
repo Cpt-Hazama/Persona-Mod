@@ -709,6 +709,7 @@ if SERVER then
 					if IsValid(ent) then
 						if (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != ply:GetPersona())) then
 							ply.Persona_EyeTarget = ent
+							ply:SetNW2Entity("Persona_Target",ent)
 							ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
 						end
 					else
@@ -716,6 +717,7 @@ if SERVER then
 						local ent = VJ_PICK(ents)
 						if IsValid(ent) then
 							ply.Persona_EyeTarget = ent
+							ply:SetNW2Entity("Persona_Target",ent)
 							ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
 						end
 					end
@@ -988,45 +990,79 @@ if CLIENT then
 		draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, len, height, color(0, 0, 0, 150))
 		draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, math.Clamp(len -(calc_xp *len),0,len), height, color(r, g, b, 255))
 
-		if IsValid(target) then
-			local len = 200
-			local height = 100
-			local bColor = color(colM,colM,colM,230)
+		local function DrawTargetHealth(ent)
+			if IsValid(ent) then
+				local len = 200
+				local height = 100
+				local bColor = color(colM,colM,colM,230)
 
-			local hp = ply:GetNW2Int("Persona_TargetHealth") or target:Health()
-			local hpMax = target:GetMaxHealth()
-			local perHP = (hp -cost) /hpMax
-			lerp_e_hp = Lerp(5 *FrameTime(), lerp_e_hp, hp)
-			calc_e_hp = Lerp(5 *FrameTime(), calc_e_hp, perHP)
-			local perHPB = lerp_e_hp *100 /hpMax
-			
-			local icon = persona:GetNW2String("SpecialAttackIcon")
-			local matIcon = Material("hud/persona/crosshair")
-			local offset = 225
-			local entPos = (target:GetPos() +target:OBBCenter()):ToScreen()
-			surface.SetMaterial(matIcon)
-			surface.SetDrawColor(color(255,255,255,255))
-			surface.DrawTexturedRect(entPos.x -offset,entPos.y -offset,450,450)
+				local hp = ply:GetNW2Int("Persona_TargetHealth") or 0
+				local hpMax = ent:GetMaxHealth()
+				local perHP = (hp -cost) /hpMax
+				lerp_e_hp = Lerp(5 *FrameTime(), lerp_e_hp, hp)
+				calc_e_hp = Lerp(5 *FrameTime(), calc_e_hp, perHP)
+				local perHPB = lerp_e_hp *100 /hpMax
+				
+				local icon = persona:GetNW2String("SpecialAttackIcon")
+				local matIcon = Material("hud/persona/crosshair")
+				local offset = 225
+				local entPos = (ent:GetPos() +ent:OBBCenter()):ToScreen()
+				surface.SetMaterial(matIcon)
+				surface.SetDrawColor(color(255,255,255,255))
+				surface.DrawTexturedRect(entPos.x -offset,entPos.y -offset,450,450)
 
-			local boxX = entPos.x -offset -35
-			local boxY = entPos.y -offset -35
-			draw.RoundedBox(corners,boxX,boxY,len,height,bColor)
+				local boxX = entPos.x -offset -35
+				local boxY = entPos.y -offset -35
+				draw.RoundedBox(corners,boxX,boxY,len,height,bColor)
 
-			local r,g,b = 107, 255, 222
-			local posX = boxX +5
-			local posY = boxY +5
-			local nlen = len -10
-			local height = 20
-			local f = math.Clamp(perHPB *0.01 *nlen,0,nlen)
+				local r,g,b = 107, 255, 222
+				local posX = boxX +5
+				local posY = boxY +5
+				local nlen = len -10
+				local height = 20
+				local f = math.Clamp(perHPB *0.01 *nlen,0,nlen)
+				local alpha = 255
 
-			draw.RoundedBox(corners, posX, posY, nlen, height, color(0, 0, 0, 150))
-			draw.RoundedBox(corners, posX, posY, f, height, color(r, g, b, 255))
+				draw.RoundedBox(corners, posX, posY, nlen, height, color(0, 0, 0, 150))
+				draw.RoundedBox(corners, posX, posY, f, height, color(r, g, b, alpha))
 
-			local text = "Level " .. (tostring(target:GetNW2Int("PXP_Level")) or "0")
-			draw.SimpleText(text,"Persona",boxX +5,boxY +30,color(248,60,64,255))
+				local text = "Level " .. (tostring(ent:GetNW2Int("PXP_Level")) or "0")
+				draw.SimpleText(text,"Persona",boxX +5,boxY +30,color(248,60,64,255))
 
-			local text = (tostring(target:GetNW2Int("PXP_EXP")) or "0") .. " EXP"
-			draw.SimpleText(text,"PXP_EXP",boxX +5,boxY +70,color(248,60,64,255))
+				local text = (tostring(ent:GetNW2Int("PXP_EXP")) or "0") .. " EXP"
+				draw.SimpleText(text,"PXP_EXP",boxX +5,boxY +70,color(248,60,64,255))
+			end
+		end
+
+		local function DrawEntHealth(ent)
+			if IsValid(ent) then
+				local len = 200
+				local height = 80
+				local bColor = color(colM,colM,colM,230)
+
+				local offset = 225
+				local entPos = (ent:GetPos() +ent:OBBCenter()):ToScreen()
+				local boxX = entPos.x -offset -35
+				local boxY = entPos.y -offset -35
+				draw.RoundedBox(corners,boxX,boxY +20,len,height,bColor)
+
+				local text = "Level " .. (tostring(ent:GetNW2Int("PXP_Level")) or "0")
+				draw.SimpleText(text,"Persona",boxX +5,boxY +30,color(248,60,64,255))
+
+				local text = (tostring(ent:GetNW2Int("PXP_EXP")) or "0") .. " EXP"
+				draw.SimpleText(text,"PXP_EXP",boxX +5,boxY +70,color(248,60,64,255))
+			end
+		end
+		
+		DrawTargetHealth(target)
+		local bTbl = ply.BattleEntitiesTable
+		-- PrintTable(ply.BattleEntitiesTable)
+		if bTbl && #bTbl > 0 then
+			for _,v in ipairs(bTbl) do
+				if v != target then
+					DrawEntHealth(v)
+				end
+			end
 		end
 
 		// Skill Menu

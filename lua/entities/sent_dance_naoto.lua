@@ -40,6 +40,10 @@ if SERVER then
 		-- self:ManipulateBoneJiggle(35,1) -- Bust | Removes the animated phys smh
 		self:ManipulateBoneJiggle(79,1)
 
+		self:SetCinematicData()
+		self:RandomizeCinematics("dance_signsoflove",4998)
+		self:RandomizeCinematics("dance_signsoflove_b",511)
+
 		self:AddAnimationEvent("dance_signsoflove",1,"default",4998)
 		self:AddAnimationEvent("dance_signsoflove",45,"happy",4998)
 		self:AddAnimationEvent("dance_signsoflove",190,"default",4998)

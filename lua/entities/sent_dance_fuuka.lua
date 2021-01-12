@@ -47,7 +47,19 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
+		self:SetCinematicData()
+		self:RandomizeCinematics("dance_time",419)
+		self:RandomizeCinematics("dance_time_2",1136)
+		self:RandomizeCinematics("dance_time_3",874)
+		self:RandomizeCinematics("dance_time_4",2084)
 		
+		self:AddFlexEvent("dance_time",50,{Name="smile_teeth",Value=3,Speed=4},419)
+		self:AddFlexEvent("dance_time",125,{Name="smile_teeth",Value=0.65,Speed=20},419)
+		
+		-- self:RandomizeExpressions({"smile_teeth"},"dance_time",419)
+		-- self:RandomizeExpressions({"smile_teeth"},"dance_time_2",1136)
+		-- self:RandomizeExpressions({"smile_teeth"},"dance_time_3",874)
+		-- self:RandomizeExpressions({"smile_teeth"},"dance_time_4",2084)
 	end
 
 	function ENT:HandleAnimationEvent(seq,event,frame)
