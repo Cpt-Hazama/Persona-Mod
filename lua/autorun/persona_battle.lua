@@ -2,6 +2,7 @@
 
 CreateConVar("vj_persona_battle","0",FCVAR_NONE,"When enabled, attacking an enemy will activate Battle Mode for you and your party.",0,1)
 CreateConVar("vj_persona_battle_positions","0",FCVAR_NONE,"When enabled, all enemy targets will be pre-positioned for battle",0,1)
+CreateConVar("vj_persona_battle_visible","0",FCVAR_NONE,"When enabled, only enemies that are visible will be targeted",0,1)
 
 PERSONA_BATTLETRACKS = {}
 
@@ -58,11 +59,12 @@ if SERVER then
 		if GetConVarNumber("vj_persona_battle") == 0 then return end
 		-- if !dmginfo:GetAttacker():IsPlayer() then return end
 
-		local attacker = dmginfo:GetAttacker()
+		local attacker = dmginfo:GetAttacker() or dmginfo:GetInflictor()
 		local dmgtype = dmginfo:GetDamageType()
 		local dmg = dmginfo:GetDamage()
-		local inBattle = attacker:GetNW2Bool("Persona_BattleMode")
+		local inBattle = IsValid(attacker) && attacker:GetNW2Bool("Persona_BattleMode") or false
 		local positions = tobool(GetConVarNumber("vj_persona_battle_positions"))
+		local vis = tobool(GetConVarNumber("vj_persona_battle_visible"))
 		local max = positions && 5 or 15
 		-- local persona = attacker.GetPersona && attacker:GetPersona() or false
 		if attacker:IsPlayer() && !inBattle && (ent:IsNPC() or ent:IsPlayer() or ent:IsNextBot()) then
@@ -83,6 +85,7 @@ if SERVER then
 						if #tbl >= max then
 							break
 						end
+						if vis && !ply:Visible(v) then continue end
 						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
 						table.insert(tbl,v)
 					end
@@ -118,6 +121,7 @@ if SERVER then
 						if #tbl >= max then
 							break
 						end
+						if vis && !ply:Visible(v) then continue end
 						v.VJ_P_DisableChasingEnemy = v.DisableChasingEnemy
 						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
 						table.insert(tbl,v)

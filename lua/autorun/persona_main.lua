@@ -700,8 +700,17 @@ if SERVER then
 
 	local function findTarget(ply)
 		ply.NextLockOnT = ply.NextLockOnT or CurTime()
+		local pickEnt = ply:GetNW2Entity("Persona_SetTarget")
 		if IsValid(ply:GetPersona()) && ply:Alive() then
 			if CurTime() > ply.NextLockOnT then
+				if IsValid(pickEnt) then
+					ply.Persona_EyeTarget = pickEnt
+					ply:SetNW2Entity("Persona_Target",pickEnt)
+					ply:SetNW2Entity("Persona_SetTarget",NULL)
+					ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
+					ply.NextLockOnT = CurTime() +0.2
+					return
+				end
 				if IsValid(ply.Persona_EyeTarget) then
 					ply.Persona_EyeTarget = NULL
 					ply:EmitSound("cpthazama/persona5/misc/00019.wav",70,100)
@@ -853,6 +862,27 @@ if CLIENT then
 				ply.PersonaRenderBackground:Remove()
 			end
 			return
+		end
+
+		local function DrawTexture(texture,col,posX,posY,scaleX,scaleY,rot)
+			local mat = Material(texture)
+			surface.SetMaterial(mat)
+			surface.SetDrawColor(col.r,col.g,col.b,col.a)
+			if rot then
+				surface.DrawTexturedRectRotated(posX,posY,scaleX,scaleY,rot)
+				return
+			end
+			surface.DrawTexturedRect(posX,posY,scaleX,scaleY)
+		end
+
+		if ply:GetNW2Bool("Persona_BattleMode") == true then
+			local rgb = HSL((RealTime() *15 -(0 *15)),128,128)
+			local HUDColor = color(rgb.r,rgb.g,rgb.b)
+			local danceMat = "hud/persona/dance/bg_stars"
+			local blink = math.Clamp(math.abs(math.sin(CurTime() *0.25) *255),50,100)
+			DrawTexture("hud/persona/dance/bg.png",color(255,255,255,255),0,0,ScrW(),ScrH())
+			DrawTexture(danceMat .. "_cut.png",color(HUDColor.r,HUDColor.g,HUDColor.b,blink),0,0,ScrW() /5,ScrH())
+			DrawTexture(danceMat .. "_cut_b.png",color(HUDColor.r,HUDColor.g,HUDColor.b,blink),ScrW() *0.8,0,ScrW() /5,ScrH())
 		end
 
 		local hp = ply:Health()

@@ -150,11 +150,15 @@ if CLIENT then
 			-- Panel:AddControl("CheckBox",{Label = "Enable Raid Boss Portraits",Command = "persona_hud_raidboss"})
 		end,{})
 
+		spawnmenu.AddToolMenuOption("Persona","Main Settings","Combat","Combat","","",function(Panel)
+			Panel:AddControl("CheckBox",{Label = "Enable Battle Mode",Command = "vj_persona_battle"})
+			Panel:AddControl("CheckBox",{Label = "Force Positions In Battle Mode",Command = "vj_persona_battle_positions"})
+			Panel:AddControl("CheckBox",{Label = "Only Target Visible Enemies In Battle Mode",Command = "vj_persona_battle_visible"})
+		end,{})
+
 		spawnmenu.AddToolMenuOption("Persona","Main Settings","NPCs","NPCs","","",function(Panel)
 			Panel:AddControl("CheckBox",{Label = "Enable NPC Themes",Command = "vj_persona_music"})
 			Panel:AddControl("Label",{Text = "Note: You can also enable/disable them per NPC!"})
-			-- Panel:AddControl("CheckBox",{Label = "Enable Battle Mode",Command = "vj_persona_battle"})
-			-- Panel:AddControl("Label",{Text = "Battle Mode occurs when you attack an enemy, leading you into a turn-based fight!"})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Dance Settings","Dance","Dance","","",function(Panel)

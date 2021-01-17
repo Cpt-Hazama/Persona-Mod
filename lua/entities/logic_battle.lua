@@ -141,13 +141,15 @@ if (CLIENT) then
 			net.SendToServer()
 		else
 			if !IsValid(ply:GetNW2Entity("Persona_Target")) then
-				ply:ConCommand("target_persona")
-				-- local pick = VJ_PICK(self.BattleEntitiesTable)
-				-- if IsValid(pick) then
+				-- ply:ConCommand("target_persona") // Can cause problems
+				local pick = VJ_PICK(self.BattleEntitiesTable)
+				if IsValid(pick) then
+					ply:SetNW2Entity("Persona_SetTarget",pick)
+					ply:ConCommand("target_persona")
 					-- ply.Persona_EyeTarget = pick
 					-- ply:SetNW2Entity("Persona_Target",pick)
 					-- ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
-				-- end
+				end
 			end
 		end
 		-- if ply.Persona_BattleTheme && ply.Persona_BattleTheme:IsPlaying() then
