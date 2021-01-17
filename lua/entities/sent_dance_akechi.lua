@@ -280,7 +280,7 @@ if SERVER then
 			self:AddCinematicEvent(seq,frame,data,maxFrames)
 		end
 
-		self:SetCinematicData()
+		-- self:SetCinematicData()
 		self:RandomizeCinematics("dance_willpower",F_WP)
 		-- Cinematic(1,{f=90,r=-180,u=40,dist=0,speed=100},"dance_willpower",F_WP)
 		-- Cinematic(4,{f=25,r=80,u=0,dist=0,speed=0.01},"dance_willpower",F_WP)

@@ -47,7 +47,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
-		self:SetCinematicData()
+		-- self:SetCinematicData()
 		self:RandomizeCinematics("dance_time",419)
 		self:RandomizeCinematics("dance_time_2",1136)
 		self:RandomizeCinematics("dance_time_3",874)

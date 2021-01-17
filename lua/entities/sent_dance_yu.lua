@@ -140,7 +140,7 @@ if SERVER then
 		self:ManipulateBoneJiggle(39,1)
 		self:ManipulateBoneJiggle(61,1)
 
-		self:SetCinematicData()
+		-- self:SetCinematicData()
 		Cinematic(1,{f=90,r=0,u=0,dist=0,speed=15},"dance_specialist",4167)
 		Cinematic(5,{f=70,r=0,u=0,dist=0,speed=1},"dance_specialist",4167)
 		Cinematic(15,{f=50,r=0,u=0,dist=0,speed=1},"dance_specialist",4167)

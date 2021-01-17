@@ -68,12 +68,15 @@ if (CLIENT) then
 		-- self:InitializeBattle(ply,tblEnemies)
 		-- self.BattleActive = true
 		ply.BattleEntitiesTable = tblEnemies
+		local boss = false
+		for _,v in pairs(tblEnemies) do if v:GetNW2Bool("VJ_IsHugeMonster") then boss = true break end end
 
-		local snd = "cpthazama/persona5/music/battlemode_01.mp3"
+		local tracks = P_FindBattleTracks(boss)
+		local name, snd, len = tracks.Name, tracks.Song, tracks.Length
+		ply:ChatPrint("Now Playing: " .. name .. " [" .. string.FormattedTime(tostring(len),"%02i:%02i") .. "]")
 		ply.Persona_BattleTheme = CreateSound(ply,snd)
-		-- ply.Persona_BattleTheme:SetSoundLevel(0)
 		ply.Persona_BattleTheme:Play()
-		ply.Persona_BattleThemeTime = 234
+		ply.Persona_BattleThemeTime = len
 		ply.Persona_BattleThemeT = CurTime() +ply.Persona_BattleThemeTime
 		ply:ConCommand("target_persona")
 	end)
@@ -158,12 +161,11 @@ if (CLIENT) then
 	function ENT:InitializeBattle(ply,tblEnemies)
 		self.BattleActive = true
 
-		local snd = "cpthazama/persona5/music/battlemode_01.mp3"
-		ply.Persona_BattleTheme = CreateSound(ply,snd)
-		-- ply.Persona_BattleTheme:SetSoundLevel(0)
-		ply.Persona_BattleTheme:Play()
-		ply.Persona_BattleThemeTime = 234
-		ply.Persona_BattleThemeT = CurTime() +ply.Persona_BattleThemeTime
+		-- local snd = "cpthazama/persona5/music/battlemode_01.mp3"
+		-- ply.Persona_BattleTheme = CreateSound(ply,snd)
+		-- ply.Persona_BattleTheme:Play()
+		-- ply.Persona_BattleThemeTime = 234
+		-- ply.Persona_BattleThemeT = CurTime() +ply.Persona_BattleThemeTime
 		ply:ConCommand("target_persona")
 	end
 end

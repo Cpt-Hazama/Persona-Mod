@@ -90,6 +90,7 @@ if CLIENT then
 	CConVar("vj_persona_dancemode","1",true,0,2)
 	CConVar("vj_persona_dancedifficulty","2",true,1,5)
 	CConVar("vj_persona_dancevol","60",true,15,100)
+	CConVar("persona_dance_perfect","0",true,0,1)
 	CConVar("persona_dance_controller","0",true,0,1)
 	CConVar("persona_dance_cinematic","0",true,0,1)
 

@@ -70,7 +70,7 @@ if SERVER then
 		-- self:ManipulateBoneJiggle(40,1)
 		-- self:ManipulateBoneJiggle(41,1)
 
-		self:SetCinematicData()
+		-- self:SetCinematicData()
 		self:RandomizeCinematics("dance_thefog",F_TF)
 		self:RandomizeCinematics("dance_thefog_b",F_TF_B)
 		-- Cinematic(1,{f=90,r=0,u=0,dist=0,speed=15},"dance_thefog",F_TF)

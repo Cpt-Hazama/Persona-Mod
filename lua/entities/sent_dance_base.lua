@@ -17,6 +17,7 @@ ENT.HeightOffset = 1
 ENT.CollisionBounds = Vector(16,16,75)
 ENT.SongStartDelay = 0
 ENT.SongStartAnimationDelay = 0
+ENT.ModelScale = 1
 ENT.HasLamp = true
 ENT.LampRGB = false
 ENT.ViewMode = 2 -- 0 = None, 1 = Follow, 2 = Dance, Dance!
@@ -24,6 +25,8 @@ ENT.ViewBone = "Spine2"
 ENT.WaitForNextSongToStartTime = 0.01
 
 ENT.Difficulty = 2 -- 1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're stupid
+
+ENT.PreviewThemes = {} -- Song that plays during song select/customization. The sounds must be looped using Waveosaur or another program. If left empty, it will play the default song (P3D Theme)
 
 ENT.Animations = {}
 -- ENT.Animations["dance_lastsurprise"] = {}
@@ -294,6 +297,84 @@ if (CLIENT) then
 		table.insert(self.Persona_HitFX,{Material=mats[type],PosW=note.LastPosW[1],PosH=note.LastPosH[1],Timer=CurTime() +0.35})
 	end
 
+	function ENT:CheckNoteHit(dir)
+		local hNoMore = 75 -- Cut-off, at this point you missed
+		local hPerfect = 170 -- Dead on
+		local hGreat = 210 -- Almost on the spot
+		local hGood = 300 -- Meh
+		local didHit = false
+		for ind,note in pairs(self.Notes) do
+			-- local tDif = note.Timer -CurTime()
+			local nDist = note.RemainingDist
+			if note && note.Direction == dir then
+				if didHit then return end
+				-- if tDif <= 0.3 && !note.Hit then
+				if note.CanBeHit && note.Hit == false then
+					local boost = CurTime() <= ply.Persona_Dance_LastCheerT
+					local mul = boost && 1.5 or 1
+					local old = ply.Persona_Dance_Score
+					local hType = note.HitType
+					local hP = note.HitPoints
+					if hType == 1 then -- Perfect
+						ply:EmitSound("cpthazama/persona5_dance/clap_mega.wav")
+						didHit = true
+						ply.Persona_Dance_HitData.Perfect = ply.Persona_Dance_HitData.Perfect +1
+						-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(100 *(1 -tDif)) *mul)
+						ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
+					elseif hType == 2 then -- Great
+						ply:EmitSound("cpthazama/persona5_dance/clap_cyl.wav")
+						didHit = true
+						ply.Persona_Dance_HitData.Great = ply.Persona_Dance_HitData.Great +1
+						-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(50 *(1 -tDif)) *mul)
+						ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
+					elseif hType == 3 then -- Good
+						ply:EmitSound("cpthazama/persona5_dance/clap.wav")
+						didHit = true
+						ply.Persona_Dance_HitData.Good = ply.Persona_Dance_HitData.Good +1
+						-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(25 *(1 -tDif)) *mul)
+						ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
+					else
+						hType = 0
+						ply:EmitSound("cpthazama/persona5/misc/00103.wav")
+						ply.Persona_Dance_HitTimes = 0
+						ply.Persona_Dance_LastNoteT = 0
+						if CurTime() > self.NextSpeakT && math.random(1,15) == 1 then
+							local snd = self:PlaySound("failing")
+							self.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
+						end
+					end
+					self:OnNoteHit(ply,ind,note,hType)
+					if ply.Persona_Dance_LastNoteT < CurTime() then
+						ply.Persona_Dance_HitTimes = 0
+					end
+					if didHit then
+						if CurTime() > self.NextSpeakT && math.random(1,15) == 1 then
+							local snd = self:PlaySound("winning")
+							self.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
+						end
+						if ply.Persona_Dance_LastCheerT > CurTime() then
+							ply.Persona_Dance_LastCheerT = math.Clamp(ply.Persona_Dance_LastCheerT +0.25,CurTime(),CurTime() +10)
+						else
+							ply.Persona_Dance_LastNoteT = CurTime() +10
+							ply.Persona_Dance_HitTimes = ply.Persona_Dance_HitTimes +1
+						end
+						if ply.Persona_Dance_HitTimes >= FEVERCOMBOCOST && ply.Persona_Dance_LastNoteT > CurTime() && CurTime() > ply.Persona_Dance_LastCheerT then
+							ply.Persona_Dance_LastNoteT = 0
+							ply.Persona_Dance_LastCheerT = CurTime() +10
+							ply.Persona_Dance_HitTimes = 0
+							ply:ChatPrint("SCORE BOOST FOR 10 SECONDS!")
+							ply:EmitSound("cpthazama/persona4/ui_shufflebegin.wav")
+							ply:EmitSound("cpthazama/persona5_dance/crowd.wav")
+						end
+					else
+						ply.Persona_Dance_HitTimes = 0
+					end
+					ply:ChatPrint("Gained " .. tostring(ply.Persona_Dance_Score -old) .. " points!")
+				end
+			end
+		end
+	end
+
 	hook.Add("PlayerBindPress", "Persona_DanceViewScroll", function(ply,bind,pressed)
 		local dancer = ply:GetNW2Entity("Persona_Dancer")
 		if !IsValid(dancer) then return end
@@ -327,109 +408,27 @@ if (CLIENT) then
 			ply.Persona_Dance_HitTimes = ply.Persona_Dance_HitTimes or 0
 			ply.Persona_Dance_LastCheerT = ply.Persona_Dance_LastCheerT or 0
 			ply.Persona_NoteDir = ply.Persona_NoteDir or "e"
-			
-			local function CheckHit(dir)
-				-- local hNoMore = 0.03 -- Cut-off, at this point you missed
-				-- local hPerfect = 0.075 -- Dead on
-				-- local hGreat = 0.013 -- Almost on the spot
-				-- local hGood = 0.2 -- Meh
 
-				local hNoMore = 75 -- Cut-off, at this point you missed
-				local hPerfect = 170 -- Dead on
-				local hGreat = 210 -- Almost on the spot
-				local hGood = 300 -- Meh
-				local didHit = false
-				for ind,note in pairs(dancer.Notes) do
-					-- local tDif = note.Timer -CurTime()
-					local nDist = note.RemainingDist
-					if note && note.Direction == dir then
-						if didHit then return end
-						-- if tDif <= 0.3 && !note.Hit then
-						if note.CanBeHit && note.Hit == false then
-							local boost = CurTime() <= ply.Persona_Dance_LastCheerT
-							local mul = boost && 1.5 or 1
-							local old = ply.Persona_Dance_Score
-							local hType = note.HitType
-							local hP = note.HitPoints
-							if hType == 1 then -- Perfect
-								ply:EmitSound("cpthazama/persona5_dance/clap_mega.wav")
-								didHit = true
-								ply.Persona_Dance_HitData.Perfect = ply.Persona_Dance_HitData.Perfect +1
-								-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(100 *(1 -tDif)) *mul)
-								ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
-							elseif hType == 2 then -- Great
-								ply:EmitSound("cpthazama/persona5_dance/clap_cyl.wav")
-								didHit = true
-								ply.Persona_Dance_HitData.Great = ply.Persona_Dance_HitData.Great +1
-								-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(50 *(1 -tDif)) *mul)
-								ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
-							elseif hType == 3 then -- Good
-								ply:EmitSound("cpthazama/persona5_dance/clap.wav")
-								didHit = true
-								ply.Persona_Dance_HitData.Good = ply.Persona_Dance_HitData.Good +1
-								-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(25 *(1 -tDif)) *mul)
-								ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
-							else
-								hType = 0
-								ply:EmitSound("cpthazama/persona5/misc/00103.wav")
-								ply.Persona_Dance_HitTimes = 0
-								ply.Persona_Dance_LastNoteT = 0
-								if CurTime() > dancer.NextSpeakT && math.random(1,15) == 1 then
-									local snd = dancer:PlaySound("failing")
-									dancer.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
-								end
-							end
-							dancer:OnNoteHit(ply,ind,note,hType)
-							if ply.Persona_Dance_LastNoteT < CurTime() then
-								ply.Persona_Dance_HitTimes = 0
-							end
-							if didHit then
-								if CurTime() > dancer.NextSpeakT && math.random(1,15) == 1 then
-									local snd = dancer:PlaySound("winning")
-									dancer.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
-								end
-								if ply.Persona_Dance_LastCheerT > CurTime() then
-									ply.Persona_Dance_LastCheerT = math.Clamp(ply.Persona_Dance_LastCheerT +0.25,CurTime(),CurTime() +10)
-								else
-									ply.Persona_Dance_LastNoteT = CurTime() +10
-									ply.Persona_Dance_HitTimes = ply.Persona_Dance_HitTimes +1
-								end
-								if ply.Persona_Dance_HitTimes >= FEVERCOMBOCOST && ply.Persona_Dance_LastNoteT > CurTime() && CurTime() > ply.Persona_Dance_LastCheerT then
-									ply.Persona_Dance_LastNoteT = 0
-									ply.Persona_Dance_LastCheerT = CurTime() +10
-									ply.Persona_Dance_HitTimes = 0
-									ply:ChatPrint("SCORE BOOST FOR 10 SECONDS!")
-									ply:EmitSound("cpthazama/persona4/ui_shufflebegin.wav")
-									ply:EmitSound("cpthazama/persona5_dance/crowd.wav")
-								end
-							else
-								ply.Persona_Dance_HitTimes = 0
-							end
-							ply:ChatPrint("Gained " .. tostring(ply.Persona_Dance_Score -old) .. " points!")
-						end
-					end
-				end
-			end
 			-- if w then
 				-- CheckHit("w")
 			-- end
 			if a then
-				CheckHit("a")
+				dancer:CheckNoteHit("a")
 			end
 			if s then
-				CheckHit("s")
+				dancer:CheckNoteHit("s")
 			end
 			if d then
-				CheckHit("d")
+				dancer:CheckNoteHit("d")
 			end
 			if n6 then
-				CheckHit("n4")
+				dancer:CheckNoteHit("n4")
 			end
 			if n8 then
-				CheckHit("n8")
+				dancer:CheckNoteHit("n8")
 			end
 			if n4 then
-				CheckHit("n6")
+				dancer:CheckNoteHit("n6")
 			end
 			if e then
 				ply:EmitSound("cpthazama/persona5_dance/mix.wav")
@@ -727,6 +726,15 @@ if (CLIENT) then
 					note.HitPoints = 350 -nDist
 					-- draw.SimpleText(math.Round(nDist),"Persona",note.LastPosW[1] +50,note.LastPosH[1] +10,Color(255,0,0))
 				end
+				
+				if GetConVarNumber("persona_dance_perfect") == 1 && note.RemainingDist then
+					local nDist = math.abs(note.RemainingDist)
+					if note.CanBeHit && nDist <= 170 && nDist > 75 then
+						if note.Hit == false then
+							dancer:CheckNoteHit(note.Direction)
+						end
+					end
+				end
 
 				if note.CanDelete /*note.Timer < CurTime()*/ or note.Hit == true then
 					-- Entity(1):ChatPrint("REMOVED")
@@ -847,7 +855,8 @@ if (CLIENT) then
 		
 		if LocalPlayer() != ply then return end
 		if ply.VJ_Persona_DancePreview_Theme == nil or ply.VJ_Persona_DancePreview_Theme && !ply.VJ_Persona_DancePreview_Theme:IsPlaying() then
-			ply.VJ_Persona_DancePreview_Theme = CreateSound(ply,"cpthazama/persona3_dance/music/preview.wav")
+			local snd = me.PreviewThemes && VJ_PICK(me.PreviewThemes) or "cpthazama/persona3_dance/music/preview.wav"
+			ply.VJ_Persona_DancePreview_Theme = CreateSound(ply,snd)
 			ply.VJ_Persona_DancePreview_Theme:SetSoundLevel(0)
 			ply.VJ_Persona_DancePreview_Theme:Play()
 			ply.VJ_Persona_DancePreview_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01) // 60
@@ -869,6 +878,7 @@ if (CLIENT) then
 		-- end
 		me.Persona_Player = ply
 		me.Difficulty = GetConVarNumber("vj_persona_dancedifficulty")
+		me.IsCheating = GetConVarNumber("persona_dance_perfect") == 1 or false
 		me.DanceIndex = (me.DanceIndex or 0) +1
 		if !me.ApplyNotes then ply:ChatPrint("A weird problem occured...respawn the Dancer and it will be fixed"); SafeRemoveEntity(me) return end
 		me:ApplyNotes(seq,(seq && me.SongLength && me.SongLength[seq]) or length -4)
@@ -914,6 +924,10 @@ if (CLIENT) then
 		local ply = net.ReadEntity()
 		local dancer = net.ReadEntity()
 		local score = ply.Persona_Dance_Score
+		
+		if dancer.IsCheating then
+			score = 0
+		end
 		
 		-- dancer:SetNW2Int("HS_" .. song,score or 0)
 		
@@ -1006,7 +1020,8 @@ function ENT:ChangeOutfit(outfit)
 	if type(outfit) == "number" && self.Outfits[outfit] then
 		local oldMdl = self:GetModel()
 		local newMdl = oldMdl
-		self:SetModel(mdl .. self.Outfits[outfit].Model .. ".mdl")
+		local useFull = self.Outfits[outfit].UseFullDirectory or false
+		self:SetModel(useFull && self.Outfits[outfit].Model or mdl .. self.Outfits[outfit].Model .. ".mdl")
 		self.HeightOffset = self.Outfits[outfit].Offset
 		self:SetPos(pos +Vector(0,0,self.HeightOffset))
 		local newMdl = self:GetModel()
@@ -1017,7 +1032,8 @@ function ENT:ChangeOutfit(outfit)
 		if v.Name == outfit then
 			local oldMdl = self:GetModel()
 			local newMdl = oldMdl
-			self:SetModel(mdl .. v.Model .. ".mdl")
+			local useFull = v.UseFullDirectory or false
+			self:SetModel(useFull && v.Model or mdl .. v.Model .. ".mdl")
 			self.HeightOffset = v.Offset
 			self:SetPos(pos +Vector(0,0,self.HeightOffset))
 			local newMdl = self:GetModel()
@@ -1028,10 +1044,11 @@ function ENT:ChangeOutfit(outfit)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PlayPreview(ply)
-	if self:GetSequenceName(self:GetSequence()) != "preview" then
-		self:ResetSequence("preview")
+	local previewAnim = self.PreviewAnimation or "preview"
+	if self:GetSequenceName(self:GetSequence()) != previewAnim then
+		self:ResetSequence(previewAnim)
 		self:SetPlaybackRate(1)
-		self:SetCycle(1)
+		-- self:SetCycle(1)
 		self:OnPlayPreview(ply)
 	end
 	net.Start("Persona_Dance_PreviewSong")
@@ -1039,7 +1056,7 @@ function ENT:PlayPreview(ply)
 		net.WriteEntity(ply)
 	net.Send(ply)
 
-	return self:GetSequenceDuration(self,"preview")
+	return self:GetSequenceDuration(self,previewAnim)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
@@ -1199,8 +1216,8 @@ function ENT:Initialize()
 	self.DanceIndex = 0
 	self.NextDanceT = CurTime()
 	self.NextSpeakT = 0
-	
-	self:SetCinematicData()
+
+	self:SetCinematicData(Vector(0,100,5),0) // Default
 
 	self.AnimationEvents = {}
 	

@@ -87,7 +87,7 @@ if SERVER then
 		self:ManipulateBoneJiggle(76,1)
 		self:ManipulateBoneJiggle(77,1)
 
-		self:SetCinematicData()
+		-- self:SetCinematicData()
 		self:RandomizeCinematics("dance_lastsurprise",917)
 		self:RandomizeCinematics("dance_lastsurprise2",1268)
 		self:RandomizeCinematics("dance_lastsurprise3",406)

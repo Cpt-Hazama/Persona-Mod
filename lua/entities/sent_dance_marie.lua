@@ -96,7 +96,7 @@ if SERVER then
 		self:SetBodygroup(BG_HAT,math.random(1,50) == 1 && 1 or 0)
 		self:SetBodygroup(BG_BAG,math.random(1,50) == 1 && 1 or 0)
 
-		self:SetCinematicData()
+		-- self:SetCinematicData()
 		self:RandomizeCinematics("dance_breakoutof",F_BOF)
 		self:RandomizeCinematics("dance_breakoutof_b",F_BOF_B)
 

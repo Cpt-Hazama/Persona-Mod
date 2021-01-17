@@ -164,6 +164,8 @@ if CLIENT then
 			Panel:AddControl("Label",{Text = "0 = Default, 1 = Spectate, 2 = Dance, Dance!"})
 			Panel:AddControl("Slider",{Label = "Dance Difficulty",Command = "vj_persona_dancedifficulty",Min = 1,Max = 5})
 			Panel:AddControl("Label",{Text = "1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're Crazy"})
+			Panel:AddControl("CheckBox",{Label = "Enable Perfect Play",Command = "persona_dance_perfect"})
+			Panel:AddControl("Label",{Text = "Scores will not be saved in Perfect Play mode!"})
 			Panel:AddControl("CheckBox",{Label = "Controller Mode",Command = "persona_dance_controller"})
 			Panel:AddControl("Label",{Text = "Enable this to play with a controller!"})
 			Panel:AddControl("CheckBox",{Label = "Cinematic Mode",Command = "persona_dance_cinematic"})
