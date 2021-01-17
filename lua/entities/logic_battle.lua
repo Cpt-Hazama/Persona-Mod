@@ -69,7 +69,7 @@ if (CLIENT) then
 		-- self.BattleActive = true
 		ply.BattleEntitiesTable = tblEnemies
 		local boss = false
-		for _,v in pairs(tblEnemies) do if v:GetNW2Bool("VJ_IsHugeMonster") then boss = true break end end
+		for _,v in pairs(tblEnemies) do if IsValid(v) && v:GetNW2Bool("VJ_IsHugeMonster") then boss = true break end end
 
 		local tracks = P_FindBattleTracks(boss)
 		local name, snd, len = tracks.Name, tracks.Song, tracks.Length
