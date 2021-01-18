@@ -19,7 +19,7 @@ PXP.GiveEXP = function(ply,xp)
 		xp = xp *2
 	end
 	if ply:IsPlayer() then
-		ply:ChatPrint("You've earned " .. ((oldXP +xp) -oldXP) .. " EXP!")
+		ply:ChatPrint("Your Persona has earned " .. ((oldXP +xp) -oldXP) .. " EXP!")
 		ply:EmitSound("cpthazama/persona4/ui_skillup.wav")
 	end
 	PXP.SetEXP(ply,oldXP +xp,true)
@@ -78,11 +78,100 @@ PXP.GetLevel = function(ply)
 	return PXP.GetPersonaData(ply,2)
 end
 
+PXP.SetPlayerLevel = function(ply,lvl,chat)
+	if !ply:IsPlayer() then return end
+	PXP.SetPersonaData(ply,9,lvl)
+	if ply:IsPlayer() && chat then
+		ply:ChatPrint("You are now level " .. lvl .. "!")
+	end
+	ply:SetNW2Int("PXP_Player_Level",lvl)
+end
+
+PXP.GetPlayerLevel = function(ply)
+	if !ply:IsPlayer() then return end
+	return PXP.GetPersonaData(ply,9)
+end
+
+PXP.SetPlayerEXP = function(ply,xp)
+	if !ply:IsPlayer() then return end
+	local oldXP = PXP.GetPlayerEXP(ply)
+	PXP.SetPersonaData(ply,10,xp)
+	ply:SetNW2Int("PXP_Player_EXP",xp)
+	if PXP.GetPlayerLevel(ply) < 99 && PXP.GetPersonaData(ply,10) >= PXP.GetRequiredPlayerXP(ply) then
+		PXP.PlayerLevelUp(ply)
+	end
+	-- PXP.SavePersonaData(ply)
+end
+
+PXP.GivePlayerEXP = function(ply,xp)
+	if !ply:IsPlayer() then return end
+	local oldXP = PXP.GetPlayerEXP(ply)
+	if ply:IsPlayer() then
+		ply:ChatPrint("You've earned " .. ((oldXP +xp) -oldXP) .. " EXP!")
+		ply:EmitSound("cpthazama/persona4/ui_skillup.wav")
+	end
+	PXP.SetPlayerEXP(ply,oldXP +xp,true)
+end
+
+PXP.GiveRequiredPlayerEXP = function(ply)
+	if !ply:IsPlayer() then return end
+	PXP.SetPlayerEXP(ply,PXP.GetRequiredPlayerXP(ply),true)
+end
+
+PXP.GetPlayerEXP = function(ply)
+	if !ply:IsPlayer() then return end
+	return PXP.GetPersonaData(ply,10)
+end
+
+PXP.SetRequiredPlayerXP = function(ply,amount)
+	if !ply:IsPlayer() then return end
+	ply:SetNW2Int("PXP_Player_RequiredEXP",amount)
+	-- PXP.SetPersonaData(ply,6,amount)
+	-- PXP.SavePersonaData(ply)
+end
+
+PXP.GetRequiredPlayerXP = function(ply)
+	if !ply:IsPlayer() then return end
+	return PXP.GetPlayerLevel(ply) == 99 && 0 or ply:GetNW2Int("PXP_Player_RequiredEXP")
+end
+
+PXP.CalculateRequiredPlayerXP = function(ply)
+	if !ply:IsPlayer() then return end
+	local formula = PXP.GetPlayerLevel(ply) *1500
+	local mRequiredXP = formula
+	PXP.SetRequiredPlayerXP(ply,mRequiredXP)
+end
+
+PXP.FindRemainingPlayerXP = function(ply)
+	if !ply:IsPlayer() then return end
+	return PXP.GetRequiredPlayerXP(ply) -PXP.GetPlayerEXP(ply)
+end
+
 PXP.SetRequiredXP = function(ply,amount)
 	if !ply:IsPlayer() then return end
 	ply:SetNW2Int("PXP_RequiredEXP",amount)
 	PXP.SetPersonaData(ply,6,amount)
 	-- PXP.SavePersonaData(ply)
+end
+
+PXP.PlayerLevelUp = function(ply)
+	if !ply:IsPlayer() then return end
+	if PXP.GetPlayerLevel(ply) == 99 then return end
+	PXP.SetPlayerLevel(ply,PXP.GetPlayerLevel(ply) +1,true)
+	PXP.CalculateRequiredPlayerXP(ply)
+
+	ply:EmitSound("cpthazama/persona4/ui_lvlup.wav")
+	local toAdd = 0
+	if PXP.GetPlayerEXP(ply) > PXP.GetRequiredPlayerXP(ply) then
+		toAdd = PXP.GetPlayerEXP(ply) -PXP.GetRequiredPlayerXP(ply)
+	end
+	PXP.SetPlayerEXP(ply,0 +toAdd)
+
+	if ply.P_LevelUp then ply.P_LevelUp:Stop() end
+	ply.P_LevelUp = CreateSound(ply,"cpthazama/persona_shared/levelup.wav")
+	ply.P_LevelUp:SetSoundLevel(0)
+	ply.P_LevelUp:Play()
+	ply.P_LevelUp:ChangeVolume(0.35)
 end
 
 PXP.GetRequiredXP = function(ply)
@@ -233,7 +322,7 @@ end
 
 PXP.GetPersonaData = function(ply,type)
 	if !ply:IsPlayer() then return end
-	local name = ply:GetPersonaName() or PXP.GetPersonaData(ply,5)
+	local name = type <= 8 && ply:GetPersonaName() or PXP.GetPersonaData(ply,5)
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
 	if type == 5 then -- Last Persona
 		local persona = file.Read(dir .. "_PERSONA.txt","DATA")
@@ -243,7 +332,12 @@ PXP.GetPersonaData = function(ply,type)
 		end
 		return persona
 	end
-	if name then
+	if type == 9 then -- Player LEVEL
+		return tonumber(file.Read(dir .. "_LEVEL.txt","DATA") or 0) or 0
+	elseif type == 10 then -- Player EXP
+		return tonumber(file.Read(dir .. "_EXP.txt","DATA") or 0) or 0
+	end
+	if name && type <= 8 then
 		if type == 1 then -- EXP
 			return tonumber(file.Read(dir .. "_" .. name .. "_EXP.txt","DATA") or 0) or 0
 		elseif type == 2 then -- Level
@@ -278,13 +372,18 @@ end
 
 PXP.SetPersonaData = function(ply,type,val)
 	if !ply:IsPlayer() then return end
-	local name = ply:GetPersonaName() or PXP.GetPersonaData(ply,5)
+	local name = type <= 8 && ply:GetPersonaName() or PXP.GetPersonaData(ply,5) or nil
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
 	if type == 5 then -- Last Persona
 		PXP.WriteFile(dir .. "_PERSONA.txt",val)
 		return
 	end
-	if name then
+	if type == 9 then -- Player Level
+		PXP.WriteFile(dir .. "_LEVEL.txt",val)
+	elseif type == 10 then -- Player EXP
+		PXP.WriteFile(dir .. "_EXP.txt",val)
+	end
+	if name && type <= 8 then
 		if type == 1 then -- EXP
 			PXP.WriteFile(dir .. "_" .. ply:GetPersonaName() .. "_EXP.txt",val)
 			ply:SetNW2Int("PXP_EXP",val)

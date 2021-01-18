@@ -58,6 +58,7 @@ if VJExists == true then
 	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat) -- Thanatos | Theme: Whims Of Everyone's Souls
 
 		-- Persona Gamemode Exclusives --
+	VJ.AddNPC("(Shadow) Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat)
 	-- VJ.AddNPC("Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat .. " - Gamemode")
 	-- VJ.AddNPC("Munehisa Iwai","npc_vj_per_vendor_iwai",vCat .. " - Gamemode")
 

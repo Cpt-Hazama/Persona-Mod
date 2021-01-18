@@ -238,7 +238,7 @@ function ENT:IdleAnimationCode(ply)
 	if self:GetSequenceName(self:GetSequence()) != self.Animations[self.CurrentIdle] then
 		self:DoIdle()
 	end
-	self.P_LerpVec = LerpVector(FrameTime() *50,self.P_LerpVec,self:GetIdlePosition(ply))
+	self.P_LerpVec = LerpVector(FrameTime() *50,self.P_LerpVec,self.User.IsPersonaShadow && self.User:GetPos() or self:GetIdlePosition(ply))
 	self:SetPos(self.P_LerpVec)
 	self:FacePlayerAim(self.User)
 end
@@ -1267,6 +1267,7 @@ function ENT:OnKilledEnemy_EXP(ent)
 	local exp = ent:GetNW2Int("PXP_EXP")
 	
 	PXP.GiveEXP(ply,exp)
+	PXP.GivePlayerEXP(ply,exp)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:BrainWash(ent,min,max)
@@ -1290,19 +1291,25 @@ function ENT:BrainWash(ent,min,max)
 				if ent:IsNPC() && ent:Disposition(ply) != D_LI then
 					ent:AddEntityRelationship(ply,D_LI,99)
 					ent.Persona_BrainWashed = true
+					ent.P_VJ_NPC_Class = ent.VJ_NPC_Class
 					local oldVal = ent.PlayerFriendly
 					local oldValB = ent.FriendsWithAllPlayerAllies
 					ent.PlayerFriendly = true
 					ent.FriendsWithAllPlayerAllies = true
+					ent.VJ_NPC_Class = ply.VJ_NPC_Class or {"CLASS_PLAYER_ALLY"}
 					if ent.VJ_AddCertainEntityAsFriendly then table.insert(ent.VJ_AddCertainEntityAsFriendly,ply) end
 					timer.Simple(20,function()
 						if IsValid(ent) then
 							ent.Persona_BrainWashed = false
-							for i,v in pairs(ent.VJ_AddCertainEntityAsFriendly) do
-								if v == ply then table.remove(ent.VJ_AddCertainEntityAsFriendly,i) end
+							if IsValid(ply) then
+								for i,v in pairs(ent.VJ_AddCertainEntityAsFriendly) do
+									if v == ply then table.remove(ent.VJ_AddCertainEntityAsFriendly,i) end
+								end
+								ply:ChatPrint(ent:IsNPC() && (ent.PrintName != nil && ent.PrintName or "target") .. " is no longer brainwashed!")
 							end
 							ent.PlayerFriendly = oldVal
 							ent.FriendsWithAllPlayerAllies = oldValB
+							ent.VJ_NPC_Class = ent.P_VJ_NPC_Class
 						end
 					end)
 				elseif ent:IsPlayer() && !ent.Persona_BrainWashed && ent:Alive() then
@@ -1312,8 +1319,11 @@ function ENT:BrainWash(ent,min,max)
 					timer.Simple(20,function()
 						if IsValid(ent) then
 							ent.Persona_BrainWashed = false
-							for i,v in pairs(ent.Persona_BrainWashers) do
-								if v == ply then table.remove(ent.Persona_BrainWashers,i) end
+							if IsValid(ply) then
+								for i,v in pairs(ent.Persona_BrainWashers) do
+									if v == ply then table.remove(ent.Persona_BrainWashers,i) end
+								end
+								ply:ChatPrint(ent:Nick() .. " is no longer brainwashed!")
 							end
 						end
 					end)

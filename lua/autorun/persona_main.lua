@@ -377,12 +377,20 @@ hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
 	PXP.SetPersonaData(ply,4,comp != nil && comp or {})
 	PXP.SetRequiredXP(ply,PXP.GetRequiredXP(ply))
 
-	ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
-	ply:SetMaxSP(ply:GetSP())
+	local Pexp = PXP.GetPersonaData(ply,10)
+	local Plvl = PXP.GetPersonaData(ply,9) or 0
+	PXP.SetPersonaData(ply,10,Pexp != nil && Pexp or 0)
+	PXP.SetPersonaData(ply,9,Plvl != nil && Plvl or 0)
+	PXP.SetRequiredPlayerXP(ply,PXP.GetRequiredPlayerXP(ply))
+
+	-- ply:SetSP(ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150)
+	-- ply:SetMaxSP(ply:GetSP())
 	ply:SetNW2Bool("Persona_BattleMode",false)
 	ply:SetNW2Bool("Persona_SkillMenu",false)
-	ply.Persona_MaxHealth = 100
-	ply:SetMaxHealth(100)
+	timer.Simple(0,function()
+		ply.Persona_MaxHealth = 100
+		ply:SetMaxHealth(100)
+	end)
 	ply.PXP_NextXPChange = CurTime()
 	
 	ply.Persona_TarukajaT = 0 -- Inc. ATK
@@ -401,14 +409,16 @@ end)
 
 if SERVER then
 	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
-		ply:SetSP(ply:GetMaxSP() or (ply:IsSuperAdmin() && 999 or ply:IsAdmin() && 350 or 150))
-		ply:SetMaxSP(ply:GetSP())
 		ply:SetNW2Bool("Persona_BattleMode",false)
 		ply:SetNW2Bool("Persona_SkillMenu",false)
+		local lvl = PXP.GetPlayerLevel(ply)
+		local shouldBe = math.Clamp(math.Round(lvl *10.09),100,654698468)
+		local shouldBeSP = math.Clamp(math.Round(lvl *8),25,654698468)
 		timer.Simple(0,function()
-			if IsValid(ply) then
-				ply:SetHealth(ply.Persona_MaxHealth)
-			end
+			ply:SetHealth(shouldBe)
+			ply:SetSP(shouldBeSP)
+			ply:SetMaxSP(ply:GetSP())
+			-- ply:SetHealth(ply.Persona_MaxHealth)
 		end)
 		ply.PXP_NextXPChange = CurTime()
 
@@ -516,11 +526,14 @@ if SERVER then
 			-- if CurTime() > v.PXP_NextXPChange && PXP.GetPersonaData(v,1) >= PXP.GetRequiredXP(v) then
 				-- PXP.LevelUp(v)
 			-- end
-			if v:Health() > v:GetMaxHealth() then
-				v:SetMaxHealth(v:Health())
-				v.Persona_MaxHealth = v:Health()
+			local lvl = PXP.GetPlayerLevel(v)
+			local shouldBe = math.Clamp(math.Round(lvl *10.09),100,654698468)
+			local shouldBeSP = math.Clamp(math.Round(lvl *8),25,654698468)
+			if shouldBe > v:GetMaxHealth() then
+				v:SetMaxHealth(shouldBe)
+				v.Persona_MaxHealth = shouldBe
 			end
-			if v:GetSP() > v:GetMaxSP() then
+			if shouldBeSP > v:GetMaxSP() then
 				v:SetMaxSP(v:GetSP())
 			end
 			if IsValid(v:GetPersona()) then

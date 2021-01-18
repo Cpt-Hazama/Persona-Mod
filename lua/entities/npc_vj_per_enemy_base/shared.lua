@@ -6,3 +6,5 @@ ENT.Contact 		= ""
 ENT.Purpose 		= ""
 ENT.Instructions 	= ""
 ENT.Category		= "NPC"
+
+ENT.IsPersonaShadow = true

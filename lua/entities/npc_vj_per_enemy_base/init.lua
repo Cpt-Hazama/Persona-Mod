@@ -70,7 +70,10 @@ function ENT:CustomOnTakeDamage_OnBleed(dmginfo,hitgroup)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:BeforeInit() end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()
+	self:BeforeInit()
 	self:SetHealth((GetConVarNumber("vj_npc_allhealth") > 0) and GetConVarNumber("vj_npc_allhealth") or self:VJ_GetDifficultyValue(self.Stats.HP))
 	self.SP = self.Stats.SP
 	

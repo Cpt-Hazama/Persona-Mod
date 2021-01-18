@@ -86,6 +86,9 @@ if SERVER then
 							break
 						end
 						if vis && !ply:Visible(v) then continue end
+						if v.IsPersonaShadow && !v.MetaVerseMode then
+							v:Transform(true,ply)
+						end
 						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
 						table.insert(tbl,v)
 					end
@@ -123,6 +126,9 @@ if SERVER then
 						end
 						if vis && !ply:Visible(v) then continue end
 						v.VJ_P_DisableChasingEnemy = v.DisableChasingEnemy
+						if v.IsPersonaShadow && !v.MetaVerseMode then
+							v:Transform(true,ply)
+						end
 						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
 						table.insert(tbl,v)
 					end
