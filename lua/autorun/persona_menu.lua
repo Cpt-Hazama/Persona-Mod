@@ -274,16 +274,24 @@ if CLIENT then
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Admin Settings","Cheats","Cheats","","",function(Panel)
-			Panel:AddControl("TextBox",{Label = "Level",Command = "persona_i_setlevel",WaitForEnter = "1"})
-			Panel:AddControl("Button",{Label = "Set Level",Command = "persona_setlevel"})
+			Panel:AddControl("TextBox",{Label = "Player Level",Command = "persona_i_ply_setlevel",WaitForEnter = "1"})
+			Panel:AddControl("Button",{Label = "Set Player Level",Command = "persona_i_ply_setlevel"})
 
-			Panel:AddControl("TextBox",{Label = "EXP",Command = "persona_i_setexp",WaitForEnter = "0"})
-			Panel:AddControl("Button",{Label = "Set EXP",Command = "persona_setexp"})
+			Panel:AddControl("TextBox",{Label = "Player EXP",Command = "persona_i_ply_setexp",WaitForEnter = "0"})
+			Panel:AddControl("Button",{Label = "Set Player EXP",Command = "persona_i_ply_setexp"})
 
-			Panel:AddControl("Button",{Label = "Give Req. EXP",Command = "persona_giveexp"})
+			Panel:AddControl("Button",{Label = "Level Up Player",Command = "persona_player_giveexp"})
 
-			Panel:AddControl("TextBox",{Label = "SP",Command = "persona_i_setsp",WaitForEnter = "1"})
-			Panel:AddControl("Button",{Label = "Set SP",Command = "persona_setsp"})
+			Panel:AddControl("TextBox",{Label = "Player SP",Command = "persona_i_setsp",WaitForEnter = "1"})
+			Panel:AddControl("Button",{Label = "Set Player SP",Command = "persona_setsp"})
+
+			Panel:AddControl("TextBox",{Label = "Persona Level",Command = "persona_i_setlevel",WaitForEnter = "1"})
+			Panel:AddControl("Button",{Label = "Set Persona Level",Command = "persona_setlevel"})
+
+			Panel:AddControl("TextBox",{Label = "Persona EXP",Command = "persona_i_setexp",WaitForEnter = "0"})
+			Panel:AddControl("Button",{Label = "Set Persona EXP",Command = "persona_setexp"})
+
+			Panel:AddControl("Button",{Label = "Level Up Persona",Command = "persona_giveexp"})
 		end,{})
 	end)
 
@@ -294,6 +302,8 @@ if CLIENT then
 	CreateClientConVar("persona_i_setlevel","1",false,true)
 	CreateClientConVar("persona_i_setexp","0",false,true)
 	CreateClientConVar("persona_i_setsp","1",false,true)
+	CreateClientConVar("persona_i_ply_setlevel","1",false,true)
+	CreateClientConVar("persona_i_ply_setexp","0",false,true)
 end
 
 local function persona_addskill(ply)
@@ -358,6 +368,13 @@ local function persona_setsp(ply)
 	end
 end
 concommand.Add("persona_setsp",persona_setsp)
+
+local function persona_player_giveexp(ply)
+	if ply:IsAdmin() or ply:IsSuperAdmin() then
+		PXP.GiveRequiredPlayerEXP(ply)
+	end
+end
+concommand.Add("persona_player_giveexp",persona_player_giveexp)
 
 local function persona_giveexp(ply)
 	if ply:IsAdmin() or ply:IsSuperAdmin() then

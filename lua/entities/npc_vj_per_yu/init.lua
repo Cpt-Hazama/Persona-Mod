@@ -15,6 +15,7 @@ ENT.Stats = {
 	AGI = 58,
 	LUC = 45,
 }
+ENT.Level = 99
 ENT.VJ_NPC_Class = {"CLASS_YU","CLASS_INVESTIGATION_TEAM","CLASS_PLAYER_ALLY"}
 ENT.FriendsWithAllPlayerAllies = true
 
@@ -80,6 +81,10 @@ function ENT:Controller_Initialize(ply)
 		net.Send(ply)
 	end
 end
+---------------------------------------------------------------------------------------------------------------------------------------------
+-- function ENT:LevelCode()
+	-- self:SetNW2Int("PXP_Level",self.Level)
+-- end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaInit()
 	self:SetBodygroup(1,1)

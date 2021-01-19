@@ -2997,6 +2997,9 @@ function ENT:Debilitate(ply,persona,rmb)
 									ent.Persona_DebilitateT = CurTime() +60
 									self:DoChat("Decreased target's ATK/DEF/Evasion for 1 minute!")
 								end
+								ent.Persona_TarukajaT = 0
+								ent.Persona_RakukajaT = 0
+								ent.Persona_SukukajaT = 0
 								local spawnparticle = ents.Create("info_particle_system")
 								spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_all")
 								spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())

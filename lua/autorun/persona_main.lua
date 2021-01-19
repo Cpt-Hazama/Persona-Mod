@@ -408,6 +408,20 @@ hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
 end)
 
 if SERVER then
+
+	function P_HasEnhancements(ent,incSPE)
+		if !IsValid(ent) then return false end
+		local incSPE = incSPE or false
+		local t = CurTime()
+		return ent.Persona_TarukajaT > t || ent.Persona_RakukajaT > t || ent.Persona_ChargedT > t && incSPE || ent.Persona_SukukajaT > t || ent.Persona_HeatRiserT > t && incSPE || ent.Persona_FocusedT > t && incSPE
+	end
+
+	function P_HasPenalties(ent)
+		if !IsValid(ent) then return false end
+		local t = CurTime()
+		return ent.Persona_TarundaT > t || ent.Persona_RakundaT > t || ent.Persona_SukundaT > t || ent.Persona_DebilitateT > t
+	end
+	
 	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
 		ply:SetNW2Bool("Persona_BattleMode",false)
 		ply:SetNW2Bool("Persona_SkillMenu",false)
@@ -520,7 +534,7 @@ if SERVER then
 		end
 	end)
 
-	local wep = "weapon_jojo_nothing"
+	local wep = "weapon_jojo_nothing" // I don't get it. I renamed this weapon, reloaded the game, shit draws the ammo. I copy the weapon, rename that one, reload the game, the copy draws the ammo but not the original. GMod is the most broken shit I've ever seen
 	hook.Add("Think","Persona_Think",function()
 		for _,v in pairs(player.GetAll()) do
 			-- if CurTime() > v.PXP_NextXPChange && PXP.GetPersonaData(v,1) >= PXP.GetRequiredXP(v) then
@@ -583,48 +597,33 @@ if SERVER then
 			local dmg = dmginfo:GetDamage()
 			local attacker = dmginfo:GetAttacker()
 			local persona = ent:GetPersona()
+			local stats = ((attacker:IsPlayer() or attacker:IsNPC()) && IsValid(attacker:GetPersona()) && attacker:GetPersona().Stats) or {STR=1,MAG=1,END=1,AGI=1,LUC=1}
+			local aPLvl = ((attacker:IsPlayer() or attacker:IsNPC()) && IsValid(attacker:GetPersona()) && attacker:GetPersona().Stats && attacker:GetPersona().Stats.LVL) or 0
+			local aLvl = ((attacker:IsPlayer()) && ((aPLvl +PXP.GetPlayerLevel(attacker)) /2 or 1)) or ((attacker:IsNPC()) && (/*aPLvl or */attacker:GetNW2Int("PXP_Level"))) or 1
+			local PLvl = ((ent:IsPlayer() or ent:IsNPC()) && IsValid(persona) && persona.Stats && persona.Stats.LVL) or 0
+			local lvl = ((ent:IsPlayer()) && ((PLvl +PXP.GetPlayerLevel(ent)) /2 or 1)) or ((ent:IsNPC()) && (/*PLvl or */ent:GetNW2Int("PXP_Level"))) or 1
+
+			aLvl = math.Round(aLvl)
+			lvl = math.Round(lvl)
+			local lvlDif = aLvl -lvl
+			local lvlDifAbs = math.abs(lvlDif)
 			
+			-- Entity(1):ChatPrint(attacker:GetName() .. " Average Level - " .. tostring(aLvl) .. " | " .. ent:GetName() .. " Average Level - " .. tostring(lvl))
+			-- Entity(1):ChatPrint("Your Average Level - " .. tostring(aLvl) .. " | Their Average Level - " .. tostring(lvl))
+			-- Entity(1):ChatPrint("Original - " .. tostring(dmg))
+			-- dmginfo:SetDamage((5 *math.sqrt((stats.STR /stats.END) *dmg) *math.abs(lvl -aLvl)) *math.Rand(0.95,1.05)) // I really don't like this. Idk if it even works properly
+			local modDMG = dmg
+			if lvlDifAbs > 5 then
+				modDMG = (lvl > aLvl && (modDMG /(lvlDifAbs /6))) or (lvlDif *0.1) *modDMG
+			end
+			dmginfo:SetDamage(modDMG)
+			-- Entity(1):ChatPrint("Formula - " .. tostring(dmginfo:GetDamage()))
 			if ent.Persona_BrainWashed then
 				if ent.Persona_BrainWashers then
 					if IsValid(attacker) && VJ_HasValue(ent.Persona_BrainWashers,attacker) then
 						dmginfo:SetDamage(0)
 					end
 				end
-			end
-			
-			if IsValid(attacker) && (attacker:IsNPC() or attacker:IsPlayer()) && IsValid(attacker:GetPersona()) && useMarkers() then
-				local color = Color(0,161,255)
-				local bonus = 0
-				if IsValid(persona) then
-					local stats = persona.Stats
-					local weak = stats.WK
-					local resist = stats.RES
-					local block = stats.NUL
-					local absorb = stats.ABS
-					local reflect = stats.REF
-					
-					if VJ_HasValue(weak,dmgtype) then
-						color = Color(255,0,0)
-						bonus = 1
-					end
-					if VJ_HasValue(resist,dmgtype) then
-						color = Color(110,0,0)
-						bonus = 2
-					end
-					if VJ_HasValue(block,dmgtype) then
-						color = Color(255,255,255)
-						bonus = 3
-					end
-					if VJ_HasValue(absorb,dmgtype) then
-						color = Color(95,63,127)
-						bonus = 4
-					end
-					if VJ_HasValue(reflect,dmgtype) then
-						color = Color(127,255,255)
-						bonus = 5
-					end
-				end
-				SpawnMarker_SV(dmg,dmgtype,dmginfo:GetDamagePosition(),dmginfo:GetDamageForce(),attacker:GetPersona():GetCritical() or false,color,bonus)
 			end
 
 			if IsValid(persona) then
@@ -657,6 +656,45 @@ if SERVER then
 						end
 					end
 				end
+			end
+			-- Entity(1):ChatPrint("Alterations - " .. tostring(dmginfo:GetDamage()))
+
+			if IsValid(attacker) && (attacker:IsNPC() or attacker:IsPlayer()) && IsValid(attacker:GetPersona()) && useMarkers() then
+				local color = Color(0,161,255)
+				local bonus = 0
+				if IsValid(persona) then
+					local stats = persona.Stats
+					local weak = stats.WK
+					local resist = stats.RES
+					local block = stats.NUL
+					local absorb = stats.ABS
+					local reflect = stats.REF
+					
+					if VJ_HasValue(weak,dmgtype) then
+						color = Color(255,0,0)
+						bonus = 1
+					end
+					if VJ_HasValue(resist,dmgtype) then
+						color = Color(110,0,0)
+						bonus = 2
+					end
+					if VJ_HasValue(block,dmgtype) then
+						color = Color(255,255,255)
+						bonus = 3
+					end
+					if VJ_HasValue(absorb,dmgtype) then
+						color = Color(95,63,127)
+						bonus = 4
+					end
+					if VJ_HasValue(reflect,dmgtype) then
+						color = Color(127,255,255)
+						bonus = 5
+					end
+				end
+				SpawnMarker_SV(dmginfo:GetDamage(),dmgtype,dmginfo:GetDamagePosition(),dmginfo:GetDamageForce(),attacker:GetPersona():GetCritical() or false,color,bonus)
+			end
+
+			if IsValid(persona) then
 				if persona.HandleDamage then
 					return persona:HandleDamage(dmg,dmgtype,dmginfo)
 				end

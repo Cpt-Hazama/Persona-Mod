@@ -101,7 +101,9 @@ function ENT:OnSwitchMetaVerse(didSwitch)
 		self:SetModel("models/cpthazama/persona5/akechi_normal.mdl")
 		self:SetBodygroup(1,0)
 	end
-	self:SetPos(self:GetPos() +Vector(0,0,8))
+	local bounds = self.Bounds
+	self:SetCollisionBounds(Vector(bounds.x,bounds.y,bounds.z),-Vector(bounds.x,bounds.y,0))
+	self:SetPos(self:GetPos() +Vector(0,0,5))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink()

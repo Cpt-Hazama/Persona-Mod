@@ -176,6 +176,9 @@ function ENT:CustomOnInitialize()
 	self:SetSP(self.Stats.SP)
 	self:SetMaxSP(self.Stats.SP)
 	
+	self.Bounds = self:GetCollisionBounds()
+	self.Bounds.z = self:OBBMaxs().z
+	
 	self:PersonaInit()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -286,17 +289,20 @@ function ENT:PersonaThink(persona,enemy,dist,controlled)
 		end
 		return
 	end
-	if math.random(1,10) == 1 then
-		persona:CycleCards()
-	end
+	-- if math.random(1,10) == 1 then
+		-- persona:CycleCards()
+	-- end
 	if self:Health() <= self:GetMaxHealth() /2 && math.random(1,20) == 1 then
 		self:UseItem("item_persona_hp")
 	end
-	if dist <= self.FarAttackDistance && dist >= self.CloseAttackDistance -100 && math.random(1,4) == 1 then
-		persona:DoSpecialAttack(self,persona,nil,true)
-	elseif dist < self.CloseAttackDistance && math.random(1,6) == 1 then
-		persona:DoMeleeAttack(self,persona,persona.CurrentMeleeSkill,true)
+	if dist <= self.FarAttackDistance && math.random(1,math.random(2,4)) == 1 then // Can attempt battle methods...
+		self:CalculateMove(persona,enemy,dist)
 	end
+	-- if dist <= self.FarAttackDistance && dist >= self.CloseAttackDistance -100 && math.random(1,4) == 1 then
+		-- persona:DoSpecialAttack(self,persona,nil,true)
+	-- elseif dist < self.CloseAttackDistance && math.random(1,6) == 1 then
+		-- persona:DoMeleeAttack(self,persona,persona.CurrentMeleeSkill,true)
+	-- end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink() end
@@ -319,6 +325,97 @@ function ENT:UseItem(class,t)
 		ent:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 		ent:Use(self,self)
 		self.NextUseT = CurTime() +(t or math.Rand(2,4))
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CalculateMove(persona,enemy,dist)
+	local choose = math.random(1,100)
+	local hasHeatRiser = self.Persona_HeatRiserT > CurTime()
+	local hasCharge = self.Persona_ChargedT > CurTime()
+	local hasConcentrate = self.Persona_FocusedT > CurTime()
+	local hasTarukaja = self.Persona_TarukajaT > CurTime()
+	local hasRakukaja = self.Persona_RakukajaT > CurTime()
+	local hasSukukaja = self.Persona_SukukajaT > CurTime()
+	local meleeSkill = persona.CurrentMeleeSkill
+	local magicSkill = persona:GetCard()
+	local hp = self:Health()
+	local sp = self:GetSP()
+	local doMelee = choose < 40
+
+	if P_HasEnhancements(enemy) && (persona:HasSkill("Dekaja") or persona:HasSkill("Debilitate")) then
+		if math.random(1,2) == 1 then
+			persona:SetCard("Dekaja")
+			persona:DoSpecialAttack(self,persona,nil,true)
+		else
+			persona:SetCard("Debilitate")
+			persona:DoSpecialAttack(self,persona,nil,true)
+		end
+		return
+	elseif P_HasPenalties(self) && math.random(1,2) == 1 && persona:HasSkill("Dekunda") then
+		persona:SetCard("Dekunda")
+		persona:DoSpecialAttack(self,persona,nil,true)
+		return
+	elseif !hasHeatRiser && math.random(1,3) == 1 && persona:HasSkill("Heat Riser") then
+		persona:SetCard("Heat Riser")
+		persona:DoSpecialAttack(self,persona,nil,true)
+		return
+	elseif !hasCharge && math.random(1,3) == 1 && persona:HasSkill("Charge") then
+		persona:SetCard("Charge")
+		persona:DoSpecialAttack(self,persona,nil,true)
+		return
+	elseif !hasConcentrate && math.random(1,3) == 1 && persona:HasSkill("Concentrate") then
+		persona:SetCard("Concentrate")
+		persona:DoSpecialAttack(self,persona,nil,true)
+		return
+	elseif (!hasTarukaja && persona:HasSkill("Tarukaja")) || (!hasRakukaja && persona:HasSkill("Rakukaja")) || (!hasSukukaja && persona:HasSkill("Sukukaja")) && math.random(1,3) == 1 then
+		local tar = !hasTarukaja && persona:HasSkill("Tarukaja")
+		local rak = !hasRakukaja && persona:HasSkill("Rakukaja")
+		local suk = !hasSukukaja && persona:HasSkill("Sukukaja")
+		local pick = {}
+		if tar then table.insert(pick,"Tarukaja") end
+		if rak then table.insert(pick,"Rakukaja") end
+		if suk then table.insert(pick,"Sukukaja") end
+		persona:SetCard(VJ_PICK(pick))
+		persona:DoSpecialAttack(self,persona,nil,true)
+		return
+	end
+	
+	if hasConcentrate && !hasCharge && math.random(1,2) == 1 then
+		doMelee = false
+	elseif hasCharge && !hasConcentrate && math.random(1,2) == 1 then
+		doMelee = true
+	elseif enemy.InCriticalState then
+		doMelee = true
+	end
+
+	if doMelee then // Attempt melee...
+		if dist < self.CloseAttackDistance then
+			persona:DoMeleeAttack(self,persona,meleeSkill,true)
+		else
+			if math.random(1,2) == 1 then
+				if P_GETSKILL(magicSkill).icon != "heal" && persona:HasSkillType("heal") then
+					local skill = persona:GetUsableSkillsByType("heal",sp)
+					persona:SetCard(skill)
+				end
+			else
+				local skill = persona:GetUsableSkillsBesidesType("heal",sp,false)
+				persona:SetCard(skill)
+			end
+			persona:DoSpecialAttack(self,persona,nil,true)
+		end
+	else // Attempt range...
+		if dist <= self.FarAttackDistance && dist >= self.CloseAttackDistance then
+			if math.random(1,4) == 1 then
+				if P_GETSKILL(magicSkill).icon != "heal" && persona:HasSkillType("heal") then
+					local skill = persona:GetUsableSkillsByType("heal",sp)
+					persona:SetCard(skill)
+				end
+			else
+				local skill = persona:GetUsableSkillsBesidesType("heal",sp,false)
+				persona:SetCard(skill)
+			end
+			persona:DoSpecialAttack(self,persona,nil,true)
+		end
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -366,8 +463,15 @@ function ENT:HandleAnimations()
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:LevelCode()
+	if IsValid(self:GetPersona()) then
+		self:SetNW2Int("PXP_Level",self.Level or self:GetPersona().Stats.LVL)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
 	self:HandleAnimations()
+	self:LevelCode()
 
 	self.DisableFindEnemy = self.InCriticalState
 	if self.InCriticalState then
@@ -439,7 +543,7 @@ function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
 				return
 			end
 			local e = ents.Create(GetCorpse.Class)
-			e:SetPos(GetCorpse:GetPos())
+			e:SetPos(GetCorpse:GetPos() +Vector(0,0,4))
 			e:SetAngles(GetCorpse:GetAngles())
 			e:Spawn()
 			if self.DeathCorpseSubMaterials != nil then

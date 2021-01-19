@@ -353,6 +353,64 @@ function ENT:PersonaCards(lmb,rmb,r)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetUsableSkillsBesidesType(type,cost,allowMelee)
+	local tbl = {}
+	for _,card in pairs(self:GetSkillsBesides(type,allowMelee)) do
+		if card.Cost <= cost then
+			table.insert(tbl,card.Name)
+		end
+	end
+	return VJ_PICK(tbl)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetUsableSkillsByType(type,cost,allowMelee)
+	local tbl = {}
+	for _,card in pairs(self:GetSelectSkills(type,allowMelee)) do
+		if card.Cost <= cost then
+			table.insert(tbl,card.Name)
+		end
+	end
+	return VJ_PICK(tbl)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetSelectSkills(type,allowMelee)
+	local tbl = {}
+	for ind,card in pairs(self.CardTable) do
+		if card.Icon == type && (allowMelee && !card.UsesHP or true) then
+			table.insert(tbl,{Name=card.Name,Cost=card.Cost})
+		end
+	end
+	return tbl
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetSkillsBesides(type,allowMelee)
+	local tbl = {}
+	for ind,card in pairs(self.CardTable) do
+		if card.Icon != type && (allowMelee && !card.UsesHP or true) then
+			table.insert(tbl,{Name=card.Name,Cost=card.Cost})
+		end
+	end
+	return tbl
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HasSkillType(type)
+	for ind,card in pairs(self.CardTable) do
+		if card.Icon == type then
+			return true
+		end
+	end
+	return false
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HasSkill(name)
+	for ind,card in pairs(self.CardTable) do
+		if card.Name == name then
+			return true
+		end
+	end
+	return false
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 	if melee == "Heaven's Blade" then
 		self:HeavensBlade(ply,persona)
@@ -1090,6 +1148,7 @@ function ENT:FacePlayerAim(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AdditionalInput(dmg,type)
+	if !IsValid(self.User) then return dmg end
 	dmg = self.User.Persona_TarukajaT > CurTime() && dmg *1.25 or dmg
 	dmg = self.User.Persona_TarundaT > CurTime() && dmg *0.5 or dmg
 	dmg = self.User.Persona_DebilitateT > CurTime() && dmg *0.5 or dmg

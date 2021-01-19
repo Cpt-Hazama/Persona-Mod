@@ -200,8 +200,15 @@ function ENT:Transform(bForce,bEntity)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:LevelCode()
+	if IsValid(self:GetPersona()) then
+		self:SetNW2Int("PXP_Level",self.Level or self:GetPersona().Stats.LVL)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
 	self:HandleAnimations()
+	self:LevelCode()
 
 	self.DisableChasingEnemy = IsValid(self:GetPersona())
 
