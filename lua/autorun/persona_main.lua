@@ -926,18 +926,29 @@ if CLIENT then
 			surface.DrawTexturedRect(posX,posY,scaleX,scaleY)
 		end
 
+		local hp = ply:Health()
+		local hpMax = ply:GetMaxHealth()
+
 		if ply:GetNW2Bool("Persona_BattleMode") == true then
 			local rgb = HSL((RealTime() *15 -(0 *15)),128,128)
+			local BGTexture = "hud/persona/dance/bg.png"
 			local HUDColor = color(rgb.r,rgb.g,rgb.b)
 			local danceMat = "hud/persona/dance/bg_stars"
 			local blink = math.Clamp(math.abs(math.sin(CurTime() *0.25) *255),50,100)
-			DrawTexture("hud/persona/dance/bg.png",color(255,255,255,255),0,0,ScrW(),ScrH())
+			local BGA = 255
+			
+			if hp <= hpMax *0.25 then
+				HUDColor = color(230,5,5)
+				BGTexture = "hud/persona/lowhealth.png"
+				blink = math.Clamp(math.abs(math.sin(CurTime() *1) *255),150,200)
+				BGA = math.Clamp(math.abs(math.sin(CurTime() *5) *255),100,176)
+			end
+			
+			DrawTexture(BGTexture,color(255,255,255,BGA),0,0,ScrW(),ScrH())
 			DrawTexture(danceMat .. "_cut.png",color(HUDColor.r,HUDColor.g,HUDColor.b,blink),0,0,ScrW() /5,ScrH())
 			DrawTexture(danceMat .. "_cut_b.png",color(HUDColor.r,HUDColor.g,HUDColor.b,blink),ScrW() *0.8,0,ScrW() /5,ScrH())
 		end
 
-		local hp = ply:Health()
-		local hpMax = ply:GetMaxHealth()
 		local sp = ply:GetSP()
 		local spMax = ply:GetMaxSP()
 		local target = ply:GetNW2Entity("Persona_Target")
