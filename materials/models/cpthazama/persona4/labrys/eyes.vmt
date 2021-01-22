@@ -1,12 +1,14 @@
 "VertexlitGeneric"
 {
 	"$basetexture" "models/cpthazama/persona4/labrys/eyes"
-	"$phongexponenttexture" "models/cpthazama/persona4/labrys/eyes_s"
+	//"$phongexponenttexture" "models/cpthazama/persona4/labrys/eyes_s"
+	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
 
 	"$phong"				"1"
-	"$phongboost"			"0.05"
+	"$phongboost"			"25"
 	"$phongfresnelranges"	"[0 0.5 1]"
-	"$phongtint"			"[0.6 0.6 0.6]"
+	//"$phongtint"			"[0.6 0.6 0.6]"
+	"$phongalbedotint"		"1"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"

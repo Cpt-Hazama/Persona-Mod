@@ -61,6 +61,68 @@ function ENT:MyriadMandala(ply,persona)
 	self:MyriadTruths(ply,persona,DMG_P_CURSE)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DreamFog(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Dream Fog"
+	local chance = 75
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) && math.random(1,100) <= chance && (ent.Persona_DreamFogT or 0) < CurTime() then
+							self.User:ChatPrint("Target is now under 'Dream Fog' for 30 seconds!")
+							ent:SetNW2Bool("Persona_DreamFog",true)
+							ent.Persona_DreamFogT = CurTime() +30
+							if ent:IsPlayer() then ent:ChatPrint("You've been put under 'Dream Fog' for 30 seconds!") end
+							ParticleEffectAttach("persona_fx_dmg_death",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
+							local hookName = "Persona_DreamFogThink_" .. ent:EntIndex()
+							hook.Add("Think",hookName,function()
+								if !IsValid(ent) then
+									hook.Remove("Think",hookName)
+									return
+								end
+								if CurTime() > ent.Persona_DreamFogT || ent:Health() <= 0 || (ent:IsPlayer() && !ent:Alive()) then
+									ent:SetNW2Bool("Persona_DreamFog",false)
+									ent:StopParticles()
+									hook.Remove("Think",hookName)
+									return
+								end
+								ent:SetNW2Bool("Persona_DreamFog",true)
+								if ent:IsNPC() then
+									ent:SetEnemy(NULL)
+								end
+								if IsValid(ent:GetPersona()) then SafeRemoveEntity(ent:GetPersona()) end
+							end)
+						else
+							self.User:ChatPrint("Missed Target!")
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MarinKarin(ply,persona)
 	if !IsValid(ply.Persona_EyeTarget) then
 		return

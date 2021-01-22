@@ -2,14 +2,16 @@
 {
 	"$basetexture" "models/cpthazama/persona3_dance/yukari/body_dance"
 	//"$bumpmap" "models/cpthazama/persona3_dance/yukari/body_dance_n"
-	"$phongexponenttexture" "models/cpthazama/persona3_dance/yukari/body_dance_s"
+	//"$phongexponenttexture" "models/cpthazama/persona3_dance/yukari/body_dance_s"
+	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
 	
 	"$translucent" "1"
 
 	"$phong"				"1"
-	"$phongboost"			"4"
+	"$phongboost"			"10"
 	"$phongfresnelranges"	"[0.67 0.83 1]"
-	"$phongtint"			"{255 126 178}"
+	//"$phongtint"			"{255 126 178}"
+	"$phongalbedotint"		"1"
 
 	"$envmap" "models/cpthazama/persona5/makoto/envmap"
 	"$envmaptint" "[0.01 0.0045 0.0075]"

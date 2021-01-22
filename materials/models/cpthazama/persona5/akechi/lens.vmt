@@ -4,11 +4,13 @@
 	"$translucent" "1"
 
 	"$surfaceprop" "glass"
+	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
 
 	"$phong"				"1"
-	"$phongboost"			"0"
+	"$phongboost"			"25"
 	"$phongfresnelranges"	"[0 0.5 1]"
-	"$phongtint"			"[1 0 0]"
+	//"$phongtint"			"[0.6 0.6 0.6]"
+	"$phongalbedotint"		"1"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"

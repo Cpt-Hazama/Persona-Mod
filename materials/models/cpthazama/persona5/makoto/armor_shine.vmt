@@ -2,18 +2,24 @@
 {
 	"$basetexture" "models/cpthazama/persona5/makoto/armor"
 	"$bumpmap" "models/cpthazama/persona5/makoto/armor_n2"
-	"$phongexponenttexture" "models/cpthazama/persona5/makoto/armor_s2"
+	//"$phongexponenttexture" "models/cpthazama/persona5/makoto/armor_s2"
+	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
 
 	"$phong"				"1"
-	"$phongboost"			"0.15"
-	"$phongfresnelranges"	"[1 1 1]"
-	"$phongtint"			"[0 0.15 1]"
+	"$phongboost"			"25"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	//"$phongtint"			"[0.6 0.6 0.6]"
+	"$phongalbedotint"		"1"
 
-	"$normalmapalphaenvmapmask"	"1"
+	//"$phong"				"1"
+	//"$phongboost"			"0.15"
+	//"$phongfresnelranges"	"[1 1 1]"
+	//"$phongtint"			"[0 0.15 1]"
+
+	//"$normalmapalphaenvmapmask"	"1"
 	"$envmap" "models/cpthazama/persona5/makoto/envmap"
 	"$envmaptint" "[0.001 0.001 0.0035]"
-	"$envmapfresnel" "1"
 
-	//"$lightwarptexture" "models/cpthazama/persona5/cel_blue"
-	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+	"$lightwarptexture" "models/cpthazama/persona5/cel_blue"
+	//"$lightwarptexture" "models/cpthazama/persona5/warp2"
 }

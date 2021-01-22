@@ -2,16 +2,18 @@
 {
 	"$basetexture" "models/cpthazama/persona4_dance/marie/face"
 	"$bumpmap" "models/cpthazama/persona4_dance/marie/face_n"
-	"$phongexponenttexture" "models/cpthazama/persona4_dance/marie/face_s"
+	//"$phongexponenttexture" "models/cpthazama/persona4_dance/marie/face_s"
 	
 	"$selfillum" "1"
 	"$selfillummask" "models/cpthazama/persona4_dance/marie/face_g"
 	"$selfillumtint" "[0 1 0.5]"
+	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
 
 	"$phong"				"1"
-	"$phongboost"			"0.05"
+	"$phongboost"			"25"
 	"$phongfresnelranges"	"[0 0.5 1]"
-	"$phongtint"			"[0.6 0.6 0.6]"
+	//"$phongtint"			"[0.6 0.6 0.6]"
+	"$phongalbedotint"		"1"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"

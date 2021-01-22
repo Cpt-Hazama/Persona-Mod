@@ -91,13 +91,6 @@ function ENT:CustomOnHitEntity(hitEnts,dmginfo)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:PersonaControls(ply,persona)
-	local lmb = ply:KeyDown(IN_ATTACK)
-	local rmb = ply:KeyDown(IN_ATTACK2)
-	local alt = ply:KeyDown(IN_WALK)
-	local r = ply:KeyDown(IN_RELOAD)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
 	return self:GetTask() == "TASK_ATTACK" && self:GetPos() +self:OBBCenter() +self:GetForward() *350 or self:GetPos() +self:OBBCenter()
 end
@@ -108,6 +101,20 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetIdlePosition(ply)
 	return ply:GetPos() +ply:GetForward() *-50 +ply:GetRight() *-15
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+local mN = "models/cpthazama/persona5/tsukiyomi/tsukiyomi"
+local mI = "models/cpthazama/persona5/tsukiyomi/tsukiyomi_instakill"
+local mN_L = "models/cpthazama/persona5/tsukiyomi/tsukiyomi_legendary"
+local mI_L = "models/cpthazama/persona5/tsukiyomi/tsukiyomi_instakill_legendary"
+function ENT:OnThink(ply)
+	local isL = PXP.IsLegendary(ply)
+	self.CurrentState = (self:GetTask() == "TASK_IDLE" && 1) or 0
+	if self.CurrentState != self.LastState then
+		local mat = (self.CurrentState == 1 && (isL && mN_L or mN)) or (isL && mI_L or mI)
+		self:SetSubMaterial(0,mat)
+		self.LastState = self.CurrentState
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
@@ -123,14 +130,18 @@ function ENT:OnSummoned(ply)
 	
 	self:AddCard("Abyssal Wings",30,false,"curse")
 	self:AddCard("Life Drain",3,false,"almighty")
-	self:AddCard("Vorpal Blade",23,true,"phys")
+	self:AddCard("Vorpal Blade")
 	self:AddCard("Teleport",15,false,"passive")
+	self:AddCard("Dream Fog")
 
 	self:SetCard("Teleport")
 	self:SetCard("Vorpal Blade",true)
 
 	local v = {forward=-125,right=60,up=35}
 	ply:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+
+	self.CurrentState = 0
+	self.LastState = 0
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)

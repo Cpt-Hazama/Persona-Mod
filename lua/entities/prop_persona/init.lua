@@ -478,6 +478,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	if card == "Myriad Truths" then 
 		self:MyriadTruths(ply,persona)
 		return
+	elseif card == "Dream Fog" then
+		self:DreamFog(ply,persona)
+		return
 	elseif card == "Tentacle of Protection" then
 		self:SummonTentacle(ply,persona,1,card)
 		return
@@ -942,6 +945,17 @@ function ENT:GetMeleeCost()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AddCard(name,req,isHP,icon)
+	if name == nil then return end
+	if req == nil || isHP == nil || icon == nil then
+		local data = P_GETSKILL(name)
+		if data.Name != "N/A" then
+			req = data.Cost
+			isHP = data.UsesHP
+			icon = data.Icon
+		else
+			return
+		end
+	end
 	self.CardTable[#self.CardTable +1] = {Name=name,Cost=req,UsesHP=isHP,Icon=(icon or "unknown")}
 
 	self.Cards = self.Cards or {}

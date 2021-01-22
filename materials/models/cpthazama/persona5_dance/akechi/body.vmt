@@ -2,14 +2,16 @@
 {
 	"$basetexture" "models/cpthazama/persona5_dance/akechi/body"
 	"$bumpmap" "models/cpthazama/persona5_dance/akechi/body_n"
-	"$phongexponenttexture" "models/cpthazama/persona5_dance/akechi/body_s"
+	//"$phongexponenttexture" "models/cpthazama/persona5_dance/akechi/body_s"
 
 	"$nocull"				"1"
+	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
 
 	"$phong"				"1"
-	"$phongboost"			"0"
+	"$phongboost"			"25"
 	"$phongfresnelranges"	"[0 0.5 1]"
-	"$phongtint"			"[1 1 1]"
+	//"$phongtint"			"[0.6 0.6 0.6]"
+	"$phongalbedotint"		"1"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"

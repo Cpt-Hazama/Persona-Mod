@@ -2,6 +2,13 @@
 {
 	"$basetexture" "models/cpthazama/persona4/yu/lens"
 	"$translucent" "1"
+	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
+
+	"$phong"				"1"
+	"$phongboost"			"25"
+	"$phongfresnelranges"	"[0 0.5 1]"
+	//"$phongtint"			"[0.6 0.6 0.6]"
+	"$phongalbedotint"		"1"
 
 	"$lightwarptexture" "models/cpthazama/persona5/warp2"
 }

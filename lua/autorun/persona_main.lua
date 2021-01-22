@@ -160,6 +160,25 @@ if CLIENT then
 
 		SpawnMarker(tostring(math.abs(dmg)),col,pos,force +Vector(math.Rand(-1,1),math.Rand(-1,1),math.Rand(0,1) *1.5),dmg,bonus)
 	end)
+	
+	hook.Add("RenderScreenspaceEffects","Persona_ScreenFX",function()
+		local CM_DreamFog = {
+			["$pp_colour_addr"] = 0,
+			["$pp_colour_addg"] = 0,
+			["$pp_colour_addb"] = 0,
+			["$pp_colour_brightness"] = -0.65,
+			["$pp_colour_contrast"] = 0.1,
+			["$pp_colour_colour"] = 0,
+			["$pp_colour_mulr"] = 0,
+			["$pp_colour_mulg"] = 0,
+			["$pp_colour_mulb"] = 0
+		}
+		local ply = LocalPlayer()
+		if !ply:Alive() then return end
+		if ply:GetNW2Bool("Persona_DreamFog") then
+			DrawColorModify(CM_DreamFog)
+		end
+	end)
 
 	hook.Add("Tick","Persona_CleanMarkers",function()		
 		local Cur = CurTime()
@@ -428,6 +447,7 @@ if SERVER then
 		local lvl = PXP.GetPlayerLevel(ply)
 		local shouldBe = math.Clamp(math.Round(lvl *10.09),100,654698468)
 		local shouldBeSP = math.Clamp(math.Round(lvl *8),25,654698468)
+		ply:SetNW2Int("PXP_Player_Level",lvl)
 		timer.Simple(0,function()
 			ply:SetHealth(shouldBe)
 			ply:SetSP(shouldBeSP)
