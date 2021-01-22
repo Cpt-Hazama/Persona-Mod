@@ -275,10 +275,10 @@ if CLIENT then
 
 		spawnmenu.AddToolMenuOption("Persona","Admin Settings","Cheats","Cheats","","",function(Panel)
 			Panel:AddControl("TextBox",{Label = "Player Level",Command = "persona_i_ply_setlevel",WaitForEnter = "1"})
-			Panel:AddControl("Button",{Label = "Set Player Level",Command = "persona_i_ply_setlevel"})
+			Panel:AddControl("Button",{Label = "Set Player Level",Command = "persona_ply_setlevel"})
 
 			Panel:AddControl("TextBox",{Label = "Player EXP",Command = "persona_i_ply_setexp",WaitForEnter = "0"})
-			Panel:AddControl("Button",{Label = "Set Player EXP",Command = "persona_i_ply_setexp"})
+			Panel:AddControl("Button",{Label = "Set Player EXP",Command = "persona_ply_setexp"})
 
 			Panel:AddControl("Button",{Label = "Level Up Player",Command = "persona_player_giveexp"})
 
@@ -343,6 +343,20 @@ local function persona_addskill(ply)
 	end
 end
 concommand.Add("persona_addskill",persona_addskill)
+
+local function persona_ply_setlevel(ply)
+	if ply:IsAdmin() or ply:IsSuperAdmin() then
+		PXP.SetPlayerLevel(ply,math.Clamp(GetConVarNumber("persona_i_ply_setlevel"),1,99))
+	end
+end
+concommand.Add("persona_ply_setlevel",persona_ply_setlevel)
+
+local function persona_ply_setexp(ply)
+	if ply:IsAdmin() or ply:IsSuperAdmin() then
+		PXP.SetPlayerEXP(ply,GetConVarNumber("persona_i_ply_setexp"))
+	end
+end
+concommand.Add("persona_ply_setexp",persona_ply_setexp)
 
 local function persona_setlevel(ply)
 	if ply:IsAdmin() or ply:IsSuperAdmin() then

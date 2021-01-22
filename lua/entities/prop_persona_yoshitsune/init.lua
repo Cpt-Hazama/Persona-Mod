@@ -33,12 +33,12 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(owner)
-	self:AddCard("Hassou Tobi",COST_P_HASSOUTOBI,true,"phys")
-	self:AddCard("Charge",COST_P_CHARGE,false,"passive")
-	self:AddCard("Heat Riser",COST_P_HEAT_RISER,false,"passive")
-	self:AddCard("Agidyne",COST_P_AGIDYNE,false,"fire")
+	self:AddCard("Hassou Tobi")
+	self:AddCard("Charge")
+	self:AddCard("Heat Riser")
+	self:AddCard("Ziodyne")
 
-	self:SetCard("Agidyne")
+	self:SetCard("Ziodyne")
 	self:SetCard("Hassou Tobi",true)
 
 	local v = {forward=-150,right=50,up=25}

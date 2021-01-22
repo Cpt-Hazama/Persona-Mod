@@ -18,7 +18,7 @@ function ENT:MyriadTruths(ply,persona,d)
 						t = self:PlaySet(skill,"range_idle",1)
 
 						for _,v in pairs(self:FindEnemies(self:GetPos(),3000)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								for i = 1,3 do
 									timer.Simple(0.35 *i,function()
 										if IsValid(self) && IsValid(v) then
@@ -426,7 +426,7 @@ function ENT:VorpalBlade(ply)
 				-- local t = {0.5,0.8,1.1,1.4,1.7,2}
 				for _,i in pairs(t) do
 					for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							timer.Simple(i,function()
 								if IsValid(v) && IsValid(self) then
 									self:DealDamage(v,DMG_P_MEDIUM,bit.bor(DMG_P_PHYS,DMG_P_CURSE))
@@ -468,11 +468,11 @@ function ENT:OneShotKill(ply,persona)
 			if IsValid(self) then
 				if math.random(1,100) <= math.Clamp(self.Stats.LUC *2,1,99) then self:DoCritical(2) end
 				for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-					if IsValid(v) then
+					if IsValid(v) && IsValid(self) then
 						v:EmitSound("cpthazama/persona5/skills/0461.wav",90)
 						for i = 1,8  do
 							timer.Simple(i *0.1,function()
-								if IsValid(v) then
+								if IsValid(v) && IsValid(self) then
 									local effectdata = EffectData()
 									local s = v:NearestPoint(self:GetAttackPosition())
 									local dist = math.Clamp(v:GetPos():Distance(v:GetPos() +v:OBBCenter()) *6,100,1000)
@@ -525,11 +525,11 @@ function ENT:RiotGun(ply,persona)
 			if IsValid(self) then
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-					if IsValid(v) then
+					if IsValid(v) && IsValid(self) then
 						v:EmitSound("cpthazama/persona5/skills/0227.wav",95)
 						for i = 1,20 do
 							timer.Simple(i *0.1,function()
-								if IsValid(v) then
+								if IsValid(v) && IsValid(self) then
 									local effectdata = EffectData()
 									local s = v:GetPos() +v:OBBCenter()
 									local dist = math.Clamp(v:GetPos():Distance(v:GetPos() +v:OBBCenter()) *6,250,2000)
@@ -1069,7 +1069,7 @@ function ENT:Garu(ply,persona)
 							if IsValid(spawnparticle) then
 								spawnparticle:Fire("Kill","",0.1)
 							end
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:DealDamage(v,DMG_P_HEAVY,DMG_P_WIND)
 							end
 						end)
@@ -1109,7 +1109,7 @@ function ENT:Garudyne(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range",1)
 						local v = ply.Persona_EyeTarget
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							local spawnparticle = ents.Create("info_particle_system")
 							spawnparticle:SetKeyValue("effect_name","vj_per_skill_garudyne")
 							spawnparticle:SetPos(v:GetPos())
@@ -1123,7 +1123,7 @@ function ENT:Garudyne(ply,persona)
 								if IsValid(spawnparticle) then
 									spawnparticle:Fire("Kill","",0.1)
 								end
-								if IsValid(v) then
+								if IsValid(v) && IsValid(self) then
 									self:DealDamage(v,DMG_P_HEAVY,DMG_P_WIND)
 								end
 							end)
@@ -1164,7 +1164,7 @@ function ENT:Magarudyne(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range",1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								local spawnparticle = ents.Create("info_particle_system")
 								spawnparticle:SetKeyValue("effect_name","vj_per_skill_garudyne")
 								spawnparticle:SetPos(v:GetPos())
@@ -1178,7 +1178,7 @@ function ENT:Magarudyne(ply,persona)
 									if IsValid(spawnparticle) then
 										spawnparticle:Fire("Kill","",0.1)
 									end
-									if IsValid(v) then
+									if IsValid(v) && IsValid(self) then
 										self:DealDamage(v,DMG_P_HEAVY,DMG_P_WIND)
 									end
 								end)
@@ -1225,7 +1225,7 @@ function ENT:Zio(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								local v = ply.Persona_EyeTarget
-								if IsValid(v) then
+								if IsValid(v) && IsValid(self) then
 									self:ZioEffect(v,DMG_P_LIGHT)
 								end
 								timer.Simple(t,function()
@@ -1266,7 +1266,7 @@ function ENT:Zionga(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								local v = ply.Persona_EyeTarget
-								if IsValid(v) then
+								if IsValid(v) && IsValid(self) then
 									self:ZioEffect(v,DMG_P_MEDIUM)
 								end
 								timer.Simple(t,function()
@@ -1307,7 +1307,7 @@ function ENT:Ziodyne(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								local v = ply.Persona_EyeTarget
-								if IsValid(v) then
+								if IsValid(v) && IsValid(self) then
 									self:ZioEffect(v,DMG_P_HEAVY)
 								end
 								timer.Simple(t,function()
@@ -1348,7 +1348,7 @@ function ENT:ThunderReign(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								local v = ply.Persona_EyeTarget
-								if IsValid(v) then
+								if IsValid(v) && IsValid(self) then
 									self:ZioEffect(v,DMG_P_SEVERE)
 								end
 								timer.Simple(t *2,function()
@@ -1387,7 +1387,7 @@ function ENT:Mazio(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-									if IsValid(v) then
+									if IsValid(v) && IsValid(self) then
 										self:ZioEffect(v,DMG_P_LIGHT)
 									end
 								end
@@ -1427,7 +1427,7 @@ function ENT:Mazionga(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-									if IsValid(v) then
+									if IsValid(v) && IsValid(self) then
 										self:ZioEffect(v,DMG_P_MEDIUM)
 									end
 								end
@@ -1467,7 +1467,7 @@ function ENT:Maziodyne(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-									if IsValid(v) then
+									if IsValid(v) && IsValid(self) then
 										self:ZioEffect(v,DMG_P_HEAVY)
 									end
 								end
@@ -1507,7 +1507,7 @@ function ENT:WildThunder(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								for _,v in pairs(self:FindEnemies(self:GetPos(),2000)) do
-									if IsValid(v) then
+									if IsValid(v) && IsValid(self) then
 										self:ZioEffect(v,DMG_P_SEVERE)
 									end
 								end
@@ -1547,7 +1547,7 @@ function ENT:ColossalStorm(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								for _,v in pairs(self:FindEnemies(self:GetPos(),2200)) do
-									if IsValid(v) then
+									if IsValid(v) && IsValid(self) then
 										self:ZioEffect(v,DMG_P_COLOSSAL)
 									end
 								end
@@ -2139,7 +2139,7 @@ function ENT:Mabufu(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:IceEffect(v,DMG_P_LIGHT)
 							end
 						end
@@ -2174,7 +2174,7 @@ function ENT:Mabufula(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:IceEffect(v,DMG_P_MEDIUM,1.25)
 							end
 						end
@@ -2209,7 +2209,7 @@ function ENT:Mabufudyne(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:IceEffect(v,DMG_P_HEAVY,1.5)
 							end
 						end
@@ -2244,7 +2244,7 @@ function ENT:IceAge(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:IceEffect(v,DMG_P_SEVERE,2.5)
 							end
 						end
@@ -2283,7 +2283,7 @@ function ENT:Psi(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						local v = ply.Persona_EyeTarget
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							self:PsiEffect(v,DMG_P_LIGHT,4)
 						end
 						timer.Simple(t,function()
@@ -2320,7 +2320,7 @@ function ENT:Psio(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						local v = ply.Persona_EyeTarget
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							self:PsiEffect(v,DMG_P_MEDIUM,4,nil,nil,"cpthazama/persona5/skills/0194.wav")
 						end
 						timer.Simple(t,function()
@@ -2357,7 +2357,7 @@ function ENT:Psiodyne(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						local v = ply.Persona_EyeTarget
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							self:PsiEffect(v,DMG_P_HEAVY,4,1.55,7,"cpthazama/persona5/skills/0195.wav")
 						end
 						timer.Simple(t,function()
@@ -2394,7 +2394,7 @@ function ENT:PsychoForce(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						local v = ply.Persona_EyeTarget
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							self:PsiEffect(v,DMG_P_SEVERE,5,2,12,"cpthazama/persona5/skills/0197.wav")
 						end
 						timer.Simple(t,function()
@@ -2428,7 +2428,7 @@ function ENT:Mapsi(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:PsiEffect(v,DMG_P_LIGHT,4)
 							end
 						end
@@ -2463,7 +2463,7 @@ function ENT:Mapsio(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:PsiEffect(v,DMG_P_MEDIUM,4,nil,nil,"cpthazama/persona5/skills/0194.wav")
 							end
 						end
@@ -2498,7 +2498,7 @@ function ENT:Mapsiodyne(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:PsiEffect(v,DMG_P_HEAVY,4,1.55,7,"cpthazama/persona5/skills/0195.wav")
 							end
 						end
@@ -2533,7 +2533,7 @@ function ENT:PsychoBlast(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),2500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:PsiEffect(v,DMG_P_SEVERE,5,2,12,"cpthazama/persona5/skills/0198.wav")
 							end
 						end
@@ -2720,7 +2720,7 @@ function ENT:Maragi(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:AgiEffect(v,DMG_P_LIGHT)
 							end
 						end
@@ -2755,7 +2755,7 @@ function ENT:Maragion(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:AgiEffect(v,DMG_P_MEDIUM)
 							end
 						end
@@ -2791,7 +2791,7 @@ function ENT:Maragidyne(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								self:AgiEffect(v,DMG_P_HEAVY)
 							end
 						end
@@ -2830,7 +2830,7 @@ function ENT:Titanomachia(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								for _,v in pairs(self:FindEnemies(self:GetPos(),2500)) do
-									if IsValid(v) then
+									if IsValid(v) && IsValid(self) then
 										self:AgiEffect(v,DMG_P_SEVERE,2.75,true)
 									end
 								end
@@ -2871,7 +2871,7 @@ function ENT:BlazingHell(ply,persona)
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_idle",1,1)
 								for _,v in pairs(self:FindEnemies(self:GetPos(),2500)) do
-									if IsValid(v) then
+									if IsValid(v) && IsValid(self) then
 										self:AgiEffect(v,DMG_P_SEVERE,2.5,true)
 									end
 								end
@@ -2885,6 +2885,100 @@ function ENT:BlazingHell(ply,persona)
 												self:DoIdle()
 											end
 										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Eiha(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Eiha"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse_small")
+							spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+
+							self:DealDamage(ent,DMG_P_LIGHT,DMG_P_CURSE,2)
+
+							ent:EmitSound("cpthazama/persona5/skills/0064.wav",90)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Eiga(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Eiga"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse_small")
+							spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+
+							self:DealDamage(ent,DMG_P_MEDIUM,DMG_P_CURSE,2)
+
+							ent:EmitSound("cpthazama/persona5/skills/0065.wav",90)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
 									end
 								end)
 							end
@@ -2943,6 +3037,96 @@ function ENT:Eigaon(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Maeiha(ply,persona)
+	local skill = "Maeiha"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								local spawnparticle = ents.Create("info_particle_system")
+								spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse_small")
+								spawnparticle:SetPos(v:GetPos() +v:OBBCenter())
+								spawnparticle:Spawn()
+								spawnparticle:Activate()
+								spawnparticle:Fire("Start","",0)
+								spawnparticle:Fire("Kill","",1)
+
+								self:DealDamage(v,DMG_P_LIGHT,DMG_P_CURSE,2)
+
+								v:EmitSound("cpthazama/persona5/skills/0064.wav",90)
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Maeiga(ply,persona)
+	local skill = "Maeiga"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								local spawnparticle = ents.Create("info_particle_system")
+								spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse")
+								spawnparticle:SetPos(v:GetPos() +v:OBBCenter())
+								spawnparticle:Spawn()
+								spawnparticle:Activate()
+								spawnparticle:Fire("Start","",0)
+								spawnparticle:Fire("Kill","",1)
+
+								self:DealDamage(v,DMG_P_MEDIUM,DMG_P_CURSE,2)
+
+								v:EmitSound("cpthazama/persona5/skills/0065.wav",90)
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Maeigaon(ply,persona)
 	local skill = "Maeigaon"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
@@ -2956,7 +3140,7 @@ function ENT:Maeigaon(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								local spawnparticle = ents.Create("info_particle_system")
 								spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse")
 								spawnparticle:SetPos(v:GetPos() +v:OBBCenter())
@@ -2988,6 +3172,72 @@ function ENT:Maeigaon(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MagatsuMandala(ply,persona)
+	local skill = "Magatsu Mandala"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1) *7
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								local spawnparticle = ents.Create("info_particle_system")
+								spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse_mandala")
+								spawnparticle:SetPos(v:GetPos())
+								spawnparticle:Spawn()
+								spawnparticle:Activate()
+								spawnparticle:Fire("Start","",0)
+								spawnparticle:Fire("SetParent",v:GetName())
+								v:EmitSound("cpthazama/persona5/skills/0707.wav",110)
+								timer.Simple(5,function()
+									if IsValid(v) then
+										util.ScreenShake(v:GetPos(),15,100,3.5,1750)
+										if IsValid(self) then
+											self:DealDamage(v,DMG_P_HEAVY,DMG_P_CURSE,2)
+											if math.random(1,2) == 1 then
+												local r = math.random(1,3)
+												if r == 1 then
+													self:Fear(v,15)
+												elseif r == 2 then
+													self:Curse(v,15,1)
+												else
+													self:Confuse(v,15)
+												end
+											end
+										end
+									end
+								end)
+								timer.Simple(7,function()
+									if IsValid(spawnparticle) then
+										spawnparticle:Fire("Kill","",0.1)
+									end
+								end)
+							end
+						end
+
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AbyssalWings(ply,persona)
 	local skill = "Abyssal Wings"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
@@ -3001,7 +3251,7 @@ function ENT:AbyssalWings(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								for i = 1,4 do
 									local spawnparticle = ents.Create("info_particle_system")
 									spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse")
@@ -3627,6 +3877,7 @@ function ENT:CallOfChaos(ply,persona) // Loki Skill
 									self:SetNW2Int("SpecialAttackCost",self.CurrentCardCost)
 									self.HasChaosParticle = true
 									self.User:StopParticles()
+									self.User:EmitSound("cpthazama/persona5/skills/0675.wav",90)
 									ParticleEffectAttach("vj_per_skill_chaos",PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
 								end
 
@@ -3729,10 +3980,10 @@ function ENT:Megidola(ply,ent)
 						t = self:PlaySet(skill,"range",1)
 						self:EmitSound("cpthazama/persona5/skills/0070.wav",75)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
-							if IsValid(v) then
+							if IsValid(v) && IsValid(self) then
 								for i = 1,3  do
 									timer.Simple(i *0.4,function()
-										if IsValid(v) then
+										if IsValid(v) && IsValid(self) then
 											local effectdata = EffectData()
 											local dist = math.Clamp(v:GetPos():Distance(v:GetPos() +v:OBBCenter()) *5,100,1000)
 											local s = (v:GetPos() +v:GetUp() *v:GetPos():Distance(v:GetPos() +v:OBBCenter()))
@@ -3908,7 +4159,7 @@ function ENT:RecoverHPEX(ply,persona)
 				local allies = self.User:GetFullParty()
 				if allies && #allies > 0 then
 					for _,v in ipairs(allies) do
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							v:SetHealth(v:GetMaxHealth())
 							VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
 
@@ -3945,7 +4196,7 @@ function ENT:RecoverSPEX(ply,persona)
 				local allies = self.User:GetFullParty()
 				if allies && #allies > 0 then
 					for _,v in ipairs(allies) do
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							v:SetSP(v:GetMaxSP())
 							VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
 
@@ -3982,7 +4233,7 @@ function ENT:MinorBuff(ply,persona)
 				local allies = self.User:GetFullParty()
 				if allies && #allies > 0 then
 					for _,v in ipairs(allies) do
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							v.Persona_TarukajaT = CurTime() +60
 							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
 
@@ -4019,7 +4270,7 @@ function ENT:MinorShield(ply,persona)
 				local allies = self.User:GetFullParty()
 				if allies && #allies > 0 then
 					for _,v in ipairs(allies) do
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							v.Persona_RakukajaT = CurTime() +60
 							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
 
@@ -4056,7 +4307,7 @@ function ENT:MinorAwareness(ply,persona)
 				local allies = self.User:GetFullParty()
 				if allies && #allies > 0 then
 					for _,v in ipairs(allies) do
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							v.Persona_SukukajaT = CurTime() +60
 							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
 
@@ -4093,7 +4344,7 @@ function ENT:PowerUp(ply,persona)
 				local allies = self.User:GetFullParty()
 				if allies && #allies > 0 then
 					for _,v in ipairs(allies) do
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							v.Persona_HeatRiserT = CurTime() +60
 							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)
 
@@ -4130,7 +4381,7 @@ function ENT:UltimateCharge(ply,persona)
 				local allies = self.User:GetFullParty()
 				if allies && #allies > 0 then
 					for _,v in ipairs(allies) do
-						if IsValid(v) then
+						if IsValid(v) && IsValid(self) then
 							v.Persona_ChargedT = CurTime() +30
 							v.Persona_FocusedT = CurTime() +30
 							-- VJ_EmitSound(v,"cpthazama/persona5/skills/0302.wav",85)

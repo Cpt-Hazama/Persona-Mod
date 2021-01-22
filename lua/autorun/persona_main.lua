@@ -158,7 +158,7 @@ if CLIENT then
 			bonus = 6
 		end
 
-		SpawnMarker(tostring(math.abs(dmg)),col,pos,force +Vector(math.Rand(-1,1),math.Rand(-1,1),math.Rand(0,1) *1.5),dmg,bonus)
+		SpawnMarker(tostring(math.abs(math.Round(dmg))),col,pos,force +Vector(math.Rand(-1,1),math.Rand(-1,1),math.Rand(0,1) *1.5),dmg,bonus)
 	end)
 	
 	hook.Add("RenderScreenspaceEffects","Persona_ScreenFX",function()
@@ -568,7 +568,7 @@ if SERVER then
 				v.Persona_MaxHealth = shouldBe
 			end
 			if shouldBeSP > v:GetMaxSP() then
-				v:SetMaxSP(v:GetSP())
+				v:SetMaxSP(shouldBeSP)
 			end
 			if IsValid(v:GetPersona()) then
 				if !v:HasWeapon(wep) && !v:IsFrozen() then

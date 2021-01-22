@@ -640,11 +640,26 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif card == "Debilitate" then
 		self:Debilitate(ply,persona)
 		return
+	elseif card == "Eiha" then
+		self:Eiha(ply,persona)
+		return
+	elseif card == "Eiga" then
+		self:Eiga(ply,persona)
+		return
 	elseif card == "Eigaon" then
 		self:Eigaon(ply,persona)
 		return
+	elseif card == "Maeiha" then
+		self:Maeiha(ply,persona)
+		return
+	elseif card == "Maeiga" then
+		self:Maeiga(ply,persona)
+		return
 	elseif card == "Maeigaon" then
 		self:Maeigaon(ply,persona)
+		return
+	elseif card == "Magatsu Mandala" then
+		self:MagatsuMandala(ply,persona)
 		return
 	elseif card == "Garu" then
 		self:Garu(ply,persona)
@@ -1021,7 +1036,7 @@ function ENT:CycleCards()
 	self.User:EmitSound("cpthazama/persona5/misc/00042.wav",45)
 
 	self:SetActiveCard(target.Name,target.Cost,target.UsesHP,target.Icon,finalIndex)
-	self.NextCardSwitchT = CurTime() +0.2
+	self.NextCardSwitchT = CurTime() +0.15
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetActiveCard(name,cost,useHP,icon,index)
@@ -1813,15 +1828,50 @@ function ENT:ZioEffect_P4AU(att,dist,eff,target)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Confuse(ent,t)
+	ent.Persona_ConfuseT = ent.Persona_ConfuseT or 0
+	if ent.Persona_ConfuseT < CurTime() then
+		ent.Persona_ConfuseT = CurTime() +t
+		self.User:ChatPrint("Inflicted Confusion!")
+		ParticleEffectAttach("persona_fx_dmg_death",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
+		local hookName = "Persona_ConfuseThink_" .. ent:EntIndex()
+		hook.Add("Think",hookName,function()
+			if !IsValid(ent) then
+				hook.Remove("Think",hookName)
+				return
+			end
+			if CurTime() > ent.Persona_ConfuseT || ent:Health() <= 0 || (ent:IsPlayer() && !ent:Alive()) then
+				ent:StopParticles()
+				hook.Remove("Think",hookName)
+				return
+			end
+			local persona = ent:GetPersona()
+			if IsValid(persona) then
+				SafeRemoveEntity(persona)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Curse(ent,t,dmg)
-	-- if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
-		-- continue
-	-- end
-	ent.Persona_DMG_Curse = CurTime() +t
-	ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
-	for i = 1, t do
-		timer.Simple(i,function()
-			if IsValid(ent) then
+	ent.Persona_CurseT = ent.Persona_CurseT or 0
+	if ent.Persona_CurseT < CurTime() then
+		ent.Persona_CurseT = CurTime() +t
+		ent.Persona_CurseDMGT = CurTime() +(t < 1 && 0 or 1)
+		self.User:ChatPrint("Inflicted Curse!")
+		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
+		local hookName = "Persona_CurseThink_" .. ent:EntIndex()
+		hook.Add("Think",hookName,function()
+			if !IsValid(ent) then
+				hook.Remove("Think",hookName)
+				return
+			end
+			if CurTime() > ent.Persona_CurseT || ent:Health() <= 0 || (ent:IsPlayer() && !ent:Alive()) then
+				ent:StopParticles()
+				hook.Remove("Think",hookName)
+				return
+			end
+			if CurTime() > ent.Persona_CurseDMGT then
 				local dmginfo = DamageInfo()
 				dmginfo:SetDamage(dmg)
 				dmginfo:SetDamageType(DMG_P_CURSE)
@@ -1829,46 +1879,38 @@ function ENT:Curse(ent,t,dmg)
 				dmginfo:SetInflictor(IsValid(self) && self or ent)
 				dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
 				ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)
+				ent.Persona_CurseDMGT = CurTime() +1
 			end
 		end)
 	end
-	timer.Simple(t +0.15,function()
-		if IsValid(ent) then
-			if CurTime() > ent.Persona_DMG_Curse then
-				ent:StopParticles()
-			end
-		end
-	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Fear(ent,t)
-	-- if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
-		-- continue
-	-- end
-	if ent:IsNPC() then
-		local prevDisp = ent:Disposition(self.User) != D_FR && ent:Disposition(self.User) or D_NU
-		ent.Persona_DMG_Fear = CurTime() +t
-		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
-		ent:AddEntityRelationship(self.User,D_FR,99)
+	ent.Persona_FearT = ent.Persona_FearT or 0
+	if ent.Persona_FearT < CurTime() then
+		ent.Persona_FearT = CurTime() +t
+		self.User:ChatPrint("Inflicted Fear!")
 		ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
-		timer.Simple(t +0.15,function()
-			if IsValid(ent) then
-				if CurTime() > ent.Persona_DMG_Fear then
-					ent:StopParticles()
-					if IsValid(self) && IsValid(self.User) then
-						ent:AddEntityRelationship(self.User,prevDisp,99)
-					end
-				end
+		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
+		local hookName = "Persona_FearThink_" .. ent:EntIndex()
+		local user = self.User
+		local prevDisp = IsValid(user) && ent:Disposition(user) != D_FR && ent:Disposition(user) or D_NU
+		hook.Add("Think",hookName,function()
+			if !IsValid(ent) then
+				hook.Remove("Think",hookName)
+				return
 			end
-		end)
-	else
-		ent.Persona_DMG_Fear = CurTime() +t
-		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
-		ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
-		timer.Simple(t +0.15,function()
-			if IsValid(ent) then
-				if CurTime() > ent.Persona_DMG_Fear then
-					ent:StopParticles()
+			if CurTime() > ent.Persona_FearT || ent:Health() <= 0 || (ent:IsPlayer() && !ent:Alive()) then
+				ent:StopParticles()
+				if IsValid(user) then ent:AddEntityRelationship(user,prevDisp,99) end
+				hook.Remove("Think",hookName)
+				return
+			end
+			if !IsValid(user) then return end
+			if ent:IsNPC() then
+				ent:AddEntityRelationship(user,D_FR,99)
+				if IsValid(ent:GetEnemy()) && ent:GetEnemy() == user then
+					ent:SetEnemy(NULL)
 				end
 			end
 		end)
