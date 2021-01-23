@@ -18,6 +18,7 @@ ENT.CollisionBounds = Vector(16,16,75)
 ENT.SongStartDelay = 1
 ENT.SongStartAnimationDelay = 0
 ENT.ViewBone = "Spine2"
+ENT.ModelScale = 0.42
 
 ENT.Animations = {}
 ENT.Animations["dance_thefog"] = {}
@@ -47,24 +48,25 @@ if SERVER then
 			self:AddCinematicEvent(seq,frame,data,maxFrames)
 		end
 	
-		self:ManipulateBoneJiggle(24,1) -- Suit
-		self:ManipulateBoneJiggle(25,1)
-		self:ManipulateBoneJiggle(26,1)
-		self:ManipulateBoneJiggle(27,1)
-		self:ManipulateBoneJiggle(28,1)
-		self:ManipulateBoneJiggle(29,1)
-		self:ManipulateBoneJiggle(30,1)
-		self:ManipulateBoneJiggle(31,1)
-		self:ManipulateBoneJiggle(32,1)
-		self:ManipulateBoneJiggle(33,1)
-		self:ManipulateBoneJiggle(34,1)
-		self:ManipulateBoneJiggle(35,1)
-		self:ManipulateBoneJiggle(97,1) -- Hair
-		self:ManipulateBoneJiggle(98,1)
-		self:ManipulateBoneJiggle(99,1)
-		self:ManipulateBoneJiggle(100,1)
-		self:ManipulateBoneJiggle(101,1)
-		self:ManipulateBoneJiggle(102,1)
+		-- self:ManipulateBoneJiggle(24,1) -- Suit
+		-- self:ManipulateBoneJiggle(25,1)
+		-- self:ManipulateBoneJiggle(26,1)
+		-- self:ManipulateBoneJiggle(27,1)
+		-- self:ManipulateBoneJiggle(28,1)
+		-- self:ManipulateBoneJiggle(29,1)
+		-- self:ManipulateBoneJiggle(30,1)
+		-- self:ManipulateBoneJiggle(31,1)
+		-- self:ManipulateBoneJiggle(32,1)
+		-- self:ManipulateBoneJiggle(33,1)
+		-- self:ManipulateBoneJiggle(34,1)
+		-- self:ManipulateBoneJiggle(35,1)
+		-- self:ManipulateBoneJiggle(97,1) -- Hair
+		-- self:ManipulateBoneJiggle(98,1)
+		-- self:ManipulateBoneJiggle(99,1)
+		-- self:ManipulateBoneJiggle(100,1)
+		-- self:ManipulateBoneJiggle(101,1)
+		-- self:ManipulateBoneJiggle(102,1)
+		
 		-- self:ManipulateBoneJiggle(38,1) -- Tie
 		-- self:ManipulateBoneJiggle(39,1)
 		-- self:ManipulateBoneJiggle(40,1)
@@ -78,6 +80,8 @@ if SERVER then
 		-- Cinematic(400,{f=60,r=-20,u=15,dist=0,speed=3},"dance_thefog",F_TF)
 		-- Cinematic(1756,{f=40,r=-0,u=15,dist=0,speed=100},"dance_thefog",F_TF)
 		-- Cinematic(1785,{f=60,r=-0,u=20,dist=0,speed=2},"dance_thefog",F_TF)
+
+		self:AddAnimationEvent("preview",3,"smirk",346)
 
 		self:AddAnimationEvent("dance_thefog",1,"default",F_TF)
 		self:AddAnimationEvent("dance_thefog",20,"neutral",F_TF)
@@ -177,72 +181,129 @@ if SERVER then
 
 	function ENT:HandleAnimationEvent(seq,event,frame)
 		if event == "default" then
-			local top,bottom,brow = 0,0,0
-			self:SetFace(top,bottom,brow)
+			self:ResetFlexes()
 		end
+
 		if event == "angry" then
-			local top,bottom,brow = 3,1,1
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 3,1,1
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesScold","frown","browAnger"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("frown",1,6)
+			self:SendFlexData("browAnger",1,6)
 		end
 		if event == "annoyed" then
-			local top,bottom,brow = 0,2,1
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 0,2,1
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyeSerious","annoyed","browAngry"})
+			self:SendFlexData("eyeSerious",1,6)
+			self:SendFlexData("annoyed",1,6)
+			self:SendFlexData("browAngry",1,6)
 		end
 		if event == "bummed" then
-			local top,bottom,brow = 0,3,5
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 0,3,5
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyeNausea","frown","browSad"})
+			self:SendFlexData("eyeNausea",1,6)
+			self:SendFlexData("frown",1,6)
+			self:SendFlexData("browSad",1,6)
 		end
 		if event == "confused" then
-			local top,bottom,brow = 2,6,2
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 2,6,2
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesOpen","aaa","browConfusion"})
+			self:SendFlexData("eyesOpen",1,6)
+			self:SendFlexData("aaa",0.5,6)
+			self:SendFlexData("browConfusion",1,6)
 		end
 		if event == "laugh" then
-			local top,bottom,brow = 0,4,7
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 0,4,7
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"open_happy"})
+			self:SendFlexData("open_happy",1,6)
 		end
 		if event == "laugh_insane" then
-			local top,bottom,brow = 2,5,2
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 2,5,2
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyeNausea","smile_big","browInsane"})
+			self:SendFlexData("eyeNausea",1,6)
+			self:SendFlexData("smile_big",1,6)
+			self:SendFlexData("browInsane",1,6)
 		end
 		if event == "neutral" then
-			local top,bottom,brow = 0,6,0
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 0,6,0
+			-- self:SetFace(top,bottom,brow)
+			-- self:RemoveOldFlexes({"smile"})
+			-- self:SendFlexData("smile",0.4,6)
+
+			self:RemoveOldFlexes({"smirk"})
+			self:SendFlexData("smirk",0.35,6)
 		end
 		if event == "open" then
-			local top,bottom,brow = 2,7,3
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 2,7,3
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesOpen","open"})
+			self:SendFlexData("eyesOpen",1,6)
+			self:SendFlexData("open",1,6)
 		end
 		if event == "sad" then
-			local top,bottom,brow = 2,8,6
-			self:SetFace(top,bottom,brow)
-		end
-		if event == "scoled" then
-			local top,bottom,brow = 1,2,6
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 2,8,6
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesDroop","frown","browSad"})
+			self:SendFlexData("eyesDroop",1,6)
+			self:SendFlexData("frown",1,6)
+			self:SendFlexData("browSad",1,6)
 		end
 		if event == "shocked" then
-			local top,bottom,brow = 2,9,3
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 2,9,3
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesOpen","aaa","browHuh","browUm"})
+			self:SendFlexData("eyesOpen",1,6)
+			self:SendFlexData("aaa",1,6)
+			self:SendFlexData("browHuh",1,6)
+			self:SendFlexData("browUm",1,6)
 		end
 		if event == "smile" then
-			local top,bottom,brow = 3,10,7
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 3,10,7
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesScold","smirk","browConfusion"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("smirk",1,6)
+			self:SendFlexData("browConfusion",1,6)
 		end
 		if event == "smirk" then
-			local top,bottom,brow = 3,11,7
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 3,11,7
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesScold","smile_large","browConfusion"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("smile_large",1,6)
+			self:SendFlexData("browConfusion",1,6)
 		end
 		if event == "smirk_smile" then
-			local top,bottom,brow = 3,12,3
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 3,12,3
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesScold","smirk","browConfusion"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("smirk",1,6)
+			self:SendFlexData("browConfusion",1,6)
 		end
 		if event == "wink" then
-			local top,bottom,brow = 4,10,7
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 4,10,7
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesScold","smile","lBrowDown"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("smile",0.5,6)
+			self:SendFlexData("lBrowDown",1,6)
 		end
 		if event == "angry_insane" then
-			local top,bottom,brow = 2,1,2
-			self:SetFace(top,bottom,brow)
+			-- local top,bottom,brow = 2,1,2
+			-- self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyesScold","smile_teeth","frown","browAnger","browInsane"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("smile_teeth",1,6)
+			self:SendFlexData("frown",1,6)
+			self:SendFlexData("browAnger",1,6)
+			self:SendFlexData("browInsane",1,6)
 		end
 	end
 end

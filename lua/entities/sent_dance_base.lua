@@ -106,6 +106,8 @@ if SERVER then
 	util.AddNetworkString("Persona_Dance_SongEnd")
 	util.AddNetworkString("Persona_Dance_ModeStart")
 	util.AddNetworkString("Persona_Dance_ChangeFlex")
+	util.AddNetworkString("Persona_Dance_ResetFlex")
+	util.AddNetworkString("Persona_Dance_RemoveFlexes")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetupDataTables()
@@ -149,6 +151,25 @@ if (CLIENT) then
 		end
 	end
 
+	function ENT:ResetFlex(name)
+		if name == true then
+			for i = 0,self:GetFlexNum() -1 do
+				-- local oldVal = self:GetFlexWeight(i)
+				-- self:SetFlexWeight(i,0)
+				-- self:OnChangeFlex(self:GetFlexName(i),oldVal,0)
+				self:ChangeFlex(self:GetFlexName(i),0,20)
+			end
+			return
+		end
+		-- local nameID = self:GetFlexIDByName(name)
+		-- if nameID then
+			-- local oldVal = self:GetFlexWeight(nameID)
+			-- self:SetFlexWeight(nameID,0)
+			-- self:OnChangeFlex(name,oldVal,0)
+			self:ChangeFlex(name,0,20)
+		-- end
+	end
+
 	function ENT:SetFlex(name,val) -- Immediate value
 		local nameID = self:GetFlexIDByName(name)
 		if nameID then
@@ -166,6 +187,7 @@ if (CLIENT) then
 		for ind,flex in ipairs(self.Flexes) do
 			if flex then
 				local id = self:GetFlexIDByName(flex.Name)
+				if !id then MsgN("Failed to load flex [" .. flex.Name .. "] on " .. tostring(self) .. "!") table.remove(self.Flexes,ind) return end
 				local oldVal = self:GetFlexWeight(id)
 				local target = flex.Target
 				-- if oldVal != flex.Target then
@@ -451,7 +473,7 @@ if (CLIENT) then
 		local dancer = ply:GetNW2Entity("Persona_Dancer")
 		if !IsValid(dancer) then return end
 		local mode = ply:GetNW2Int("Persona_DanceMode")
-		if mode != 2 then return end
+		if mode == 0 then return end
 
 		dancer.Persona_NextNoteT = dancer.Persona_NextNoteT or 0
 		ply.Persona_Dance_LastCheerT = ply.Persona_Dance_LastCheerT or 0
@@ -580,39 +602,40 @@ if (CLIENT) then
 		local danceMat = dancer.HUD_SideMaterial
 		local blink = math.Clamp(math.abs(math.sin(CurTime() *1) *255),50,255)
 		
-		DrawTexture("hud/persona/dance/bg.png",boost && Color(boostColor.r,boostColor.g,boostColor.b,255) or Color(255,255,255,255),0,0,ScrW(),ScrH())
-		DrawTexture(danceMat && danceMat .. "_cut.png" or "hud/persona/dance/bg_stars_cut.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,blink),0,0,ScrW() /5,ScrH())
-		DrawTexture(danceMat && danceMat .. "_cut_b.png" or "hud/persona/dance/bg_stars_cut_b.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,blink),ScrW() *0.8,0,ScrW() /5,ScrH())
-		DrawTexture("hud/persona/dance/sidebar.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),0,0,ScrW() /5,ScrH())
-		DrawTexture("hud/persona/dance/sidebar_b.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),ScrW() *0.8,0,ScrW() /5,ScrH())
-		if boost then DrawTexture("hud/persona/dance/bg_swirl.png",Color(boostColor.r,boostColor.g,boostColor.b,100),ScrW() /2,ScrH() /2,ScrH() *1.15,ScrH() *1.15,(CurTime() % 360) *25) end
-		
-		if ply.Persona_HUD_LoadT && CurTime() < ply.Persona_HUD_LoadT then
-			DrawTexture("hud/persona/dance/loading.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),ScrW() /1.041,ScrH() /1.075,200,200,(CurTime() % 360) *100)
-		end		
-		if ply.Persona_HUD_SaveT && CurTime() < ply.Persona_HUD_SaveT then
-			DrawTexture("hud/persona/dance/saving.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),ScrW() /1.041,ScrH() /1.075,200,200,(CurTime() % 360) *100)
-		end
-		
-		DrawTexture("hud/persona/dance/ico_a.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonA_W,buttonA_H,200,200)
-		-- DrawTexture("hud/persona/dance/ico_w.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonW_W,buttonW_H,200,200)
-		DrawTexture("hud/persona/dance/ico_s.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonW_W,buttonW_H,200,200)
-		DrawTexture("hud/persona/dance/ico_d.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonD_W,buttonD_H,200,200)
-		
-		DrawTexture("hud/persona/dance/ico_n4.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN4_W,buttonN4_H,200,200)
-		DrawTexture("hud/persona/dance/ico_n8.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN8_W,buttonN8_H,200,200)
-		DrawTexture("hud/persona/dance/ico_n6.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN6_W,buttonN6_H,200,200)
-		
-		-- DrawTexture("hud/persona/dance/fx_impact.png",Color(255,0,0,255),buttonN4_W +210,buttonN4_H -20,50,50)
+		if mode == 2 then
+			DrawTexture("hud/persona/dance/bg.png",boost && Color(boostColor.r,boostColor.g,boostColor.b,255) or Color(255,255,255,255),0,0,ScrW(),ScrH())
+			DrawTexture(danceMat && danceMat .. "_cut.png" or "hud/persona/dance/bg_stars_cut.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,blink),0,0,ScrW() /5,ScrH())
+			DrawTexture(danceMat && danceMat .. "_cut_b.png" or "hud/persona/dance/bg_stars_cut_b.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,blink),ScrW() *0.8,0,ScrW() /5,ScrH())
+			DrawTexture("hud/persona/dance/sidebar.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),0,0,ScrW() /5,ScrH())
+			DrawTexture("hud/persona/dance/sidebar_b.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),ScrW() *0.8,0,ScrW() /5,ScrH())
+			if boost then DrawTexture("hud/persona/dance/bg_swirl.png",Color(boostColor.r,boostColor.g,boostColor.b,100),ScrW() /2,ScrH() /2,ScrH() *1.15,ScrH() *1.15,(CurTime() % 360) *25) end
+			
+			if ply.Persona_HUD_LoadT && CurTime() < ply.Persona_HUD_LoadT then
+				DrawTexture("hud/persona/dance/loading.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),ScrW() /1.041,ScrH() /1.075,200,200,(CurTime() % 360) *100)
+			end		
+			if ply.Persona_HUD_SaveT && CurTime() < ply.Persona_HUD_SaveT then
+				DrawTexture("hud/persona/dance/saving.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),ScrW() /1.041,ScrH() /1.075,200,200,(CurTime() % 360) *100)
+			end
+			
+			DrawTexture("hud/persona/dance/ico_a.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonA_W,buttonA_H,200,200)
+			-- DrawTexture("hud/persona/dance/ico_w.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonW_W,buttonW_H,200,200)
+			DrawTexture("hud/persona/dance/ico_s.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonW_W,buttonW_H,200,200)
+			DrawTexture("hud/persona/dance/ico_d.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonD_W,buttonD_H,200,200)
+			
+			DrawTexture("hud/persona/dance/ico_n4.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN4_W,buttonN4_H,200,200)
+			DrawTexture("hud/persona/dance/ico_n8.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN8_W,buttonN8_H,200,200)
+			DrawTexture("hud/persona/dance/ico_n6.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN6_W,buttonN6_H,200,200)
+			-- DrawTexture("hud/persona/dance/fx_impact.png",Color(255,0,0,255),buttonN4_W +210,buttonN4_H -20,50,50)
 
-		local iDif = dancer.Difficulty
-		local dif = iDif == 1 && "Easy" or iDif == 2 && "Normal" or iDif == 3 && "Hard" or iDif == 4 && "Crazy" or "Insane"
-		draw.RoundedBox(8,boxSX,boxSY,boxSW,boxSH,Color(0,0,0,245))
-	
-		draw.RoundedBox(8,boxX,boxY,boxW,boxH,Color(0,0,0,245)) // 200
-		draw.SimpleText(songName,"Persona",boxX +10,boxY +10,HUDColor)
-		draw.SimpleText("Difficulty - " .. dif,"Persona",boxX +10,boxY +50,HUDColor)
-		draw.SimpleText(scoreText,"Persona",boxSX +10,boxSY +10,HUDColor)
+			local iDif = dancer.Difficulty
+			local dif = iDif == 1 && "Easy" or iDif == 2 && "Normal" or iDif == 3 && "Hard" or iDif == 4 && "Crazy" or "Insane"
+			draw.RoundedBox(8,boxSX,boxSY,boxSW,boxSH,Color(0,0,0,245))
+		
+			draw.RoundedBox(8,boxX,boxY,boxW,boxH,Color(0,0,0,245)) // 200
+			draw.SimpleText(songName,"Persona",boxX +10,boxY +10,HUDColor)
+			draw.SimpleText("Difficulty - " .. dif,"Persona",boxX +10,boxY +50,HUDColor)
+			draw.SimpleText(scoreText,"Persona",boxSX +10,boxSY +10,HUDColor)
+		end
 		
 		if dancer:GetShowSongMenu() then
 			// Outfits
@@ -640,7 +663,7 @@ if (CLIENT) then
 				surface.PlaySound("cpthazama/persona5/misc/00031.wav")
 			end
 
-			boxX, boxY = ScrW() /1.53, ScrH() /4
+			boxX, boxY = ScrW() /1.53, mode == 2 && ScrH() /4 or ScrH() /12
 			boxW, boxH = ScrW() /4.6, 165
 			-- boxW, boxH = ScrW() /4.6, #dancer.Outfits *95
 			for i = 1,#dancer.Outfits do
@@ -682,7 +705,7 @@ if (CLIENT) then
 				surface.PlaySound("cpthazama/persona5/misc/00031.wav")
 				if ply.VJ_Persona_DancePreview_Theme:IsPlaying() then ply.VJ_Persona_DancePreview_Theme:Stop() end
 			end
-			boxX, boxY = ScrW() /7, ScrH() /4
+			boxX, boxY = ScrW() /7, mode == 2 && ScrH() /4 or ScrH() /12
 			-- boxW, boxH = ScrW() /2, ScrH() /(9.65 -#dancer.SoundTracks)
 			boxW, boxH = ScrW() /2, 145
 			for i = 1,#dancer.SoundTracks do
@@ -705,45 +728,47 @@ if (CLIENT) then
 			draw.RoundedBox(8,boxSX +5, boxSY +45,math.Clamp(20 *r,0,boxSW -10),40,HUDColor)
 		end
 
-		for ind,note in pairs(dancer.Notes) do
-			if note then
-				if note.RemainingDist then -- So, due to another really fucking retarded and weird GMod issue, I am not forced to run this block of code every fucking Tick. Holy fuck I am so done with GMod...
-					local hNoMore = 75 -- Cut-off, at this point you missed
-					local hPerfect = 170 -- Dead on
-					local hGreat = 210 -- Almost on the spot
-					local hGood = 350 -- Meh
-					local nDist = math.abs(note.RemainingDist)
-					if nDist <= hPerfect && nDist > hNoMore then
-						note.HitType = 1
-					elseif nDist > hPerfect && nDist <= hGreat then
-						note.HitType = 2
-					elseif nDist > hGreat && nDist <= hGood then
-						note.HitType = 3
-					else
-						note.HitType = 0
+		if mode == 2 then
+			for ind,note in pairs(dancer.Notes) do
+				if note then
+					if note.RemainingDist then -- So, due to another really fucking retarded and weird GMod issue, I am not forced to run this block of code every fucking Tick. Holy fuck I am so done with GMod...
+						local hNoMore = 75 -- Cut-off, at this point you missed
+						local hPerfect = 170 -- Dead on
+						local hGreat = 210 -- Almost on the spot
+						local hGood = 350 -- Meh
+						local nDist = math.abs(note.RemainingDist)
+						if nDist <= hPerfect && nDist > hNoMore then
+							note.HitType = 1
+						elseif nDist > hPerfect && nDist <= hGreat then
+							note.HitType = 2
+						elseif nDist > hGreat && nDist <= hGood then
+							note.HitType = 3
+						else
+							note.HitType = 0
+						end
+						note.CanBeHit = nDist <= 370
+						note.HitPoints = 350 -nDist
+						-- draw.SimpleText(math.Round(nDist),"Persona",note.LastPosW[1] +50,note.LastPosH[1] +10,Color(255,0,0))
 					end
-					note.CanBeHit = nDist <= 370
-					note.HitPoints = 350 -nDist
-					-- draw.SimpleText(math.Round(nDist),"Persona",note.LastPosW[1] +50,note.LastPosH[1] +10,Color(255,0,0))
-				end
-				
-				if GetConVarNumber("persona_dance_perfect") == 1 && note.RemainingDist then
-					local nDist = math.abs(note.RemainingDist)
-					if note.CanBeHit && nDist <= 170 && nDist > 75 then
-						if note.Hit == false then
-							dancer:CheckNoteHit(note.Direction)
+					
+					if GetConVarNumber("persona_dance_perfect") == 1 && note.RemainingDist then
+						local nDist = math.abs(note.RemainingDist)
+						if note.CanBeHit && nDist <= 170 && nDist > 75 then
+							if note.Hit == false then
+								dancer:CheckNoteHit(note.Direction)
+							end
 						end
 					end
-				end
 
-				if note.CanDelete /*note.Timer < CurTime()*/ or note.Hit == true then
-					-- Entity(1):ChatPrint("REMOVED")
-					if note.Hit == false then
-						dancer:OnNoteHit(ply,ind,note,0)
+					if note.CanDelete /*note.Timer < CurTime()*/ or note.Hit == true then
+						-- Entity(1):ChatPrint("REMOVED")
+						if note.Hit == false then
+							dancer:OnNoteHit(ply,ind,note,0)
+						end
+						table.remove(dancer.Notes,ind)
+					else
+						DrawNote(note)
 					end
-					table.remove(dancer.Notes,ind)
-				else
-					DrawNote(note)
 				end
 			end
 		end
@@ -948,6 +973,24 @@ if (CLIENT) then
 		local speed = net.ReadInt(32)
 		
 		dancer:ChangeFlex(flex,val,speed)
+	end)
+
+	net.Receive("Persona_Dance_RemoveFlexes",function(len)
+		local dancer = net.ReadEntity()
+		local tbl = net.ReadTable()
+
+		for i = 0,dancer:GetFlexNum() -1 do
+			local cName = dancer:GetFlexName(i)
+			if !VJ_HasValue(tbl,cName) && cName != "blink" then
+				dancer:ChangeFlex(cName,0,15)
+			end
+		end
+	end)
+
+	net.Receive("Persona_Dance_ResetFlex",function(len)
+		local dancer = net.ReadEntity()
+
+		dancer:ResetFlex(true)
 	end)
 
 	function ENT:Think()
@@ -1307,14 +1350,31 @@ function ENT:AddCinematicEvent(seq,frame,data,frameCount)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SendFlexData(name,value,speed)
+	net.Start("Persona_Dance_ChangeFlex")
+		net.WriteEntity(self)
+		net.WriteString(name)
+		net.WriteInt(value,32)
+		net.WriteInt(speed,32)
+	net.Broadcast()
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:ResetFlexes()
+	net.Start("Persona_Dance_ResetFlex")
+		net.WriteEntity(self)
+	net.Broadcast()
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:RemoveOldFlexes(tbl)
+	net.Start("Persona_Dance_RemoveFlexes")
+		net.WriteEntity(self)
+		net.WriteTable(tbl)
+	net.Broadcast()
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleRandomFlex(seq,frame)
 	for _,v in pairs(self.RandomFlex[seq][frame]) do
-		net.Start("Persona_Dance_ChangeFlex")
-			net.WriteEntity(self)
-			net.WriteString(v.Name)
-			net.WriteInt(v.Value,32)
-			net.WriteInt(v.Speed,32)
-		net.Broadcast()
+		self:SendFlexData(v.Name,v.Value,v.Speed)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
