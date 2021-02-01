@@ -17,6 +17,7 @@ ENT.HeightOffset = 0.1
 ENT.CollisionBounds = Vector(16,16,75)
 ENT.SongStartDelay = 1	
 ENT.SongStartAnimationDelay = 0
+ENT.ModelScale = 0.42
 ENT.ViewBone = "Spine2"
 
 ENT.Animations = {}
@@ -28,8 +29,12 @@ ENT.SoundTracks = {
 	[1] = {dance = "dance_breakoutof", song = "cpthazama/persona4_dance/music/c012.mp3", name = "Break Out Of"}
 }
 
+ENT.PreviewThemes = {"cpthazama/persona4_dance/music/preview.wav"}
+
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Velvet Room Attire", Model = "", Offset = 0.1, ReqSong = nil, ReqScore = 0}
+ENT.Outfits[2] = {Name = "Velvet Room Attire (Hatless)", Model = "", Offset = 0.1, ReqSong = "Break Out Of", ReqScore = 4500}
+ENT.Outfits[3] = {Name = "Velvet Room Attire (Bagless)", Model = "", Offset = 0.1, ReqSong = "Break Out Of", ReqScore = 8000}
 
 ENT.SongLength = {}
 ENT.SongLength["dance_breakoutof"] = 215
@@ -63,42 +68,69 @@ BG_BROW_HAPPY = 32
 BG_BROW_WINK = 33
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
-	function ENT:OnInit()
-		-- self:ManipulateBoneJiggle(44,1) -- Bust | Removes the animated phys smh
-		self:ManipulateBoneJiggle(46,1) -- Tie
-		self:ManipulateBoneJiggle(47,1)
-		self:ManipulateBoneJiggle(48,1)
-		self:ManipulateBoneJiggle(4,1) -- Skirt
-		self:ManipulateBoneJiggle(5,1)
-		self:ManipulateBoneJiggle(6,1)
-		self:ManipulateBoneJiggle(7,1)
-		self:ManipulateBoneJiggle(8,1)
-		self:ManipulateBoneJiggle(9,1)
-		self:ManipulateBoneJiggle(10,1)
-		self:ManipulateBoneJiggle(11,1)
-		self:ManipulateBoneJiggle(12,1)
-		self:ManipulateBoneJiggle(13,1)
-		self:ManipulateBoneJiggle(14,1)
-		self:ManipulateBoneJiggle(15,1)
-		self:ManipulateBoneJiggle(16,1)
-		self:ManipulateBoneJiggle(17,1)
-		self:ManipulateBoneJiggle(18,1)
-		self:ManipulateBoneJiggle(19,1)
-		self:ManipulateBoneJiggle(106,1) -- Hair
-		self:ManipulateBoneJiggle(107,1)
-		self:ManipulateBoneJiggle(108,1)
-		self:ManipulateBoneJiggle(109,1)
-		self:ManipulateBoneJiggle(110,1)
-		self:ManipulateBoneJiggle(111,1)
-		self:ManipulateBoneJiggle(112,1)
-		self:ManipulateBoneJiggle(113,1)
+	function ENT:OnChangedOutfit(old,new,outfit)
+		if outfit == "Velvet Room Attire" then
+			self:SetBodygroup(0,0)
+			self:SetBodygroup(1,0)
+		end
+		if outfit == "Velvet Room Attire (Hatless)" then
+			self:SetBodygroup(0,1)
+			self:SetBodygroup(1,0)
+		end
+		if outfit == "Velvet Room Attire (Bagless)" then
+			self:SetBodygroup(0,0)
+			self:SetBodygroup(1,1)
+		end
+	end
 
-		self:SetBodygroup(BG_HAT,math.random(1,50) == 1 && 1 or 0)
-		self:SetBodygroup(BG_BAG,math.random(1,50) == 1 && 1 or 0)
+	function ENT:OnPlayPreview()
+		self:HandleAnimationEvent(nil,"smile",nil)
+	end
+
+	function ENT:OnInit()
+		local function Cinematic(frame,data,seq,maxFrames)
+			self:AddCinematicEvent(seq,frame,data,maxFrames)
+		end
+
+		-- self:ManipulateBoneJiggle(44,1) -- Bust | Removes the animated phys smh
+		-- self:ManipulateBoneJiggle(46,1) -- Tie
+		-- self:ManipulateBoneJiggle(47,1)
+		-- self:ManipulateBoneJiggle(48,1)
+		-- self:ManipulateBoneJiggle(4,1) -- Skirt
+		-- self:ManipulateBoneJiggle(5,1)
+		-- self:ManipulateBoneJiggle(6,1)
+		-- self:ManipulateBoneJiggle(7,1)
+		-- self:ManipulateBoneJiggle(8,1)
+		-- self:ManipulateBoneJiggle(9,1)
+		-- self:ManipulateBoneJiggle(10,1)
+		-- self:ManipulateBoneJiggle(11,1)
+		-- self:ManipulateBoneJiggle(12,1)
+		-- self:ManipulateBoneJiggle(13,1)
+		-- self:ManipulateBoneJiggle(14,1)
+		-- self:ManipulateBoneJiggle(15,1)
+		-- self:ManipulateBoneJiggle(16,1)
+		-- self:ManipulateBoneJiggle(17,1)
+		-- self:ManipulateBoneJiggle(18,1)
+		-- self:ManipulateBoneJiggle(19,1)
+		-- self:ManipulateBoneJiggle(106,1) -- Hair
+		-- self:ManipulateBoneJiggle(107,1)
+		-- self:ManipulateBoneJiggle(108,1)
+		-- self:ManipulateBoneJiggle(109,1)
+		-- self:ManipulateBoneJiggle(110,1)
+		-- self:ManipulateBoneJiggle(111,1)
+		-- self:ManipulateBoneJiggle(112,1)
+		-- self:ManipulateBoneJiggle(113,1)
+
+		-- self:SetBodygroup(BG_HAT,math.random(1,50) == 1 && 1 or 0)
+		-- self:SetBodygroup(BG_BAG,math.random(1,50) == 1 && 1 or 0)
 
 		-- self:SetCinematicData()
 		self:RandomizeCinematics("dance_breakoutof",F_BOF)
 		self:RandomizeCinematics("dance_breakoutof_b",F_BOF_B)
+
+		self:AddAnimationEvent("preview",3,"smile",318)
+		self:AddAnimationEvent("preview",15,"smile",318)
+		self:AddAnimationEvent("preview",35,"smile",318)
 
 		self:AddAnimationEvent("dance_breakoutof",1,"default",F_BOF)
 		self:AddAnimationEvent("dance_breakoutof",139,"open",F_BOF)
@@ -209,66 +241,155 @@ if SERVER then
 		self:AddAnimationEvent("dance_breakoutof_b",F_BOF_B -1,"default",F_BOF_B)
 	end
 
-	function ENT:SetFace(top,bottom,brow)
-		self:SetBodygroup(BG_TOP,top)
-		self:SetBodygroup(BG_BOTTOM,bottom)
-		self:SetBodygroup(BG_BROW,brow)
-	end
-
 	function ENT:HandleAnimationEvent(seq,event,frame)
 		if event == "default" then
-			local top,bottom,brow = 0,0,0
-			self:SetFace(top,bottom,brow)
+			self:ResetFlexes()
 		end
-		if event == "smile" then
-			local top,bottom,brow = 0,6,1
-			self:SetFace(top,bottom,brow)
+		if event == "angry" then
+			self:RemoveOldFlexes({"eyesScold","frown","browAnger"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("frown",1,6)
+			self:SendFlexData("browAnger",1,6)
 		end
-		if event == "neutral" then
-			local top,bottom,brow = 0,2,1
-			self:SetFace(top,bottom,brow)
+		if event == "annoyed" then
+			self:RemoveOldFlexes({"eyeSerious","annoyed","browAngry"})
+			self:SendFlexData("eyeSerious",1,6)
+			self:SendFlexData("annoyed",1,6)
+			self:SendFlexData("browAngry",1,6)
 		end
-		if event == "open" then
-			local top,bottom,brow = 0,3,1
-			self:SetFace(top,bottom,brow)
+		if event == "bummed" then
+			self:RemoveOldFlexes({"eyeNausea","frown","browSad"})
+			self:SendFlexData("eyeNausea",1,6)
+			self:SendFlexData("frown",1,6)
+			self:SendFlexData("browSad",1,6)
 		end
-		if event == "openwide" then
-			local top,bottom,brow = 2,4,1
-			self:SetFace(top,bottom,brow)
+		if event == "confused" then
+			self:RemoveOldFlexes({"eyesOpen","mouth_curious","browConfusion"})
+			self:SendFlexData("eyesOpen",1,6)
+			self:SendFlexData("mouth_curious",0.5,6)
+			self:SendFlexData("browConfusion",1,6)
 		end
-		if event == "open_shocked" then
-			local top,bottom,brow = 2,5,0
-			self:SetFace(top,bottom,brow)
-		end
-		if event == "wink" then
-			local top,bottom,brow = 4,6,2
-			self:SetFace(top,bottom,brow)
-		end
-		if event == "smile_close" then
-			local top,bottom,brow = 1,1,1
-			self:SetFace(top,bottom,brow)
-		end
-		if event == "squint" then
-			local top,bottom,brow = 3,5,2
-			self:SetFace(top,bottom,brow)
-		end
-		if event == "squint_open" then
-			local top,bottom,brow = 3,3,1
-			self:SetFace(top,bottom,brow)
-		end
-		if event == "smirk" then
-			local top,bottom,brow = 0,1,0
-			self:SetFace(top,bottom,brow)
+		if event == "laugh" then
+			self:RemoveOldFlexes({"open_happy"})
+			self:SendFlexData("open_happy",1,6)
 		end
 		if event == "cringe" then
-			local top,bottom,brow = 2,7,0
-			self:SetFace(top,bottom,brow)
+			self:RemoveOldFlexes({"eyeNausea","frown","browConfusion"})
+			self:SendFlexData("eyeNausea",1,6)
+			self:SendFlexData("frown",1,6)
+			self:SendFlexData("browConfusion",1,6)
 		end
-	end
-
-	function ENT:OnPlayDance(seq,t)
-		-- if seq == "dance_breakoutof" then
-			-- self:ChangeFace(nil,nil,2)
+		if event == "neutral" then
+			self:RemoveOldFlexes({"smile"})
+			self:SendFlexData("smile",0.7,6)
+		end
+		if event == "squintopen" then
+			self:RemoveOldFlexes({"eyeSerious","browAngry","open"})
+			self:SendFlexData("eyeSerious",0.55,6)
+			self:SendFlexData("browAngry",0.3,6)
+			self:SendFlexData("open",1,6)
+		end
+		if event == "open" then
+			self:RemoveOldFlexes({"eyesOpen","open"})
+			self:SendFlexData("eyesOpen",1,6)
+			self:SendFlexData("open",1,6)
+		end
+		if event == "sad" then
+			self:RemoveOldFlexes({"eyesDroop","frown","browSad"})
+			self:SendFlexData("eyesDroop",1,6)
+			self:SendFlexData("frown",1,6)
+			self:SendFlexData("browSad",1,6)
+		end
+		if event == "open_shocked" then
+			self:RemoveOldFlexes({"eyesOpen","mouth_curious","browHuh","browUm"})
+			self:SendFlexData("eyesOpen",1,6)
+			self:SendFlexData("mouth_curious",1,6)
+			self:SendFlexData("browHuh",1,6)
+			self:SendFlexData("browUm",1,6)
+		end
+		if event == "openwide" then
+			self:RemoveOldFlexes({"eyesOpen","smile_large"})
+			self:SendFlexData("eyesOpen",1,6)
+			self:SendFlexData("smile_large",1,6)
+		end
+		if event == "smile" then
+			self:RemoveOldFlexes({"eyesScold","smile"})
+			self:SendFlexData("eyesScold",0.25,6)
+			self:SendFlexData("smile",1,6)
+		end
+		if event == "smirk" then
+			self:RemoveOldFlexes({"eyesScold","smile_large","browConfusion"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("smile_large",1,6)
+			self:SendFlexData("browConfusion",1,6)
+		end
+		if event == "smirk_smile" then
+			self:RemoveOldFlexes({"eyesScold","smirk","browConfusion"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("smirk",1,6)
+			self:SendFlexData("browConfusion",1,6)
+		end
+		if event == "wink" then
+			self:RemoveOldFlexes({"lWink","smile_teeth","lBrowDown"})
+			self:SendFlexData("smile_teeth",0.5,6)
+			self:SendFlexData("lBrowDown",1,6)
+			self:SendFlexData("lWink",1,6)
+		end
+		if event == "angry_frustrated" then
+			self:RemoveOldFlexes({"eyesScold","smile_teeth","frown","browAnger","browFrustrated"})
+			self:SendFlexData("eyesScold",1,6)
+			self:SendFlexData("smile_teeth",1,6)
+			self:SendFlexData("frown",1,6)
+			self:SendFlexData("browAnger",1,6)
+			self:SendFlexData("browFrustrated",1,6)
+		end
+		-- if event == "default" then
+			-- local top,bottom,brow = 0,0,0
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "smile" then
+			-- local top,bottom,brow = 0,6,1
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "neutral" then
+			-- local top,bottom,brow = 0,2,1
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "open" then
+			-- local top,bottom,brow = 0,3,1
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "openwide" then
+			-- local top,bottom,brow = 2,4,1
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "open_shocked" then
+			-- local top,bottom,brow = 2,5,0
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "wink" then
+			-- local top,bottom,brow = 4,6,2
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "smile_close" then
+			-- local top,bottom,brow = 1,1,1
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "squint" then
+			-- local top,bottom,brow = 3,5,2
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "squint_open" then
+			-- local top,bottom,brow = 3,3,1
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "smirk" then
+			-- local top,bottom,brow = 0,1,0
+			-- self:SetFace(top,bottom,brow)
+		-- end
+		-- if event == "cringe" then
+			-- local top,bottom,brow = 2,7,0
+			-- self:SetFace(top,bottom,brow)
 		-- end
 	end
 end

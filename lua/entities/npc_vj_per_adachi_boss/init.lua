@@ -13,6 +13,7 @@ ENT.VJ_NPC_Class = {"CLASS_ADACHI"}
 
 ENT.Phase = 1
 ENT.ChangingPhases = false
+ENT.HasAltForm = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaInit()
 	self:SetBodygroup(1,1)
@@ -30,10 +31,6 @@ function ENT:OnDisablePersona(persona)
 	ParticleEffectAttach("vj_per_shadow_idle",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnSwitchMetaVerse(didSwitch)
-	self:SetSkin(1)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Dialogue(t,snd,cFunc)
 	timer.Simple(t,function()
 		if IsValid(self) then
@@ -48,6 +45,7 @@ end
 function ENT:OnThink()
 	self:SetPoseParameter("smile",self:IsMoving() && 0.9 or 0)
 	self:SetPoseParameter("anger",1)
+	self:SetSkin(1)
 	if self:Health() <= self:GetMaxHealth() *0.5 && self.Phase == 1 && self.ChangingPhases == false then
 		self.ChangingPhases = true
 		if IsValid(self:GetPersona()) then self:GetPersona():Remove() end

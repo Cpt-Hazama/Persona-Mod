@@ -34,6 +34,7 @@ ENT.Animations["range_idle"] = "persona_attack_idle"
 ENT.Animations["range_end"] = "persona_attack_end"
 
 ENT.Persona = "izanagi_velvet"
+ENT.HasAltForm = false
 
 util.AddNetworkString("vj_persona_hud_lavenza")
 util.AddNetworkString("vj_persona_hud_lavenza_speech")

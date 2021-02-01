@@ -1832,7 +1832,7 @@ function ENT:Confuse(ent,t)
 	ent.Persona_ConfuseT = ent.Persona_ConfuseT or 0
 	if ent.Persona_ConfuseT < CurTime() then
 		ent.Persona_ConfuseT = CurTime() +t
-		self.User:ChatPrint("Inflicted Confusion!")
+		if self.User:IsPlayer() then self.User:ChatPrint("Inflicted Confusion!") end
 		ParticleEffectAttach("persona_fx_dmg_death",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 		local hookName = "Persona_ConfuseThink_" .. ent:EntIndex()
 		hook.Add("Think",hookName,function()
@@ -1858,7 +1858,7 @@ function ENT:Curse(ent,t,dmg)
 	if ent.Persona_CurseT < CurTime() then
 		ent.Persona_CurseT = CurTime() +t
 		ent.Persona_CurseDMGT = CurTime() +(t < 1 && 0 or 1)
-		self.User:ChatPrint("Inflicted Curse!")
+		if self.User:IsPlayer() then self.User:ChatPrint("Inflicted Curse!") end
 		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 		local hookName = "Persona_CurseThink_" .. ent:EntIndex()
 		hook.Add("Think",hookName,function()
@@ -1889,7 +1889,7 @@ function ENT:Fear(ent,t)
 	ent.Persona_FearT = ent.Persona_FearT or 0
 	if ent.Persona_FearT < CurTime() then
 		ent.Persona_FearT = CurTime() +t
-		self.User:ChatPrint("Inflicted Fear!")
+		if self.User:IsPlayer() then self.User:ChatPrint("Inflicted Fear!") end
 		ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
 		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 		local hookName = "Persona_FearThink_" .. ent:EntIndex()

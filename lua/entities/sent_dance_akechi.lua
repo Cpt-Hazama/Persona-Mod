@@ -26,6 +26,8 @@ ENT.SoundTracks = {
 	[1] = {dance = "dance_willpower", song = "cpthazama/persona5_dance/music/h024.mp3", name = "Will Power"}
 }
 
+ENT.PreviewThemes = {"cpthazama/persona5_dance/music/preview.wav"}
+
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Detective Uniform", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
 

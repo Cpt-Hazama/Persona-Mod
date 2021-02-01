@@ -242,33 +242,34 @@ function ENT:OnThink()
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:HandleAnimations()
+function ENT:HandleAnimations(controlled)
 	local hasPersona = IsValid(self:GetPersona())
+	local combatAnims = (hasPersona or (controlled && self.MetaVerseMode))
 	if hasPersona then
 		self.Animations["idle_combat"] = VJ_SequenceToActivity(self,"persona_attack_start_idle")
-	else
+	elseif !hasPersona && self.MetaVerseMode then
 		self.Animations["idle_combat"] = ACT_IDLE_ANGRY
 	end
-	self.CurrentIdle = hasPersona && self.Animations["idle_combat"] or self.Animations["idle"]
+	self.CurrentIdle = combatAnims && self.Animations["idle_combat"] or self.Animations["idle"]
 	self.CurrentWalk = hasPersona && self.Animations["walk_combat"] or self.Animations["walk"]
 	self.CurrentRun = hasPersona && self.Animations["run_combat"] or self.Animations["run"]
 
 	if self:Health() <= self:GetMaxHealth() *0.4 && !hasPersona then
 		self.CurrentIdle = self.Animations["idle_low"]
 	end
-	
+
+	if self:GetState() == 0 then
+		self.AnimTbl_IdleStand = {self.CurrentIdle}
+		self.AnimTbl_Walk = {self.CurrentWalk}
+		self.AnimTbl_Run = {self.CurrentRun}
+	end
+
 	if self.MetaVerseMode then
 		if hasPersona then
 			self:SetBodygroup(1,0)
 		else
 			self:SetBodygroup(1,1)
 		end
-	end
-
-	if self:GetState() == 0 then
-		self.AnimTbl_IdleStand = {self.CurrentIdle}
-		self.AnimTbl_Walk = {self.CurrentWalk}
-		self.AnimTbl_Run = {self.CurrentRun}
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------

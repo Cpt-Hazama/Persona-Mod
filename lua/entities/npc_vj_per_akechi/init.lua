@@ -227,6 +227,7 @@ ENT.Animations["range_idle"] = "persona_attack_idle"
 ENT.Animations["range_end"] = "persona_attack_end"
 
 ENT.Persona = "loki"
+ENT.HasAltForm = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnTakeDamage_AfterDamage(dmginfo,hitgroup)
 	local t = dmginfo:GetDamageType()
@@ -370,7 +371,7 @@ function ENT:OnThink()
 	elseif self.PlayerFriendly == false && self.IsGood == true then
 		self:ChangeFaction(false)
 	end
-	if self.MetaVerseMode && self:Health() > 0 then
+	if IsValid(self:GetEnemy()) && self:Health() > 0 then
 		self:SetPoseParameter("anger",0.6)
 	else
 		self:SetPoseParameter("anger",0)
@@ -392,22 +393,6 @@ function ENT:UseItem(class,t)
 				self:VJ_ACT_PLAYACTIVITY("item_end",true,false,true)
 			end
 		end)
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:HandleAnimations()
-	self.CurrentIdle = IsValid(self:GetPersona()) && self.Animations["idle_combat"] or self.Animations["idle"]
-	self.CurrentWalk = IsValid(self:GetPersona()) && self.Animations["walk_combat"] or self.Animations["walk"]
-	self.CurrentRun = IsValid(self:GetPersona()) && self.Animations["run_combat"] or self.Animations["run"]
-
-	if self:Health() <= self:GetMaxHealth() *0.4 then
-		self.CurrentIdle = self.Animations["idle_low"]
-	end
-
-	if self:GetState() == 0 then
-		self.AnimTbl_IdleStand = {self.CurrentIdle}
-		self.AnimTbl_Walk = {self.CurrentWalk}
-		self.AnimTbl_Run = {self.CurrentRun}
 	end
 end
 /*-----------------------------------------------

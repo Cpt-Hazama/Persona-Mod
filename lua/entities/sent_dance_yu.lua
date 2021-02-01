@@ -26,6 +26,8 @@ ENT.SoundTracks = {
 	[1] = {dance = "dance_specialist", song = "cpthazama/persona4_dance/music/c001.mp3", name = "Specialist -Remix-"}
 }
 
+ENT.PreviewThemes = {"cpthazama/persona4_dance/music/preview.wav"}
+
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Yasogami Winter Uniform", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
 

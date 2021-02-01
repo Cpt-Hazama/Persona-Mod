@@ -12,6 +12,7 @@ ENT.VJ_NPC_Class = {"CLASS_PERSONA_ENEMY","CLASS_KAMOSHIDA"}
 ENT.AvailablePersonae = {
 	"jack",
 	"hastur",
+	"yoshitsune",
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:BeforeInit()

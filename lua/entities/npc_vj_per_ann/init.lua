@@ -93,21 +93,7 @@ function ENT:UseItem(class,t)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:HandleAnimations()
-	self.CurrentIdle = IsValid(self:GetPersona()) && self.Animations["idle_combat"] or self.Animations["idle"]
-	self.CurrentWalk = IsValid(self:GetPersona()) && self.Animations["walk_combat"] or self.Animations["walk"]
-	self.CurrentRun = IsValid(self:GetPersona()) && self.Animations["run_combat"] or self.Animations["run"]
-
-	if self:Health() <= self:GetMaxHealth() *0.4 then
-		self.CurrentIdle = self.Animations["idle_low"]
-	end
-
-	if self:GetState() == 0 then
-		self.AnimTbl_IdleStand = {self.CurrentIdle}
-		self.AnimTbl_Walk = {self.CurrentWalk}
-		self.AnimTbl_Run = {self.CurrentRun}
-	end
-	
+function ENT:OnThink()
 	if self.MetaVerseMode then
 		if hasPersona then
 			self:SetBodygroup(1,0)

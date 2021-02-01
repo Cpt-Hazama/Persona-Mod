@@ -63,6 +63,7 @@ ENT.SoundTbl_GetUp = {
 }
 
 ENT.GeneralSoundPitch1 = 100
+ENT.HasAltForm = false
 
 util.AddNetworkString("vj_persona_hud_yukari")
 ---------------------------------------------------------------------------------------------------------------------------------------------

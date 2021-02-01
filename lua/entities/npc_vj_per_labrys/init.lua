@@ -194,14 +194,7 @@ function ENT:UseItem(class,t)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:HandleAnimations()
-	-- self.CurrentIdle = IsValid(self:GetPersona()) && self.Animations["idle_combat"] or self.Animations["idle"]
-	-- self.CurrentWalk = IsValid(self:GetPersona()) && self.Animations["walk_combat"] or self.Animations["walk"]
-	-- self.CurrentRun = IsValid(self:GetPersona()) && self.Animations["run_combat"] or self.Animations["run"]
-	self.CurrentIdle = IsValid(self:GetEnemy()) && self.Animations["idle_combat"] or self.Animations["idle"]
-	self.CurrentWalk = IsValid(self:GetEnemy()) && self.Animations["walk_combat"] or self.Animations["walk"]
-	self.CurrentRun = IsValid(self:GetEnemy()) && self.Animations["run_combat"] or self.Animations["run"]
-	
+function ENT:OnThink()
 	if self.FriendsWithAllPlayerAllies then
 		if IsValid(self:GetEnemy()) then
 			self.Axe = self:Give("weapon_vj_persona_axe_labrys")
@@ -210,16 +203,6 @@ function ENT:HandleAnimations()
 				self.Axe:Remove()
 			end
 		end
-	end
-
-	if self:Health() <= self:GetMaxHealth() *0.4 then
-		self.CurrentIdle = self.Animations["idle_low"]
-	end
-
-	if self:GetState() == 0 then
-		self.AnimTbl_IdleStand = {self.CurrentIdle}
-		self.AnimTbl_Walk = {self.CurrentWalk}
-		self.AnimTbl_Run = {self.CurrentRun}
 	end
 end
 /*-----------------------------------------------

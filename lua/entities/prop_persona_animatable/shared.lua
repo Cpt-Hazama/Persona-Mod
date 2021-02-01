@@ -58,10 +58,21 @@ if (CLIENT) then
 		end
 	end
 
+	function ENT:ResetFlex(name)
+		if name == true then
+			for i = 0,self:GetFlexNum() -1 do
+				self:ChangeFlex(self:GetFlexName(i),0,20)
+			end
+			return
+		end
+		self:ChangeFlex(name,0,20)
+	end
+
 	function ENT:SetFlex(name,val) -- Immediate value
 		local nameID = self:GetFlexIDByName(name)
 		if nameID then
 			local oldVal = self:GetFlexWeight(nameID)
+			val = math.Clamp(val,0,1)
 			self:SetFlexWeight(nameID,val)
 			self:OnChangeFlex(name,oldVal,val)
 		end
@@ -73,8 +84,10 @@ if (CLIENT) then
 		for ind,flex in ipairs(self.Flexes) do
 			if flex then
 				local id = self:GetFlexIDByName(flex.Name)
+				if !id then MsgN("Failed to load flex [" .. flex.Name .. "] on " .. tostring(self) .. "!") table.remove(self.Flexes,ind) return end
 				local oldVal = self:GetFlexWeight(id)
-				if oldVal != flex.Target then
+				local target = flex.Target
+				if (math.abs(target -oldVal) > 0.0125) then
 					self:SetFlex(flex.Name,Lerp(FrameTime() *flex.Speed,oldVal,flex.Target))
 				else
 					table.remove(self.Flexes,ind)
@@ -89,7 +102,7 @@ if (CLIENT) then
 
         local blink = CurTime() < (self.BlinkTime or 0)
         local baseBlink = 0
-
+    
         if blink then
             self.CurBlink = Lerp(FrameTime() *10,self.CurBlink or baseBlink,1)
             self:SetFlex("blink",self.CurBlink)
@@ -104,4 +117,31 @@ if (CLIENT) then
 	function ENT:DrawTranslucent()
 		self:Draw()
 	end
+
+	net.Receive("Persona_Dance_ChangeFlex",function(len)
+		local dancer = net.ReadEntity()
+		local flex = net.ReadString()
+		local val = net.ReadFloat(32)
+		local speed = net.ReadInt(32)
+
+		dancer:ChangeFlex(flex,val,speed)
+	end)
+
+	net.Receive("Persona_Dance_RemoveFlexes",function(len)
+		local dancer = net.ReadEntity()
+		local tbl = net.ReadTable()
+
+		for i = 0,dancer:GetFlexNum() -1 do
+			local cName = dancer:GetFlexName(i)
+			if !VJ_HasValue(tbl,cName) && cName != "blink" then
+				dancer:ChangeFlex(cName,0,15)
+			end
+		end
+	end)
+
+	net.Receive("Persona_Dance_ResetFlex",function(len)
+		local dancer = net.ReadEntity()
+
+		dancer:ResetFlex(true)
+	end)
 end

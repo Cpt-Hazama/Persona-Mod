@@ -28,6 +28,8 @@ ENT.SoundTracks = {
 	[1] = {dance = "dance_signsoflove", song = "cpthazama/persona4_dance/music/c007.mp3", name = "Signs Of Love -Remix-"}
 }
 
+ENT.PreviewThemes = {"cpthazama/persona4_dance/music/preview.wav"}
+
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Stage Outfit", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
 

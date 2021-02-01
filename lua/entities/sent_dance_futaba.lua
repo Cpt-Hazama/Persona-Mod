@@ -32,6 +32,8 @@ ENT.SoundTracks = {
 	[1] = {dance = "dance_lastsurprise", song = "cpthazama/persona5_dance/music/h015.mp3", name = "Last Surprise -Remix-"}
 }
 
+ENT.PreviewThemes = {"cpthazama/persona5_dance/music/preview.wav"}
+
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Stage Uniform", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
 

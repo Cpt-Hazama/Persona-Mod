@@ -447,10 +447,11 @@ function ENT:PersonaCode()
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:HandleAnimations()
-	self.CurrentIdle = IsValid(self:GetPersona()) && self.Animations["idle_combat"] or self.Animations["idle"]
-	self.CurrentWalk = IsValid(self:GetPersona()) && self.Animations["walk_combat"] or self.Animations["walk"]
-	self.CurrentRun = IsValid(self:GetPersona()) && self.Animations["run_combat"] or self.Animations["run"]
+function ENT:HandleAnimations(controlled)
+	local combatAnims = (IsValid(self:GetPersona()) or (controlled && self.MetaVerseMode))
+	self.CurrentIdle = combatAnims && self.Animations["idle_combat"] or self.Animations["idle"]
+	self.CurrentWalk = combatAnims && self.Animations["walk_combat"] or self.Animations["walk"]
+	self.CurrentRun = combatAnims && self.Animations["run_combat"] or self.Animations["run"]
 
 	if self:Health() <= self:GetMaxHealth() *0.4 then
 		self.CurrentIdle = self.Animations["idle_low"]
@@ -470,8 +471,15 @@ function ENT:LevelCode()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
-	self:HandleAnimations()
+	local controlled = self.VJ_IsBeingControlled
+
+	self:HandleAnimations(controlled)
+	
 	self:LevelCode()
+	self:SetNW2Bool("MetaVerseMode",self.MetaVerseMode)
+	if self.HasAltForm == false then -- Fuck me right?
+		self.MetaVerseMode = true
+	end
 
 	self.DisableFindEnemy = self.InCriticalState
 	if self.InCriticalState then
@@ -480,25 +488,44 @@ function ENT:CustomOnThink()
 	self.ConstantlyFaceEnemyDistance = self.FarAttackDistance -500
 	self.NoChaseAfterCertainRange_FarDistance = self.CloseAttackDistance -50
 
-	if IsValid(self:GetEnemy()) then
-		if self.MetaVerseMode == false then
-			if CurTime() > self.NextMetaChangeT then
-				self.MetaVerseMode = true
+	if !controlled then
+		if IsValid(self:GetEnemy()) then
+			if self.MetaVerseMode == false then
+				if CurTime() > self.NextMetaChangeT then
+					self.MetaVerseMode = true
+					self.NextMetaChangeT = CurTime() +3
+					self:OnSwitchMetaVerse(true)
+				end
+			else
 				self.NextMetaChangeT = CurTime() +3
-				self:OnSwitchMetaVerse(true)
 			end
 		else
-			self.NextMetaChangeT = CurTime() +3
+			if self.MetaVerseMode then
+				if CurTime() > self.NextMetaChangeT then
+					if IsValid(self:GetPersona()) then
+						SafeRemoveEntity(self:GetPersona())
+					end
+					self.MetaVerseMode = false
+					self.NextMetaChangeT = CurTime() +2
+					self:OnSwitchMetaVerse(false)
+				end
+			else
+				self.NextMetaChangeT = CurTime() +1
+			end
 		end
 	else
-		if self.MetaVerseMode then
+		local ply = self.VJ_TheController
+		if ply:KeyDown(IN_RELOAD) && ply:KeyDown(IN_USE) then
+			if self.HasAltForm == false then return end
 			if CurTime() > self.NextMetaChangeT then
-				self.MetaVerseMode = false
+				local new = !self.MetaVerseMode
+				if new == false && IsValid(self:GetPersona()) then
+					SafeRemoveEntity(self:GetPersona())
+				end
+				self.MetaVerseMode = !self.MetaVerseMode
 				self.NextMetaChangeT = CurTime() +2
-				self:OnSwitchMetaVerse(false)
+				self:OnSwitchMetaVerse(new)
 			end
-		else
-			self.NextMetaChangeT = CurTime() +1
 		end
 	end
 	

@@ -192,10 +192,12 @@ if (CLIENT) then
 				local target = flex.Target
 				-- if oldVal != flex.Target then
 				-- if (target > oldVal && oldVal < target) or (target < oldVal && oldVal > target) then
-				if (math.abs(target -oldVal) > 0.05) then
+				if (math.abs(target -oldVal) > 0.0125) then
 					-- Entity(1):ChatPrint("Changing " .. flex.Name .. " from " .. oldVal .. " to " .. flex.Target)
 					self:SetFlex(flex.Name,Lerp(FrameTime() *flex.Speed,oldVal,flex.Target))
 				else
+					-- Entity(1):ChatPrint(flex.Name .. " " .. math.abs(target -oldVal) .. " " .. target)
+					-- Entity(1):ChatPrint("REMOVED " .. flex.Name)
 					table.remove(self.Flexes,ind)
 				end
 			end
@@ -224,6 +226,8 @@ if (CLIENT) then
 		self.DanceIndex = 0
 		self.NextSpeakT = 0
 		self:ClientInit()
+		
+		self.MinCameraZoom = self:BoundingRadius()
 		
 		self.ViewMode = GetConVarNumber("vj_persona_dancemode")
 		self:SetViewMode(GetConVarNumber("vj_persona_dancemode"))
@@ -460,9 +464,9 @@ if (CLIENT) then
 		if (bind == "invprev" or bind == "invnext") then
 			ply.Persona_DanceZoom = ply.Persona_DanceZoom or 90
 			if bind == "invprev" then
-				ply.Persona_DanceZoom = math.Clamp(ply.Persona_DanceZoom -5,dancer:BoundingRadius(),500)
+				ply.Persona_DanceZoom = math.Clamp(ply.Persona_DanceZoom -5,dancer.MinCameraZoom or 35,500)
 			else
-				ply.Persona_DanceZoom = math.Clamp(ply.Persona_DanceZoom +5,dancer:BoundingRadius(),500)
+				ply.Persona_DanceZoom = math.Clamp(ply.Persona_DanceZoom +5,dancer.MinCameraZoom or 35,500)
 			end
 		end
 	end)
@@ -805,7 +809,8 @@ if (CLIENT) then
 		local danceMode = ply:GetNW2Int("Persona_DanceMode")
 		local cCinematic = tobool(GetConVarNumber("persona_dance_cinematic"))
 		local enabled = IsValid(dancer) && danceMode != 0
-		if enabled && cCinematic then
+		local doingPreview = IsValid(dancer) && dancer:GetSequenceName(dancer:GetSequence()) == (dancer.PreviewAnimation or "preview")
+		if enabled && cCinematic && !doingPreview then
 			cmd:SetMouseX(0)
 			cmd:SetMouseY(0)
 			return true
@@ -827,7 +832,8 @@ if (CLIENT) then
 			if dancer:GetNW2Bool("CustomView") == true && dancer.CustomCalcView then
 				return dancer:CustomCalcView(ply,pos,angles,fov,danceBone)
 			end
-			if cCinematic then
+			local doingPreview = dancer:GetSequenceName(dancer:GetSequence()) == (dancer.PreviewAnimation or "preview")
+			if cCinematic && !doingPreview then
 				local pos = dancer:GetNW2Vector("LastCinematicPos")
 				local dist = dancer:GetNW2Int("LastCinematicDist")
 				local speed = dancer:GetNW2Int("LastCinematicSpeed")
@@ -856,7 +862,7 @@ if (CLIENT) then
 			local dist = ply.Persona_DanceZoom or 90
 			local tr = util.TraceHull({
 				start = sPos,
-				endpos = sPos +angles:Forward() *-math.max(dist,dancer:BoundingRadius()),
+				endpos = sPos +angles:Forward() *-math.max(dist,dancer.MinCameraZoom or 35),
 				mask = MASK_SHOT,
 				filter = player.GetAll(),
 				mins = Vector(-8,-8,-8),
@@ -969,9 +975,9 @@ if (CLIENT) then
 	net.Receive("Persona_Dance_ChangeFlex",function(len)
 		local dancer = net.ReadEntity()
 		local flex = net.ReadString()
-		local val = net.ReadInt(32)
+		local val = net.ReadFloat(32)
 		local speed = net.ReadInt(32)
-		
+
 		dancer:ChangeFlex(flex,val,speed)
 	end)
 
@@ -1043,6 +1049,7 @@ function ENT:SetAnimationRate(rate)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OutfitUnlocked(outfit,ply)
+	if GetConVarNumber("sv_cheats") == 1 then return true end
 	if type(outfit) == "number" && self.Outfits[outfit] then
 		if self.Outfits[outfit].ReqSong == nil then return true end
 		local highscore = PXP.GetDanceData(ply,self.Outfits[outfit].ReqSong)
@@ -1204,11 +1211,18 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RandomizeExpressions(flexes,anim,frames,chance)
 	local chance = chance or 50
-	
+
+	self.RandomizedFlexes = self.RandomizedFlexes or {}
+	self.RandomizedFlexes[anim] = self.RandomizedFlexes[anim] or {}
+	for _,v in pairs(flexes) do
+		table.insert(self.RandomizedFlexes[anim],v)
+	end
 	for i = 1,frames do
 		if math.random(1,chance) == 1 then
 			for _,flex in pairs(flexes) do
-				self:AddFlexEvent(anim,i,{Name=flex,Value=math.Rand(0,1),Speed=math.Rand(0.5,6)},frames)
+				local name, val, speed = flex, math.Rand(0,1), math.Rand(0.1,5)
+				self:AddFlexEvent(anim,i,{Name=name,Value=val,Speed=speed},frames)
+				-- print(name,val,speed)
 			end
 		end
 	end
@@ -1354,7 +1368,7 @@ function ENT:SendFlexData(name,value,speed)
 	net.Start("Persona_Dance_ChangeFlex")
 		net.WriteEntity(self)
 		net.WriteString(name)
-		net.WriteInt(value,32)
+		net.WriteFloat(value,32)
 		net.WriteInt(speed,32)
 	net.Broadcast()
 end
@@ -1374,6 +1388,8 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleRandomFlex(seq,frame)
 	for _,v in pairs(self.RandomFlex[seq][frame]) do
+		-- Entity(1):ChatPrint(v.Name .. " | " .. v.Value .. " | " .. v.Speed .. " | " .. frame)
+		self:RemoveOldFlexes(self.RandomizedFlexes[self:GetSequenceName(self:GetSequence())])
 		self:SendFlexData(v.Name,v.Value,v.Speed)
 	end
 end
@@ -1420,12 +1436,16 @@ function ENT:AddAnimationEvent(seq,frame,eventName,frameCount)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:StartLamp()
-	if !self.HasLamp then return end
 	SafeRemoveEntity(self.Lamp)
+	self:SpawnLamp(self)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SpawnLamp(ent)
+	if !self.HasLamp then return end
 
 	local tr = util.TraceHull({
-		start = self:GetPos() +self:OBBCenter(),
-		endpos = self:GetPos() +self:GetForward() *200 +Vector(0,0,self:OBBMaxs().z *3.5),
+		start = ent:GetPos() +ent:OBBCenter(),
+		endpos = ent:GetPos() +ent:GetForward() *200 +Vector(0,0,ent:OBBMaxs().z *3.5),
 		mask = MASK_SHOT,
 		filter = player.GetAll(),
 		mins = Vector(-8,-8,-8),
@@ -1433,28 +1453,34 @@ function ENT:StartLamp()
 	})
 	local trPos = tr.HitPos +tr.HitNormal *5
 
-	self.Lamp = ents.Create("gmod_lamp")
-	self.Lamp:SetModel("models/maxofs2d/lamp_projector.mdl")
-	self.Lamp:SetPos(trPos)
-	self.Lamp:SetAngles((self:GetPos() -self.Lamp:GetPos()):Angle())
-	self.Lamp:Spawn()
-	self.Lamp:SetMoveType(MOVETYPE_NONE)
-	self.Lamp:SetSolid(SOLID_BBOX)
-	self:DeleteOnRemove(self.Lamp)
-	self.Lamp:SetOn(true)
-	self.Lamp:SetLightFOV(40)
-	self.Lamp:SetDistance(self.Lamp:GetPos():Distance(self:GetPos()) *2)
-	self.Lamp:SetBrightness(self.Lamp:GetPos():Distance(self:GetPos()) *0.01)
-	-- self.Lamp:SetFashlightTexture("sprites/lamphalo")
-	-- self.Lamp:SetFashlightTexture("engine/lightsprite")
-	self.Lamp:SetColor(Color(255,255,255))
-	if IsValid(self.Lamp.flashlight) then
-		self.Lamp.flashlight:Input("SpotlightTexture",NULL,NULL,"effects/flashlight/soft")
-		-- self.Lamp.flashlight:SetColor(Color(255,255,255))
+	local lamp = ents.Create("gmod_lamp")
+	lamp:SetModel("models/maxofs2d/lamp_projector.mdl")
+	lamp:SetPos(trPos)
+	lamp:SetAngles((ent:GetPos() -lamp:GetPos()):Angle())
+	lamp:Spawn()
+	lamp.Target = ent
+	lamp:SetMoveType(MOVETYPE_NONE)
+	lamp:SetSolid(SOLID_BBOX)
+	ent:DeleteOnRemove(lamp)
+	lamp:SetOn(true)
+	lamp:SetLightFOV(40)
+	lamp:SetDistance(lamp:GetPos():Distance(ent:GetPos()) *2)
+	lamp:SetBrightness(lamp:GetPos():Distance(ent:GetPos()) *0.0025)
+	lamp:SetColor(Color(255,255,255))
+	if IsValid(lamp.flashlight) then
+		lamp.flashlight:Input("SpotlightTexture",NULL,NULL,"effects/flashlight/soft")
 	end
-	self.Lamp:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
-	local phys = self:GetPhysicsObject()
+	lamp:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+	local phys = lamp:GetPhysicsObject()
 	if IsValid(phys) then phys:Sleep() end
+	
+	ent.Lamp = lamp
+
+	self.Lamps = self.Lamps or {}
+	local index = #self.Lamps +1
+	table.insert(self.Lamps,lamp)
+
+	return {Ent=lamp,Ind=index}
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Think()
@@ -1500,19 +1526,23 @@ function ENT:Think()
 		end
 		self.NextDanceT = CurTime() +t
 	end
-	if IsValid(self.Lamp) then
-		self.Lamp:SetAngles((self:GetBonePosition(1) -self.Lamp:GetPos()):Angle())
-		local flashlight = self.Lamp.flashlight
+	local lamp = self.Lamp
+	if IsValid(lamp) then
+		local bone = self.ViewBone
+		local pos = (self:GetBonePosition(self:LookupBone(bone)) or self:GetBonePosition(1))
+		lamp:SetAngles((pos -lamp:GetPos()):Angle())
+		lamp:SetBrightness(lamp:GetPos():Distance(pos) *0.012)
+		local flashlight = lamp.flashlight
 		if IsValid(flashlight) then
 			if self.LampRGB then
 				local col = self:HSL((RealTime() *70 -(0 *8)),128,128)
 				flashlight:Input("SpotlightTexture",NULL,NULL,"effects/flashlight/soft")
 				flashlight:Input("LightColor",NULL,NULL,Format("%i %i %i 255",col.r,col.g,col.b))
-				self.Lamp:SetColor(col)
+				lamp:SetColor(col)
 			else
 				flashlight:Input("SpotlightTexture",NULL,NULL,"effects/flashlight/soft")
 				flashlight:Input("LightColor",NULL,NULL,Format("%i %i %i 255",255,255,255))
-				self.Lamp:SetColor(Color(255,255,255))
+				lamp:SetColor(Color(255,255,255))
 			end
 		end
 	end
@@ -1610,25 +1640,26 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRemove()
 	SafeRemoveEntity(self.Lamp)
-	if IsValid(self.Creator) then
-		self.Creator:SetNW2Entity("Persona_Dancer",NULL)
-		self.Creator:SetNW2Int("Persona_DanceMode",0)
-		self.Creator:SetNW2String("Persona_DanceBone",nil)
-		self.Creator:UnSpectate()
-		self.Creator:KillSilent()
-		self.Creator:Spawn()
-		self.Creator:SetHealth(self.Data_Creator[1])
-		self.Creator:SetArmor(self.Data_Creator[2])
+	local ply = self.Creator
+	if IsValid(ply) then
+		ply:SetNW2Entity("Persona_Dancer",NULL)
+		ply:SetNW2Int("Persona_DanceMode",0)
+		ply:SetNW2String("Persona_DanceBone",nil)
+		ply:UnSpectate()
+		ply:KillSilent()
+		ply:Spawn()
+		ply:SetHealth(self.Data_Creator[1])
+		ply:SetArmor(self.Data_Creator[2])
 		for _, v in pairs(self.Data_Creator[3]) do
-			self.Creator:Give(v)
+			ply:Give(v)
 		end
-		self.Creator:SelectWeapon(self.Data_Creator[4])
-		self.Creator:SetPos(self:GetPos() +self:OBBMaxs() +Vector(0,0,20))
-		self.Creator:SetNoDraw(false)
-		self.Creator:DrawShadow(true)
-		self.Creator:SetNoTarget(false)
-		self.Creator:DrawViewModel(true)
-		self.Creator:DrawWorldModel(true)
+		ply:SelectWeapon(self.Data_Creator[4])
+		ply:SetPos(self:GetPos() +self:OBBMaxs() +Vector(0,0,20))
+		ply:SetNoDraw(false)
+		ply:DrawShadow(true)
+		ply:SetNoTarget(false)
+		ply:DrawViewModel(true)
+		ply:DrawWorldModel(true)
 	end
 	self.Creator = NULL
 end

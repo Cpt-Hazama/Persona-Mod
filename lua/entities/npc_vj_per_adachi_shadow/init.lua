@@ -10,6 +10,7 @@ ENT.Stats = {
 	SP = 45000,
 }
 ENT.VJ_NPC_Class = {"CLASS_SHADOW"}
+ENT.HasAltForm = false
 
 util.AddNetworkString("vj_persona_hud_adachi_shadow")
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,10 +48,6 @@ function ENT:OnDisablePersona(persona)
 	ParticleEffectAttach("vj_per_shadow_idle",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnSwitchMetaVerse(didSwitch)
-	self:SetSkin(1)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink()
 	self:SetPoseParameter("smile",self:IsMoving() && 0.9 or self:Health() <= self:GetMaxHealth() *0.4 && 0 or 0.75)
 	if self:Health() <= self:GetMaxHealth() *0.4 then
@@ -58,6 +55,7 @@ function ENT:OnThink()
 	else
 		self:SetPoseParameter("anger",0)
 	end
+	self:SetSkin(1)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnRemove()

@@ -49,6 +49,7 @@ P_AddBattleTrack("Reach Out To The Truth","cpthazama/persona_shared/battlemode_6
 P_AddBattleTrack("Time To Make History","cpthazama/persona_shared/battlemode_7.mp3",171)
 P_AddBattleTrack("Take Over","cpthazama/persona_shared/battlemode_8.mp3",226)
 P_AddBattleTrack("Reach Out To The Truth (Arena ver.)","cpthazama/persona_shared/battlemode_9.mp3",134)
+P_AddBattleTrack("Beneath The Mask (Ultimate ver.)","cpthazama/persona_shared/battlemode_10.mp3",324)
 
 P_AddBattleTrack("Keeper Of Lust","cpthazama/persona_shared/battlemode_boss_1.mp3",243,true)
 P_AddBattleTrack("Rivers In The Desert (Instrumental)","cpthazama/persona_shared/battlemode_boss_2.mp3",315,true)
