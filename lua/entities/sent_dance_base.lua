@@ -20,8 +20,9 @@ ENT.SongStartAnimationDelay = 0
 ENT.ModelScale = 1
 ENT.HasLamp = true
 ENT.LampRGB = false
-ENT.ViewMode = 2 -- 0 = None, 1 = Follow, 2 = Dance, Dance!
+ENT.ViewMode = 2 -- 1 = Follow, 2 = Dance, Dance!
 ENT.ViewBone = "Spine2"
+ENT.ViewBoneOffset = Vector(0,0,0)
 ENT.WaitForNextSongToStartTime = 0.01
 
 ENT.Difficulty = 2 -- 1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're stupid
@@ -859,6 +860,7 @@ if (CLIENT) then
 				return view
 			end
 			local sPos,sAng = dancer:GetBonePosition(dancer:LookupBone(danceBone))
+			sPos = sPos +(dancer.ViewBoneOffset or Vector(0,0,0))
 			local dist = ply.Persona_DanceZoom or 90
 			local tr = util.TraceHull({
 				start = sPos,
@@ -885,6 +887,8 @@ if (CLIENT) then
 		local ply = net.ReadEntity()
 		
 		if LocalPlayer() != ply then return end
+		
+		if ply.VJ_Persona_Dance_Theme then ply.VJ_Persona_Dance_Theme:Stop() end
 		if ply.VJ_Persona_DancePreview_Theme == nil or ply.VJ_Persona_DancePreview_Theme && !ply.VJ_Persona_DancePreview_Theme:IsPlaying() then
 			local snd = me.PreviewThemes && VJ_PICK(me.PreviewThemes) or "cpthazama/persona3_dance/music/preview.wav"
 			ply.VJ_Persona_DancePreview_Theme = CreateSound(ply,snd)
@@ -978,17 +982,18 @@ if (CLIENT) then
 		local val = net.ReadFloat(32)
 		local speed = net.ReadInt(32)
 
-		dancer:ChangeFlex(flex,val,speed)
+		if dancer.ChangeFlex then dancer:ChangeFlex(flex,val,speed) end
 	end)
 
 	net.Receive("Persona_Dance_RemoveFlexes",function(len)
 		local dancer = net.ReadEntity()
+		if !IsValid(dancer) then MsgN("Rubat broke something. Try respawning this Dancer...") end
 		local tbl = net.ReadTable()
 
 		for i = 0,dancer:GetFlexNum() -1 do
 			local cName = dancer:GetFlexName(i)
 			if !VJ_HasValue(tbl,cName) && cName != "blink" then
-				dancer:ChangeFlex(cName,0,15)
+				if dancer.ChangeFlex then dancer:ChangeFlex(cName,0,15) end -- Fucking GMod
 			end
 		end
 	end)
@@ -996,7 +1001,7 @@ if (CLIENT) then
 	net.Receive("Persona_Dance_ResetFlex",function(len)
 		local dancer = net.ReadEntity()
 
-		dancer:ResetFlex(true)
+		if dancer.ResetFlex then dancer:ResetFlex(true) end
 	end)
 
 	function ENT:Think()
@@ -1006,8 +1011,13 @@ if (CLIENT) then
 			ply.VJ_Persona_Dance_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01)
 			ply.VJ_Persona_Dance_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
 		end
-		if ply.VJ_Persona_DancePreview_Theme && ply.VJ_Persona_DancePreview_Theme:IsPlaying() then
-			ply.VJ_Persona_DancePreview_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01)
+		if ply.VJ_Persona_DancePreview_Theme then
+			-- if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() then
+				-- ply.VJ_Persona_DancePreview_Theme:ChangeVolume(0)
+				-- return
+			-- end
+			-- print(GetConVarNumber("vj_persona_dancevol"))
+			ply.VJ_Persona_DancePreview_Theme:ChangeVolume(ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() && 0 or GetConVarNumber("vj_persona_dancevol") *0.01)
 			ply.VJ_Persona_DancePreview_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
 		end
 	end
@@ -1365,6 +1375,7 @@ function ENT:AddCinematicEvent(seq,frame,data,frameCount)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SendFlexData(name,value,speed)
+	if !IsValid(self) then return end -- I really don't fucking know, fuck whoever broke my shit in the GMod update
 	net.Start("Persona_Dance_ChangeFlex")
 		net.WriteEntity(self)
 		net.WriteString(name)
@@ -1389,7 +1400,10 @@ end
 function ENT:HandleRandomFlex(seq,frame)
 	for _,v in pairs(self.RandomFlex[seq][frame]) do
 		-- Entity(1):ChatPrint(v.Name .. " | " .. v.Value .. " | " .. v.Speed .. " | " .. frame)
-		self:RemoveOldFlexes(self.RandomizedFlexes[self:GetSequenceName(self:GetSequence())])
+		local tbl = self.RandomizedFlexes[self:GetSequenceName(self:GetSequence())]
+		if tbl then
+			self:RemoveOldFlexes(tbl)
+		end
 		self:SendFlexData(v.Name,v.Value,v.Speed)
 	end
 end
@@ -1501,6 +1515,7 @@ function ENT:Think()
 		net.Broadcast()
 		self:SetSelectedSong("false")
 		self.StartedSong = false
+		SafeRemoveEntity(self.Lamp)
 	end
 	if self:GetSelectedSong() != "false" && !self.StartedSong then
 		self.StartedSong = true

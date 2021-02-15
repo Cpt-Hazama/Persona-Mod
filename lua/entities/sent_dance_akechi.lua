@@ -14,6 +14,7 @@ ENT.AdminOnly = true
 
 ENT.Model = "models/cpthazama/persona5_dance/akechi.mdl"
 ENT.HeightOffset = 1
+ENT.ModelScale = 0.42
 ENT.CollisionBounds = Vector(16,16,75)
 ENT.SongStartDelay = 0.1
 ENT.ViewBone = "Spine2"
@@ -30,6 +31,8 @@ ENT.PreviewThemes = {"cpthazama/persona5_dance/music/preview.wav"}
 
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Detective Uniform", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
+ENT.Outfits[2] = {Name = "Black-Masked Intruder", Model = "_blackmask", Offset = 1, ReqSong = "Will Power", ReqScore = 25000}
+ENT.Outfits[3] = {Name = "Black-Mask (Royal)", Model = "_blackmask", Offset = 1, ReqSong = "Will Power", ReqScore = 30000}
 
 ENT.Sounds = {}
 ENT.Sounds["start"] = {
@@ -149,38 +152,57 @@ if CLIENT then
 		local seq = "dance_willpower"
 		local lifeTime = 1
 		local offset = 0.5 -- Lazy be like
-		self:AddNote(seq,"s",lifeTime,8 -lifeTime -offset)
-		self:AddNote(seq,"a",lifeTime,9 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,9.625 -lifeTime -offset)
-		self:AddNote(seq,"d",lifeTime,10.5 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,11.5 -lifeTime -offset)
-		self:AddNote(seq,"a",lifeTime,12.25 -lifeTime -offset)
-		self:AddNote(seq,"d",lifeTime,13 -lifeTime -offset)
-		self:AddNote(seq,"a",lifeTime,13.75 -lifeTime -offset)
-		self:AddNote(seq,"d",lifeTime,14 -lifeTime -offset)
-		self:AddNote(seq,"d",lifeTime,14.25 -lifeTime -offset)
-		self:AddNote(seq,"a",lifeTime,14.5 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,15 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,15.25 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,15.5 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,16 -lifeTime -offset)
-		self:AddNote(seq,"a",lifeTime,16.5 -lifeTime -offset)
-		self:AddNote(seq,"d",lifeTime,17 -lifeTime -offset)
-		self:AddNote(seq,"a",lifeTime,17.5 -lifeTime -offset)
-		self:AddNote(seq,"a",lifeTime,17.75 -lifeTime -offset)
-		self:AddNote(seq,"a",lifeTime,18 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,18.5 -lifeTime -offset)
-		self:AddNote(seq,"d",lifeTime,18.75 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,19.25 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,19.5 -lifeTime -offset)
-		self:AddNote(seq,"a",lifeTime,19.75 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,20 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,21 -lifeTime -offset)
-		self:AddNote(seq,"s",lifeTime,21.25 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,8 -lifeTime -offset)
+		-- self:AddNote(seq,"a",lifeTime,9 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,9.625 -lifeTime -offset)
+		-- self:AddNote(seq,"d",lifeTime,10.5 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,11.5 -lifeTime -offset)
+		-- self:AddNote(seq,"a",lifeTime,12.25 -lifeTime -offset)
+		-- self:AddNote(seq,"d",lifeTime,13 -lifeTime -offset)
+		-- self:AddNote(seq,"a",lifeTime,13.75 -lifeTime -offset)
+		-- self:AddNote(seq,"d",lifeTime,14 -lifeTime -offset)
+		-- self:AddNote(seq,"d",lifeTime,14.25 -lifeTime -offset)
+		-- self:AddNote(seq,"a",lifeTime,14.5 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,15 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,15.25 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,15.5 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,16 -lifeTime -offset)
+		-- self:AddNote(seq,"a",lifeTime,16.5 -lifeTime -offset)
+		-- self:AddNote(seq,"d",lifeTime,17 -lifeTime -offset)
+		-- self:AddNote(seq,"a",lifeTime,17.5 -lifeTime -offset)
+		-- self:AddNote(seq,"a",lifeTime,17.75 -lifeTime -offset)
+		-- self:AddNote(seq,"a",lifeTime,18 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,18.5 -lifeTime -offset)
+		-- self:AddNote(seq,"d",lifeTime,18.75 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,19.25 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,19.5 -lifeTime -offset)
+		-- self:AddNote(seq,"a",lifeTime,19.75 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,20 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,21 -lifeTime -offset)
+		-- self:AddNote(seq,"s",lifeTime,21.25 -lifeTime -offset)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
+	function ENT:OnChangedOutfit(old,new,outfit)
+		if outfit == "Detective Uniform" then
+			self:SetSubMaterial()
+		end
+		if outfit == "Black-Masked Intruder" then
+			self:SetSubMaterial()
+		end
+		if outfit == "Black-Mask (Royal)" then
+			for k, v in ipairs(self:GetMaterials()) do
+				if v == "models/cpthazama/persona5_dance/akechi/body_blackmask" then
+					self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/body_good")
+				end
+				if v == "models/cpthazama/persona5_dance/akechi/mask" then
+					self:SetSubMaterial(k -1,"models/cpthazama/persona5/akechi/mask_good")
+				end
+			end
+		end
+	end
+
 	function ENT:OnStartDance(seq,song,songName,dance)
 		local mode = GetConVarNumber("vj_persona_dancemode")
 		if mode == 2 then
@@ -194,11 +216,11 @@ if SERVER then
 	end
 
 	function ENT:OnInit()
-		self:ManipulateBoneJiggle(28,1) -- Jacket
-		self:ManipulateBoneJiggle(29,1)
-		self:ManipulateBoneJiggle(30,1)
-		self:ManipulateBoneJiggle(31,1)
-		self:ManipulateBoneJiggle(32,1)
+		-- self:ManipulateBoneJiggle(28,1) -- Jacket
+		-- self:ManipulateBoneJiggle(29,1)
+		-- self:ManipulateBoneJiggle(30,1)
+		-- self:ManipulateBoneJiggle(31,1)
+		-- self:ManipulateBoneJiggle(32,1)
 		-- self:ManipulateBoneJiggle(93,1) -- Hair
 		-- self:ManipulateBoneJiggle(94,1)
 		-- self:ManipulateBoneJiggle(95,1)
@@ -310,18 +332,13 @@ if SERVER then
 		-- Cinematic(1630,{f=15,r=-8,u=0,dist=0,speed=1,bone="head"},"dance_willpower",F_WP)
 		
 		Cinematic(4700,{f=15,r=8,u=15,dist=0,speed=1},"dance_willpower",F_WP)
-	end
 
-	function ENT:SetFace(top,bottom,brow,eyes)
-		eyes = eyes or 0
-		self:SetBodygroup(BG_TOP,top)
-		self:SetBodygroup(BG_BOTTOM,bottom)
-		self:SetBodygroup(BG_BROW,brow)
-		self:SetBodygroup(BG_EYES,eyes)
+		local exp = {"annoyed","smile_big","neutral","eyeSerious","eyeOpen","browAnger"}
+		self:RandomizeExpressions(exp,"preview",227)
 	end
 
 	function ENT:OnThink()
-		if math.random(1,100) == 1 && CurTime() > self.NextSpeakT then
+		if math.random(1,100) == 1 && CurTime() > self.NextSpeakT && self.StartedSong then
 			local snd = self:PlaySound(self.Insane && "idle_insane" or "idle")
 			self.NextSpeakT = CurTime() +SoundDuration(snd[2]) +math.random(1,10)
 		end
@@ -329,24 +346,44 @@ if SERVER then
 
 	function ENT:HandleAnimationEvent(seq,event,frame)
 		if event == "default" then
-			local top,bottom,brow,eyes = 0,0,0,0
-			self:SetFace(top,bottom,brow,eyes)
+			self:ResetFlexes()
 		end
 		if event == "smile" then
-			local top,bottom,brow,eyes = 0,1,2,0
-			self:SetFace(top,bottom,brow,eyes)
+			self:RemoveOldFlexes({"smile","smile_teeth"})
+			self:SendFlexData("smile",1,6)
+			self:SendFlexData("smile_teeth",1,6)
 		end
 		if event == "open" then
-			local top,bottom,brow,eyes = 2,3,2,0
-			self:SetFace(top,bottom,brow,eyes)
+			self:RemoveOldFlexes({"open_small","neutral","eyeOpen"})
+			self:SendFlexData("eyeOpen",0.45,6)
+			self:SendFlexData("neutral",1,6)
+			self:SendFlexData("open_small",1,6)
 		end
 		if event == "neutral" then
-			local top,bottom,brow,eyes = 0,2,0,0
-			self:SetFace(top,bottom,brow,eyes)
+			self:RemoveOldFlexes({"smile"})
+			self:SendFlexData("smile",1,6)
 		end
 		if event == "insane_smile" then
-			local top,bottom,brow,eyes = 2,6,1,0
-			self:SetFace(top,bottom,brow,eyes)
+			self:RemoveOldFlexes({
+				"eyeOpen",
+				"eyeSerious",
+				"smile",
+				"open_happy",
+				"neutral",
+				"sad",
+				"smile_big",
+				"annoyed",
+				"browAnger",
+			})
+			self:SendFlexData("eyeOpen",1,2)
+			self:SendFlexData("eyeSerious",1,2)
+			self:SendFlexData("smile",1,2)
+			self:SendFlexData("open_happy",1,2)
+			self:SendFlexData("neutral",1,2)
+			self:SendFlexData("sad",1,2)
+			self:SendFlexData("smile_big",1,2)
+			self:SendFlexData("annoyed",1,2)
+			self:SendFlexData("browAnger",1,2)
 			if frame == 2406 then
 				self.Insane = true
 				timer.Simple(1,function()
@@ -358,16 +395,37 @@ if SERVER then
 			end
 		end
 		if event == "insane" then
-			local top,bottom,brow,eyes = 0,7,1,0
-			self:SetFace(top,bottom,brow,eyes)
+			self:RemoveOldFlexes({
+				"eyeDroop",
+				"eyeOpen",
+				"eyeSerious",
+				"smile",
+				"neutral",
+				"smile_big",
+				"annoyed",
+				"browAnger",
+			})
+			self:SendFlexData("eyeDroop",1,2)
+			self:SendFlexData("eyeOpen",1,2)
+			self:SendFlexData("eyeSerious",1,2)
+			self:SendFlexData("smile",1,2)
+			self:SendFlexData("neutral",1,2)
+			self:SendFlexData("smile_big",1,2)
+			self:SendFlexData("annoyed",1,2)
+			self:SendFlexData("browAnger",1,2)
 		end
 		if event == "open_shocked" then
-			local top,bottom,brow,eyes = 2,4,0,0
-			self:SetFace(top,bottom,brow,eyes)
+			self:RemoveOldFlexes({"open_confused","neutral","eyeSerious"})
+			self:SendFlexData("eyeSerious",1,6)
+			self:SendFlexData("neutral",1,6)
+			self:SendFlexData("open_confused",1,6)
 		end
 		if event == "angry" then
-			local top,bottom,brow,eyes = 3,5,1,0
-			self:SetFace(top,bottom,brow,eyes)
+			self:RemoveOldFlexes({"sad","neutral","eyeSerious","browAnger"})
+			self:SendFlexData("browAnger",1,6)
+			self:SendFlexData("eyeSerious",1,6)
+			self:SendFlexData("neutral",1,6)
+			self:SendFlexData("sad",1,6)
 		end
 	end
 end

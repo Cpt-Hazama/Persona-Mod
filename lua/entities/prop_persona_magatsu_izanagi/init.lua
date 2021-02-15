@@ -117,10 +117,6 @@ function ENT:Maziodyne_NPC(ply,enemy)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:PersonaControls_NPC(ply,persona)
-
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaControls(ply,persona)
 	local lmb = ply:KeyDown(IN_ATTACK)
 	local rmb = ply:KeyDown(IN_ATTACK2)

@@ -16,16 +16,16 @@ ENT.LeveledSkills = {
 	{Level = 74, Name = "Salvation", Cost = 40, UsesHP = false, Icon = "heal"},
 	{Level = 68, Name = "Maragidyne", Cost = 22, UsesHP = false, Icon = "fire"},
 	{Level = 65, Name = "Mediarahan", Cost = 30, UsesHP = false, Icon = "heal"},
-	{Level = 59, Name = "Samarecarm", Cost = 18, UsesHP = false, Icon = "heal"},
+	-- {Level = 59, Name = "Samarecarm", Cost = 18, UsesHP = false, Icon = "heal"},
 	{Level = 55, Name = "Diarahan", Cost = 18, UsesHP = false, Icon = "heal"},
 	{Level = 51, Name = "Agidyne", Cost = 12, UsesHP = false, Icon = "fire"},
-	{Level = 43, Name = "Mediarama", Cost = 12, UsesHP = false, Icon = "heal"},
+	-- {Level = 43, Name = "Mediarama", Cost = 12, UsesHP = false, Icon = "heal"},
 	{Level = 39, Name = "Maragion", Cost = 16, UsesHP = false, Icon = "fire"},
 	{Level = 33, Name = "Diarama", Cost = 6, UsesHP = false, Icon = "heal"},
-	{Level = 30, Name = "Fire Break", Cost = 15, UsesHP = false, Icon = "passive"},
-	{Level = 26, Name = "Recarm", Cost = 8, UsesHP = false, Icon = "heal"},
+	-- {Level = 30, Name = "Fire Break", Cost = 15, UsesHP = false, Icon = "passive"},
+	-- {Level = 26, Name = "Recarm", Cost = 8, UsesHP = false, Icon = "heal"},
 	{Level = 21, Name = "Agilao", Cost = 8, UsesHP = false, Icon = "fire"},
-	{Level = 16, Name = "Media", Cost = 7, UsesHP = false, Icon = "heal"},
+	-- {Level = 16, Name = "Media", Cost = 7, UsesHP = false, Icon = "heal"},
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.LegendaryMaterials = {}
@@ -49,7 +49,7 @@ function ENT:OnSummoned(owner)
 	self:AddCard("Cleave",5,true,"phys")
 	self:AddCard("Dia",3,false,"heal")
 	self:AddCard("Agi",4,false,"fire")
-	self:AddCard("Me Patra",6,false,"passive")
+	-- self:AddCard("Me Patra",6,false,"passive")
 	self:AddCard("Maragi",10,false,"fire")
 
 	self:SetCard("Agi")

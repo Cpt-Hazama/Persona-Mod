@@ -107,6 +107,12 @@ P_ADDSKILL({Name = "Terror Claw",Cost = 8,UsesHP = true,Icon = "phys"})
 P_ADDSKILL({Name = "Sword Dance",Cost = 21,UsesHP = true,Icon = "phys"})
 P_ADDSKILL({Name = "Heaven's Blade",Cost = 35,UsesHP = true,Icon = "phys"})
 P_ADDSKILL({Name = "Magatsu Blade",Cost = 25,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Agneyastra",Cost = 24,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Heat Wave",Cost = 16,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Black Spot",Cost = 16,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Gale Slash",Cost = 12,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Rampage",Cost = 13,UsesHP = true,Icon = "phys"})
+P_ADDSKILL({Name = "Skull Cracker",Cost = 9,UsesHP = true,Icon = "phys"})
 
 	-- Gun --
 P_ADDSKILL({Name = "One-shot Kill",Cost = 17,UsesHP = true,Icon = "gun"})
@@ -167,12 +173,20 @@ P_ADDSKILL({Name = "Psycho Force",Cost = 48,UsesHP = false,Icon = "psi"})
 P_ADDSKILL({Name = "Psycho Blast",Cost = 54,UsesHP = false,Icon = "psi"})
 
 	-- Bless --
+P_ADDSKILL({Name = "Kouha",Cost = 4,UsesHP = false,Icon = "bless"})
 P_ADDSKILL({Name = "Kouga",Cost = 8,UsesHP = false,Icon = "bless"})
 P_ADDSKILL({Name = "Kougaon",Cost = 12,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Makouha",Cost = 10,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Makouga",Cost = 16,UsesHP = false,Icon = "bless"})
 P_ADDSKILL({Name = "Makougaon",Cost = 22,UsesHP = false,Icon = "bless"})
 P_ADDSKILL({Name = "Divine Judgement",Cost = 48,UsesHP = false,Icon = "bless"})
 P_ADDSKILL({Name = "Mahamaon",Cost = 34,UsesHP = false,Icon = "bless"})
-P_ADDSKILL({Name = "Shining Arrows",Cost = 22,UsesHP = false,Icon = "bless"})
+-- P_ADDSKILL({Name = "Shining Arrows",Cost = 22,UsesHP = false,Icon = "bless"})
+
+P_ADDSKILL({Name = "Hama",Cost = 8,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Hamaon",Cost = 15,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Mahama",Cost = 18,UsesHP = false,Icon = "bless"})
+P_ADDSKILL({Name = "Mahamaon",Cost = 34,UsesHP = false,Icon = "bless"})
 
 	-- Curse --
 P_ADDSKILL({Name = "Eiha",Cost = 4,UsesHP = false,Icon = "curse"})
@@ -186,7 +200,14 @@ P_ADDSKILL({Name = "Mamudoon",Cost = 26,UsesHP = false,Icon = "curse"})
 P_ADDSKILL({Name = "Magatsu Mandala",Cost = 30,UsesHP = false,Icon = "curse"})
 P_ADDSKILL({Name = "Abyssal Wings",Cost = 30,UsesHP = false,Icon = "curse"})
 
+P_ADDSKILL({Name = "Mudo",Cost = 8,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Mudoon",Cost = 15,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Mamudo",Cost = 18,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Mamudoon",Cost = 34,UsesHP = false,Icon = "curse"})
+P_ADDSKILL({Name = "Die For Me!",Cost = 44,UsesHP = false,Icon = "curse"})
+
 	-- Healing --
+P_ADDSKILL({Name = "Dia",Cost = 3,UsesHP = false,Icon = "heal"})
 P_ADDSKILL({Name = "Diarama",Cost = 6,UsesHP = false,Icon = "heal"})
 P_ADDSKILL({Name = "Diarahan",Cost = 18,UsesHP = false,Icon = "heal"})
 P_ADDSKILL({Name = "Mediarahan",Cost = 30,UsesHP = false,Icon = "heal"})
@@ -199,7 +220,13 @@ P_ADDSKILL({Name = "Concentrate",Cost = 15,UsesHP = false,Icon = "passive"})
 P_ADDSKILL({Name = "Debilitate",Cost = 30,UsesHP = false,Icon = "passive"})
 P_ADDSKILL({Name = "Heat Riser",Cost = 30,UsesHP = false,Icon = "passive"})
 P_ADDSKILL({Name = "Tetrakarn",Cost = 36,UsesHP = false,Icon = "passive"})
-P_ADDSKILL({Name = "Tarukaja",Cost = 12,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Makarakarn",Cost = 36,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Tarukaja",Cost = 8,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Rakukaja",Cost = 8,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Sukukaja",Cost = 8,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Tarunda",Cost = 8,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Rakunda",Cost = 8,UsesHP = false,Icon = "passive"})
+P_ADDSKILL({Name = "Sukunda",Cost = 8,UsesHP = false,Icon = "passive"})
 P_ADDSKILL({Name = "Call of Chaos",Cost = 100,UsesHP = false,Icon = "passive"})
 
 	-- Sleep/Ailemt --
@@ -216,7 +243,7 @@ P_ADDSKILL({Name = "Myriad Truths",Cost = 40,UsesHP = true,Icon = "almighty"})
 P_ADDSKILL({Name = "Myriad Mandala",Cost = 45,UsesHP = true,Icon = "almighty"})
 P_ADDSKILL({Name = "Doors of Hades",Cost = 32,UsesHP = true,Icon = "almighty"})
 P_ADDSKILL({Name = "Life Drain",Cost = 3,UsesHP = true,Icon = "almighty"})
--- P_ADDSKILL({Name = "Black Viper",Cost = 48,UsesHP = true,Icon = "almighty"})
+P_ADDSKILL({Name = "Black Viper",Cost = 48,UsesHP = true,Icon = "almighty"})
 -- P_ADDSKILL({Name = "Sinful Shell",Cost = 999,UsesHP = true,Icon = "almighty"})
 
 	-- Unique --

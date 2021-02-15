@@ -36,7 +36,8 @@ ENT.SoundTracks = {
 
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Stage Outfit", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
-ENT.Outfits[2] = {Name = "Gekkoukan Winter Uniform", Model = "_winteruniform", Offset = 1, ReqSong = "Want To Be Close -Remix", ReqScore = 10000}
+-- ENT.Outfits[2] = {Name = "Gekkoukan Winter Uniform", Model = "_winteruniform", Offset = 1, ReqSong = "Want To Be Close -Remix", ReqScore = 10000}
+ENT.Outfits[2] = {Name = "Gekkoukan Winter Uniform", Model = "_winteruniform", Offset = 1, ReqSong = "When The Moon's Reaching Out Stars -Remix-", ReqScore = 10000}
 ENT.Outfits[3] = {Name = "Race Queen", Model = "_racequeen", Offset = 0.1, ReqSong = "When The Moon's Reaching Out Stars -Remix-", ReqScore = 60000}
 
 ENT.SongLength = {}
@@ -45,17 +46,29 @@ ENT.SongLength["dance_wanttobeclose"] = 175
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if CLIENT then
 	function ENT:ClientInit()
-		self:ChangeFlex("smile_teeth",1,2)
+		-- self:ChangeFlex("smile_teeth",1,2)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
+	function ENT:OnPlayPreview()
+		self:RemoveOldFlexes({"smile_teeth"})
+		self:SendFlexData("smile_teeth",1,2)
+	end
+
 	function ENT:OnInit()
 		-- self:SetCinematicData()
 		self:RandomizeCinematics("dance_whenthemoonsreachingoutstars",1160)
 		self:RandomizeCinematics("dance_whenthemoonsreachingoutstars_2",619)
 		self:RandomizeCinematics("dance_whenthemoonsreachingoutstars_3",1775)
 		self:RandomizeCinematics("dance_whenthemoonsreachingoutstars_4",1138)
+		
+		local exp = {"smile_teeth","smile","eyeOpen","eyeSerious","browUp","neutral"}
+		self:RandomizeExpressions(exp,"dance_whenthemoonsreachingoutstars",1160)
+		self:RandomizeExpressions(exp,"dance_whenthemoonsreachingoutstars_2",619)
+		self:RandomizeExpressions(exp,"dance_whenthemoonsreachingoutstars_3",1775)
+		self:RandomizeExpressions(exp,"dance_whenthemoonsreachingoutstars_4",1138)
+		self:RandomizeExpressions(exp,"preview",227)
 	end
 end
 /*--------------------------------------------------

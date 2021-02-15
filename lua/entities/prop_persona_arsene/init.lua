@@ -16,7 +16,7 @@ ENT.Stats = {
 ENT.LeveledSkills = {
 	{Level = 34, Name = "Charge", Cost = 15, UsesHP = false, Icon = "passive"},
 	{Level = 30, Name = "Maeigaon", Cost = 22, UsesHP = false, Icon = "curse"}, -- heavy, all
-	{Level = 26, Name = "Brave Blade", Cost = 24, UsesHP = true, Icon = "phys"}, -- colossal, one
+	-- {Level = 26, Name = "Brave Blade", Cost = 24, UsesHP = true, Icon = "phys"}, -- colossal, one
 	{Level = 22, Name = "Eigaon", Cost = 12, UsesHP = false, Icon = "curse"}, -- heavy, one
 	{Level = 18, Name = "Maeiga", Cost = 16, UsesHP = false, Icon = "curse"}, -- medium, all
 	{Level = 13, Name = "Eiga", Cost = 8, UsesHP = false, Icon = "curse"}, -- medium, one

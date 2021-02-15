@@ -201,15 +201,15 @@ function ENT:OnSummonPersona(persona)
 		end
 	end)
 	self.VJC_Data.ThirdP_Offset = Vector(-80, 80, 0)
-	persona.IdleLoop = CreateSound(persona,"cpthazama/persona5/makoto/johanna/idle.wav")
-	persona.IdleLoop:SetSoundLevel(78)
-	persona.Drive1Loop = CreateSound(persona,"cpthazama/persona5/makoto/johanna/drive1.wav")
-	persona.Drive1Loop:SetSoundLevel(85)
-	persona.Drive2Loop = CreateSound(persona,"cpthazama/persona5/makoto/johanna/drive2.wav")
-	persona.Drive2Loop:SetSoundLevel(110)
-	table.insert(persona.Loops,persona.IdleLoop)
-	table.insert(persona.Loops,persona.Drive1Loop)
-	table.insert(persona.Loops,persona.Drive2Loop)
+	-- persona.IdleLoop = CreateSound(persona,"cpthazama/persona5/makoto/johanna/idle.wav")
+	-- persona.IdleLoop:SetSoundLevel(78)
+	-- persona.Drive1Loop = CreateSound(persona,"cpthazama/persona5/makoto/johanna/drive1.wav")
+	-- persona.Drive1Loop:SetSoundLevel(85)
+	-- persona.Drive2Loop = CreateSound(persona,"cpthazama/persona5/makoto/johanna/drive2.wav")
+	-- persona.Drive2Loop:SetSoundLevel(110)
+	-- table.insert(persona.Loops,persona.IdleLoop)
+	-- table.insert(persona.Loops,persona.Drive1Loop)
+	-- table.insert(persona.Loops,persona.Drive2Loop)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnDisablePersona(persona)
@@ -226,17 +226,16 @@ function ENT:OnThink()
 	if self:IsMoving() then
 		if persona then
 			self.VJC_Data.ThirdP_Offset = Vector(0, 0, -30)
-			persona.IdleLoop:Stop()
-			persona.Drive2Loop:Play()
+			-- persona.IdleLoop:Stop()
+			-- persona.Drive2Loop:Play()
 			local fast = self:GetActivity() == ACT_RUN_AGITATED
-			persona.Drive2Loop:ChangePitch(fast && 100 or 75,0)
-			persona.Drive2Loop:ChangeVolume(fast && 120 or 75,0)
+			-- persona.Drive2Loop:ChangePitch(fast && 100 or 75,0)
+			-- persona.Drive2Loop:ChangeVolume(fast && 120 or 75,0)
 		end
 	else
 		if persona then
-			persona.IdleLoop:Play()
-			-- persona.Drive1Loop:Stop()
-			persona.Drive2Loop:Stop()
+			-- persona.IdleLoop:Play()
+			-- persona.Drive2Loop:Stop()
 		end
 		self.VJC_Data.ThirdP_Offset = persona && Vector(-80, 80, 0) or Vector(-15, 40, -35)
 	end

@@ -2,10 +2,11 @@
 {
 	"$basetexture" "models/cpthazama/persona4/labrys/axe/metal"
 	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
+	"$nodecal" "1"
 
 	"$phong"				"1"
 	"$phongboost"			"25"
-	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongfresnelranges"	"[0.035 0.2 1]"
 	//"$phongtint"			"[0.6 0.6 0.6]"
 	"$phongalbedotint"		"1"
 

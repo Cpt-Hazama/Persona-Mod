@@ -248,6 +248,9 @@ function ENT:OnThink(ply) end
 function ENT:DefaultPersonaControls(ply,persona)
 	if ply:IsPlayer() then
 		local ent = ply.Persona_EyeTarget
+		if IsValid(ent) && ent:Health() <= 0 then
+			ply.Persona_EyeTarget = NULL
+		end
 		ply:SetNW2Entity("Persona_Target",ent)
 		ply:SetNW2Int("Persona_TargetHealth",IsValid(ent) && ent:Health() or 100)
 		-- if ply:KeyReleased(IN_WALK) && CurTime() > self.NextLockOnT then
@@ -418,6 +421,9 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 	elseif melee == "Cross Slash" then
 		self:CrossSlash(ply,persona)
 		return
+	elseif melee == "Raining Seeds" then
+		self:RainingSeeds(ply,persona)
+		return
 	elseif melee == "Ghastly Wail" then
 		self:GhostlyWail(ply)
 		return
@@ -453,11 +459,32 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 	elseif melee == "Cleave" then
 		self:Cleave(ply,persona)
 		return
+	elseif melee == "Megaton Raid" then
+		self:MegatonRaid(ply,persona)
+		return
+	elseif melee == "Agneyastra" then
+		self:Agneyastra(ply,persona)
+		return
+	elseif melee == "Heat Wave" then
+		self:HeatWave(ply,persona)
+		return
+	elseif melee == "Black Spot" then
+		self:BlackSpot(ply,persona)
+		return
 	elseif melee == "Gigantomachia" then
 		self:Gigantomachia(ply,persona)
 		return
 	elseif melee == "Bash" then
 		self:Bash(ply,persona)
+		return
+	elseif melee == "Rampage" then
+		self:Rampage(ply,persona)
+		return
+	elseif melee == "Skull Cracker" then
+		self:SkullCracker(ply,persona)
+		return
+	elseif melee == "Gale Slash" then
+		self:GaleSlash(ply,persona)
 		return
 	elseif melee == "God's Hand" then
 		self:GodsHand(ply,persona)
@@ -477,6 +504,12 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	local card = self:GetCard()
 	if card == "Myriad Truths" then 
 		self:MyriadTruths(ply,persona)
+		return
+	elseif card == "Piercing Strike" then
+		self:PiercingStrike(ply,persona)
+		return
+	elseif card == "Tyrant Chaos" then
+		self:TyrantChaos(ply,persona)
 		return
 	elseif card == "Dream Fog" then
 		self:DreamFog(ply,persona)
@@ -613,20 +646,41 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif card == "Concentrate" then
 		self:Concentrate(ply,persona)
 		return
+	elseif card == "Tarukaja" then
+		self:Tarukaja(ply,persona)
+		return
+	elseif card == "Rakukaja" then
+		self:Rakukaja(ply,persona)
+		return
+	elseif card == "Sukukaja" then
+		self:Sukukaja(ply,persona)
+		return
+	elseif card == "Tarunda" then
+		self:Tarunda(ply,persona)
+		return
+	elseif card == "Rakunda" then
+		self:Rakunda(ply,persona)
+		return
+	elseif card == "Sukunda" then
+		self:Sukunda(ply,persona)
+		return
 	elseif card == "Heat Riser" then
 		self:HeatRiser(ply,persona)
 		return
-	-- elseif card == "Mamudoon" then
-		-- self:Mamudoon(ply,persona)
-		-- return
-	-- elseif card == "Die For Me!" then
-		-- self:DieForMe(ply,persona)
-		-- return
+	elseif card == "Tetrakarn" then
+		self:Tetrakarn(ply,persona)
+		return
+	elseif card == "Makarakarn" then
+		self:Makarakarn(ply,persona)
+		return
 	elseif card == "Salvation" then
 		self:Salvation(ply,persona)
 		return
 	elseif card == "Cadenza" then
 		self:Cadenza(ply,persona)
+		return
+	elseif card == "Dia" then
+		self:Dia(ply,persona)
 		return
 	elseif card == "Diarama" then
 		self:Diarama(ply,persona)
@@ -670,6 +724,39 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif card == "Magarudyne" then
 		self:Magarudyne(ply,persona)
 		return
+	elseif card == "Hama" then
+		self:Hama(ply,persona)
+		return
+	elseif card == "Hamaon" then
+		self:Hamaon(ply,persona)
+		return
+	elseif card == "Mahama" then
+		self:Mahama(ply,persona)
+		return
+	elseif card == "Mahamaon" then
+		self:Mahamaon(ply,persona)
+		return
+	elseif card == "Mudo" then
+		self:Mudo(ply,persona)
+		return
+	elseif card == "Mudoon" then
+		self:Mudoon(ply,persona)
+		return
+	elseif card == "Mamudo" then
+		self:Mamudo(ply,persona)
+		return
+	elseif card == "Mamudoon" then
+		self:Mamudoon(ply,persona)
+		return
+	elseif card == "Die For Me!" then
+		self:DieForMe(ply,persona)
+		return
+	elseif card == "Black Viper" then
+		self:BlackViper(ply,persona)
+		return
+	elseif card == "Doors of Hades" then
+		self:DoorsOfHades(ply,persona)
+		return
 	elseif card == "Megidola" then
 		self:Megidola(ply,persona)
 		return
@@ -691,11 +778,32 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif card == "Freidyne" then
 		self:Freidyne(ply,persona)
 		return
+	elseif card == "Nuclear Crush" then
+		self:NuclearCrush(ply,persona)
+		return
+	elseif card == "Kouha" then
+		self:Kouha(ply,persona)
+		return
+	elseif card == "Kouga" then
+		self:Kouga(ply,persona)
+		return
 	elseif card == "Kougaon" then
 		self:Kougaon(ply,persona)
 		return
+	elseif card == "Makouha" then
+		self:Makouha(ply,persona)
+		return
+	elseif card == "Makouga" then
+		self:Makouga(ply,persona)
+		return
 	elseif card == "Makougaon" then
 		self:Makougaon(ply,persona)
+		return
+	elseif card == "Divine Judgement" then
+		self:DivineJudgement(ply,persona)
+		return
+	elseif card == "Eternal Radiance" then
+		self:EternalRadiance(ply,persona)
 		return
 	elseif card == "Recover HP EX" then
 		self:RecoverHPEX(ply,persona)
@@ -743,6 +851,12 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		end
 		return
 	elseif card == "Heaven's Blade" then
+		self.CurrentMeleeSkill = card
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif card == "Raining Seeds" then
 		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
@@ -803,6 +917,48 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 		end
 		return
 	elseif card == "Cleave" then
+		self.CurrentMeleeSkill = card
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif card == "Megaton Raid" then
+		self.CurrentMeleeSkill = card
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif card == "Agneyastra" then
+		self.CurrentMeleeSkill = card
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif card == "Heat Wave" then
+		self.CurrentMeleeSkill = card
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif card == "Black Spot" then
+		self.CurrentMeleeSkill = card
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif card == "Gale Slash" then
+		self.CurrentMeleeSkill = card
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif card == "Rampage" then
+		self.CurrentMeleeSkill = card
+		if ply:IsNPC() then
+			self:DoMeleeAttack(ply,persona,melee,rmb)
+		end
+		return
+	elseif card == "Skull Cracker" then
 		self.CurrentMeleeSkill = card
 		if ply:IsNPC() then
 			self:DoMeleeAttack(ply,persona,melee,rmb)
@@ -1580,6 +1736,57 @@ function ENT:NuclearEffect(ent,dmg,t,sc)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:BlackViperEffect(ent,dmg)
+	local dmg = dmg or DMG_P_SEVERE
+	local scale = 20
+	local function FX(ent)
+		local spawnparticle = ents.Create("info_particle_system")
+		spawnparticle:SetKeyValue("effect_name","vj_per_skill_viper_main")
+		spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter() +Vector(math.Rand(-200,200),math.Rand(-200,200),0))
+		spawnparticle:Spawn()
+		spawnparticle:Activate()
+		spawnparticle:Fire("Start","",0)
+		spawnparticle:Fire("Kill","",0.1)
+	end
+	VJ_CreateSound(ent,"cpthazama/persona5/skills/0180.wav",150)
+	FX(ent)
+	timer.Simple(0.75,function()
+		if IsValid(self) && IsValid(ent) then
+			if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+			local m = ents.Create("prop_vj_animatable")
+			m:SetModel("models/cpthazama/persona5/effects/black_viper.mdl")
+			m:SetPos(ent:GetPos())
+			m:Spawn()
+			m:DrawShadow(false)
+			m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+			m:ResetSequence("bite")
+			m:SetModelScale(scale)
+
+			-- for i = 1,5 do
+				-- timer.Simple(0.2 *i,function() if IsValid(ent) then FX(ent) end end)
+			-- end
+			timer.Simple(0.1,function() if IsValid(ent) then FX(ent) end end)
+
+			timer.Simple(0.8,function()
+				if IsValid(ent) && IsValid(self) then
+					local dmginfo = DamageInfo()
+					dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
+					dmginfo:SetDamageType(DMG_P_ALMIGHTY)
+					dmginfo:SetInflictor(IsValid(self) && self or v)
+					dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
+					dmginfo:SetDamagePosition(m:NearestPoint(ent:GetPos() +ent:OBBCenter()))
+					ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)
+				end
+			end)
+			timer.Simple(VJ_GetSequenceDuration(m,"bite"),function()
+				if IsValid(m) then
+					SafeRemoveEntity(m)
+				end
+			end)
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PsiEffect(ent,dmg,t,sc,cnt,sound)
 	local dmg = dmg or DMG_P_SEVERE
 	local tbl = {}
@@ -1647,12 +1854,132 @@ function ENT:PsiEffect(ent,dmg,t,sc,cnt,sound)
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:MegidolaonEffect(ent,dmg)
+function ENT:BlessAttack(ent,dmg,t,effect)
+	local spawnparticle = ents.Create("info_particle_system")
+	spawnparticle:SetKeyValue("effect_name",effect or "vj_per_skill_bless_small")
+	spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+	spawnparticle:Spawn()
+	spawnparticle:Activate()
+	spawnparticle:Fire("Start","",0)
+	if t then
+		spawnparticle:Fire("SetParent",ent:GetName())
+	else
+		spawnparticle:Fire("Kill","",0.1)
+	end
+
+	timer.Simple(t or 0,function()
+		if IsValid(self) && IsValid(ent) then
+			self:DealDamage(ent,dmg,DMG_P_BLESS,2)
+			if t then
+				spawnparticle:Fire("Kill","",0.1)
+			end
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:BlessEffect(ent,chance,effect)
+	local spawnparticle = ents.Create("info_particle_system")
+	spawnparticle:SetKeyValue("effect_name","vj_per_skill_bless_small_b")
+	spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+	spawnparticle:Spawn()
+	spawnparticle:Activate()
+	spawnparticle:Fire("Start","",0)
+	spawnparticle:Fire("Kill","",0.1)
+
+	local function FX(ent)
+		local spawnparticle = ents.Create("info_particle_system")
+		spawnparticle:SetKeyValue("effect_name","vj_per_skill_bless_small_b")
+		spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+		spawnparticle:Spawn()
+		spawnparticle:Activate()
+		spawnparticle:Fire("Start","",0)
+		spawnparticle:Fire("Kill","",0.1)
+	end
+
+	for i = 1,18 do
+		timer.Simple(0.1 *i,function() if IsValid(ent) then if i == 2 then ent:EmitSound("cpthazama/persona5/skills/0053.wav",80) end FX(ent) end end)
+	end
+
+	timer.Simple(2,function()
+		if IsValid(ent) && IsValid(self) && math.random(1,chance) == 1 then
+			local spawnparticle = ents.Create("info_particle_system")
+			spawnparticle:SetKeyValue("effect_name",effect or "vj_per_skill_bless_small")
+			spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+			spawnparticle:Spawn()
+			spawnparticle:Activate()
+			spawnparticle:Fire("Start","",0)
+			spawnparticle:Fire("Kill","",0.1)
+			
+			self:InstaKillDamage(ent,chance,DMG_P_BLESS)
+		else
+			if IsValid(self) then
+				self.User:ChatPrint("Missed Target!")
+			end
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:InstaKillDamage(ent,chance,dmgtype)
+	if math.random(1,chance) == 1 then
+		ent:SetHealth(1)
+		ent.GodMode = false
+		if ent:IsPlayer() then
+			ent:GodDisable()
+		end
+		self:DealDamage(ent,ent:GetMaxHealth() or ent:Health(),dmgtype or DMG_P_CURSE,2)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MudoEffect(ent,chance,effect)
+	local spawnparticle = ents.Create("info_particle_system")
+	spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse_b_small")
+	spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+	spawnparticle:Spawn()
+	spawnparticle:Activate()
+	spawnparticle:Fire("Start","",0)
+	spawnparticle:Fire("Kill","",0.1)
+	ent:EmitSound("cpthazama/persona5/skills/0063.wav",80)
+	
+	local function FX(ent)
+		local spawnparticle = ents.Create("info_particle_system")
+		spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse_b_small")
+		spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+		spawnparticle:Spawn()
+		spawnparticle:Activate()
+		spawnparticle:Fire("Start","",0)
+		spawnparticle:Fire("Kill","",0.1)
+	end
+
+	timer.Simple(0.5,function() if IsValid(ent) then FX(ent) end end)
+	timer.Simple(0.9,function() if IsValid(ent) then FX(ent) end end)
+	timer.Simple(1.2,function() if IsValid(ent) then FX(ent) end end)
+
+	timer.Simple(1.5,function()
+		if IsValid(ent) && IsValid(self) && math.random(1,chance) == 1 then
+			local spawnparticle = ents.Create("info_particle_system")
+			spawnparticle:SetKeyValue("effect_name",effect or "vj_per_skill_curse_small")
+			spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+			spawnparticle:Spawn()
+			spawnparticle:Activate()
+			spawnparticle:Fire("Start","",0)
+			spawnparticle:Fire("Kill","",0.1)
+
+			self:InstaKillDamage(ent,chance,DMG_P_CURSE)
+		else
+			if IsValid(self) then
+				self.User:ChatPrint("Missed Target!")
+			end
+		end
+	end)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MegidolaonEffect(ent,dmg,time,scale)
 	-- if self.User:IsPlayer() && ent:IsPlayer() && VJ_HasValue(self.User:GetParty(),ent:UniqueID()) then
 		-- continue
 	-- end
 	local dmg = dmg or DMG_P_SEVERE
-	local scale = 60 -- 100
+	local scale = scale or 60 -- 100
+	local time = time or 5
 	local m = ents.Create("prop_vj_animatable")
 	m:SetModel("models/cpthazama/persona5/effects/megidolaon.mdl")
 	m:SetPos(ent:GetPos() +Vector(0,0,15))
@@ -1660,7 +1987,7 @@ function ENT:MegidolaonEffect(ent,dmg)
 	m:DrawShadow(false)
 	m:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 	m:ResetSequence("idle")
-	m:SetModelScale(scale,5)
+	m:SetModelScale(scale,time)
 	VJ_CreateSound(m,"cpthazama/persona5/skills/megidolaon.wav",150)
 	-- m:EmitSound("PERSONA_MEGIDOLAON")
 	local Light = ents.Create("light_dynamic")
@@ -1674,7 +2001,7 @@ function ENT:MegidolaonEffect(ent,dmg)
 	Light:Fire("TurnOn","",0)
 	Light:Fire("TurnOff","",5)
 	m:DeleteOnRemove(Light)
-	timer.Simple(4.5,function()
+	timer.Simple(time -0.5,function()
 		if IsValid(m) && IsValid(self) then
 			local ents = self:FindEnemies(m:GetPos(),30 *scale)
 			if ents != nil then
@@ -1693,7 +2020,7 @@ function ENT:MegidolaonEffect(ent,dmg)
 			end
 		end
 	end)
-	timer.Simple(5,function()
+	timer.Simple(time,function()
 		if IsValid(m) then
 			SafeRemoveEntity(m)
 		end
@@ -1890,19 +2217,23 @@ function ENT:Fear(ent,t)
 	if ent.Persona_FearT < CurTime() then
 		ent.Persona_FearT = CurTime() +t
 		if self.User:IsPlayer() then self.User:ChatPrint("Inflicted Fear!") end
-		ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
+		-- ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
 		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 		local hookName = "Persona_FearThink_" .. ent:EntIndex()
 		local user = self.User
-		local prevDisp = IsValid(user) && ent:Disposition(user) != D_FR && ent:Disposition(user) or D_NU
+		local prevDisp = (ent:IsNPC() && IsValid(user) && ent:Disposition(user) != D_FR && ent:Disposition(user) or D_NU) or false
 		hook.Add("Think",hookName,function()
 			if !IsValid(ent) then
 				hook.Remove("Think",hookName)
 				return
 			end
+			if IsValid(ent) && ent:Health() <= 0 then
+				hook.Remove("Think",hookName)
+				return
+			end
 			if CurTime() > ent.Persona_FearT || ent:Health() <= 0 || (ent:IsPlayer() && !ent:Alive()) then
 				ent:StopParticles()
-				if IsValid(user) then ent:AddEntityRelationship(user,prevDisp,99) end
+				if IsValid(user) && ent:IsNPC() then ent:AddEntityRelationship(user,prevDisp,99) end
 				hook.Remove("Think",hookName)
 				return
 			end

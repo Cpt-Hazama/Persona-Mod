@@ -1,6 +1,6 @@
 include('shared.lua')
 
-SWEP.PrintName        = "No Weapons"
+SWEP.PrintName        = ""
 SWEP.Author           = ""
 SWEP.Purpose          = ""
 SWEP.Instructions     = ""

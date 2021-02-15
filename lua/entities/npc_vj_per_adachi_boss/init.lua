@@ -9,7 +9,7 @@ ENT.Stats = {
 	HP = 35000,
 	SP = 45000,
 }
-ENT.VJ_NPC_Class = {"CLASS_ADACHI"}
+ENT.VJ_NPC_Class = {"CLASS_SHADOW"}
 
 ENT.Phase = 1
 ENT.ChangingPhases = false
@@ -48,6 +48,7 @@ function ENT:OnThink()
 	self:SetSkin(1)
 	if self:Health() <= self:GetMaxHealth() *0.5 && self.Phase == 1 && self.ChangingPhases == false then
 		self.ChangingPhases = true
+		self.HasSounds = false
 		if IsValid(self:GetPersona()) then self:GetPersona():Remove() end
 		self.DisablePersona = true
 		self.GodMode = true
@@ -62,6 +63,7 @@ function ENT:OnThink()
 		timer.Simple(25,function()
 			if IsValid(self) then
 				self:StopMoving()
+				self.HasSounds = true
 				self.GodMode = false
 				self.DisablePersona = false
 				self.Phase = 2

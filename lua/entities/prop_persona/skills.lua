@@ -57,6 +57,49 @@ function ENT:MyriadTruths(ply,persona,d)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PiercingStrike(ply,persona,d)
+	local skill = "Piercing Strike"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1)
+		self:TakeSP(self.CurrentCardCost)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								for i = 1,10 do
+									timer.Simple(0.35 *i,function()
+										if IsValid(self) && IsValid(v) then
+											v:EmitSound("cpthazama/persona5/skills/0619.wav",110)
+											self:DealDamage(v,DMG_P_MEDIUM,DMG_P_ALMIGHTY,2)
+										end
+									end)
+								end
+							end
+						end
+						timer.Simple(4,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MyriadMandala(ply,persona)
 	self:MyriadTruths(ply,persona,DMG_P_CURSE)
 end
@@ -466,7 +509,6 @@ function ENT:OneShotKill(ply,persona)
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
 		timer.Simple((self.StartMeleeDamageCode or 0),function()
 			if IsValid(self) then
-				if math.random(1,100) <= math.Clamp(self.Stats.LUC *2,1,99) then self:DoCritical(2) end
 				for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
 					if IsValid(v) && IsValid(self) then
 						v:EmitSound("cpthazama/persona5/skills/0461.wav",90)
@@ -487,6 +529,9 @@ function ENT:OneShotKill(ply,persona)
 									effectdata:SetOrigin(s)
 									effectdata:SetAttachment(0)
 									util.Effect("Persona_Hit_Bullet_Mega",effectdata)
+									if i == 5 then
+										if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+									end
 								end
 							end)
 						end
@@ -523,7 +568,6 @@ function ENT:RiotGun(ply,persona)
 		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
 		timer.Simple((self.StartMeleeDamageCode or 0),function()
 			if IsValid(self) then
-				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
 					if IsValid(v) && IsValid(self) then
 						v:EmitSound("cpthazama/persona5/skills/0227.wav",95)
@@ -543,6 +587,9 @@ function ENT:RiotGun(ply,persona)
 									effectdata:SetAngles(Angle(255,255,255))
 									effectdata:SetRadius(math.random(25,35))
 									util.Effect("Persona_Slice",effectdata)
+									if i == 15 then
+										if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+									end
 								end
 							end)
 						end
@@ -584,7 +631,7 @@ function ENT:Bash(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_LIGHT,600,150)
+						self:MeleeAttackCode(DMG_P_LIGHT,1500,150)
 					end
 				end)
 			end
@@ -636,9 +683,254 @@ function ENT:Cleave(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_LIGHT,600,150)
+						self:MeleeAttackCode(DMG_P_LIGHT,1500,150)
 					end
 				end)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:MegatonRaid(ply,persona)
+	local skill = "Megaton Raid"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		timer.Simple((self.StartMeleeDamageCode or 0),function()
+			if IsValid(self) then
+				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
+					if IsValid(self) then
+						self:MeleeAttackCode(DMG_P_SEVERE,1500,150)
+					end
+				end)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:HeatWave(ply,persona)
+	local skill = "Heat Wave"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		timer.Simple((self.StartMeleeDamageCode or 0),function()
+			if IsValid(self) then
+				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
+					if IsValid(self) then
+						self:MeleeAttackCode(DMG_P_MEDIUM,1500,150)
+					end
+				end)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:BlackSpot(ply,persona)
+	local skill = "Black Spot"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		timer.Simple((self.StartMeleeDamageCode or 0),function()
+			if IsValid(self) then
+				if math.random(1,100) <= self.Stats.LUC && math.random(1,3) == 1 then self:DoCritical(2) end
+				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
+					if IsValid(self) then
+						self:MeleeAttackCode(DMG_P_MEDIUM,1500,150)
+					end
+				end)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GaleSlash(ply,persona)
+	local skill = "Gale Slash"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		timer.Simple((self.StartMeleeDamageCode or 0),function()
+			if IsValid(self) then
+				if math.random(1,100) <= self.Stats.LUC && math.random(1,100) <= 5 then self:DoCritical(2) end
+				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
+					if IsValid(self) then
+						self:MeleeAttackCode(DMG_P_LIGHT,1500,150)
+					end
+				end)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SkullCracker(ply,persona)
+	local skill = "Skull Cracker"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		timer.Simple((self.StartMeleeDamageCode or 0),function()
+			if IsValid(self) then
+				if math.random(1,100) <= self.Stats.LUC && math.random(1,100) <= 5 then self:DoCritical(2) end
+				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
+					if IsValid(self) then
+						local tbl = self:MeleeAttackCode(DMG_P_LIGHT,1500,150)
+						if #tbl > 0 then
+							for _,v in pairs(tbl) do
+								if IsValid(v) && math.random(1,2) == 1 then
+									self:Confuse(v,15)
+								end
+							end
+						end
+					end
+				end)
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Rampage(ply,persona)
+	local skill = "Rampage"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		timer.Simple((self.StartMeleeDamageCode or 0),function()
+			if IsValid(self) then
+				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+				local t = self.FirstMeleeDamageTime or 0.8
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:MeleeAttackCode(DMG_P_LIGHT,1500,150)
+					end
+				end)
+				for i = 1,2 do
+					if math.random(1,4) == 1 then
+						timer.Simple(t +(0.25 /i),function()
+							if IsValid(self) then
+								self:MeleeAttackCode(DMG_P_LIGHT,1500,150)
+							end
+						end)
+					end
+				end
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:RainingSeeds(ply,persona)
+	local skill = "Raining Seeds"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		timer.Simple((self.StartMeleeDamageCode or 0),function()
+			if IsValid(self) then
+				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+				local t = self.FirstMeleeDamageTime or 0.8
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:MeleeAttackCode(DMG_P_HEAVY,1500,150)
+					end
+				end)
+				for i = 1,2 do
+					if math.random(1,3) == 1 then
+						timer.Simple(t +(0.25 /i),function()
+							if IsValid(self) then
+								self:MeleeAttackCode(DMG_P_HEAVY,1500,150)
+							end
+						end)
+					end
+				end
+			end
+		end)
+		timer.Simple(tA,function()
+			if IsValid(self) then
+				self:DoIdle()
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Agneyastra(ply,persona)
+	local skill = "Agneyastra"
+	if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_ATTACK")
+		local tA = self:PlaySet(skill,"melee",1)
+		self:FindTarget(ply)
+		self:SetAngles(self.User:GetAngles())
+		self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+		timer.Simple((self.StartMeleeDamageCode or 0),function()
+			if IsValid(self) then
+				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+				local t = self.FirstMeleeDamageTime or 0.8
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:MeleeAttackCode(DMG_P_HEAVY,1500,150)
+					end
+				end)
+				for i = 1,2 do
+					if math.random(1,4) == 1 then
+						timer.Simple(t +(0.25 /i),function()
+							if IsValid(self) then
+								self:MeleeAttackCode(DMG_P_HEAVY,1500,150)
+							end
+						end)
+					end
+				end
 			end
 		end)
 		timer.Simple(tA,function()
@@ -662,7 +954,7 @@ function ENT:TerrorClaw(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 0.75),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_MEDIUM,1000,120,nil,math.random(1,2) == 1 && "Fear" or nil,10)
+						self:MeleeAttackCode(DMG_P_MEDIUM,1500,120,nil,math.random(1,2) == 1 && "Fear" or nil,10)
 					end
 				end)
 			end
@@ -688,7 +980,7 @@ function ENT:Laevateinn(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 1.65),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_COLOSSAL,1000,120)
+						self:MeleeAttackCode(DMG_P_COLOSSAL,1500,120)
 					end
 				end)
 			end
@@ -714,7 +1006,7 @@ function ENT:GodsHand(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 1.7),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_COLOSSAL,1000,100)
+						self:MeleeAttackCode(DMG_P_COLOSSAL,1500,100)
 					end
 				end)
 			end
@@ -740,7 +1032,7 @@ function ENT:VajraBlast(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_MEDIUM,600,150)
+						self:MeleeAttackCode(DMG_P_MEDIUM,1500,150)
 					end
 				end)
 			end
@@ -766,7 +1058,7 @@ function ENT:MiraclePunch(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC *2.5 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 1),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_MEDIUM,600,125)
+						self:MeleeAttackCode(DMG_P_MEDIUM,1500,125)
 					end
 				end)
 			end
@@ -792,7 +1084,7 @@ function ENT:BeastWeaver(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 1.3),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_COLOSSAL,1200,90)
+						self:MeleeAttackCode(DMG_P_COLOSSAL,1500,90)
 						if self.User:IsPlayer() then
 							self.User:ChatPrint("Your ATK has been greatly reduced for 5 minutes!")
 						end
@@ -822,7 +1114,7 @@ function ENT:AlmightySlash(ply,persona)
 				if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 				timer.Simple((self.FirstMeleeDamageTime or 0.8),function()
 					if IsValid(self) then
-						self:MeleeAttackCode(DMG_P_COLOSSAL,1200,90,DMG_P_ALMIGHTY)
+						self:MeleeAttackCode(DMG_P_COLOSSAL,1500,90,DMG_P_ALMIGHTY)
 					end
 				end)
 			end
@@ -1783,7 +2075,7 @@ function ENT:SummonTentacle(ply,persona,type,name)
 											spawnparticle:Fire("Kill","",0.1)
 											ent:EmitSound("cpthazama/persona5/skills/0361.wav",90)
 											
-											persona:DoChat("[Tentacle of Assistance] Decreased target's ATK/DEF/Evasion for 1 minute!")
+											persona:DoChat("[Tentacle of Assistance] Decreased target's ATK/DEF/AGI for 1 minute!")
 											
 											self:PlayAnimation("attack",1,0,true)
 
@@ -1877,11 +2169,8 @@ function ENT:EvilSmile(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Kougaon(ply,persona)
-	if !IsValid(ply.Persona_EyeTarget) then
-		return
-	end
-	local skill = "Kougaon"
+function ENT:DivineJudgement(ply,persona)
+	local skill = "Divine Judgement"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
 		self:SetTask("TASK_PLAY_ANIMATION")
 		self:TakeSP(self.CurrentCardCost)
@@ -1892,23 +2181,28 @@ function ENT:Kougaon(ply,persona)
 				timer.Simple(t,function()
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range_idle",1,1)
-						local ent = ply.Persona_EyeTarget
-						if IsValid(ent) then
-							local spawnparticle = ents.Create("info_particle_system")
-							spawnparticle:SetKeyValue("effect_name","vj_per_skill_bless")
-							spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
-							spawnparticle:SetParent(ent)
-							spawnparticle:Spawn()
-							spawnparticle:Activate()
-							spawnparticle:Fire("Start","",0)
-							spawnparticle:Fire("SetParent",ent:GetName())
-							timer.Simple(2,function()
-								if IsValid(self) && IsValid(ent) then
-									self:DealDamage(ent,DMG_P_HEAVY,DMG_P_BLESS,2)
-									ent:EmitSound("cpthazama/persona5/skills/0055.wav",90)
-									spawnparticle:Fire("Kill","",0.1)
-								end
-							end)
+						for _,ent in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(ent) then
+								local spawnparticle = ents.Create("info_particle_system")
+								spawnparticle:SetKeyValue("effect_name","vj_per_skill_bless")
+								spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+								spawnparticle:SetParent(ent)
+								spawnparticle:Spawn()
+								spawnparticle:Activate()
+								spawnparticle:Fire("Start","",0)
+								spawnparticle:Fire("SetParent",ent:GetName())
+								timer.Simple(2,function()
+									if IsValid(self) && IsValid(ent) then
+										if !ent.VJ_IsHugeMonster && !ent.VJ_Persona_Boss && !(ent:IsPlayer() && ent:IsSuperAdmin()) then
+											ent:SetHealth(ent:Health() /2)
+										else
+											self.User:ChatPrint("Attack inneffective against this boss!")
+										end
+										ent:EmitSound("cpthazama/persona5/skills/0055.wav",90)
+										spawnparticle:Fire("Kill","",0.1)
+									end
+								end)
+							end
 						end
 						timer.Simple(t,function()
 							if IsValid(self) then
@@ -1928,8 +2222,8 @@ function ENT:Kougaon(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Makougaon(ply,persona)
-	local skill = "Makougaon"
+function ENT:EternalRadiance(ply,persona)
+	local skill = "Eternal Radiance"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
 		self:SetTask("TASK_PLAY_ANIMATION")
 		self:TakeSP(self.CurrentCardCost)
@@ -2896,6 +3190,552 @@ function ENT:BlazingHell(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Kouha(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Kouha"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:BlessAttack(ent,DMG_P_LIGHT)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Kouga(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Kouga"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:BlessAttack(ent,DMG_P_MEDIUM)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Kougaon(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Kougaon"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:BlessAttack(ent,DMG_P_HEAVY,2,"vj_per_skill_bless")
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Makouha(ply,persona)
+	local skill = "Makouha"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,ent in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(ent) then
+								self:BlessAttack(ent,DMG_P_LIGHT)
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Makouga(ply,persona)
+	local skill = "Makouga"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,ent in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(ent) then
+								self:BlessAttack(ent,DMG_P_MEDIUM)
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Makougaon(ply,persona)
+	local skill = "Makougaon"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,ent in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(ent) then
+								self:BlessAttack(ent,DMG_P_HEAVY,2,"vj_per_skill_bless")
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Hama(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Hama"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:BlessEffect(ent,4)
+						end
+						timer.Simple(2.25,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Hamaon(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Hamaon"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:BlessEffect(ent,3)
+						end
+						timer.Simple(2.25,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Mahama(ply,persona)
+	local skill = "Mahama"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								self:BlessEffect(v,4)
+							end
+						end
+						timer.Simple(2.25,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Mahamaon(ply,persona)
+	local skill = "Mahamaon"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								self:BlessEffect(v,3)
+							end
+						end
+						timer.Simple(2.25,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Mudo(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Mudo"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:MudoEffect(ent,4)
+						end
+						timer.Simple(2.25,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Mudoon(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Mudoon"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							self:MudoEffect(ent,3)
+						end
+						timer.Simple(2.25,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Mamudo(ply,persona)
+	local skill = "Mamudo"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								self:MudoEffect(v,4)
+							end
+						end
+						timer.Simple(2.25,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Mamudoon(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Mamudoon"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								self:MudoEffect(v,3)
+							end
+						end
+						timer.Simple(2.25,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:DieForMe(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Die For Me!"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								VJ_CreateSound(v,"cpthazama/persona5/skills/0171.wav",80)
+								self:MudoEffect(v,2,"vj_per_skill_curse")
+							end
+						end
+						timer.Simple(3,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Eiha(ply,persona)
 	if !IsValid(ply.Persona_EyeTarget) then
 		return
@@ -3285,62 +4125,6 @@ function ENT:AbyssalWings(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Debilitate(ply,persona,rmb)
-	if !IsValid(ply.Persona_EyeTarget) then
-		return
-	end
-	local skill = "Debilitate"
-	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
-		self:SetTask("TASK_PLAY_ANIMATION")
-		self:TakeSP(self.CurrentCardCost)
-		local t = self:PlaySet(skill,"range_start",1)
-		timer.Simple(t,function()
-			if IsValid(self) then
-				t = self:PlaySet(skill,"range",1)
-				timer.Simple(t,function()
-					if IsValid(self) then
-						t = self:PlaySet(skill,"range_idle",1,1)
-						local ent = ply.Persona_EyeTarget
-						if IsValid(ent) then
-							-- if ent:Visible(self) then
-								if ent.Persona_DebilitateT then
-									self:DoChat(CurTime() > ent.Persona_DebilitateT && "Decreased target's ATK/DEF/Evasion for 1 minute!" or "Decreased target's ATK/DEF/Evasion time extended!")
-								else
-									ent.Persona_DebilitateT = CurTime() +60
-									self:DoChat("Decreased target's ATK/DEF/Evasion for 1 minute!")
-								end
-								ent.Persona_TarukajaT = 0
-								ent.Persona_RakukajaT = 0
-								ent.Persona_SukukajaT = 0
-								local spawnparticle = ents.Create("info_particle_system")
-								spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_all")
-								spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
-								spawnparticle:Spawn()
-								spawnparticle:Activate()
-								spawnparticle:Fire("Start","",0)
-								spawnparticle:Fire("Kill","",0.1)
-
-								ent:EmitSound("cpthazama/persona5/skills/0361.wav",90)
-							-- end
-						end
-						timer.Simple(t,function()
-							if IsValid(self) then
-								t = self:PlaySet(skill,"range_end",1)
-								timer.Simple(t,function()
-									if IsValid(self) then
-										self:SetTask("TASK_IDLE")
-										self:DoIdle()
-									end
-								end)
-							end
-						end)
-					end
-				end)
-			end
-		end)
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Freila(ply,persona)
 	local skill = "Freila"
 	local enemy = ply.Persona_EyeTarget
@@ -3431,6 +4215,41 @@ function ENT:Freidyne(ply,persona)
 								t = self:PlaySet(skill,"range_end",1)
 								timer.Simple(t,function()
 									if IsValid(self) then
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:NuclearCrush(ply,persona)
+	local skill = "Nuclear Crush"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								self:NuclearEffect(v,DMG_P_HEAVY,1.75,6)
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
 										self:DoIdle()
 									end
 								end)
@@ -3643,6 +4462,69 @@ function ENT:Cadenza(ply,persona)
 							spawnparticle:Fire("Start","",0)
 							spawnparticle:Fire("Kill","",0.1)
 						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Dia(ply,persona)
+	local skill = "Dia"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local party = self.User:GetFullParty(true)
+						local ally = NULL
+						if #party > 0 then
+							ally = VJ_PICK(party)
+						end
+						if self.User:Health() > self.User:GetMaxHealth() *0.65 && IsValid(ally) then
+							ally:SetHealth(math.Clamp(ally:Health() +(ally:GetMaxHealth() *0.1),1,ally:GetMaxHealth()))
+							self:DoChat("Restored 10% of " .. (ally.Nick && ally:Nick() or ally:GetName()) .. "'s HP!")
+							ally:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+							ally:RemoveAllDecals()
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
+							spawnparticle:SetPos(ally:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						else
+							self.User:SetHealth(math.Clamp(self.User:Health() +(self.User:GetMaxHealth() *0.1),1,self.User:GetMaxHealth()))
+							self:DoChat("Restored 10% of your HP!")
+							self:EmitSound("cpthazama/persona5/skills/0302.wav",85)
+							self.User:RemoveAllDecals()
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_heal")
+							spawnparticle:SetPos(self.User:GetPos())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+						end
+
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_end",1)
@@ -3901,6 +4783,435 @@ function ENT:CallOfChaos(ply,persona) // Loki Skill
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Tarukaja(ply,persona)
+	local skill = "Tarukaja"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						
+						self:DoChat(CurTime() > ply.Persona_TarukajaT && "Increased ATK for 1 minute!" or "Increased ATK time extended!")
+
+						ply.Persona_TarukajaT = CurTime() +60
+
+						local spawnparticle = ents.Create("info_particle_system")
+						spawnparticle:SetKeyValue("effect_name","vj_per_skill_atk")
+						spawnparticle:SetPos(ply:GetPos())
+						spawnparticle:Spawn()
+						spawnparticle:Activate()
+						spawnparticle:Fire("Start","",0)
+						spawnparticle:Fire("Kill","",0.1)
+						self:EmitSound("cpthazama/persona5/skills/0335.wav",90)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Rakukaja(ply,persona)
+	local skill = "Rakukaja"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						
+						self:DoChat(CurTime() > ply.Persona_RakukajaT && "Increased DEF for 1 minute!" or "Increased DEF time extended!")
+
+						ply.Persona_RakukajaT = CurTime() +60
+
+						local spawnparticle = ents.Create("info_particle_system")
+						spawnparticle:SetKeyValue("effect_name","vj_per_skill_def")
+						spawnparticle:SetPos(ply:GetPos())
+						spawnparticle:Spawn()
+						spawnparticle:Activate()
+						spawnparticle:Fire("Start","",0)
+						spawnparticle:Fire("Kill","",0.1)
+						self:EmitSound("cpthazama/persona5/skills/0335.wav",90)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Sukukaja(ply,persona)
+	local skill = "Sukukaja"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						
+						self:DoChat(CurTime() > ply.Persona_SukukajaT && "Increased AGI for 1 minute!" or "Increased AGI time extended!")
+
+						ply.Persona_SukukajaT = CurTime() +60
+
+						local spawnparticle = ents.Create("info_particle_system")
+						spawnparticle:SetKeyValue("effect_name","vj_per_skill_evasion")
+						spawnparticle:SetPos(ply:GetPos())
+						spawnparticle:Spawn()
+						spawnparticle:Activate()
+						spawnparticle:Fire("Start","",0)
+						spawnparticle:Fire("Kill","",0.1)
+						self:EmitSound("cpthazama/persona5/skills/0335.wav",90)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Tetrakarn(ply,persona)
+	local skill = "Tetrakarn"
+	if ply.Persona_Tetrakarn then return end
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				VJ_CreateSound(ply,"cpthazama/persona5/skills/0370.wav",80)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						
+						self:DoChat("[Tetrakarn] Physical shield created!")
+
+						ply.Persona_Tetrakarn = true
+
+						local spawnparticle = ents.Create("info_particle_system")
+						spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_def")
+						spawnparticle:SetPos(ply:GetPos())
+						spawnparticle:Spawn()
+						spawnparticle:Activate()
+						spawnparticle:Fire("Start","",0)
+						spawnparticle:Fire("Kill","",0.1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Makarakarn(ply,persona)
+	local skill = "Makarakarn"
+	if ply.Persona_Makarakarn then return end
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				VJ_CreateSound(ply,"cpthazama/persona5/skills/0370.wav",80)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						
+						self:DoChat("[Makarakarn] Magical shield created!")
+
+						ply.Persona_Makarakarn = true
+
+						local spawnparticle = ents.Create("info_particle_system")
+						spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_def")
+						spawnparticle:SetPos(ply:GetPos())
+						spawnparticle:Spawn()
+						spawnparticle:Activate()
+						spawnparticle:Fire("Start","",0)
+						spawnparticle:Fire("Kill","",0.1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Tarunda(ply,persona,rmb)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Tarunda"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							if ent.Persona_TarundaT then
+								self:DoChat(CurTime() > ent.Persona_TarundaT && "Decreased target's ATK for 1 minute!" or "Decreased target's ATK time extended!")
+							else
+								ent.Persona_TarundaT = CurTime() +60
+								self:DoChat("Decreased target's ATK for 1 minute!")
+							end
+							ent.Persona_TarukajaT = 0
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_atk")
+							spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+
+							ent:EmitSound("cpthazama/persona5/skills/0347.wav",90)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Rakunda(ply,persona,rmb)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Rakunda"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							if ent.Persona_RakundaT then
+								self:DoChat(CurTime() > ent.Persona_RakundaT && "Decreased target's DEF for 1 minute!" or "Decreased target's ATK time extended!")
+							else
+								ent.Persona_RakundaT = CurTime() +60
+								self:DoChat("Decreased target's DEF for 1 minute!")
+							end
+							ent.Persona_RakukajaT = 0
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_def")
+							spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+
+							ent:EmitSound("cpthazama/persona5/skills/0347.wav",90)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Sukunda(ply,persona,rmb)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Sukunda"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							if ent.Persona_SukundaT then
+								self:DoChat(CurTime() > ent.Persona_SukundaT && "Decreased target's AGI for 1 minute!" or "Decreased target's ATK time extended!")
+							else
+								ent.Persona_SukundaT = CurTime() +60
+								self:DoChat("Decreased target's AGI for 1 minute!")
+							end
+							ent.Persona_SukukajaT = 0
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_evasion")
+							spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",0.1)
+
+							ent:EmitSound("cpthazama/persona5/skills/0347.wav",90)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Debilitate(ply,persona,rmb)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Debilitate"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							-- if ent:Visible(self) then
+								if ent.Persona_DebilitateT then
+									self:DoChat(CurTime() > ent.Persona_DebilitateT && "Decreased target's ATK/DEF/Evasion for 1 minute!" or "Decreased target's ATK/DEF/Evasion time extended!")
+								else
+									ent.Persona_DebilitateT = CurTime() +60
+									self:DoChat("Decreased target's ATK/DEF/Evasion for 1 minute!")
+								end
+								ent.Persona_TarukajaT = 0
+								ent.Persona_RakukajaT = 0
+								ent.Persona_SukukajaT = 0
+								local spawnparticle = ents.Create("info_particle_system")
+								spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_all")
+								spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+								spawnparticle:Spawn()
+								spawnparticle:Activate()
+								spawnparticle:Fire("Start","",0)
+								spawnparticle:Fire("Kill","",0.1)
+
+								ent:EmitSound("cpthazama/persona5/skills/0361.wav",90)
+							-- end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HeatRiser(ply,persona)
 	if self.User:GetSP() >= self.CurrentCardCost /*&& CurTime() > ply.Persona_HeatRiserT*/ && self:GetTask() == "TASK_IDLE" then
 		self:SetTask("TASK_PLAY_ANIMATION")
@@ -3913,7 +5224,7 @@ function ENT:HeatRiser(ply,persona)
 					if IsValid(self) then
 						t = self:PlaySet("Heat Riser","range_idle",1,1)
 
-						self:DoChat(CurTime() > ply.Persona_HeatRiserT && "Increased Party ATK/DEF/Evasion for 1 minute!" or "Increased ATK/DEF/Evasion time extended!")
+						self:DoChat(CurTime() > ply.Persona_HeatRiserT && "Increased Party ATK/DEF/AGI for 1 minute!" or "Increased ATK/DEF/AGI time extended!")
 
 						ply.Persona_HeatRiserT = CurTime() +60
 						for _,v in pairs(ply:GetFullParty(true)) do
@@ -3965,19 +5276,77 @@ function ENT:HeatRiser(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Megidola(ply,ent)
-	local skill = "Megidola"
+function ENT:DoorsOfHades(ply,ent)
+	local skill = "Doors of Hades"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet(skill,"range_start",1)
-		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range_start_idle",1)
 				timer.Simple(t,function()
 					if IsValid(self) then
 						t = self:PlaySet(skill,"range",1)
+						timer.Simple(2,function()
+							if IsValid(self) then
+								if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+							end
+						end)
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								local effectdata = EffectData()
+								effectdata:SetStart((v:GetPos() +v:GetUp() *v:GetPos():Distance(v:GetPos() +v:OBBCenter()) *8))
+								util.Effect("Persona_DoorsOfHades",effectdata)
+
+								timer.Simple(3,function()
+									if IsValid(v) && IsValid(self) then
+										local effectdata = EffectData()
+										effectdata:SetOrigin(v:NearestPoint(v:GetPos() +v:OBBCenter()))
+										effectdata:SetScale(math.Clamp(DMG_P_HEAVY /3,20,300))
+										util.Effect("Persona_Hit_Cut",effectdata)
+										self:DealDamage(v,DMG_P_HEAVY,DMG_P_ALMIGHTY,2)
+										self:InstaKillDamage(v,3)
+									end
+								end)
+							end
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								self:PlaySet(skill,"range_idle",1,1)
+								t = 4
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:DoIdle()
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Megidola(ply,ent)
+	local skill = "Megidola"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 						self:EmitSound("cpthazama/persona5/skills/0070.wav",75)
 						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
 							if IsValid(v) && IsValid(self) then
@@ -4036,7 +5405,6 @@ function ENT:Megidolaon(ply,ent)
 		self:TakeSP(self.CurrentCardCost)
 		self:SetTask("TASK_PLAY_ANIMATION")
 		local t = self:PlaySet("Megidolaon","range_start",1)
-		if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 		timer.Simple(t,function()
 			if IsValid(self) then
 				t = self:PlaySet("Megidolaon","range_start_idle",1)
@@ -4044,6 +5412,7 @@ function ENT:Megidolaon(ply,ent)
 				timer.Simple(t,function()
 					if IsValid(self) then
 						t = self:PlaySet("Megidolaon","range",1)
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
 						local ent = ent or ply.Persona_EyeTarget
 						if IsValid(ent) then
 							self:MegidolaonEffect(ent)
@@ -4056,6 +5425,94 @@ function ENT:Megidolaon(ply,ent)
 								timer.Simple(t,function()
 									if IsValid(self) then
 										t = self:PlaySet("Megidolaon","range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:DoIdle()
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:TyrantChaos(ply)
+	local ent = ply.Persona_EyeTarget
+	local skill = "Tyrant Chaos"
+	if !IsValid(ent) then
+		return
+	end
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1)
+				t = 5
+				self:EmitSound("cpthazama/persona5/skills/0070.wav",110,85)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								self:PlaySet(skill,"range_idle",1,1)
+								if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+								t = 8
+								local ent = ent or ply.Persona_EyeTarget
+								if IsValid(ent) then
+									self:MegidolaonEffect(ent,DMG_P_COLOSSAL,8,150)
+								end
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
+										timer.Simple(t,function()
+											if IsValid(self) then
+												self:DoIdle()
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:BlackViper(ply)
+	local ent = ply.Persona_EyeTarget
+	local skill = "Black Viper"
+	if !IsValid(ent) then
+		return
+	end
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:TakeSP(self.CurrentCardCost)
+		self:SetTask("TASK_PLAY_ANIMATION")
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range_start_idle",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range",1)
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_idle",1,1)
+								local ent = ent or ply.Persona_EyeTarget
+								if IsValid(ent) then
+									self:BlackViperEffect(ent,DMG_P_SEVERE)
+								end
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_end",1)
 										timer.Simple(t,function()
 											if IsValid(self) then
 												self:DoIdle()
@@ -4087,7 +5544,7 @@ function ENT:SinfulShell(ply,persona)
 			if IsValid(self) then
 				t = self:PlaySet(skill,"range",1)
 
-				self:DoChat(CurTime() > ply.Persona_HeatRiserT && "Increased ATK/DEF/Evasion for 1 minute!" or "Increased ATK/DEF/Evasion time extended!")
+				self:DoChat(CurTime() > ply.Persona_HeatRiserT && "Increased ATK/DEF/AGI for 1 minute!" or "Increased ATK/DEF/AGI time extended!")
 
 				ply.Persona_HeatRiserT = CurTime() +60
 				self:EmitSound("cpthazama/persona5/skills/0343.wav",90)
@@ -4320,7 +5777,7 @@ function ENT:MinorAwareness(ply,persona)
 							spawnparticle:Fire("Kill","",0.1)
 						end
 					end
-					self:DoChat("Buffed Party AGI/Evasion!")
+					self:DoChat("Buffed Party AGI/AGI!")
 				end
 				timer.Simple(t,function()
 					if IsValid(self) then

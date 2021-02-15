@@ -21,13 +21,13 @@ ENT.LeveledSkills = {
 	{Level = 84, Name = "Divine Judgement", Cost = 48, UsesHP = false, Icon = "bless"},
 	{Level = 75, Name = "Makougaon", Cost = 22, UsesHP = false, Icon = "bless"},
 	{Level = 60, Name = "Mediarahan", Cost = 30, UsesHP = false, Icon = "heal"},
-	{Level = 55, Name = "Samarecarm", Cost = 18, UsesHP = false, Icon = "heal"},
+	-- {Level = 55, Name = "Samarecarm", Cost = 18, UsesHP = false, Icon = "heal"},
 	{Level = 48, Name = "Kougaon", Cost = 12, UsesHP = false, Icon = "bless"},
 	{Level = 40, Name = "Makouga", Cost = 16, UsesHP = false, Icon = "bless"},
-	{Level = 35, Name = "Mediarama", Cost = 12, UsesHP = false, Icon = "heal"},
-	{Level = 30, Name = "Recarm", Cost = 8, UsesHP = false, Icon = "heal"},
+	-- {Level = 35, Name = "Mediarama", Cost = 12, UsesHP = false, Icon = "heal"},
+	-- {Level = 30, Name = "Recarm", Cost = 8, UsesHP = false, Icon = "heal"},
 	{Level = 23, Name = "Kouga", Cost = 8, UsesHP = false, Icon = "bless"},
-	{Level = 19, Name = "Tetraja", Cost = 24, UsesHP = false, Icon = "passive"},
+	-- {Level = 19, Name = "Tetraja", Cost = 24, UsesHP = false, Icon = "passive"},
 	{Level = 12, Name = "Makouha", Cost = 10, UsesHP = false, Icon = "bless"}
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------

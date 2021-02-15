@@ -14,18 +14,19 @@ ENT.AdminOnly = true
 
 ENT.Model = "models/cpthazama/persona5_dance/futaba.mdl"
 ENT.HeightOffset = 1
+ENT.ModelScale = 0.42
 ENT.CollisionBounds = Vector(16,16,75)
 ENT.SongStartDelay = 0
 ENT.SongStartAnimationDelay = 0.2
 
 ENT.Animations = {}
 ENT.Animations["dance_lastsurprise"] = {}
-ENT.Animations["dance_lastsurprise"][1] = {anim = "dance_lastsurprise",next = "dance_lastsurprise2",endEarlyTime = 0.09}
-ENT.Animations["dance_lastsurprise"][2] = {anim = "dance_lastsurprise2",next = "dance_lastsurprise4",endEarlyTime = 0.05}
-ENT.Animations["dance_lastsurprise"][3] = {anim = "dance_lastsurprise4",next = "dance_lastsurprise2",endEarlyTime = 0.08}
-ENT.Animations["dance_lastsurprise"][4] = {anim = "dance_lastsurprise2",next = "dance_lastsurprise5",endEarlyTime = 0.05}
-ENT.Animations["dance_lastsurprise"][5] = {anim = "dance_lastsurprise5",next = "dance_lastsurprise3",endEarlyTime = 0.075}
-ENT.Animations["dance_lastsurprise"][6] = {anim = "dance_lastsurprise3",next = "dance_lastsurprise6",endEarlyTime = 0.2}
+ENT.Animations["dance_lastsurprise"][1] = {anim = "dance_lastsurprise",next = "dance_lastsurprise2",endEarlyTime = 0}
+ENT.Animations["dance_lastsurprise"][2] = {anim = "dance_lastsurprise2",next = "dance_lastsurprise4",endEarlyTime = 0}
+ENT.Animations["dance_lastsurprise"][3] = {anim = "dance_lastsurprise4",next = "dance_lastsurprise2",endEarlyTime = 0}
+ENT.Animations["dance_lastsurprise"][4] = {anim = "dance_lastsurprise2",next = "dance_lastsurprise5",endEarlyTime = 0}
+ENT.Animations["dance_lastsurprise"][5] = {anim = "dance_lastsurprise5",next = "dance_lastsurprise3",endEarlyTime = 0}
+ENT.Animations["dance_lastsurprise"][6] = {anim = "dance_lastsurprise3",next = "dance_lastsurprise6",endEarlyTime = 0}
 ENT.Animations["dance_lastsurprise"][7] = {anim = "dance_lastsurprise6",next = false,endEarlyTime = 0}
 
 ENT.SoundTracks = {
@@ -36,58 +37,13 @@ ENT.PreviewThemes = {"cpthazama/persona5_dance/music/preview.wav"}
 
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Stage Uniform", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
+ENT.Outfits[2] = {Name = "Summer Uniform", Model = "_uniform_summer", Offset = 1, ReqSong = "Last Surprise -Remix-", ReqScore = 12000}
 
 ENT.SongLength = {}
 ENT.SongLength["dance_lastsurprise"] = 204
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:OnInit()
-		// Bust
-		self:ManipulateBoneJiggle(110,1)
-
-		// Hair
-		self:ManipulateBoneJiggle(118,1)
-		self:ManipulateBoneJiggle(119,1)
-		self:ManipulateBoneJiggle(120,1)
-		self:ManipulateBoneJiggle(131,1)
-		self:ManipulateBoneJiggle(132,1)
-		self:ManipulateBoneJiggle(133,1)
-		self:ManipulateBoneJiggle(136,1)
-		self:ManipulateBoneJiggle(137,1)
-		self:ManipulateBoneJiggle(123,1)
-		self:ManipulateBoneJiggle(124,1)
-		self:ManipulateBoneJiggle(125,1)
-		self:ManipulateBoneJiggle(127,1)
-		self:ManipulateBoneJiggle(128,1)
-		self:ManipulateBoneJiggle(129,1)
-		self:ManipulateBoneJiggle(114,1)
-		self:ManipulateBoneJiggle(115,1)
-		self:ManipulateBoneJiggle(116,1)
-		
-		// Scarf
-		self:ManipulateBoneJiggle(10,1)
-		self:ManipulateBoneJiggle(11,1)
-		
-		// Jacket
-		self:ManipulateBoneJiggle(39,1)
-		self:ManipulateBoneJiggle(38,1)
-		self:ManipulateBoneJiggle(37,1)
-		self:ManipulateBoneJiggle(44,1)
-		self:ManipulateBoneJiggle(45,1)
-		self:ManipulateBoneJiggle(41,1)
-		self:ManipulateBoneJiggle(42,1)
-		self:ManipulateBoneJiggle(34,1)
-		self:ManipulateBoneJiggle(35,1)
-		self:ManipulateBoneJiggle(31,1)
-		self:ManipulateBoneJiggle(32,1)
-		self:ManipulateBoneJiggle(73,1)
-		self:ManipulateBoneJiggle(74,1)
-		self:ManipulateBoneJiggle(79,1)
-		self:ManipulateBoneJiggle(80,1)
-		self:ManipulateBoneJiggle(82,1)
-		self:ManipulateBoneJiggle(83,1)
-		self:ManipulateBoneJiggle(76,1)
-		self:ManipulateBoneJiggle(77,1)
 
 		-- self:SetCinematicData()
 		self:RandomizeCinematics("dance_lastsurprise",917)
@@ -154,28 +110,33 @@ if SERVER then
 		self:AddAnimationEvent("dance_lastsurprise6",560,"smile",1012)
 		self:AddAnimationEvent("dance_lastsurprise6",878,"wink",1012)
 		self:AddAnimationEvent("dance_lastsurprise6",878,"default",1010)
-		
-		self:SetBodygroup(1,math.random(1,4) == 1 && 1 or 0)
+
+		local exp = {"smile","eyeDroop","browUp"}
+		self:RandomizeExpressions(exp,"preview",227)
 	end
 
 	function ENT:HandleAnimationEvent(seq,event,frame)
 		if event == "default" then
-			self:SetBodygroup(2,0)
+			self:ResetFlexes()
 		end
 		if event == "smile" then
-			self:SetBodygroup(2,1)
+			self:RemoveOldFlexes({"smile","browUp"})
+			self:SendFlexData("browUp",0.3,6)
+			self:SendFlexData("smile",1,6)
 		end
 		if event == "open" then
-			self:SetBodygroup(2,2)
+			self:RemoveOldFlexes({"open_happy","neutral","eyeOpen"})
+			self:SendFlexData("eyeOpen",0.45,6)
+			self:SendFlexData("neutral",1,6)
+			self:SendFlexData("open_happy",1,6)
 		end
 		if event == "wink" then
-			self:SetBodygroup(2,3)
-		end
-	end
-
-	function ENT:OnPlayDance(seq,t)
-		if seq == "dance_lastsurprise" then
-			self:ChangeFace(nil,nil,2)
+			self:RemoveOldFlexes({"smile_big","smirk","lWink","eyeDroop","rBrowDown"})
+			self:SendFlexData("eyeDroop",0.3,6)
+			self:SendFlexData("rBrowDown",1,6)
+			self:SendFlexData("lWink",1,6)
+			self:SendFlexData("smile_big",1,6)
+			self:SendFlexData("smirk",1,6)
 		end
 	end
 end

@@ -88,7 +88,7 @@ end
 -- end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PersonaInit()
-	self:SetBodygroup(1,1)
+	-- self:SetBodygroup(1,1)
 	self.CurrentIndex = 1
 	self.HasOkami = false
 end

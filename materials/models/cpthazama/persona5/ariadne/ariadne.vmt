@@ -6,7 +6,7 @@
 
 	"$phong"				"1"
 	"$phongboost"			"0"
-	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongfresnelranges"	"[0.035 0.2 1]"
 	"$phongtint"			"[0 0.15 1]"
 
 	"$rimlight" "1"

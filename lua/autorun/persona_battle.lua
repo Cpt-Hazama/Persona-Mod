@@ -6,19 +6,24 @@ CreateConVar("vj_persona_battle_visible","0",FCVAR_NONE,"When enabled, only enem
 
 PERSONA_BATTLETRACKS = {}
 
-function P_AddBattleTrack(name,dir,len,bossTrack)
+function P_AddBattleTrack(name,dir,len,bossTrack,specific)
 	bossTrack = bossTrack or false
-	table.insert(PERSONA_BATTLETRACKS,{Name = name,File = dir,Length = len,BossTrack = bossTrack})
+	table.insert(PERSONA_BATTLETRACKS,{Name = name,File = dir,Length = len,BossTrack = bossTrack,Entity = specific})
 	MsgN("Successfully added battle track data: " .. name .. " | " .. dir .. " | " .. len .. " seconds")
 end
 
-function P_FindBattleTracks(bossTrack)
+function P_FindBattleTracks(bossTrack,specific)
 	local tbl = {}
 	local ind = 0
+	local canGo = true
 	for _,v in pairs(PERSONA_BATTLETRACKS) do
-		if bossTrack == true && v.BossTrack == true then
+		if specific && v.Entity && v.Entity == specific then
+			return {Name=v.Name,Song=v.File,Length=v.Length}
+		end
+		if !canGo then return end
+		if bossTrack == true && v.BossTrack == true && !v.Entity then
 			table.insert(tbl,{v.Name,v.File,v.Length})
-		elseif bossTrack != true && v.BossTrack != true then
+		elseif bossTrack != true && v.BossTrack != true && !v.Entity then
 			table.insert(tbl,{v.Name,v.File,v.Length})
 		end
 	end
@@ -54,6 +59,8 @@ P_AddBattleTrack("Beneath The Mask (Ultimate ver.)","cpthazama/persona_shared/ba
 P_AddBattleTrack("Keeper Of Lust","cpthazama/persona_shared/battlemode_boss_1.mp3",243,true)
 P_AddBattleTrack("Rivers In The Desert (Instrumental)","cpthazama/persona_shared/battlemode_boss_2.mp3",315,true)
 P_AddBattleTrack("Will Power","cpthazama/persona_shared/battlemode_boss_3.mp3",165,true)
+
+P_AddBattleTrack("Yaldabaoth","cpthazama/persona5/music/Yaldabaoth.mp3",180,true,"npc_vj_per_yaldabaoth")
 
 if SERVER then
 	hook.Add("EntityTakeDamage","Persona_BattleMode",function(ent,dmginfo)

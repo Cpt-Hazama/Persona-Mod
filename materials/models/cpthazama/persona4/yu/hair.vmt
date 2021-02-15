@@ -4,10 +4,11 @@
 	"$bumpmap" "models/cpthazama/persona4/yu/hair_n"
 	//"$phongexponenttexture" "models/cpthazama/persona4/yu/hair_s"
 	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
+	"$nocull" "1"
 
 	"$phong"				"1"
 	"$phongboost"			"10"
-	"$phongfresnelranges"	"[0 0.5 1]"
+	"$phongfresnelranges"	"[0.035 0.2 1]"
 	//"$phongtint"			"[0.6 0.6 0.6]"
 	"$phongalbedotint"		"1"
 

@@ -1,0 +1,19 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona_shared/blackviper/body"
+	"$bumpmap" "models/cpthazama/persona_shared/blackviper/body_n"
+	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
+
+	"$phong"				"1"
+	"$phongboost"			"25"
+	"$phongfresnelranges"	"[0.035 0.2 1]"
+	//"$phongtint"			"[0.6 0.6 0.6]"
+	"$phongalbedotint"		"1"
+
+	"$rimlight" "1"
+	"$rimlightexponent" "1"
+	"$rimlightboost" "15"
+	"$rimmask" "1"
+
+	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+}

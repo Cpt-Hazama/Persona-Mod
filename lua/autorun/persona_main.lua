@@ -10,6 +10,18 @@ function IsPersonaGamemode()
 	return PGM().Name == "Persona"
 end
 
+function GetDancerFlexData(seqID,ent) -- Get a really good randomly generated facial flex set? Get the data with this!
+	local ent = ent or Entity(1)
+	local tbl = ent:GetNW2Entity("Persona_Dancer").RandomFlex
+	local sequenceID = seqID or 1 -- ACT_IDLE or aka Preview
+	for k,v in SortedPairs(tbl[sequenceID]) do
+		local frame = k
+		for i,d in pairs(v) do
+			print(frame .. ",{Name='" .. d.Name .. "',Value=" .. d.Value .. ",Speed=" .. d.Speed .. "}")
+		end
+	end
+end
+
 local File = FindMetaTable("File")
 
 function File:QuickRead(position)
@@ -118,29 +130,26 @@ if CLIENT then
 		if !useMarkers() then return end
 		
 		local split = string.Split(text,"")
-		-- for i = 1,#split do
-			local marker = {}
-			marker.text = text
-			-- marker.text = split[i]
-			marker.numbers = split
-			marker.effects = bonus
-			marker.initialized = false
-			marker.pos = Vector(pos.x,pos.y,pos.z)
-			marker.vel = Vector(vel.x,vel.y,vel.z)
-			marker.col = Color(col.r,col.g,col.b)
-			marker.duration = 1.5
-			marker.dmg = dmg
-			marker.spawntime = CurTime()
-			marker.deathtime = CurTime() +1.5
+		local marker = {}
+		marker.initialized = false
+		marker.text = text
+		marker.numbers = split
+		marker.effects = bonus
+		marker.dmg = dmg
+		marker.duration = 1.5
+		marker.pos = Vector(pos.x,pos.y,pos.z)
+		marker.vel = Vector(vel.x,vel.y,vel.z)
+		marker.col = Color(col.r,col.g,col.b)
+		marker.spawntime = CurTime()
+		marker.deathtime = CurTime() +marker.duration
 
-			surface.SetFont("Persona")
-			local w,h = surface.GetTextSize(text)
+		surface.SetFont("Persona")
+		local w,h = surface.GetTextSize(text)
 
-			marker.widthH = w /2
-			marker.heightH = h /2
+		marker.widthH = w /2
+		marker.heightH = h /2
 
-			table.insert(Persona_DMGMarkers,marker)
-		-- end
+		table.insert(Persona_DMGMarkers,marker)
 	end
 
 	net.Receive("persona_spawndmg",function()
@@ -462,6 +471,9 @@ if SERVER then
 		ply.Persona_RakundaT = 0 -- Dec. DEF
 		ply.Persona_SukukajaT = 0 -- Inc. AGI
 		ply.Persona_SukundaT = 0 -- Dec. AGI
+		
+		ply.Persona_Tetrakarn = false -- Shield for Phys (non-Almighty)
+		ply.Persona_Makarakarn = false -- Shield for Magic (non-Almighty)
 
 		ply.Persona_DebilitateT = 0
 		ply.Persona_HeatRiserT = 0
@@ -530,6 +542,9 @@ if SERVER then
 					ent.Persona_RakundaT = 0 -- Dec. DEF
 					ent.Persona_SukukajaT = 0 -- Inc. AGI
 					ent.Persona_SukundaT = 0 -- Dec. AGI
+		
+					ent.Persona_Tetrakarn = false -- Shield for Phys (non-Almighty)
+					ent.Persona_Makarakarn = false -- Shield for Magic (non-Almighty)
 
 					ent.Persona_DebilitateT = 0
 					ent.Persona_HeatRiserT = 0
@@ -554,7 +569,7 @@ if SERVER then
 		end
 	end)
 
-	local wep = "weapon_jojo_nothing" // I don't get it. I renamed this weapon, reloaded the game, shit draws the ammo. I copy the weapon, rename that one, reload the game, the copy draws the ammo but not the original. GMod is the most broken shit I've ever seen
+	local wep = "weapon_persona_nothing"
 	hook.Add("Think","Persona_Think",function()
 		for _,v in pairs(player.GetAll()) do
 			-- if CurTime() > v.PXP_NextXPChange && PXP.GetPersonaData(v,1) >= PXP.GetRequiredXP(v) then
@@ -603,6 +618,27 @@ if SERVER then
 	end
 
 	hook.Add("EntityTakeDamage","Persona_ModifyPlayerDMG",function(ent,dmginfo)
+		if dmginfo:GetDamage() > 0 && ent.Persona_Tetrakarn && !dmginfo:IsDamageType(DMG_P_ALMIGHTY) && (dmginfo:IsDamageType(DMG_P_PHYS) || dmginfo:IsDamageType(DMG_P_GUN) || dmginfo:IsDamageType(DMG_SLASH) || dmginfo:IsDamageType(DMG_AIRBOAT) || dmginfo:IsDamageType(DMG_BUCKSHOT) || dmginfo:IsDamageType(DMG_SNIPER) || dmginfo:IsDamageType(DMG_BULLET) || dmginfo:IsDamageType(DMG_CLUB) || dmginfo:IsDamageType(DMG_GENERIC)) then
+			local attacker = (IsValid(dmginfo:GetAttacker()) && dmginfo:GetAttacker() or dmginfo:GetInflictor())
+			dmginfo:SetAttacker(ent)
+			dmginfo:SetInflictor(ent)
+			attacker:TakeDamageInfo(dmginfo)
+			dmginfo:SetDamage(0)
+			VJ_CreateSound(ent,"cpthazama/persona5/skills/0375.wav",80)
+			if ent:IsPlayer() then ent:ChatPrint("[Tetrakarn] Reflected damage back at attacker!") end
+			ent.Persona_Tetrakarn = false
+		end
+		if dmginfo:GetDamage() > 0 && ent.Persona_Makarakarn && !dmginfo:IsDamageType(DMG_P_ALMIGHTY) && (dmginfo:IsDamageType(DMG_P_ICE) || dmginfo:IsDamageType(DMG_P_EARTH) || dmginfo:IsDamageType(DMG_P_WIND) || dmginfo:IsDamageType(DMG_P_GRAVITY) || dmginfo:IsDamageType(DMG_P_NUCLEAR) || dmginfo:IsDamageType(DMG_P_EXPEL) || dmginfo:IsDamageType(DMG_P_DEATH) || dmginfo:IsDamageType(DMG_P_MIRACLE) || dmginfo:IsDamageType(DMG_P_FORCE) || dmginfo:IsDamageType(DMG_P_TECH) || dmginfo:IsDamageType(DMG_P_PSI) || dmginfo:IsDamageType(DMG_P_ELEC) || dmginfo:IsDamageType(DMG_P_CURSE) || dmginfo:IsDamageType(DMG_P_FEAR) || dmginfo:IsDamageType(DMG_P_BLESS) || dmginfo:IsDamageType(DMG_P_FIRE) || dmginfo:IsDamageType(DMG_P_BURN) || dmginfo:IsDamageType(DMG_P_SEAL) || dmginfo:IsDamageType(DMG_P_SLEEP) || dmginfo:IsDamageType(DMG_P_PARALYZE) || dmginfo:IsDamageType(DMG_BURN) || dmginfo:IsDamageType(DMG_SHOCK) || dmginfo:IsDamageType(DMG_SONIC) || dmginfo:IsDamageType(DMG_ENERGYBEAM) || dmginfo:IsDamageType(DMG_DROWN) || dmginfo:IsDamageType(DMG_PARALYZE) || dmginfo:IsDamageType(DMG_NERVEGAS) || dmginfo:IsDamageType(DMG_POISON) || dmginfo:IsDamageType(DMG_ACID) || dmginfo:IsDamageType(DMG_PLASMA) || dmginfo:IsDamageType(DMG_PHYSGUN) || dmginfo:IsDamageType(DMG_DISSOLVE)) then
+			local attacker = (IsValid(dmginfo:GetAttacker()) && dmginfo:GetAttacker() or dmginfo:GetInflictor())
+			dmginfo:SetAttacker(ent)
+			dmginfo:SetInflictor(ent)
+			attacker:TakeDamageInfo(dmginfo)
+			dmginfo:SetDamage(0)
+			VJ_CreateSound(ent,"cpthazama/persona5/skills/0375.wav",80)
+			if ent:IsPlayer() then ent:ChatPrint("[Makarakarn] Reflected damage back at attacker!") end
+			ent.Persona_Makarakarn = false
+		end
+		
 		if ent.Persona_DMG_Fear && ent.Persona_DMG_Fear > CurTime() then
 			dmginfo:ScaleDamage(1.5)
 		end
@@ -811,10 +847,15 @@ if SERVER then
 end
 
 if CLIENT then
+
+	local pFont = ScreenScale(8.5)
+	local pFont_EXP = ScreenScale(6.5)
+	local pFont_Small = ScreenScale(7)
+
 	surface.CreateFont("Persona",{
 		font = "p5hatty",
 		extended = false,
-		size = 35,
+		size = pFont,
 		weight = 500,
 		blursize = 0,
 		scanlines = 0,
@@ -832,7 +873,7 @@ if CLIENT then
 	surface.CreateFont("PXP_EXP",{
 		font = "p5hatty",
 		extended = false,
-		size = 25,
+		size = pFont_EXP,
 		weight = 500,
 		blursize = 0,
 		scanlines = 0,
@@ -847,10 +888,10 @@ if CLIENT then
 		outline = true,
 	})
 
-	surface.CreateFont("Persona_Small",{
+	surface.CreateFont("Persona_Small",{ -- Obsolete
 		font = "p5hatty",
 		extended = false,
-		size = 22,
+		size = pFont_Small,
 		weight = 500,
 		blursize = 0,
 		scanlines = 0,

@@ -18,7 +18,7 @@ ENT.Stats = {
 ENT.HullType = HULL_LARGE
 ENT.SightDistance = 20000
 ENT.SightAngle = 110
-ENT.TurningSpeed = 5
+ENT.TurningSpeed = 1
 ENT.VJ_IsHugeMonster = true
 ENT.MovementType = VJ_MOVETYPE_STATIONARY
 ENT.Stationary_UseNoneMoveType = true
@@ -85,13 +85,15 @@ function ENT:CustomOnInitialize()
 	timer.Simple(0,function()
 		self:SetPos(self:GetPos() +Vector(0,0,1500))
 	end)
+	
+	self:DrawShadow(false)
 
 	self:SetSP(self.Stats.SP)
 	self:SetMaxSP(self.Stats.SP)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
-
+	self:RemoveAllDecals()
 end
 /*-----------------------------------------------
 	*** Copyright (c) 2012-2019 by Cpt. Hazama, All rights reserved. ***

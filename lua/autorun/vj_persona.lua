@@ -14,59 +14,42 @@ local VJExists = file.Exists("lua/autorun/vj_base_autorun.lua","GAME")
 if VJExists == true then
 	include('autorun/vj_controls.lua')
 
-	-- if CLIENT then
-		-- VJ.AddClientConVar("vj_persona_music",1)
-		-- VJ.AddClientConVar("vj_persona_dancemode",0)
-		-- VJ.AddClientConVar("vj_persona_dancedifficulty",2)
-		-- VJ.AddClientConVar("vj_persona_dancevol",60)
-	-- end
-
 	local vCat = "Persona"
+	local vCatBad = "Persona - Villains"
 	VJ.AddCategoryInfo(vCat,{Icon = "vj_icons/persona.png"})
+	VJ.AddCategoryInfo(vCat .. " - Villains",{Icon = "vj_icons/persona.png"})
 	VJ.AddCategoryInfo(vCat .. " - Bosses",{Icon = "vj_icons/persona.png"})
 	VJ.AddCategoryInfo(vCat .. " - Gamemode",{Icon = "vj_icons/persona.png"})
 
-		-- Persona - Raid Bossess --
-	-- These all use the song Shadow as their theme --
-	-- VJ.AddNPC("Makoto Niijima (Shadow)","npc_vj_per_makoto_shadow",vCat)
-	-- VJ.AddNPC("Yu Narukami (Shadow)","npc_vj_per_yu_shadow",vCat)
-	-- VJ.AddNPC("Tohru Adachi (Shadow)","npc_vj_per_adachi_shadow",vCat)
-	-- VJ.AddNPC("Sho Minazuki (Shadow)","npc_vj_per_sho_shadow",vCat)
+	-- VJ.AddNPC("Ren Amamiya","npc_vj_per_ren",vCat)
+	VJ.AddNPC("Ann Takamaki","npc_vj_per_ann",vCat)
+	VJ.AddNPC("Makoto Niijima","npc_vj_per_makoto",vCat)
+	VJ.AddNPC("Goro Akechi","npc_vj_per_akechi_crow",vCat)
+	VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat)
 
-		-- Persona 5 - Protagonists --
-	-- VJ.AddNPC("Ren Amamiya","npc_vj_per_ren",vCat) -- Persona: Arsène and Satanael | Theme: Last Surprise / Groovy
-	VJ.AddNPC("Ann Takamaki","npc_vj_per_ann",vCat) -- Carmen and Célestine | Theme: Wake Up, Get Up, Get Out There
-	VJ.AddNPC("Makoto Niijima","npc_vj_per_makoto",vCat) -- Johanna and Anat | Theme: Price
-	VJ.AddNPC("Goro Akechi","npc_vj_per_akechi_crow",vCat) -- Persona: Robin Hood | Theme: Ark
-	VJ.AddNPC("Lavenza","npc_vj_per_lavenza",vCat) -- Persona: Thor, Berith and Atavaka | Theme: Rivers in The Desert
+	-- VJ.AddNPC("Holy Grail","npc_vj_per_yaldabaoth_stage1",vCatBad)
+	-- VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCatBad)
+	VJ.AddNPC("Goro Akechi (Black Mask)","npc_vj_per_akechi",vCatBad)
+	
+	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat)
+	VJ.AddNPC("Labrys","npc_vj_per_labrys",vCat)
+	
+	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi",vCatBad)
+	VJ.AddNPC("Shadow Labrys","npc_vj_per_labrys_shadow",vCatBad)
+	
+	VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat)
+	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat)
 
-		-- Persona 5 - Antagonists --
-	-- VJ.AddNPC("Holy Grail","npc_vj_per_yaldabaoth_stage1",vCat) -- Theme: Yaldabaoth
-	VJ.AddNPC("Yaldabaoth","npc_vj_per_yaldabaoth",vCat) -- Theme: Yaldabaoth
-	VJ.AddNPC("Goro Akechi (Black Mask)","npc_vj_per_akechi",vCat) -- Persona: Loki and Hereward | Theme: Reincarnation (I'll Face Myself)
-	
-		-- Persona 4 - Protagonists --
-	VJ.AddNPC("Yu Narukami","npc_vj_per_yu",vCat) -- Izanagi / Izanagi-no-Okami | Theme: Reach Out To The Truth (Arena Ver.)
-	VJ.AddNPC("Labrys","npc_vj_per_labrys",vCat) -- Ariadne | Theme: Spirited Girl
-	
-		-- Persona 4 - Antagonists -- 
-	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi",vCat) -- Magatsu-Izanagi | Theme: A Fool or A Clown? / A New World Fool
-	VJ.AddNPC("Shadow Labrys","npc_vj_per_labrys_shadow",vCat) -- Asterius | Theme: Shadows of the Labrynth
-	
-		-- Persona 3 - Protagonists
-	VJ.AddNPC("Makoto Yuki","npc_vj_per_yuki",vCat) -- Orpheos / Messiah | Theme: Mass Destruction
-	-- VJ.AddNPC("Elizabeth","npc_vj_per_elizabeth",vCat) -- Thanatos | Theme: Whims Of Everyone's Souls
+		-- Shadows --
+	VJ.AddNPC("Tohru Adachi (Shadow)","npc_vj_per_adachi_boss",vCatBad)
+	VJ.AddNPC("Yu Narukami (Shadow)","npc_vj_per_yu_shadow",vCatBad)
 
 		-- Persona Gamemode Exclusives --
-	VJ.AddNPC("(Shadow) Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat)
+	VJ.AddNPC("(Shadow) Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCatBad)
 	-- VJ.AddNPC("Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat .. " - Gamemode")
 	-- VJ.AddNPC("Munehisa Iwai","npc_vj_per_vendor_iwai",vCat .. " - Gamemode")
-
-		-- Bosses --
-
-		-- Persona 4 - Antagonists -- 
-	VJ.AddNPC("Tohru Adachi","npc_vj_per_adachi_boss",vCat .. " - Bosses")
 	
+		-- Unused but, maybe in the future? It's easier to just manually code than make a cue system
 	CUE_BATTLE_DISADVANTAGE = 1
 	CUE_BATTLE_ADVANTAGE = 2
 	CUE_BATTLE_ALLOUTATTACK = 3

@@ -355,22 +355,22 @@ function ENT:CalculateMove(persona,enemy,dist)
 		persona:SetCard("Dekunda")
 		persona:DoSpecialAttack(self,persona,nil,true)
 		return
-	elseif !hasHeatRiser && math.random(1,3) == 1 && persona:HasSkill("Heat Riser") then
+	elseif hasHeatRiser == false && math.random(1,3) == 1 && persona:HasSkill("Heat Riser") then
 		persona:SetCard("Heat Riser")
 		persona:DoSpecialAttack(self,persona,nil,true)
 		return
-	elseif !hasCharge && math.random(1,3) == 1 && persona:HasSkill("Charge") then
+	elseif hasCharge == false && math.random(1,3) == 1 && persona:HasSkill("Charge") then
 		persona:SetCard("Charge")
 		persona:DoSpecialAttack(self,persona,nil,true)
 		return
-	elseif !hasConcentrate && math.random(1,3) == 1 && persona:HasSkill("Concentrate") then
+	elseif hasConcentrate == false && math.random(1,3) == 1 && persona:HasSkill("Concentrate") then
 		persona:SetCard("Concentrate")
 		persona:DoSpecialAttack(self,persona,nil,true)
 		return
-	elseif (!hasTarukaja && persona:HasSkill("Tarukaja")) || (!hasRakukaja && persona:HasSkill("Rakukaja")) || (!hasSukukaja && persona:HasSkill("Sukukaja")) && math.random(1,3) == 1 then
-		local tar = !hasTarukaja && persona:HasSkill("Tarukaja")
-		local rak = !hasRakukaja && persona:HasSkill("Rakukaja")
-		local suk = !hasSukukaja && persona:HasSkill("Sukukaja")
+	elseif (hasTarukaja == false && persona:HasSkill("Tarukaja")) || (hasRakukaja == false && persona:HasSkill("Rakukaja")) || (hasSukukaja == false && persona:HasSkill("Sukukaja")) && math.random(1,3) == 1 then
+		local tar = hasTarukaja == false && persona:HasSkill("Tarukaja")
+		local rak = hasRakukaja == false && persona:HasSkill("Rakukaja")
+		local suk = hasSukukaja == false && persona:HasSkill("Sukukaja")
 		local pick = {}
 		if tar then table.insert(pick,"Tarukaja") end
 		if rak then table.insert(pick,"Rakukaja") end
@@ -474,6 +474,7 @@ function ENT:CustomOnThink()
 	local controlled = self.VJ_IsBeingControlled
 
 	self:HandleAnimations(controlled)
+	self:RemoveAllDecals()
 	
 	self:LevelCode()
 	self:SetNW2Bool("MetaVerseMode",self.MetaVerseMode)

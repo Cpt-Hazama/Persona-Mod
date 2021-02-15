@@ -21,13 +21,13 @@ ENT.Animations["range"] = "range_single"
 ENT.LeveledSkills = {
 	{Level = 74, Name = "Agneyastra", Cost = 24, UsesHP = true, Icon = "phys"},
 	{Level = 70, Name = "God's Hand", Cost = 22, UsesHP = true, Icon = "phys"},
-	{Level = 67, Name = "Rainy Death", Cost = 20, UsesHP = true, Icon = "phys"},
+	-- {Level = 67, Name = "Rainy Death", Cost = 20, UsesHP = true, Icon = "phys"}, -- Do I really need to code this?
 	{Level = 52, Name = "Charge", Cost = 15, UsesHP = false, Icon = "passive"},
 	{Level = 46, Name = "Heat Wave", Cost = 16, UsesHP = true, Icon = "phys"},
 	{Level = 38, Name = "Black Spot", Cost = 16, UsesHP = true, Icon = "phys"},
 	{Level = 33, Name = "Bufula", Cost = 8, UsesHP = false, Icon = "frost"},
 	{Level = 29, Name = "Gale Slash", Cost = 12, UsesHP = true, Icon = "phys"},
-	{Level = 22, Name = "Assault Dive", Cost = 9, UsesHP = true, Icon = "phys"},
+	-- {Level = 22, Name = "Assault Dive", Cost = 9, UsesHP = true, Icon = "phys"}, -- Muda da
 	{Level = 20, Name = "Rampage", Cost = 12, UsesHP = true, Icon = "phys"},
 	{Level = 14, Name = "Mabufu", Cost = 10, UsesHP = false, Icon = "frost"},
 	{Level = 11, Name = "Skull Cracker", Cost = 9, UsesHP = true, Icon = "phys"},

@@ -56,16 +56,17 @@ if SERVER then
 		self:AddFlexEvent("dance_time",50,{Name="smile_teeth",Value=3,Speed=4},419)
 		self:AddFlexEvent("dance_time",125,{Name="smile_teeth",Value=0.65,Speed=20},419)
 		
+		local exp = {"smile_teeth","smile","eyeOpen","browUp","neutral"}
+		self:RandomizeExpressions(exp,"dance_time",419)
+		self:RandomizeExpressions(exp,"dance_time_2",1136)
+		self:RandomizeExpressions(exp,"dance_time_3",874)
+		self:RandomizeExpressions(exp,"dance_time_4",2084)
+		self:RandomizeExpressions(exp,"preview",227)
+		
 		-- self:RandomizeExpressions({"smile_teeth"},"dance_time",419)
 		-- self:RandomizeExpressions({"smile_teeth"},"dance_time_2",1136)
 		-- self:RandomizeExpressions({"smile_teeth"},"dance_time_3",874)
 		-- self:RandomizeExpressions({"smile_teeth"},"dance_time_4",2084)
-	end
-
-	function ENT:HandleAnimationEvent(seq,event,frame)
-		if event == "default" then
-			
-		end
 	end
 end
 /*--------------------------------------------------

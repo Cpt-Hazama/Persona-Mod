@@ -7,7 +7,7 @@ include('shared.lua')
 -----------------------------------------------*/
 ENT.Model = {"models/cpthazama/persona5/enemies/kamoshidaguard.mdl"} -- The game will pick a random model from the table when the SNPC is spawned | Add as many as you want 
 
-ENT.VJ_NPC_Class = {"CLASS_PERSONA_ENEMY","CLASS_KAMOSHIDA"}
+ENT.VJ_NPC_Class = {"CLASS_PERSONA_ENEMY","CLASS_KAMOSHIDA","CLASS_SHADOW"}
 
 ENT.AvailablePersonae = {
 	"jack",

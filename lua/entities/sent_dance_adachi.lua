@@ -83,7 +83,7 @@ if SERVER then
 		-- Cinematic(1756,{f=40,r=-0,u=15,dist=0,speed=100},"dance_thefog",F_TF)
 		-- Cinematic(1785,{f=60,r=-0,u=20,dist=0,speed=2},"dance_thefog",F_TF)
 
-		self:AddAnimationEvent("preview",3,"smirk",346)
+		self:AddAnimationEvent("preview",3,"smile",346)
 
 		self:AddAnimationEvent("dance_thefog",1,"default",F_TF)
 		self:AddAnimationEvent("dance_thefog",20,"neutral",F_TF)

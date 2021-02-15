@@ -19,16 +19,16 @@ ENT.LeveledSkills = {
 	{Level = 57, Name = "Diarahan", Cost = 18, UsesHP = false, Icon = "heal"},
 	{Level = 54, Name = "Maragidyne", Cost = 22, UsesHP = false, Icon = "fire"},
 	{Level = 46, Name = "Agidyne", Cost = 12, UsesHP = false, Icon = "fire"},
-	{Level = 41, Name = "Matarunda", Cost = 24, UsesHP = false, Icon = "passive"},
+	-- {Level = 41, Name = "Matarunda", Cost = 24, UsesHP = false, Icon = "passive"},
 	{Level = 35, Name = "Maragion", Cost = 16, UsesHP = false, Icon = "fire"},
-	{Level = 30, Name = "Lullaby", Cost = 8, UsesHP = false, Icon = "sleep"},
+	-- {Level = 30, Name = "Lullaby", Cost = 8, UsesHP = false, Icon = "sleep"},
 	{Level = 28, Name = "Diarama", Cost = 6, UsesHP = false, Icon = "heal"},
-	{Level = 25, Name = "Fire Break", Cost = 15, UsesHP = false, Icon = "passive"},
+	-- {Level = 25, Name = "Fire Break", Cost = 15, UsesHP = false, Icon = "passive"},
 	{Level = 22, Name = "Agilao", Cost = 8, UsesHP = false, Icon = "fire"},
-	{Level = 16, Name = "Dekaja", Cost = 10, UsesHP = false, Icon = "passive"},
+	-- {Level = 16, Name = "Dekaja", Cost = 10, UsesHP = false, Icon = "passive"},
 	{Level = 13, Name = "Maragi", Cost = 10, UsesHP = false, Icon = "fire"},
 	{Level = 11, Name = "Tarunda", Cost = 8, UsesHP = false, Icon = "passive"},
-	{Level = 7, Name = "Dormina", Cost = 3, UsesHP = false, Icon = "sleep"},
+	-- {Level = 7, Name = "Dormina", Cost = 3, UsesHP = false, Icon = "sleep"},
 }
 ENT.LegendaryMaterials = {}
 ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/carmen/carmen_legendary"
