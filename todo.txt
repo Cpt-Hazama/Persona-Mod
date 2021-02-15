@@ -1,4 +1,0 @@
-Skills
-	- Add missing skills
-Models
-	- Revamp facial animations on characters

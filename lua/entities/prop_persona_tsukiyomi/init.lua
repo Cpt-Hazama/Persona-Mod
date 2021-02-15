@@ -36,45 +36,45 @@ function ENT:HandleEvents(skill,animBlock,seq,t)
 	local ply = self.User
 	if animBlock == "melee" then
 		local tbl = {
-			"cpthazama/persona4/sho/nb400a.wav",
-			"cpthazama/persona4/sho/nb400b.wav",
-			"cpthazama/persona4/sho/no124a.wav",
-			"cpthazama/persona4/sho/no125a.wav",
-			"cpthazama/persona4/sho/no126a.wav",
-			"cpthazama/persona4/sho/no126ak.wav",
-			"cpthazama/persona4/sho/no127a.wav",
-			"cpthazama/persona4/sho/no127b.wav",
-			"cpthazama/persona4/sho/no128a.wav",
+			"cpthazama/vo/sho/nb400a.wav",
+			"cpthazama/vo/sho/nb400b.wav",
+			"cpthazama/vo/sho/no124a.wav",
+			"cpthazama/vo/sho/no125a.wav",
+			"cpthazama/vo/sho/no126a.wav",
+			"cpthazama/vo/sho/no126ak.wav",
+			"cpthazama/vo/sho/no127a.wav",
+			"cpthazama/vo/sho/no127b.wav",
+			"cpthazama/vo/sho/no128a.wav",
 		}
 		self:UserSound(VJ_PICK(tbl))
 	end
 	if animBlock == "special" then
 		local tbl = {
-			"cpthazama/persona4/sho/nb313b.wav"
+			"cpthazama/vo/sho/nb313b.wav"
 		}
 		self:UserSound(VJ_PICK(tbl))
 	end
 	if skill == "Abyssal Wings" then
 		if animBlock == "range_start" then
 			self.Set = math.random(1,2)
-			self:UserSound(self.Set == 1 && "cpthazama/persona4/sho/nb313b.wav" or "cpthazama/persona4/sho/nb322a.wav")
+			self:UserSound(self.Set == 1 && "cpthazama/vo/sho/nb313b.wav" or "cpthazama/vo/sho/nb322a.wav")
 		end
 		if animBlock == "range" then
-			self:UserSound(self.Set == 1 && "cpthazama/persona4/sho/nb322b.wav" or "cpthazama/persona4/sho/nb323a.wav")
+			self:UserSound(self.Set == 1 && "cpthazama/vo/sho/nb322b.wav" or "cpthazama/vo/sho/nb323a.wav")
 		end
 	else
 		if animBlock == "range_start" then
 			local tbl = {
-				"cpthazama/persona4/sho/no304a.wav",
-				"cpthazama/persona4/sho/nb400a.wav",
-				"cpthazama/persona4/sho/nb400b.wav",
+				"cpthazama/vo/sho/no304a.wav",
+				"cpthazama/vo/sho/nb400a.wav",
+				"cpthazama/vo/sho/nb400b.wav",
 			}
 			self:UserSound(VJ_PICK(tbl))
 		end
 		if animBlock == "range" then
 			local tbl = {
-				"cpthazama/persona4/sho/no303b.wav",
-				"cpthazama/persona4/sho/nb323b.wav",
+				"cpthazama/vo/sho/no303b.wav",
+				"cpthazama/vo/sho/nb323b.wav",
 			}
 			self:UserSound(VJ_PICK(tbl))
 		end
@@ -119,12 +119,12 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
 	local tbl = {
-		"cpthazama/persona4/sho/nb213a.wav",
-		"cpthazama/persona4/sho/nb213b.wav",
-		"cpthazama/persona4/sho/no210a.wav",
-		"cpthazama/persona4/sho/no210b.wav",
-		"cpthazama/persona4/sho/no211a.wav",
-		"cpthazama/persona4/sho/no211b.wav",
+		"cpthazama/vo/sho/nb213a.wav",
+		"cpthazama/vo/sho/nb213b.wav",
+		"cpthazama/vo/sho/no210a.wav",
+		"cpthazama/vo/sho/no210b.wav",
+		"cpthazama/vo/sho/no211a.wav",
+		"cpthazama/vo/sho/no211b.wav",
 	}
 	self:UserSound(VJ_PICK(tbl))
 	
@@ -145,5 +145,5 @@ function ENT:OnSummoned(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
-	self:UserSound("cpthazama/persona4/sho/no127b.wav")
+	self:UserSound("cpthazama/vo/sho/no127b.wav")
 end

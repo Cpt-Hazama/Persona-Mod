@@ -574,6 +574,12 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif card == "Marin Karin" then
 		self:MarinKarin(ply,persona)
 		return
+	elseif card == "Life Drain" then
+		self:LifeDrain(ply,persona)
+		return
+	elseif card == "Spirit Drain" then
+		self:SpiritDrain(ply,persona)
+		return
 	elseif card == "Agi" then
 		self:Agi(ply,persona)
 		return
@@ -2137,7 +2143,7 @@ function ENT:ZioEffect_P4AU(att,dist,eff,target)
 		start = pos,
 		endpos = endPosi,
 	})
-	self:EmitSound("cpthazama/persona5/adachi/elec_charge.wav",75)
+	self:EmitSound("cpthazama/vo/adachi/elec_charge.wav",75)
 	if tr.Hit then
 		if !IsValid(ent) then
 			ent = tr.Entity
@@ -2217,7 +2223,7 @@ function ENT:Fear(ent,t)
 	if ent.Persona_FearT < CurTime() then
 		ent.Persona_FearT = CurTime() +t
 		if self.User:IsPlayer() then self.User:ChatPrint("Inflicted Fear!") end
-		-- ent:EmitSound("cpthazama/persona5/adachi/curse.wav",80)
+		-- ent:EmitSound("cpthazama/vo/adachi/curse.wav",80)
 		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 		local hookName = "Persona_FearThink_" .. ent:EntIndex()
 		local user = self.User

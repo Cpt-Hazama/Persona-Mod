@@ -166,6 +166,106 @@ function ENT:DreamFog(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:LifeDrain(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Life Drain"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							local hp = ent:Health()
+							local take = hp -20
+
+							ent:EmitSound("cpthazama/persona5/skills/0103.wav")
+							self.User:SetHealth(math.Clamp(self.User:Health() +20,1,self.User:GetMaxHealth()))
+							ent:SetHealth(math.Clamp(take,1,ent:GetMaxHealth()))
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_evasion")
+							spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",1)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SpiritDrain(ply,persona)
+	if !IsValid(ply.Persona_EyeTarget) then
+		return
+	end
+	local skill = "Spirit Drain"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1)
+						local ent = ply.Persona_EyeTarget
+						if IsValid(ent) then
+							local sp = ent:GetSP()
+							local take = sp -10
+
+							ent:EmitSound("cpthazama/persona5/skills/0103.wav")
+							self.User:SetSP(math.Clamp(self.User:GetSP() +10,1,self.User:GetMaxSP()))
+							ent:SetSP(math.Clamp(take,1,ent:GetMaxSP()))
+
+							local spawnparticle = ents.Create("info_particle_system")
+							spawnparticle:SetKeyValue("effect_name","vj_per_skill_debuff_def")
+							spawnparticle:SetPos(ent:GetPos() +ent:OBBCenter())
+							spawnparticle:Spawn()
+							spawnparticle:Activate()
+							spawnparticle:Fire("Start","",0)
+							spawnparticle:Fire("Kill","",1)
+						end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MarinKarin(ply,persona)
 	if !IsValid(ply.Persona_EyeTarget) then
 		return
@@ -325,7 +425,7 @@ function ENT:YomiDrop(ply,persona,rmb)
 				if IsValid(self) && IsValid(ply) then
 					self:SetNoDraw(true)
 					self.InstaKillStage = 2
-					self:EmitSound("cpthazama/persona5/adachi/redmist.wav")
+					self:EmitSound("cpthazama/vo/adachi/redmist.wav")
 					-- self:PlayAnimation("atk_magatsu_mandala_pre_idle",1,1)
 					self:PlaySet(skill,"range_start_idle",1,1)
 				end
@@ -347,7 +447,7 @@ function ENT:YomiDrop(ply,persona,rmb)
 						self.InstaKillTarget = ent
 						self.InstaKillTargetPos = ent:GetPos()
 						if ent:IsPlayer() then ent:Freeze(true) end
-						ent:EmitSound("cpthazama/persona5/adachi/redmist_puddle.wav")
+						ent:EmitSound("cpthazama/vo/adachi/redmist_puddle.wav")
 
 						local bloodeffect = EffectData()
 						bloodeffect:SetOrigin(ent:GetPos())
@@ -374,7 +474,7 @@ function ENT:YomiDrop(ply,persona,rmb)
 						self:SetAngles(Angle(ang.x,(self.InstaKillTarget:GetPos() -self:GetPos()):Angle().y,ang.z))
 					end
 					self:SetNoDraw(false)
-					self:EmitSound("cpthazama/persona5/adachi/redmist.wav")
+					self:EmitSound("cpthazama/vo/adachi/redmist.wav")
 				end
 			end)
 
@@ -383,7 +483,7 @@ function ENT:YomiDrop(ply,persona,rmb)
 					if IsValid(self.InstaKillTarget) && self.InstaKillStage != 0 then
 						-- self:PlayAnimation("atk_magatsu_mandala",1,1)
 						self:PlaySet(skill,"range_idle",1,1)
-						self:EmitSound("cpthazama/persona5/adachi/blast_charge.wav",120)
+						self:EmitSound("cpthazama/vo/adachi/blast_charge.wav",120)
 						util.ScreenShake(self:GetPos(),16,100,3,5000)
 					end
 				end
@@ -410,7 +510,7 @@ function ENT:YomiDrop(ply,persona,rmb)
 						if ent:IsPlayer() then
 							ent:GodDisable()
 						end
-						self:EmitSound("cpthazama/persona5/adachi/slash.wav",120)
+						self:EmitSound("cpthazama/vo/adachi/slash.wav",120)
 						ent:SetPos(self.InstaKillTargetPos)
 						if ent:IsPlayer() then ent:Freeze(false) end
 						ent:SetHealth(1)
@@ -1307,7 +1407,7 @@ function ENT:Teleport()
 				bloodeffect:SetAttachment(1)
 				util.Effect("P4_RedMist",bloodeffect)
 				
-				sound.Play("cpthazama/persona5/adachi/blast_charge.wav",self:GetPos(),75)
+				sound.Play("cpthazama/vo/adachi/blast_charge.wav",self:GetPos(),75)
 
 				self.User:SetPos(pos)
 				self:SetPos(self:GetIdlePosition(self.User))
@@ -1324,7 +1424,7 @@ function ENT:Teleport()
 				bloodeffect:SetAttachment(1)
 				util.Effect("P4_RedMist",bloodeffect)
 				
-				sound.Play("cpthazama/persona5/adachi/blast_charge.wav",self:GetPos(),75)
+				sound.Play("cpthazama/vo/adachi/blast_charge.wav",self:GetPos(),75)
 				timer.Simple(t,function()
 					if IsValid(self) then
 						self:DoIdle()
