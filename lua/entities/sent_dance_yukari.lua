@@ -24,10 +24,10 @@ ENT.WaitForNextSongToStartTime = 10
 
 ENT.Animations = {}
 ENT.Animations["dance_whenthemoonsreachingoutstars"] = {}
-ENT.Animations["dance_whenthemoonsreachingoutstars"][1] = {anim = "dance_whenthemoonsreachingoutstars",next = "dance_whenthemoonsreachingoutstars_2",endEarlyTime = 0.02}
-ENT.Animations["dance_whenthemoonsreachingoutstars"][2] = {anim = "dance_whenthemoonsreachingoutstars_2",next = "dance_whenthemoonsreachingoutstars_3",endEarlyTime = 0.02}
-ENT.Animations["dance_whenthemoonsreachingoutstars"][3] = {anim = "dance_whenthemoonsreachingoutstars_3",next = "dance_whenthemoonsreachingoutstars_2",endEarlyTime = 0.02}
-ENT.Animations["dance_whenthemoonsreachingoutstars"][4] = {anim = "dance_whenthemoonsreachingoutstars_2",next = "dance_whenthemoonsreachingoutstars_4",endEarlyTime = 0.02}
+ENT.Animations["dance_whenthemoonsreachingoutstars"][1] = {anim = "dance_whenthemoonsreachingoutstars",next = "dance_whenthemoonsreachingoutstars_2",endEarlyTime = 0}
+ENT.Animations["dance_whenthemoonsreachingoutstars"][2] = {anim = "dance_whenthemoonsreachingoutstars_2",next = "dance_whenthemoonsreachingoutstars_3",endEarlyTime = 0}
+ENT.Animations["dance_whenthemoonsreachingoutstars"][3] = {anim = "dance_whenthemoonsreachingoutstars_3",next = "dance_whenthemoonsreachingoutstars_2",endEarlyTime = 0}
+ENT.Animations["dance_whenthemoonsreachingoutstars"][4] = {anim = "dance_whenthemoonsreachingoutstars_2",next = "dance_whenthemoonsreachingoutstars_4",endEarlyTime = 0}
 ENT.Animations["dance_whenthemoonsreachingoutstars"][5] = {anim = "dance_whenthemoonsreachingoutstars_4",next = false,endEarlyTime = 0}
 
 ENT.SoundTracks = {
@@ -42,7 +42,7 @@ ENT.Outfits[3] = {Name = "Race Queen", Model = "_racequeen", Offset = 0.1, ReqSo
 
 ENT.SongLength = {}
 ENT.SongLength["dance_whenthemoonsreachingoutstars"] = 173
-ENT.SongLength["dance_wanttobeclose"] = 175
+-- ENT.SongLength["dance_wanttobeclose"] = 175
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if CLIENT then
 	function ENT:ClientInit()

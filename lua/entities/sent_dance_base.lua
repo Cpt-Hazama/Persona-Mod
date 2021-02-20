@@ -1,5 +1,8 @@
 AddCSLuaFile()
 
+local table_insert = table.insert
+local table_remove = table.remove
+
 ENT.Base 			= "prop_vj_animatable"
 ENT.Type 			= "anim"
 ENT.PrintName 		= ""
@@ -148,7 +151,7 @@ if (CLIENT) then
 			end
 		end
 		if canContinue then
-			table.insert(self.Flexes,{Name=name,Target=val,Speed=speed})
+			table_insert(self.Flexes,{Name=name,Target=val,Speed=speed})
 		end
 	end
 
@@ -188,7 +191,7 @@ if (CLIENT) then
 		for ind,flex in ipairs(self.Flexes) do
 			if flex then
 				local id = self:GetFlexIDByName(flex.Name)
-				if !id then MsgN("Failed to load flex [" .. flex.Name .. "] on " .. tostring(self) .. "!") table.remove(self.Flexes,ind) return end
+				if !id then MsgN("Failed to load flex [" .. flex.Name .. "] on " .. tostring(self) .. "!") table_remove(self.Flexes,ind) return end
 				local oldVal = self:GetFlexWeight(id)
 				local target = flex.Target
 				-- if oldVal != flex.Target then
@@ -199,7 +202,7 @@ if (CLIENT) then
 				else
 					-- Entity(1):ChatPrint(flex.Name .. " " .. math.abs(target -oldVal) .. " " .. target)
 					-- Entity(1):ChatPrint("REMOVED " .. flex.Name)
-					table.remove(self.Flexes,ind)
+					table_remove(self.Flexes,ind)
 				end
 			end
 		end
@@ -224,6 +227,33 @@ if (CLIENT) then
 	end
 
 	function ENT:Initialize()
+		local extraCostumes = P_GetAvailableCostumes(self.PrintName)
+		if extraCostumes then
+			for _,costumeData in pairs(extraCostumes) do
+				table_insert(self.Outfits,costumeData)
+			end
+		end
+
+		local extraSongs = P_GetAvailableSongs(self.PrintName)
+		if extraSongs then
+			for _,data in pairs(extraSongs.SongData) do
+				table_insert(self.SoundTracks,data)
+				if data.length then
+					if !self.SongLength then self.SongLength = {} end
+					self.SongLength[data.dance] = data.length
+				end
+			end
+			for index,data in pairs(extraSongs.AnimData) do
+				local animName = data[1].anim
+				self.Animations[animName] = {}
+				local tbl = data[1]
+				for i = 1,#data do
+					tbl = data[i]
+					self.Animations[animName][i] = {anim = tbl.anim,next = tbl.next,endEarlyTime = tbl.endEarlyTime}
+				end
+			end
+		end
+
 		self.DanceIndex = 0
 		self.NextSpeakT = 0
 		self:ClientInit()
@@ -236,7 +266,7 @@ if (CLIENT) then
 
 	function ENT:AddNote(seq,dir,timer,spawnTime)
 		self.TrackNotes[seq] = self.TrackNotes[seq] or {}
-		table.insert(self.TrackNotes[seq],{Dir = dir,Life = timer,Activate = spawnTime})
+		table_insert(self.TrackNotes[seq],{Dir = dir,Life = timer,Activate = spawnTime})
 	end
 	
 	function ENT:CustomCalcView(ply,pos,angles,fov,danceBone) end
@@ -321,7 +351,7 @@ if (CLIENT) then
 		}
 		
 		self.Persona_HitFX = self.Persona_HitFX or {}
-		table.insert(self.Persona_HitFX,{Material=mats[type],PosW=note.LastPosW[1],PosH=note.LastPosH[1],Timer=CurTime() +0.35})
+		table_insert(self.Persona_HitFX,{Material=mats[type],PosW=note.LastPosW[1],PosH=note.LastPosH[1],Timer=CurTime() +0.35})
 	end
 
 	function ENT:CheckNoteHit(dir)
@@ -714,7 +744,7 @@ if (CLIENT) then
 			-- boxW, boxH = ScrW() /2, ScrH() /(9.65 -#dancer.SoundTracks)
 			boxW, boxH = ScrW() /2, 145
 			for i = 1,#dancer.SoundTracks do
-				boxH = boxH +(i *8)
+				boxH = boxH +(i *13)
 			end
 			draw.RoundedBox(8,boxX, boxY,boxW,boxH,Color(0,0,0,245))
 			draw.SimpleText("SELECT A SONG","Persona",boxX *2.3,boxY +10,HUDColor)
@@ -770,7 +800,7 @@ if (CLIENT) then
 						if note.Hit == false then
 							dancer:OnNoteHit(ply,ind,note,0)
 						end
-						table.remove(dancer.Notes,ind)
+						table_remove(dancer.Notes,ind)
 					else
 						DrawNote(note)
 					end
@@ -795,7 +825,7 @@ if (CLIENT) then
 			for ind,fx in pairs(dancer.Persona_HitFX) do
 				if fx then
 					if fx.Timer < CurTime() then
-						table.remove(dancer.Persona_HitFX,ind)
+						table_remove(dancer.Persona_HitFX,ind)
 					else
 						DrawFX(fx)
 					end
@@ -1225,7 +1255,7 @@ function ENT:RandomizeExpressions(flexes,anim,frames,chance)
 	self.RandomizedFlexes = self.RandomizedFlexes or {}
 	self.RandomizedFlexes[anim] = self.RandomizedFlexes[anim] or {}
 	for _,v in pairs(flexes) do
-		table.insert(self.RandomizedFlexes[anim],v)
+		table_insert(self.RandomizedFlexes[anim],v)
 	end
 	for i = 1,frames do
 		if math.random(1,chance) == 1 then
@@ -1289,6 +1319,32 @@ function ENT:Initialize()
 	self.AnimationEvents = {}
 	
 	self:SetNW2Bool("CustomView",false)
+	self.CanShowMenu = CurTime() +0.15
+	local extraCostumes = P_GetAvailableCostumes(self.PrintName)
+	if extraCostumes then
+		for _,costumeData in pairs(extraCostumes) do
+			table_insert(self.Outfits,costumeData)
+		end
+	end
+	local extraSongs = P_GetAvailableSongs(self.PrintName)
+	if extraSongs then
+		for _,data in pairs(extraSongs.SongData) do
+			table_insert(self.SoundTracks,data)
+			if data.length then
+				if !self.SongLength then self.SongLength = {} end
+				self.SongLength[data.dance] = data.length
+			end
+		end
+		for _,data in pairs(extraSongs.AnimData) do
+			local animName = data[1].anim
+			self.Animations[animName] = {}
+			local tbl = data[1]
+			for i = 1,#data do
+				tbl = data[i]
+				self.Animations[animName][i] = {anim = tbl.anim,next = tbl.next,endEarlyTime = tbl.endEarlyTime}
+			end
+		end
+	end
 
 	timer.Simple(0,function()
 		if IsValid(self) then
@@ -1325,7 +1381,7 @@ function ENT:Initialize()
 						self:SetNW2Int("HS_" .. v.name,PXP.GetDanceData(self.Creator,v.name) or 0)
 					end
 				end
-				self:SetShowSongMenu(true)
+				-- self:SetShowSongMenu(true)
 				self:OnInit()
 			end
 		end
@@ -1361,12 +1417,12 @@ function ENT:AddCinematicEvent(seq,frame,data,frameCount)
 	self.CinematicEvents = self.CinematicEvents or {}
 	self.CinematicEvents[seq] = self.CinematicEvents[seq] or {}
 	self.CinematicEvents[seq][frame] = self.CinematicEvents[seq][frame] or {}
-	table.insert(self.CinematicEvents[seq][frame],data)
+	table_insert(self.CinematicEvents[seq][frame],data)
 	
 	self.CinematicCoolDown = self.CinematicCoolDown or {}
 	self.CinematicCoolDown[seq] = self.CinematicCoolDown[seq] or {}
 	self.CinematicCoolDown[seq][frame] = self.CinematicCoolDown[seq][frame] or {}
-	table.insert(self.CinematicCoolDown[seq][frame],CurTime())
+	table_insert(self.CinematicCoolDown[seq][frame],CurTime())
 
 	if frameCount then
 		self.RegisteredSequences = self.RegisteredSequences or {}
@@ -1413,17 +1469,17 @@ function ENT:AddFlexEvent(seq,frame,flexData,frameCount)
 	self.AnimationEvents = self.AnimationEvents or {}
 	self.AnimationEvents[seq] = self.AnimationEvents[seq] or {}
 	self.AnimationEvents[seq][frame] = self.AnimationEvents[seq][frame] or {}
-	table.insert(self.AnimationEvents[seq][frame],"rand_flex")
+	table_insert(self.AnimationEvents[seq][frame],"rand_flex")
 	
 	self.EventCoolDown = self.EventCoolDown or {}
 	self.EventCoolDown[seq] = self.EventCoolDown[seq] or {}
 	self.EventCoolDown[seq][frame] = self.EventCoolDown[seq][frame] or {}
-	table.insert(self.EventCoolDown[seq][frame],CurTime())
+	table_insert(self.EventCoolDown[seq][frame],CurTime())
 	
 	self.RandomFlex = self.RandomFlex or {}
 	self.RandomFlex[seq] = self.RandomFlex[seq] or {}
 	self.RandomFlex[seq][frame] = self.RandomFlex[seq][frame] or {}
-	table.insert(self.RandomFlex[seq][frame],flexData)
+	table_insert(self.RandomFlex[seq][frame],flexData)
 
 	if frameCount then
 		self.RegisteredSequences = self.RegisteredSequences or {}
@@ -1436,12 +1492,12 @@ function ENT:AddAnimationEvent(seq,frame,eventName,frameCount)
 	self.AnimationEvents = self.AnimationEvents or {}
 	self.AnimationEvents[seq] = self.AnimationEvents[seq] or {}
 	self.AnimationEvents[seq][frame] = self.AnimationEvents[seq][frame] or {}
-	table.insert(self.AnimationEvents[seq][frame],eventName)
+	table_insert(self.AnimationEvents[seq][frame],eventName)
 	
 	self.EventCoolDown = self.EventCoolDown or {}
 	self.EventCoolDown[seq] = self.EventCoolDown[seq] or {}
 	self.EventCoolDown[seq][frame] = self.EventCoolDown[seq][frame] or {}
-	table.insert(self.EventCoolDown[seq][frame],CurTime())
+	table_insert(self.EventCoolDown[seq][frame],CurTime())
 
 	if frameCount then
 		self.RegisteredSequences = self.RegisteredSequences or {}
@@ -1492,7 +1548,7 @@ function ENT:SpawnLamp(ent)
 
 	self.Lamps = self.Lamps or {}
 	local index = #self.Lamps +1
-	table.insert(self.Lamps,lamp)
+	table_insert(self.Lamps,lamp)
 
 	return {Ent=lamp,Ind=index}
 end
@@ -1505,7 +1561,9 @@ function ENT:Think()
 			self:SetNW2Int("HS_" .. v.name,highscore)
 		end
 		self:PlayPreview(self.Creator)
-		self:SetShowSongMenu(true)
+		if CurTime() > self.CanShowMenu then
+			self:SetShowSongMenu(true)
+		end
 	end
 	if self.NextDanceT < CurTime() && self.StartedSong then
 		net.Start("Persona_Dance_SongEnd")

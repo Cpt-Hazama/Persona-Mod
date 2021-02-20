@@ -2,26 +2,6 @@ include("persona_xp.lua")
 
 local debug = 0
 
-function PGM()
-	return gmod.GetGamemode()
-end
-
-function IsPersonaGamemode()
-	return PGM().Name == "Persona"
-end
-
-function GetDancerFlexData(seqID,ent) -- Get a really good randomly generated facial flex set? Get the data with this!
-	local ent = ent or Entity(1)
-	local tbl = ent:GetNW2Entity("Persona_Dancer").RandomFlex
-	local sequenceID = seqID or 1 -- ACT_IDLE or aka Preview
-	for k,v in SortedPairs(tbl[sequenceID]) do
-		local frame = k
-		for i,d in pairs(v) do
-			print(frame .. ",{Name='" .. d.Name .. "',Value=" .. d.Value .. ",Speed=" .. d.Speed .. "}")
-		end
-	end
-end
-
 local File = FindMetaTable("File")
 
 function File:QuickRead(position)

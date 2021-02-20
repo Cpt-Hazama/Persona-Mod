@@ -4477,6 +4477,7 @@ function ENT:Salvation(ply,persona)
 						t = self:PlaySet(skill,"range_idle",1,1)
 						self.User:SetHealth(self.User:GetMaxHealth())
 						for _,v in pairs(self.User:GetFullParty(true)) do
+							if !IsValid(v) then continue end
 							v:SetHealth(v:GetMaxHealth())
 							v:EmitSound("cpthazama/persona5/skills/0318.wav",85)
 							v:RemoveAllDecals()
@@ -4782,6 +4783,7 @@ function ENT:Mediarahan(ply,persona)
 						t = self:PlaySet(skill,"range_idle",1,1)
 						self.User:SetHealth(self.User:GetMaxHealth())
 						for _,v in pairs(self.User:GetFullParty(true)) do
+							if !IsValid(v) then continue end
 							v:SetHealth(v:GetMaxHealth())
 							v:EmitSound("cpthazama/persona5/skills/0302.wav",85)
 							v:RemoveAllDecals()
@@ -5328,6 +5330,7 @@ function ENT:HeatRiser(ply,persona)
 
 						ply.Persona_HeatRiserT = CurTime() +60
 						for _,v in pairs(ply:GetFullParty(true)) do
+							if !IsValid(v) then continue end
 							v.Persona_HeatRiserT = CurTime() +60
 							v:EmitSound("cpthazama/persona5/skills/0343.wav",90)
 
