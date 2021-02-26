@@ -4112,6 +4112,79 @@ function ENT:Maeigaon(ply,persona)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:VelvetMandala(ply,persona)
+	local skill = "Velvet Mandala"
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+		self:SetTask("TASK_PLAY_ANIMATION")
+		self:TakeSP(self.CurrentCardCost)
+		local t = self:PlaySet(skill,"range_start",1)
+		timer.Simple(t,function()
+			if IsValid(self) then
+				t = self:PlaySet(skill,"range",1)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_idle",1,1) *7
+						for _,v in pairs(self:FindEnemies(self:GetPos(),1500)) do
+							if IsValid(v) && IsValid(self) then
+								local pos = {
+									[1] = v:GetPos() +v:GetForward() *200 +v:GetRight() *200,
+									[2] = v:GetPos() +v:GetForward() *200 +v:GetRight() *-200,
+									[3] = v:GetPos() +v:GetForward() *-200
+								}
+								for i = 1,3 do
+									local spawnparticle = ents.Create("info_particle_system")
+									spawnparticle:SetKeyValue("effect_name","vj_per_skill_curse_mandala")
+									spawnparticle:SetPos(pos[i])
+									spawnparticle:Spawn()
+									spawnparticle:Activate()
+									spawnparticle:Fire("Start","",0)
+									spawnparticle:Fire("SetParent",v:GetName())
+									v:EmitSound("cpthazama/persona5/skills/0707.wav",110)
+									timer.Simple(5,function()
+										if IsValid(v) then
+											util.ScreenShake(v:GetPos(),15,100,3.5,1750)
+											if IsValid(self) then
+												self:DealDamage(v,DMG_P_HEAVY,DMG_P_CURSE,2)
+												if math.random(1,2) == 1 then
+													local r = math.random(1,3)
+													if r == 1 then
+														self:Fear(v,15)
+													elseif r == 2 then
+														self:Curse(v,15,1)
+													else
+														self:Confuse(v,15)
+													end
+												end
+											end
+										end
+									end)
+									timer.Simple(7,function()
+										if IsValid(spawnparticle) then
+											spawnparticle:Fire("Kill","",0.1)
+										end
+									end)
+								end
+							end
+						end
+
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range_end",1)
+								timer.Simple(t,function()
+									if IsValid(self) then
+										self:SetTask("TASK_IDLE")
+										self:DoIdle()
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:MagatsuMandala(ply,persona)
 	local skill = "Magatsu Mandala"
 	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then

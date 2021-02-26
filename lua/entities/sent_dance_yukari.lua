@@ -36,8 +36,8 @@ ENT.SoundTracks = {
 
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Stage Outfit", Model = "", Offset = 1, ReqSong = nil, ReqScore = 0}
--- ENT.Outfits[2] = {Name = "Gekkoukan Winter Uniform", Model = "_winteruniform", Offset = 1, ReqSong = "Want To Be Close -Remix", ReqScore = 10000}
-ENT.Outfits[2] = {Name = "Gekkoukan Winter Uniform", Model = "_winteruniform", Offset = 1, ReqSong = "When The Moon's Reaching Out Stars -Remix-", ReqScore = 10000}
+-- ENT.Outfits[2] = {Name = "Winter Uniform", Model = "_winteruniform", Offset = 1, ReqSong = "Want To Be Close -Remix", ReqScore = 10000}
+ENT.Outfits[2] = {Name = "Winter Uniform", Model = "_winteruniform", Offset = 1, ReqSong = "When The Moon's Reaching Out Stars -Remix-", ReqScore = 10000}
 ENT.Outfits[3] = {Name = "Race Queen", Model = "_racequeen", Offset = 0.1, ReqSong = "When The Moon's Reaching Out Stars -Remix-", ReqScore = 60000}
 
 ENT.SongLength = {}

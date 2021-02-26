@@ -613,6 +613,9 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	elseif card == "Myriad Mandala" then
 		self:MyriadMandala(ply,persona)
 		return
+	elseif card == "Velvet Mandala" then
+		self:VelvetMandala(ply,persona)
+		return
 	elseif card == "Maziodyne" then
 		self:Maziodyne(ply,persona,rmb)
 		return

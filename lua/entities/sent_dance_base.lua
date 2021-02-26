@@ -1116,6 +1116,12 @@ function ENT:ChangeOutfit(outfit)
 		self:SetPos(pos +Vector(0,0,self.HeightOffset))
 		local newMdl = self:GetModel()
 		self:OnChangedOutfit(oldMdl,newMdl,outfit)
+		local DLC_Data = P_GetCostumeData(self.PrintName,outfit)
+		if DLC_Data then
+			if DLC_Data.OnChangedOutfit != nil then
+				DLC_Data.OnChangedOutfit(self,oldMdl,newMdl,outfit)
+			end
+		end
 		return
 	end
 	for _,v in pairs(self.Outfits) do
@@ -1128,6 +1134,12 @@ function ENT:ChangeOutfit(outfit)
 			self:SetPos(pos +Vector(0,0,self.HeightOffset))
 			local newMdl = self:GetModel()
 			self:OnChangedOutfit(oldMdl,newMdl,outfit)
+			local DLC_Data = P_GetCostumeData(self.PrintName,outfit)
+			if DLC_Data then
+				if DLC_Data.OnChangedOutfit != nil then
+					DLC_Data.OnChangedOutfit(self,oldMdl,newMdl,outfit)
+				end
+			end
 			break
 		end
 	end
