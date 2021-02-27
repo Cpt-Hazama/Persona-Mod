@@ -86,6 +86,14 @@ if CLIENT then
 	CConVar("persona_dance_controller","0",true,0,1)
 	CConVar("persona_dance_cinematic","0",true,0,1)
 
+	CConVar("persona_dance_top_l","11",true,0,159)
+	CConVar("persona_dance_mid_l","29",true,0,159)
+	CConVar("persona_dance_bot_l","14",true,0,159)
+	CConVar("persona_dance_top_r","8",true,0,159)
+	CConVar("persona_dance_mid_r","9",true,0,159)
+	CConVar("persona_dance_bot_r","10",true,0,159)
+	CConVar("persona_dance_scratch","15",true,0,159)
+
 	CConVar("persona_dance_hud_r","255",true,0,255)
 	CConVar("persona_dance_hud_g","255",true,0,255)
 	CConVar("persona_dance_hud_b","255",true,0,255)
@@ -829,8 +837,27 @@ end
 if CLIENT then
 
 	local pFont = ScreenScale(8.5)
+	local pFontBig = ScreenScale(25)
 	local pFont_EXP = ScreenScale(6.5)
 	local pFont_Small = ScreenScale(7)
+
+	surface.CreateFont("Persona_Large",{
+		font = "p5hatty",
+		extended = false,
+		size = pFontBig,
+		weight = 500,
+		blursize = 0,
+		scanlines = 0,
+		antialias = true,
+		underline = false,
+		italic = false,
+		strikeout = false,
+		symbol = false,
+		rotary = false,
+		shadow = false,
+		additive = false,
+		outline = true,
+	})
 
 	surface.CreateFont("Persona",{
 		font = "p5hatty",

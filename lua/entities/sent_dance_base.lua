@@ -317,6 +317,7 @@ if (CLIENT) then
 			end
 			-- return
 		end
+		self.TotalNotes = #self.TrackNotes[anim]
 		local index = self.DanceIndex
 		for _,v in pairs(self.TrackNotes[anim]) do
 			timer.Simple(v.Activate,function()
@@ -337,6 +338,7 @@ if (CLIENT) then
 	end
 
 	function ENT:OnNoteHit(ply,ind,note,type)
+		if note.Hit == true then return end
 		note.Hit = true
 		note.HitType = type
 		if type == 0 then
@@ -352,6 +354,75 @@ if (CLIENT) then
 		
 		self.Persona_HitFX = self.Persona_HitFX or {}
 		table_insert(self.Persona_HitFX,{Material=mats[type],PosW=note.LastPosW[1],PosH=note.LastPosH[1],Timer=CurTime() +0.35})
+	end
+
+	function ENT:CheckButtons(ply) -- Oh what's that? PlayerBindPress doesn't work on CLIENT in singleplayer? Yea fuck that BS, so dumb. Allow me to just recreate the whole fucking thing myself just so I can tell the Dancer "goo goo ga ga I pressed this button"...
+		local a = GetConVarNumber("persona_dance_top_l")
+		local s = GetConVarNumber("persona_dance_mid_l")
+		local d = GetConVarNumber("persona_dance_bot_l")
+		local e = GetConVarNumber("persona_dance_scratch")
+		local n4 = GetConVarNumber("persona_dance_top_r")
+		local n8 = GetConVarNumber("persona_dance_mid_r")
+		local n6 = GetConVarNumber("persona_dance_bot_r")
+		ply.Persona_ButtonData = ply.Persona_ButtonData or {}
+		ply.Persona_ButtonData["a"] = ply.Persona_ButtonData["a"] or {Down = false, CT = 0}
+		ply.Persona_ButtonData["s"] = ply.Persona_ButtonData["s"] or {Down = false, CT = 0}
+		ply.Persona_ButtonData["d"] = ply.Persona_ButtonData["d"] or {Down = false, CT = 0}
+		ply.Persona_ButtonData["e"] = ply.Persona_ButtonData["e"] or {Down = false, CT = 0}
+		ply.Persona_ButtonData["n4"] = ply.Persona_ButtonData["n4"] or {Down = false, CT = 0}
+		ply.Persona_ButtonData["n8"] = ply.Persona_ButtonData["n8"] or {Down = false, CT = 0}
+		ply.Persona_ButtonData["n6"] = ply.Persona_ButtonData["n6"] or {Down = false, CT = 0}
+		
+		ply.Persona_ButtonData["a"].Down = ply.Persona_ButtonData["a"].CT >= CurTime()
+		ply.Persona_ButtonData["s"].Down = ply.Persona_ButtonData["s"].CT >= CurTime()
+		ply.Persona_ButtonData["d"].Down = ply.Persona_ButtonData["d"].CT >= CurTime()
+		ply.Persona_ButtonData["e"].Down = ply.Persona_ButtonData["e"].CT >= CurTime()
+		ply.Persona_ButtonData["n4"].Down = ply.Persona_ButtonData["n4"].CT >= CurTime()
+		ply.Persona_ButtonData["n6"].Down = ply.Persona_ButtonData["n6"].CT >= CurTime()
+		ply.Persona_ButtonData["n8"].Down = ply.Persona_ButtonData["n8"].CT >= CurTime()
+
+		if input.IsButtonDown(a) then
+			if CurTime() > ply.Persona_ButtonData["a"].CT then
+				self:CheckNoteHit("a")
+			end
+			ply.Persona_ButtonData["a"].CT = CurTime() +0.05
+		end
+		if input.IsButtonDown(s) then
+			if CurTime() > ply.Persona_ButtonData["s"].CT then
+				self:CheckNoteHit("s")
+			end
+			ply.Persona_ButtonData["s"].CT = CurTime() +0.05
+		end
+		if input.IsButtonDown(d) then
+			if CurTime() > ply.Persona_ButtonData["d"].CT then
+				self:CheckNoteHit("d")
+			end
+			ply.Persona_ButtonData["d"].CT = CurTime() +0.05
+		end
+		if input.IsButtonDown(n4) then
+			if CurTime() > ply.Persona_ButtonData["n4"].CT then
+				self:CheckNoteHit("n6")
+			end
+			ply.Persona_ButtonData["n4"].CT = CurTime() +0.05
+		end
+		if input.IsButtonDown(n6) then
+			if CurTime() > ply.Persona_ButtonData["n6"].CT then
+				self:CheckNoteHit("n4")
+			end
+			ply.Persona_ButtonData["n6"].CT = CurTime() +0.05
+		end
+		if input.IsButtonDown(n8) then
+			if CurTime() > ply.Persona_ButtonData["n8"].CT then
+				self:CheckNoteHit("n8")
+			end
+			ply.Persona_ButtonData["n8"].CT = CurTime() +0.05
+		end
+		if input.IsButtonDown(e) then
+			if CurTime() > ply.Persona_ButtonData["e"].CT then
+				ply:EmitSound("cpthazama/persona5_dance/mix.wav")
+			end
+			ply.Persona_ButtonData["e"].CT = CurTime() +0.05
+		end
 	end
 
 	function ENT:CheckNoteHit(dir)
@@ -405,6 +476,7 @@ if (CLIENT) then
 						ply.Persona_Dance_HitTimes = 0
 					end
 					if didHit then
+						ply.Persona_Dance_TotalHits = ply.Persona_Dance_TotalHits +1
 						if CurTime() > self.NextSpeakT && math.random(1,15) == 1 then
 							local snd = self:PlaySound("winning")
 							self.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
@@ -432,33 +504,69 @@ if (CLIENT) then
 		end
 	end
 
-	hook.Add("PlayerBindPress", "Persona_DanceViewScroll", function(ply,bind,pressed)
+	hook.Add("PlayerButtonDown","Persona_DanceButtons",function(ply,key)
+		local dancer = ply:GetNW2Entity("Persona_Dancer")
+		if !IsValid(dancer) then return end
+		local mode = ply:GetNW2Int("Persona_DanceMode")
+		if mode == 2 then
+			-- local a = GetConVarNumber("persona_dance_top_l")
+			-- local s = GetConVarNumber("persona_dance_mid_l")
+			-- local d = GetConVarNumber("persona_dance_bot_l")
+			-- local e = GetConVarNumber("persona_dance_scratch")
+			-- local n4 = GetConVarNumber("persona_dance_top_r")
+			-- local n8 = GetConVarNumber("persona_dance_mid_r")
+			-- local n6 = GetConVarNumber("persona_dance_bot_r")
+
+			-- if key == a then
+				-- dancer:CheckNoteHit("a")
+			-- end
+			-- if key == s then
+				-- dancer:CheckNoteHit("s")
+			-- end
+			-- if key == d then
+				-- dancer:CheckNoteHit("d")
+			-- end
+			-- if key == n6 then
+				-- dancer:CheckNoteHit("n4")
+			-- end
+			-- if key == n8 then
+				-- dancer:CheckNoteHit("n8")
+			-- end
+			-- if key == n4 then
+				-- dancer:CheckNoteHit("n6")
+			-- end
+			-- if key == e then
+				-- ply:EmitSound("cpthazama/persona5_dance/mix.wav")
+			-- end
+		end
+	end)
+
+	hook.Add("PlayerBindPress","Persona_DanceViewScroll",function(ply,bind,pressed)
 		local dancer = ply:GetNW2Entity("Persona_Dancer")
 		if !IsValid(dancer) then return end
 		local mode = ply:GetNW2Int("Persona_DanceMode")
 		if mode == 0 then return end
 
-		local usingController = GetConVarNumber("persona_dance_controller") == 1
-		local bUp = usingController && "lastinv" or "+forward"
-		local bLeft = usingController && "+reload" or "+moveleft"
-		local bRight = usingController && "+use" or "+moveright"
-		local bDown = usingController && "+jump" or "+back"
-		local bScratch = usingController && "+attack" or "+use"
-		local bNum4 = usingController && "+invprev" or "slot7"
-		local bNum8 = usingController && "+attack2" or "slot8"
-		local bNum6 = usingController && "+invnext" or "slot9"
-		local w = bind == bUp && pressed
-		local a = bind == bLeft && pressed
-		local s = bind == bDown && pressed
-		local d = bind == bRight && pressed
-		local e = bind == bScratch && pressed
-		local n4 = bind == bNum4 && pressed
-		local n8 = bind == bNum8 && pressed
-		local n6 = bind == bNum6 && pressed
+		-- local usingController = GetConVarNumber("persona_dance_controller") == 1
+		-- local bUp = usingController && "lastinv" or "+forward"
+		-- local bLeft = usingController && "+reload" or "+moveleft"
+		-- local bRight = usingController && "+use" or "+moveright"
+		-- local bDown = usingController && "+jump" or "+back"
+		-- local bScratch = usingController && "+attack" or "+use"
+		-- local bNum4 = usingController && "+invprev" or "slot7"
+		-- local bNum8 = usingController && "+attack2" or "slot8"
+		-- local bNum6 = usingController && "+invnext" or "slot9"
+		-- local w = bind == bUp && pressed
+		-- local a = bind == bLeft && pressed
+		-- local s = bind == bDown && pressed
+		-- local d = bind == bRight && pressed
+		-- local e = bind == bScratch && pressed
+		-- local n4 = bind == bNum4 && pressed
+		-- local n8 = bind == bNum8 && pressed
+		-- local n6 = bind == bNum6 && pressed
 
 		if mode == 2 then
 			ply.Persona_HitTime = ply.Persona_HitTime or 0
-			-- ply:SetNW2Int("Persona_Dance_Score",ply:GetNW2Int("Persona_Dance_Score") or 0)
 			ply.Persona_Dance_HitData = ply.Persona_Dance_HitData or {Perfect=0,Great=0,Good=0,Miss=0}
 			ply.Persona_Dance_Score = ply.Persona_Dance_Score or 0
 			ply.Persona_Dance_LastNoteT = ply.Persona_Dance_LastNoteT or 0
@@ -466,30 +574,27 @@ if (CLIENT) then
 			ply.Persona_Dance_LastCheerT = ply.Persona_Dance_LastCheerT or 0
 			ply.Persona_NoteDir = ply.Persona_NoteDir or "e"
 
-			-- if w then
-				-- CheckHit("w")
+			-- if a then
+				-- dancer:CheckNoteHit("a")
 			-- end
-			if a then
-				dancer:CheckNoteHit("a")
-			end
-			if s then
-				dancer:CheckNoteHit("s")
-			end
-			if d then
-				dancer:CheckNoteHit("d")
-			end
-			if n6 then
-				dancer:CheckNoteHit("n4")
-			end
-			if n8 then
-				dancer:CheckNoteHit("n8")
-			end
-			if n4 then
-				dancer:CheckNoteHit("n6")
-			end
-			if e then
-				ply:EmitSound("cpthazama/persona5_dance/mix.wav")
-			end
+			-- if s then
+				-- dancer:CheckNoteHit("s")
+			-- end
+			-- if d then
+				-- dancer:CheckNoteHit("d")
+			-- end
+			-- if n6 then
+				-- dancer:CheckNoteHit("n4")
+			-- end
+			-- if n8 then
+				-- dancer:CheckNoteHit("n8")
+			-- end
+			-- if n4 then
+				-- dancer:CheckNoteHit("n6")
+			-- end
+			-- if e then
+				-- ply:EmitSound("cpthazama/persona5_dance/mix.wav")
+			-- end
 		end
 		
 		if (bind == "invprev" or bind == "invnext") then
@@ -638,6 +743,7 @@ if (CLIENT) then
 		local blink = math.Clamp(math.abs(math.sin(CurTime() *1) *255),50,255)
 		
 		if mode == 2 then
+			dancer:CheckButtons(ply)
 			DrawTexture("hud/persona/dance/bg.png",boost && Color(boostColor.r,boostColor.g,boostColor.b,255) or Color(255,255,255,255),0,0,ScrW(),ScrH())
 			DrawTexture(danceMat && danceMat .. "_cut.png" or "hud/persona/dance/bg_stars_cut.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,blink),0,0,ScrW() /5,ScrH())
 			DrawTexture(danceMat && danceMat .. "_cut_b.png" or "hud/persona/dance/bg_stars_cut_b.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,blink),ScrW() *0.8,0,ScrW() /5,ScrH())
@@ -652,15 +758,49 @@ if (CLIENT) then
 				DrawTexture("hud/persona/dance/saving.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),ScrW() /1.041,ScrH() /1.075,200,200,(CurTime() % 360) *100)
 			end
 			
-			DrawTexture("hud/persona/dance/ico_a.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonA_W,buttonA_H,200,200)
-			-- DrawTexture("hud/persona/dance/ico_w.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonW_W,buttonW_H,200,200)
-			DrawTexture("hud/persona/dance/ico_s.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonW_W,buttonW_H,200,200)
-			DrawTexture("hud/persona/dance/ico_d.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonD_W,buttonD_H,200,200)
+			-- DrawTexture("hud/persona/dance/ico_a.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonA_W,buttonA_H,200,200)
+			-- DrawTexture("hud/persona/dance/ico_s.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonW_W,buttonW_H,200,200)
+			-- DrawTexture("hud/persona/dance/ico_d.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonD_W,buttonD_H,200,200)
 			
-			DrawTexture("hud/persona/dance/ico_n4.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN4_W,buttonN4_H,200,200)
-			DrawTexture("hud/persona/dance/ico_n8.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN8_W,buttonN8_H,200,200)
-			DrawTexture("hud/persona/dance/ico_n6.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN6_W,buttonN6_H,200,200)
-			-- DrawTexture("hud/persona/dance/fx_impact.png",Color(255,0,0,255),buttonN4_W +210,buttonN4_H -20,50,50)
+			-- DrawTexture("hud/persona/dance/ico_n4.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN4_W,buttonN4_H,200,200)
+			-- DrawTexture("hud/persona/dance/ico_n8.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN8_W,buttonN8_H,200,200)
+			-- DrawTexture("hud/persona/dance/ico_n6.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN6_W,buttonN6_H,200,200)
+
+			local a = GetConVarNumber("persona_dance_top_l")
+			local s = GetConVarNumber("persona_dance_mid_l")
+			local d = GetConVarNumber("persona_dance_bot_l")
+			local e = GetConVarNumber("persona_dance_scratch")
+			local n4 = GetConVarNumber("persona_dance_top_r")
+			local n8 = GetConVarNumber("persona_dance_mid_r")
+			local n6 = GetConVarNumber("persona_dance_bot_r")
+			
+			local function getInputName(var)
+				return string.Replace(string.upper(language.GetPhrase(input.GetKeyName(var))),"NUMPAD ","")
+			end
+			
+			local currentX, currentY = buttonA_W, buttonA_H
+			draw.SimpleText(getInputName(a),"Persona_Large",currentX +62,currentY +48,HUDColor)
+			DrawTexture("hud/persona/dance/ico_blank.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonA_W,buttonA_H,200,200)
+			
+			local currentX, currentY = buttonW_W, buttonW_H
+			draw.SimpleText(getInputName(s),"Persona_Large",currentX +70,currentY +55,HUDColor)
+			DrawTexture("hud/persona/dance/ico_blank.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonW_W,buttonW_H,200,200)
+			
+			local currentX, currentY = buttonD_W, buttonD_H
+			draw.SimpleText(getInputName(d),"Persona_Large",currentX +70,currentY +54,HUDColor)
+			DrawTexture("hud/persona/dance/ico_blank.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonD_W,buttonD_H,200,200)
+			
+			local currentX, currentY = buttonN4_W, buttonN4_H
+			draw.SimpleText(getInputName(n4),"Persona_Large",currentX +74,currentY +57,HUDColor)
+			DrawTexture("hud/persona/dance/ico_blank.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN4_W,buttonN4_H,200,200)
+			
+			local currentX, currentY = buttonN8_W, buttonN8_H
+			draw.SimpleText(getInputName(n8),"Persona_Large",currentX +70,currentY +55,HUDColor)
+			DrawTexture("hud/persona/dance/ico_blank.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN8_W,buttonN8_H,200,200)
+			
+			local currentX, currentY = buttonN6_W, buttonN6_H
+			draw.SimpleText(getInputName(n6),"Persona_Large",currentX +75,currentY +54,HUDColor)
+			DrawTexture("hud/persona/dance/ico_blank.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN6_W,buttonN6_H,200,200)
 
 			local iDif = dancer.Difficulty
 			local dif = iDif == 1 && "Easy" or iDif == 2 && "Normal" or iDif == 3 && "Hard" or iDif == 4 && "Crazy" or "Insane"
@@ -756,6 +896,30 @@ if (CLIENT) then
 				local score = dancer:GetNW2Int("HS_" .. name)
 				draw.SimpleText(name .. " : High Score - " .. tostring(score),"Persona",boxX +10,stPos,i == dancer.SelectedIndex && boostColor or HUDColor)
 			end
+		else
+			// Hit Count
+			local boxTX, boxTY = ScrW() /2.175, ScrH() /1.1
+			local boxTW, boxTH = ScrW() /40, ScrH() /28
+			local hitTimes = ply.Persona_Dance_HitTimes
+			local hitTotalTimes = ply.Persona_Dance_TotalHits
+			local totalNotes = dancer.TotalNotes or 0
+			local text = hitTotalTimes .. " / " .. totalNotes
+			-- if hitTimes > 4 then
+				boxTW = boxTW *(string.len(tostring(text)) /3)
+				draw.RoundedBox(8,boxTX,boxTY,boxTW,boxTH,Color(0,0,0,245)) // 200
+				draw.SimpleText(text,"Persona",boxTX +10,boxTY +10,HUDColor)
+			-- end
+
+			// Timer
+			local boxTX, boxTY = ScrW() /2.235, ScrH() /1.05
+			local boxTW, boxTH = ScrW() /46, ScrH() /28
+			local startedTime = dancer.StartSongTime or 0
+			local setEndTime = dancer.TimeToEndSong or 0
+			local currentLength = dancer.CurrentSongLength or 0
+			local text = string.FormattedTime(tostring(math.abs((CurTime() -startedTime))),"%02i:%02i") .. " / " .. string.FormattedTime(tostring(currentLength),"%02i:%02i")
+			boxTW = boxTW *(string.len(tostring(text)) /3)
+			draw.RoundedBox(8,boxTX,boxTY,boxTW,boxTH,Color(0,0,0,245)) // 200
+			draw.SimpleText(text,"Persona",boxTX +10,boxTY +10,HUDColor)
 		end
 
 		if canExpand then
@@ -946,12 +1110,18 @@ if (CLIENT) then
 		me.IsCheating = GetConVarNumber("persona_dance_perfect") == 1 or false
 		me.DanceIndex = (me.DanceIndex or 0) +1
 		if !me.ApplyNotes then ply:ChatPrint("A weird problem occured...respawn the Dancer and it will be fixed"); SafeRemoveEntity(me) return end
-		me:ApplyNotes(seq,(seq && me.SongLength && me.SongLength[seq]) or length -4)
+		local hasSongLengthSet = (seq && me.SongLength && me.SongLength[seq]) or false
+		local setLength = (hasSongLengthSet && me.SongLength[seq]) or length
+		me:ApplyNotes(seq,hasSongLengthSet && setLength or setLength -4)
+		me.StartSongTime = CurTime()
+		me.TimeToEndSong = CurTime() +setLength
+		me.CurrentSongLength = setLength
 		me.Persona_NextNoteT = CurTime() +3
 
 		ply.Persona_Dance_LastNoteT = 0
 		ply.Persona_Dance_LastCheerT = 0
 		ply.Persona_Dance_HitTimes = 0
+		ply.Persona_Dance_TotalHits = 0
 		ply.Persona_Dance_HitData = {Perfect=0,Great=0,Good=0,Miss=0}
 		me.HUD_SideMaterial = math.random(1,2) == 1 && "hud/persona/dance/bg_stars" or "hud/persona/dance/bg_hex"
 		ply.Persona_HUD_LoadT = CurTime() +math.Rand(0.1,0.6)
@@ -989,6 +1159,8 @@ if (CLIENT) then
 		local ply = net.ReadEntity()
 		local dancer = net.ReadEntity()
 		local score = ply.Persona_Dance_Score
+		
+		table.Empty(dancer.Notes)
 		
 		if dancer.IsCheating then
 			score = 0
@@ -1199,10 +1371,11 @@ function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
 			end
 			self:OnPlayDance(seq,t)
 			local dur = self:GetSequenceDuration(self,seq)
-			local equ = dur -(dur *GetConVarNumber("host_timescale"))
-			if dur *GetConVarNumber("host_timescale") > dur then
-				equ = (dur *GetConVarNumber("host_timescale")) -dur
-			end
+			-- local equ = dur -(dur *GetConVarNumber("host_timescale"))
+			-- if dur *GetConVarNumber("host_timescale") > dur then
+				-- equ = (dur *GetConVarNumber("host_timescale")) -dur
+			-- end
+			local equ = dur -(dur)
 			t = math.Clamp(dur -equ,0,999999999)
 			if self.Index == 0 then
 				self.Index = 1
@@ -1527,7 +1700,7 @@ function ENT:SpawnLamp(ent)
 
 	local tr = util.TraceHull({
 		start = ent:GetPos() +ent:OBBCenter(),
-		endpos = ent:GetPos() +ent:GetForward() *200 +Vector(0,0,ent:OBBMaxs().z *3.5),
+		endpos = ent:GetPos() +ent:GetForward() *450 +Vector(0,0,ent:OBBMaxs().z *6),
 		mask = MASK_SHOT,
 		filter = player.GetAll(),
 		mins = Vector(-8,-8,-8),
@@ -1546,7 +1719,7 @@ function ENT:SpawnLamp(ent)
 	ent:DeleteOnRemove(lamp)
 	lamp:SetOn(true)
 	lamp:SetLightFOV(40)
-	lamp:SetDistance(lamp:GetPos():Distance(ent:GetPos()) *2)
+	lamp:SetDistance(lamp:GetPos():Distance(ent:GetPos()) *1.5)
 	lamp:SetBrightness(lamp:GetPos():Distance(ent:GetPos()) *0.0025)
 	lamp:SetColor(Color(255,255,255))
 	if IsValid(lamp.flashlight) then
@@ -1631,9 +1804,10 @@ function ENT:Think()
 			end
 		end
 	end
-	if self:GetPlaybackRate() *GetConVarNumber("host_timescale") != self:GetPlaybackRate() then
-		self:SetPlaybackRate(self.DefaultPlaybackRate *GetConVarNumber("host_timescale"))
-	end
+	-- if self:GetPlaybackRate() *GetConVarNumber("host_timescale") != self:GetPlaybackRate() then
+		-- self:SetPlaybackRate(self.DefaultPlaybackRate *GetConVarNumber("host_timescale"))
+		self:SetPlaybackRate(self.DefaultPlaybackRate)
+	-- end
 	local seq = self:GetSequence()
 	local findSeq = self.RegisteredSequences && self.RegisteredSequences[seq]
 	local eventSeq = self.AnimationEvents && self.AnimationEvents[seq]

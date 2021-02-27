@@ -174,6 +174,13 @@ if CLIENT then
 			Panel:AddControl("Label",{Text = "Enable this to play with a controller!"})
 			Panel:AddControl("CheckBox",{Label = "Cinematic Mode",Command = "persona_dance_cinematic"})
 			Panel:AddControl("Label",{Text = "If the Dancer has a Cinematic Mode, this will give Dance Mode 1 & 2 an authentic feel!"})
+			Panel:AddControl("Numpad",{Label = "Top-Left Key", Command = "persona_dance_top_l"})
+			Panel:AddControl("Numpad",{Label = "Middle-Left Key", Command = "persona_dance_mid_l"})
+			Panel:AddControl("Numpad",{Label = "Bottom-Left Key", Command = "persona_dance_bot_l"})
+			Panel:AddControl("Numpad",{Label = "Top-Right Key", Command = "persona_dance_top_r"})
+			Panel:AddControl("Numpad",{Label = "Middle-Right Key", Command = "persona_dance_mid_r"})
+			Panel:AddControl("Numpad",{Label = "Bottom-Right Key", Command = "persona_dance_bot_r"})
+			Panel:AddControl("Numpad",{Label = "Scratch Key", Command = "persona_dance_scratch"})
 			Panel:AddControl("Color",{
 				Label = "HUD Color", 
 				Red = "persona_dance_hud_r",
