@@ -263,6 +263,7 @@ PXP.SetCompendium = function(ply,com)
 end
 
 PXP.InCompendium = function(ply,findPersona)
+	if PERSONA_UNLOCKALL then return true end
 	if !ply:IsPlayer() then return end
 	local exists = false
 	for _,persona in pairs(PXP.GetCompendium(ply)) do

@@ -1274,6 +1274,7 @@ function ENT:SetAnimationRate(rate)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OutfitUnlocked(outfit,ply)
+	if PERSONA_UNLOCKALL then return true end
 	if GetConVarNumber("sv_cheats") == 1 then return true end
 	if type(outfit) == "number" && self.Outfits[outfit] then
 		if self.Outfits[outfit].ReqSong == nil then return true end
