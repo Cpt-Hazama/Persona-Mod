@@ -897,29 +897,31 @@ if (CLIENT) then
 				draw.SimpleText(name .. " : High Score - " .. tostring(score),"Persona",boxX +10,stPos,i == dancer.SelectedIndex && boostColor or HUDColor)
 			end
 		else
-			// Hit Count
-			local boxTX, boxTY = ScrW() /2.175, ScrH() /1.1
-			local boxTW, boxTH = ScrW() /40, ScrH() /28
-			local hitTimes = ply.Persona_Dance_HitTimes
-			local hitTotalTimes = ply.Persona_Dance_TotalHits
-			local totalNotes = dancer.TotalNotes or 0
-			local text = hitTotalTimes .. " / " .. totalNotes
-			-- if hitTimes > 4 then
+			if mode == 2 then
+				// Hit Count
+				local boxTX, boxTY = ScrW() /2.175, ScrH() /1.1
+				local boxTW, boxTH = ScrW() /40, ScrH() /28
+				local hitTimes = ply.Persona_Dance_HitTimes or 0
+				local hitTotalTimes = ply.Persona_Dance_TotalHits or 0
+				local totalNotes = dancer.TotalNotes or 0
+				local text = hitTotalTimes .. " / " .. totalNotes
+				-- if hitTimes > 4 then
+					boxTW = boxTW *(string.len(tostring(text)) /3)
+					draw.RoundedBox(8,boxTX,boxTY,boxTW,boxTH,Color(0,0,0,245)) // 200
+					draw.SimpleText(text,"Persona",boxTX +10,boxTY +10,HUDColor)
+				-- end
+
+				// Timer
+				local boxTX, boxTY = ScrW() /2.235, ScrH() /1.05
+				local boxTW, boxTH = ScrW() /46, ScrH() /28
+				local startedTime = dancer.StartSongTime or 0
+				local setEndTime = dancer.TimeToEndSong or 0
+				local currentLength = dancer.CurrentSongLength or 0
+				local text = string.FormattedTime(tostring(math.abs((CurTime() -startedTime))),"%02i:%02i") .. " / " .. string.FormattedTime(tostring(currentLength),"%02i:%02i")
 				boxTW = boxTW *(string.len(tostring(text)) /3)
 				draw.RoundedBox(8,boxTX,boxTY,boxTW,boxTH,Color(0,0,0,245)) // 200
 				draw.SimpleText(text,"Persona",boxTX +10,boxTY +10,HUDColor)
-			-- end
-
-			// Timer
-			local boxTX, boxTY = ScrW() /2.235, ScrH() /1.05
-			local boxTW, boxTH = ScrW() /46, ScrH() /28
-			local startedTime = dancer.StartSongTime or 0
-			local setEndTime = dancer.TimeToEndSong or 0
-			local currentLength = dancer.CurrentSongLength or 0
-			local text = string.FormattedTime(tostring(math.abs((CurTime() -startedTime))),"%02i:%02i") .. " / " .. string.FormattedTime(tostring(currentLength),"%02i:%02i")
-			boxTW = boxTW *(string.len(tostring(text)) /3)
-			draw.RoundedBox(8,boxTX,boxTY,boxTW,boxTH,Color(0,0,0,245)) // 200
-			draw.SimpleText(text,"Persona",boxTX +10,boxTY +10,HUDColor)
+			end
 		end
 
 		if canExpand then
@@ -1126,8 +1128,19 @@ if (CLIENT) then
 		me.HUD_SideMaterial = math.random(1,2) == 1 && "hud/persona/dance/bg_stars" or "hud/persona/dance/bg_hex"
 		ply.Persona_HUD_LoadT = CurTime() +math.Rand(0.1,0.6)
 		me:SetShowSongMenu(false)
+
+		local extraSongs = P_GetAvailableSongs(me.PrintName)
+		if extraSongs then
+			for _,data in pairs(extraSongs.SongData) do
+				if data.delay then
+					if !me.SongDelay then me.SongDelay = {} end
+					me.SongDelay[data.dance] = data.delay
+				end
+			end
+		end
+		local delay = me.SongDelay && me.SongDelay[seq] or me.SongStartDelay
 		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == dir then ply.VJ_Persona_Dance_Theme:Stop() end
-		timer.Simple(me.SongStartDelay,function()
+		timer.Simple(delay,function()
 			if IsValid(ply) && IsValid(me) then
 				ply.VJ_Persona_Dance_ThemeDir = dir
 				ply.VJ_Persona_Dance_Theme = CreateSound(ply,dir)
@@ -1362,6 +1375,7 @@ function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
 						net.WriteString(dance)
 						net.WriteInt(self:GetSequenceDuration(self,dance),12)
 					net.Broadcast()
+					hook.Call("PersonaMod_DancerStartedSong",nil,self,song,dance)
 				end
 				self.DanceIndex = self.DanceIndex +1
 				self:SetSong(song)
@@ -1519,6 +1533,10 @@ function ENT:Initialize()
 				if !self.SongLength then self.SongLength = {} end
 				self.SongLength[data.dance] = data.length
 			end
+			if data.delay then
+				if !self.SongDelay then self.SongDelay = {} end
+				self.SongDelay[data.dance] = data.delay
+			end
 		end
 		for _,data in pairs(extraSongs.AnimData) do
 			local animName = data[1].anim
@@ -1568,6 +1586,7 @@ function ENT:Initialize()
 				end
 				-- self:SetShowSongMenu(true)
 				self:OnInit()
+				hook.Call("PersonaMod_DancerCreated",nil,self,self.Creator)
 			end
 		end
 	end)

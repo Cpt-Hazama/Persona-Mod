@@ -375,11 +375,13 @@ function NPC:SummonPersona(persona)
 		if self.SoundTbl_Persona then
 			VJ_CreateSound(self,self.SoundTbl_Persona,80,100)
 		end
+		hook.Call("PersonaMod_PersonaSummoned",nil,self,ent)
 	else
 		if personaEntity:GetTask() != "TASK_RETURN" then
 			personaEntity:SetTask("TASK_RETURN")
 			personaEntity:OnRequestDisappear(self)
 		end
+		hook.Call("PersonaMod_PersonaUnsummoned",nil,self,personaEntity)
 	end
 end
 
