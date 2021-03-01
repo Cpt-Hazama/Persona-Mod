@@ -1359,6 +1359,16 @@ local pParticleList = {
 }
 for _,v in ipairs(pParticleList) do PrecacheParticleSystem(v) end
 
+game.AddParticles("particles/persona_aura.pcf")
+local pParticleList = {
+	"persona_aura_blue",
+	"persona_aura_red",
+	"persona_aura_yellow",
+	"persona_aura_purple",
+	"persona_aura_velvet",
+}
+for _,v in ipairs(pParticleList) do PrecacheParticleSystem(v) end
+
 game.AddParticles("particles/persona_fx.pcf")
 local pParticleList = {
 	"persona_fx_dmg_death",

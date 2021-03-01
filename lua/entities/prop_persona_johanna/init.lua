@@ -90,14 +90,3 @@ function ENT:OnSummoned(owner)
 	self:SetCard("Freila")
 	self:SetCard("Vajra Blast",true)
 end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:RequestAura(ply,aura)
-	self:EmitSound("cpthazama/persona5/misc/00118.wav",75,100)
-	ParticleEffectAttach(aura == "jojo_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
-	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
-	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
-	local fx = EffectData()
-	fx:SetOrigin(self:GetIdlePosition(ply))
-	fx:SetScale(80)
-	util.Effect("JoJo_Summon",fx)
-end

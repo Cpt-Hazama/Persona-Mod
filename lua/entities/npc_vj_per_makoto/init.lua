@@ -200,6 +200,13 @@ function ENT:OnSummonPersona(persona)
 			self:GetPersona():DoIdle()
 		end
 	end)
+	persona:StopParticles()
+	if persona.IsLegendary then
+		ParticleEffectAttach("persona_aura_yellow",PATTACH_POINT_FOLLOW,persona,persona:LookupAttachment("origin"))
+	end
+	ParticleEffectAttach("persona_aura_blue",PATTACH_POINT_FOLLOW,persona,persona:LookupAttachment("origin"))
+	ParticleEffectAttach("vj_per_idle_chains",PATTACH_POINT_FOLLOW,persona,persona:LookupAttachment("origin"))
+
 	self.VJC_Data.ThirdP_Offset = Vector(-80, 80, 0)
 	-- persona.IdleLoop = CreateSound(persona,"cpthazama/persona5/makoto/johanna/idle.wav")
 	-- persona.IdleLoop:SetSoundLevel(78)

@@ -2,7 +2,7 @@
 {
 	"$basetexture" "models/cpthazama/persona5/johanna/johanna"
 	"$bumpmap" "models/cpthazama/persona5/johanna/johanna_n"
-	"$phongexponenttexture" "models/cpthazama/persona5/johanna/johanna_s"
+	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
 
 	"$phong"				"1"
 	"$phongboost"			"10"

@@ -155,6 +155,9 @@ function ENT:MakeLegendary()
 	for index,mat in pairs(self.LegendaryMaterials) do
 		self:SetSubMaterial(index -1,mat)
 	end
+	
+	self.IsLegendary = true
+	self:RequestAura(self.User,PERSONA[self.User:GetPersonaName()].Aura)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize() end
@@ -1106,10 +1109,15 @@ function ENT:Think()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RequestAura(ply,aura)
+	self:StopParticles()
 	self:EmitSound("cpthazama/persona5/misc/00118.wav",75,100)
-	ParticleEffectAttach(aura == "jojo_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+	if self.IsLegendary then
+		ParticleEffectAttach("persona_aura_yellow",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+	end
+	-- ParticleEffectAttach(self.IsLegendary && "persona_aura_yellow" or aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
-	ParticleEffectAttach(aura,PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
+	ParticleEffectAttach(aura == "persona_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+	ParticleEffectAttach(aura == "persona_aura_red" && "jojo_aura_red" or "jojo_aura_blue",PATTACH_POINT_FOLLOW,ply,ply:LookupAttachment("origin"))
 	local fx = EffectData()
 	fx:SetOrigin(self:GetIdlePosition(ply))
 	fx:SetScale(80)
