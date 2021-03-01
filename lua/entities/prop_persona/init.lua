@@ -246,6 +246,12 @@ end
 function ENT:OnThink(ply) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DefaultPersonaControls(ply,persona)
+	self:SetLVL(self.Stats.LVL)
+	self:SetSTR(self.Stats.STR)
+	self:SetMAG(self.Stats.MAG)
+	self:SetEND(self.Stats.END)
+	self:SetAGI(self.Stats.AGI)
+	self:SetLUC(self.Stats.LUC)
 	if ply:IsPlayer() then
 		local ent = ply.Persona_EyeTarget
 		if IsValid(ent) && ent:Health() <= 0 then

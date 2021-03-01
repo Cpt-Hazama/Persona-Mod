@@ -13,7 +13,7 @@ SWEP.Secondary.Ammo			=  "none"
 
 function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
-	timer.Simple(0,function() self:SetActivities() end)
+	timer.Simple(0,function() if self.SetActivities then self:SetActivities() end end)
 end
 
 function SWEP:CustomAmmoDisplay()

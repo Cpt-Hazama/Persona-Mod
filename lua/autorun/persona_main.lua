@@ -643,12 +643,10 @@ if SERVER then
 			local dmg = dmginfo:GetDamage()
 			local attacker = dmginfo:GetAttacker()
 			local persona = ent:GetPersona()
-			local stats = ((attacker:IsPlayer() or attacker:IsNPC()) && IsValid(attacker:GetPersona()) && attacker:GetPersona().Stats) or {STR=1,MAG=1,END=1,AGI=1,LUC=1}
-			local aPLvl = ((attacker:IsPlayer() or attacker:IsNPC()) && IsValid(attacker:GetPersona()) && attacker:GetPersona().Stats && attacker:GetPersona().Stats.LVL) or 0
+			local aPLvl = ((attacker:IsPlayer() && PXP.GetLevel(attacker)) or (attacker:IsNPC() && IsValid(attacker:GetPersona()) && attacker:GetPersona():GetLVL())) or 1
 			local aLvl = ((attacker:IsPlayer()) && ((aPLvl +PXP.GetPlayerLevel(attacker)) /2 or 1)) or ((attacker:IsNPC()) && (/*aPLvl or */attacker:GetNW2Int("PXP_Level"))) or 1
-			local PLvl = ((ent:IsPlayer() or ent:IsNPC()) && IsValid(persona) && persona.Stats && persona.Stats.LVL) or 0
+			local PLvl = ((ent:IsPlayer() && PXP.GetLevel(ent)) or (ent:IsNPC() && IsValid(persona) && persona:GetLVL())) or 1
 			local lvl = ((ent:IsPlayer()) && ((PLvl +PXP.GetPlayerLevel(ent)) /2 or 1)) or ((ent:IsNPC()) && (/*PLvl or */ent:GetNW2Int("PXP_Level"))) or 1
-
 			aLvl = math.Round(aLvl)
 			lvl = math.Round(lvl)
 			local lvlDif = aLvl -lvl
@@ -660,10 +658,11 @@ if SERVER then
 			-- dmginfo:SetDamage((5 *math.sqrt((stats.STR /stats.END) *dmg) *math.abs(lvl -aLvl)) *math.Rand(0.95,1.05)) // I really don't like this. Idk if it even works properly
 			local modDMG = dmg
 			if lvlDifAbs > 5 then
+				print(lvl > aLvl && "Yoshitsune is stronger" or "I'm stronger")
 				modDMG = (lvl > aLvl && (modDMG /(lvlDifAbs /6))) or (lvlDif *0.1) *modDMG
 			end
 			dmginfo:SetDamage(modDMG)
-			-- Entity(1):ChatPrint("Formula - " .. tostring(dmginfo:GetDamage()))
+			-- Entity(1):ChatPrint("Formula - " .. tostring(modDMG))
 			if ent.Persona_BrainWashed then
 				if ent.Persona_BrainWashers then
 					if IsValid(attacker) && VJ_HasValue(ent.Persona_BrainWashers,attacker) then

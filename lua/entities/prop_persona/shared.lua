@@ -43,6 +43,12 @@ end
 function ENT:SetupDataTables()
 	self:NetworkVar("Bool",0,"Critical")
 	self:NetworkVar("Bool",0,"CriticalFX")
+	self:NetworkVar("Int",0,"LVL")
+	self:NetworkVar("Int",1,"STR")
+	self:NetworkVar("Int",2,"MAG")
+	self:NetworkVar("Int",3,"END")
+	self:NetworkVar("Int",4,"AGI")
+	self:NetworkVar("Int",5,"LUC")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetFeedName(name,class)
