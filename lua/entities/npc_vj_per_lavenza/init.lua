@@ -8,7 +8,7 @@ include('shared.lua')
 ENT.Model = {"models/cpthazama/persona5/lavenza.mdl"} -- The game will pick a random model from the table when the SNPC is spawned | Add as many as you want 
 ENT.Stats = {
 	HP = 20000,
-	SP = 999,
+	SP = 90000,
 	LVL = 99,
 	STR = 99,
 	MAG = 99,
@@ -110,7 +110,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnAcceptInput(key,ent,caller,data)
 	if ent:IsPlayer() then
-		self:OnInteract(ent)
+		-- self:OnInteract(ent)
 	end
 end
 /*-----------------------------------------------

@@ -383,37 +383,37 @@ if (CLIENT) then
 
 		if input.IsButtonDown(a) then
 			if CurTime() > ply.Persona_ButtonData["a"].CT then
-				self:CheckNoteHit("a")
+				self:CheckNoteHit("a",ply)
 			end
 			ply.Persona_ButtonData["a"].CT = CurTime() +0.05
 		end
 		if input.IsButtonDown(s) then
 			if CurTime() > ply.Persona_ButtonData["s"].CT then
-				self:CheckNoteHit("s")
+				self:CheckNoteHit("s",ply)
 			end
 			ply.Persona_ButtonData["s"].CT = CurTime() +0.05
 		end
 		if input.IsButtonDown(d) then
 			if CurTime() > ply.Persona_ButtonData["d"].CT then
-				self:CheckNoteHit("d")
+				self:CheckNoteHit("d",ply)
 			end
 			ply.Persona_ButtonData["d"].CT = CurTime() +0.05
 		end
 		if input.IsButtonDown(n4) then
 			if CurTime() > ply.Persona_ButtonData["n4"].CT then
-				self:CheckNoteHit("n6")
+				self:CheckNoteHit("n6",ply)
 			end
 			ply.Persona_ButtonData["n4"].CT = CurTime() +0.05
 		end
 		if input.IsButtonDown(n6) then
 			if CurTime() > ply.Persona_ButtonData["n6"].CT then
-				self:CheckNoteHit("n4")
+				self:CheckNoteHit("n4",ply)
 			end
 			ply.Persona_ButtonData["n6"].CT = CurTime() +0.05
 		end
 		if input.IsButtonDown(n8) then
 			if CurTime() > ply.Persona_ButtonData["n8"].CT then
-				self:CheckNoteHit("n8")
+				self:CheckNoteHit("n8",ply)
 			end
 			ply.Persona_ButtonData["n8"].CT = CurTime() +0.05
 		end
@@ -425,7 +425,7 @@ if (CLIENT) then
 		end
 	end
 
-	function ENT:CheckNoteHit(dir)
+	function ENT:CheckNoteHit(dir,ply)
 		local hNoMore = 75 -- Cut-off, at this point you missed
 		local hPerfect = 170 -- Dead on
 		local hGreat = 210 -- Almost on the spot
@@ -956,7 +956,7 @@ if (CLIENT) then
 						local nDist = math.abs(note.RemainingDist)
 						if note.CanBeHit && nDist <= 170 && nDist > 75 then
 							if note.Hit == false then
-								dancer:CheckNoteHit(note.Direction)
+								dancer:CheckNoteHit(note.Direction,ply)
 							end
 						end
 					end

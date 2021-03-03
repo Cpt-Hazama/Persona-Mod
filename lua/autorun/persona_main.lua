@@ -658,7 +658,7 @@ if SERVER then
 			-- dmginfo:SetDamage((5 *math.sqrt((stats.STR /stats.END) *dmg) *math.abs(lvl -aLvl)) *math.Rand(0.95,1.05)) // I really don't like this. Idk if it even works properly
 			local modDMG = dmg
 			if lvlDifAbs > 5 then
-				print(lvl > aLvl && "Yoshitsune is stronger" or "I'm stronger")
+				-- print(lvl > aLvl && "Yoshitsune is stronger" or "I'm stronger")
 				modDMG = (lvl > aLvl && (modDMG /(lvlDifAbs /6))) or (lvlDif *0.1) *modDMG
 			end
 			dmginfo:SetDamage(modDMG)
