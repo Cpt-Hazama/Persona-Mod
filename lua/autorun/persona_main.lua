@@ -1239,6 +1239,7 @@ if CLIENT then
 		local posX = boxX
 		local posY = boxHeight +50
 		local len = boxX -25
+		local lenBar = len -18
 		local height = 30
 		local bHeight = 110
 		local bDrop = bHeight +30
@@ -1249,9 +1250,9 @@ if CLIENT then
 		if meter <= maxMeter *0.15 then
 			r,g,b = 220, 0, 0
 		end
-		draw.RoundedBox(12, ScrW() -posX, ScrH() -posY -bHeight, len, bDrop, bColor)
-		draw.RoundedBox(12, ScrW() -posX, ScrH() -posY, len, height, color(0,0,0,150))
-		draw.RoundedBox(12, ScrW() -posX, ScrH() -posY, math.Clamp(len *((perMTB /100) /(persona:GetNW2Bool("Legendary") && 2 or 1)),0,len), height, color(r, g, b, 255))
+		draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY -bHeight, len, bDrop, bColor)
+		draw.RoundedBox(corners, ScrW() -posX +10, ScrH() -posY -5, lenBar, height, color(0,0,0,150))
+		draw.RoundedBox(corners, ScrW() -posX +10, ScrH() -posY -5, math.Clamp(lenBar *((perMTB /100) /(persona:GetNW2Bool("Legendary") && 2 or 1)),0,lenBar), height, color(r, g, b, 255))
 		local push = 0
 		local spacing = 50
 		for i = 1,12 do

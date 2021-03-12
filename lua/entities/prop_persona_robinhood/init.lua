@@ -118,8 +118,29 @@ function ENT:OnSummoned(owner)
 
 	local v = {forward=-230,right=100,up=60}
 	self.User:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	
+	local tbl = {
+		"cpthazama/vo/akechi/blackmask/bp09_01 [64].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [66].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [133].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [134].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [132].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [180].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [181].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [184].wav",
+	}
+	self:UserSound(VJ_PICK(tbl))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRequestDisappear(ply)
 	
+	local tbl = {
+		"cpthazama/vo/akechi/blackmask/bp09_01 [186].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [168].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [167].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [164].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [163].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [137].wav"
+	}
+	self:UserSound(VJ_PICK(tbl))
 end

@@ -1,0 +1,23 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona_shared/glow_red"
+
+	"$nocull" 1
+	"$translucent" 1
+
+	$detail	"models/cpthazama/persona_shared/glow_red"
+	$detailscale "1"
+	$detailblendfactor "0"
+	$detailblendmode "1"
+
+	"Proxies"
+	{
+		"Sine"
+		{
+			"resultVar"	"$detailblendfactor"
+			"sineperiod"	3
+			"sinemin"	0
+			"sinemax"	2
+		}
+	}
+}

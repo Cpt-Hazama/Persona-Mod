@@ -57,4 +57,6 @@ function ENT:OnSummoned(owner)
 
 	local v = {forward=-250,right=120,up=100}
 	self.User:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	
+	self:UserSound("cpthazama/persona5/joker/0" .. math.random(159,162) .. ".wav")
 end

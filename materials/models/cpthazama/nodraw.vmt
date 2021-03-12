@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/nodraw"
+	"$alphatest" 1
+	"$nodecal" 1
+}

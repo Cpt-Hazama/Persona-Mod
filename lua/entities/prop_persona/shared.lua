@@ -73,6 +73,25 @@ function ENT:DoInstaKillTheme(ents,t,ft)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if CLIENT then
+	function ENT:Draw()
+		-- local name = "PersonaMod_FixOutlines_" .. self:EntIndex()
+		-- local ent = self
+		self:DrawModel()
+		-- hook.Add("RenderScreenspaceEffects",name,function()
+			-- if !IsValid(ent) then
+				-- hook.Remove("RenderScreenspaceEffects",name)
+				-- return
+			-- end
+			-- cam.Start3D(EyePos(),EyeAngles())
+				-- render.SetBlend(1)
+				-- render.MaterialOverride(Material("models/cpthazama/persona_shared/glow_red"))
+				-- ent:DrawModel()
+				-- render.MaterialOverride(0)
+				-- render.SetBlend(1)
+			-- cam.End3D()
+		-- end)
+	end
+
 	net.Receive("Persona_SetName",function(len)
 		local name = net.ReadString()
 		local class = net.ReadString()
@@ -200,9 +219,9 @@ function ENT:UserSound(snd,vol,pitch)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if (CLIENT) then
-	function ENT:Draw()
-		self:DrawModel()
-	end
+	-- function ENT:Draw()
+		-- self:DrawModel()
+	-- end
 	
 	function ENT:DrawTranslucent()
 		self:Draw()

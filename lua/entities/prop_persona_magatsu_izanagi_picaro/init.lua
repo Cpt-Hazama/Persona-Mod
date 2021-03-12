@@ -44,33 +44,6 @@ ENT.LegendaryMaterials = {}
 ENT.LegendaryMaterials[1] = "models/cpthazama/persona5/magatsuizanagi/magatsuizanagi_picaro_nofx_legendary"
 ENT.LegendaryMaterials[2] = "models/cpthazama/persona5/magatsuizanagi/magatsuizanagi_picaro_legendary"
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:HandleEvents(skill,animBlock,seq,t)
-	if skill == "Ghostly Wail" then
-		if animBlock == "melee" then
-			self:UserSound("cpthazama/vo/adachi/vo/ghostly_wail_0" .. math.random(1,2) .. ".wav",85)
-		end
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:CustomOnHitEntity(hitEnts,dmginfo)
-	-- if dmginfo:GetDamageType() == DMG_P_FEAR then
-		-- for _,v in pairs(hitEnts) do
-			-- if IsValid(v) && v:Health() > 0 then
-				-- self:Fear(v,15)
-			-- end
-		-- end
-	-- end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:PersonaControls(ply,persona)
-	if ply:IsNPC() then
-		return
-	end
-	local lmb = ply:KeyDown(IN_ATTACK)
-	local rmb = ply:KeyDown(IN_ATTACK2)
-	local r = ply:KeyDown(IN_RELOAD)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
 	return self:GetPos() +self:OBBCenter()
 end
@@ -92,10 +65,8 @@ function ENT:GetIdlePosition(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnSummoned(ply)
-	self:UserSound("cpthazama/vo/adachi/vo/summon_0" .. math.random(1,8) .. ".wav")
 	self:SetModel(self.Model)
 	self:DoIdle()
-	self.PersonaDistance = 999999999 -- 40 meters
 	self.Magatsu = true
 
 	-- self:AddCard("Magarudyne",22,false,"wind")
@@ -111,15 +82,6 @@ function ENT:OnSummoned(ply)
 
 	local v = {forward=-200,right=80,up=50}
 	ply:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnRequestDisappear(ply)
-	-- ply:EmitSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav")
-	local tbl = {
-		"cpthazama/vox/adachi/kill/vbtl_pad_0#98 (pad152).wav",
-		"cpthazama/vox/adachi/kill/vbtl_pad_0#96 (pad150).wav",
-		"cpthazama/vox/adachi/kill/vbtl_pad_0#179 (pad300_1).wav",
-		"cpthazama/vox/adachi/kill/vbtl_pad_0#180 (pad300_2).wav",
-	}
-	self:UserSound(VJ_PICK(tbl))
+
+	self:UserSound("cpthazama/persona5/joker/0014.wav")
 end

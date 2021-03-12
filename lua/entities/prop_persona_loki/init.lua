@@ -55,14 +55,20 @@ function ENT:HandleEvents(skill,animBlock,seq,t)
 	end
 	if animBlock == "melee" then
 		if skill == "Laevateinn" then
-			self:UserSound("cpthazama/persona5/akechi/blackmask/00010_streaming [1].wav",80)
+			self:UserSound("cpthazama/vo/akechi/blackmask/bp09_01 [224].wav",80)
 		else
 			self:UserSound(VJ_PICK({
-				"cpthazama/persona5/akechi/blackmask/00004_streaming [1].wav",
-				"cpthazama/persona5/akechi/blackmask/00006_streaming [1].wav",
-				"cpthazama/persona5/akechi/blackmask/00007_streaming [1].wav",
-				"cpthazama/persona5/akechi/blackmask/00008_streaming [1].wav",
-				"cpthazama/persona5/akechi/blackmask/00009_streaming [1].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [221].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [223].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [22].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [23].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [25].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [27].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [30].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [31].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [35].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [38].wav",
+				"cpthazama/vo/akechi/blackmask/bp09_01 [39].wav",
 			}),80)
 		end
 	end
@@ -158,6 +164,7 @@ function ENT:OnSummoned(owner)
 		"cpthazama/vo/akechi/blackmask/bp09_01 [156].wav",
 		"cpthazama/vo/akechi/blackmask/bp09_01 [160].wav",
 		"cpthazama/vo/akechi/blackmask/bp09_01 [13].wav",
+		"cpthazama/vo/akechi/blackmask/bp09_01 [5].wav",
 		"cpthazama/vo/akechi/blackmask/bp09_01 [151].wav",
 		"cpthazama/vo/akechi/blackmask/bp09_01 [152].wav",
 	}),80)

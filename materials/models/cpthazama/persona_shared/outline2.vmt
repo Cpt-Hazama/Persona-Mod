@@ -1,0 +1,7 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/persona_shared/outline2"
+
+	"$nocull" 1
+	"$translucent" 1
+}

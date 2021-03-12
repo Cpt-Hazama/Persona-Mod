@@ -63,6 +63,8 @@ function ENT:OnSummoned(ply)
 
 	local v = {forward=-200,right=80,up=110}
 	ply:SetNW2Vector("Persona_CustomPos",Vector(v.right,v.forward,v.up))
+	
+	self:UserSound("cpthazama/persona5/joker/0013.wav")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnKilledEnemy(ent)

@@ -1153,9 +1153,13 @@ function ENT:RequestAura(ply,aura)
 	util.Effect("JoJo_Summon",fx)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnSummoned(ply) end
+function ENT:OnSummoned(ply)
+	self:UserSound("cpthazama/persona5/joker/0" .. math.random(159,162) .. ".wav") // Override in your Persona!
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnRequestDisappear(ply) end
+function ENT:OnRequestDisappear(ply)
+	self:UserSound("cpthazama/persona5/joker/0" .. math.random(106,120) .. ".wav") // Override in your Persona!
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoIdle()
 	self:SetTask("TASK_IDLE")
