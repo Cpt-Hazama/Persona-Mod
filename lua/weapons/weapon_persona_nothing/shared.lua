@@ -29,7 +29,7 @@ function SWEP:SetActivities()
 		local persona = self.Owner:GetPersona()
 		if IsValid(persona) && persona.SetActivities then
 			self.ActivityTranslate = persona:SetActivities()
-			PrintTable(self.ActivityTranslate)
+			-- PrintTable(self.ActivityTranslate)
 			gotTable = true
 		end
 	end

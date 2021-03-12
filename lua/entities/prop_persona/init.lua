@@ -88,6 +88,7 @@ function ENT:Initialize()
 	
 	self:SetCritical(false)
 	self.HasChaosParticle = false
+	self.HasOverdrive = false
 
 	self.Loops = {}
 	self.Flexes = {}
@@ -105,9 +106,17 @@ function ENT:Initialize()
 	
 	self.P_LerpVec = self:GetPos()
 	self.P_LerpAng = self:GetAngles()
-	
+
 	timer.Simple(0,function()
 		if self.User:IsPlayer() then
+			net.Start("Persona_Elements")
+				net.WriteEntity(self.User)
+				net.WriteTable(self.Stats.WK)
+				net.WriteTable(self.Stats.RES)
+				net.WriteTable(self.Stats.NUL)
+				net.WriteTable(self.Stats.REF)
+				net.WriteTable(self.Stats.ABS)
+			net.Send(self.User)
 			if self.IsVelvetPersona then
 				if !PXP.InCompendium(self.User,string.Replace(self:GetClass(),"prop_persona_","")) then
 					SafeRemoveEntity(self)
@@ -157,6 +166,25 @@ function ENT:MakeLegendary()
 	end
 	
 	self.IsLegendary = true
+	self:RequestAura(self.User,PERSONA[self.User:GetPersonaName()].Aura)
+	-- self:Overdrive(true)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Overdrive(b)
+	self.HasOverdrive = b
+	self:SetNW2Bool("Overdrive",b)
+	self:StopParticles()
+	if self.OverdriveAura then self.OverdriveAura:Stop() end
+	if b then
+		if !self.OverdriveAura then
+			self.OverdriveAura = CreateSound(self,"cpthazama/persona_shared/overdrive.wav")
+			self.OverdriveAura:SetSoundLevel(65)
+		end
+		self.OverdriveAura:Play()
+		self:RequestAura(self.User,PERSONA[self.User:GetPersonaName()].Aura)
+		ParticleEffectAttach("persona_aura_overdrive",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+		return
+	end
 	self:RequestAura(self.User,PERSONA[self.User:GetPersonaName()].Aura)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1040,6 +1068,7 @@ function ENT:AddAnimationEvent(seq,frame,eventName,frameCount)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Think()
+	self:SetNW2Bool("Legendary",self.IsLegendary)
 	local seq = self:GetSequence()
 	if self.AnimationEvents[seq] && self.RegisteredSequences[seq] then
 		if self.LastSequence != seq then
@@ -1363,6 +1392,7 @@ function ENT:AdditionalInput(dmg,type)
 	dmg = self.User.Persona_HeatRiserT > CurTime() && dmg *1.5 or dmg
 	dmg = self.User.Persona_ChaosT > CurTime() && dmg *3 or dmg
 	dmg = self:GetCritical() && dmg *1.25 or dmg
+	dmg = self.HasOverdrive && dmg *1.25 or dmg
 	if type == 1 then -- Physical
 		dmg = self.User.Persona_ChargedT > CurTime() && dmg *2 or dmg
 		dmg = (dmg *self.Stats.STR) /6
@@ -2321,6 +2351,7 @@ function ENT:OnRemove()
 		end
 		PXP.SavePersonaData(self.User,self.EXP,self.Level,self.CardTable)
 	end
+	if self.OverdriveAura then self.OverdriveAura:Stop() end
 	self:StopParticles()
 	if IsValid(self.User) && self.User:IsNPC() && self.User.OnDisablePersona then
 		self.User:OnDisablePersona(self)

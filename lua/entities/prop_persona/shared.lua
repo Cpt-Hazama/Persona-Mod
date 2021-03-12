@@ -20,6 +20,7 @@ if SERVER then
 	util.AddNetworkString("Persona_SetName")
 	util.AddNetworkString("Persona_InstaKill")
 	util.AddNetworkString("Persona_UpdateCards")
+	util.AddNetworkString("Persona_Elements")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 -- if CLIENT then
@@ -78,6 +79,22 @@ if CLIENT then
 
 		language.Add(class,name)
 		killicon.Add(class,"HUD/killicons/default",Color(255,80,0,255))
+	end)
+
+	net.Receive("Persona_Elements",function(len,pl)
+		local ply = net.ReadEntity()
+		local WK = net.ReadTable()
+		local RES = net.ReadTable()
+		local NUL = net.ReadTable()
+		local REF = net.ReadTable()
+		local ABS = net.ReadTable()
+
+		ply.PersonaElements = {}
+		ply.PersonaElements.WK = WK or {}
+		ply.PersonaElements.RES = RES or {}
+		ply.PersonaElements.NUL = NUL or {}
+		ply.PersonaElements.REF = REF or {}
+		ply.PersonaElements.ABS = ABS or {}
 	end)
 
 	net.Receive("Persona_InstaKill",function(len)

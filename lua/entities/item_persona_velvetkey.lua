@@ -42,6 +42,23 @@ end
 function ENT:Use(ply,caller)
 	local velvetPersona = ply:GetPersonaName() .. "_velvet"
 	local hasVelvetAlready = PXP.InCompendium(ply,velvetPersona)
+	if ply:IsPlayer() && IsValid(ply:GetPersona()) && !ply:GetPersona():GetNW2Bool("Overdrive") && PXP.IsLegendary(ply) && !PXP.IsVelvet(ply) && PXP.GetLevel(ply) <= 99 then
+		if PXP.GetLevel(ply) >= 99 && PERSONA[velvetPersona] && !hasVelvetAlready then
+			if IsValid(ply:GetPersona()) then
+				ply:GetPersona():SetTask("TASK_RETURN")
+				ply:GetPersona():OnRequestDisappear(ply)
+			end
+			ply:SetPersona(ply:GetPersonaName() .. "_velvet")
+			PXP.SetPersonaData(ply,8,2)
+			ply:PrintMessage(HUD_PRINTTALK,"Igor blesses your Persona with Ultimate power! You can now summon the Velvet Form of your Persona!")
+			SafeRemoveEntity(self)
+			return
+		end
+		ply:PrintMessage(HUD_PRINTTALK,"Your Persona absorbs the key and you are overwhelmed with power! Your body can not stand the pressure of Overdrive Mode...")
+		ply:GetPersona():Overdrive(true)
+		SafeRemoveEntity(self)
+		return
+	end
 	if hasVelvetAlready then
 		ply:PrintMessage(HUD_PRINTTALK,"You already have the Velvet Form of your Persona!")
 		return

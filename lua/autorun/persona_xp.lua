@@ -12,6 +12,21 @@ PXP.SetEXP = function(ply,xp)
 	-- PXP.SavePersonaData(ply)
 end
 
+PXP.RemoveEXP = function(ply,xp) -- Old plan for Overdrive, the consistent file writing caused lag
+	if !ply:IsPlayer() then return end
+	local level = PXP.GetLevel(ply)
+	if PXP.IsLegendary(ply) then
+		xp = xp *2
+	end
+	PXP.SetEXP(ply,PXP.GetEXP(ply) -xp)
+	PXP.CalculateRequiredXP(ply)
+	if PXP.GetEXP(ply) <= 0 then
+		PXP.SetLevel(ply,PXP.GetLevel(ply) -1)
+		local req = PXP.CalculateRequiredXP(ply)
+		PXP.SetEXP(ply,req -1)
+	end
+end
+
 PXP.GiveEXP = function(ply,xp)
 	if !ply:IsPlayer() then return end
 	local oldXP = PXP.GetEXP(ply)
@@ -183,8 +198,8 @@ PXP.CalculateRequiredXP = function(ply)
 	if !ply:IsPlayer() then return end
 	-- local formula = (75 *(PXP.GetLevel(ply) -1) +200)
 	local formula = PXP.GetLevel(ply) *1500
-	local mRequiredXP = formula
-	PXP.SetRequiredXP(ply,mRequiredXP)
+	PXP.SetRequiredXP(ply,formula)
+	return formula
 end
 
 PXP.FindRemainingXP = function(ply)

@@ -22,15 +22,15 @@ end
 
 	//-- Damage Types --\\
 DMG_P_ICE = 1000
-DMG_P_EARTH = 1001
+DMG_P_EARTH = 1001 -- Obsolete
 DMG_P_WIND = 1002
-DMG_P_GRAVITY = 1003
+DMG_P_GRAVITY = 1003 -- Obsolete
 DMG_P_NUCLEAR = 1004
-DMG_P_EXPEL = 1005
-DMG_P_DEATH = 1006
+DMG_P_EXPEL = 1005 -- Obsolete
+DMG_P_DEATH = 1006 -- Obsolete
 DMG_P_MIRACLE = 1007
-DMG_P_FORCE = 1008
-DMG_P_TECH = 1009
+DMG_P_FORCE = 1008 -- Obsolete
+DMG_P_TECH = 1009 -- Obsolete
 DMG_P_ALMIGHTY = 1010
 DMG_P_PSI = 1011
 DMG_P_ELEC = 1012
@@ -41,9 +41,28 @@ DMG_P_GUN = 1016
 DMG_P_BLESS = 1017
 DMG_P_FIRE = 1018
 DMG_P_BURN = 268435464
-DMG_P_SEAL = 1019
+DMG_P_SEAL = 1019 -- Obsolete
 DMG_P_SLEEP = 1020
 DMG_P_PARALYZE = 1021
+
+function P_HasDamageType(dmginfo,lookTbl)
+	if type(dmginfo) == "table" then
+		for _,v in ipairs(dmginfo) do
+			if VJ_HasValue(lookTbl,v) then
+				return true
+			end
+		end
+	elseif type(dmginfo) == "number" then
+		return VJ_HasValue(lookTbl,dmginfo)
+	else
+		for _,v in ipairs(lookTbl) do
+			if dmginfo:IsDamageType(v) == true then
+				return true
+			end
+		end
+	end
+	return false
+end
 
 	//-- Default Damage Amounts --\\
 DMG_P_MINISCULE = 10

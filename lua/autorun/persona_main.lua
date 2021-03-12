@@ -245,6 +245,18 @@ end
 
 local PLY = FindMetaTable("Player")
 
+function PLY:SetPersonaMeter(i)
+	return self:SetNW2Float("PersonaMeter",i)
+end
+
+function PLY:GetPersonaMeter()
+	return self:GetNW2Float("PersonaMeter")
+end
+
+function PLY:GetMaxPersonaMeter()
+	return math.Round(self:GetMaxSP() /5 *(PXP.IsLegendary(self) && 2 or 1))
+end
+
 function PLY:HasPersona()
 	-- return self:GetNW2Bool("PersonaUser") or false
 	return true
@@ -312,6 +324,18 @@ local NPC = FindMetaTable("NPC")
 
 function NPC:Alive()
 	return self:Health() > 0
+end
+
+function NPC:SetPersonaMeter(i)
+	return self:SetNW2Float("PersonaMeter",i)
+end
+
+function NPC:GetPersonaMeter()
+	return self:GetNW2Float("PersonaMeter")
+end
+
+function NPC:GetMaxPersonaMeter()
+	return math.Round(self:GetMaxSP() /5)
 end
 
 function NPC:GetPersona()
@@ -451,9 +475,13 @@ if SERVER then
 			ply:SetHealth(shouldBe)
 			ply:SetSP(shouldBeSP)
 			ply:SetMaxSP(ply:GetSP())
+			ply:SetPersonaMeter(ply:GetMaxPersonaMeter())
 			-- ply:SetHealth(ply.Persona_MaxHealth)
 		end)
 		ply.PXP_NextXPChange = CurTime()
+		ply.Persona_NextRegenMeterT = 0
+		ply.Persona_NextRegenMeterSoundT = 0
+		ply.Persona_NextRegenMeterStopSoundT = 0
 
 		ply.Persona_TarukajaT = 0 -- Inc. ATK
 		ply.Persona_TarundaT = 0 -- Dec. ATK
@@ -561,10 +589,11 @@ if SERVER then
 
 	local wep = "weapon_persona_nothing"
 	hook.Add("Think","Persona_Think",function()
+		local cheats = GetConVarNumber("sv_cheats") == 1
 		for _,v in pairs(player.GetAll()) do
-			-- if CurTime() > v.PXP_NextXPChange && PXP.GetPersonaData(v,1) >= PXP.GetRequiredXP(v) then
-				-- PXP.LevelUp(v)
-			-- end
+			local meter = v:GetPersonaMeter()
+			local maxMeter = v:GetMaxPersonaMeter()
+			local persona = v:GetPersona()
 			local lvl = PXP.GetPlayerLevel(v)
 			local shouldBe = math.Clamp(math.Round(lvl *10.09),100,654698468)
 			local shouldBeSP = math.Clamp(math.Round(lvl *8),25,654698468)
@@ -575,12 +604,39 @@ if SERVER then
 			if shouldBeSP > v:GetMaxSP() then
 				v:SetMaxSP(shouldBeSP)
 			end
-			if IsValid(v:GetPersona()) then
+			if IsValid(persona) then
 				if !v:HasWeapon(wep) && !v:IsFrozen() then
 					v:Give(wep)
 				end
 				v:SelectWeapon(wep)
+				v:SetPersonaMeter(cheats && maxMeter or math.Clamp(meter -0.1,0,maxMeter))
+				v.Persona_NextRegenMeterT = CurTime() +5
+				if meter <= 0 && persona:GetTask() != "TASK_RETURN" then
+					persona:SetTask("TASK_RETURN")
+					persona:OnRequestDisappear(v)
+					if CurTime() > v.Persona_NextRegenMeterStopSoundT then
+						local snd = "cpthazama/persona5/misc/00045.wav"
+						Persona_CSound(v,snd,65)
+						v.Persona_NextRegenMeterStopSoundT = CurTime() +SoundDuration(snd)
+					end
+				end
+				if persona.HasOverdrive then
+					-- PXP.RemoveEXP(v,20)
+					if v:GetSP() <= 0 then
+						persona:Overdrive(false)
+					else
+						persona:TakeSP(cheats && 0 or 1)
+					end
+				end
 			else
+				if CurTime() > v.Persona_NextRegenMeterT && meter < maxMeter then
+					v:SetPersonaMeter(cheats && maxMeter or math.Clamp(meter +1,0,maxMeter))
+					if v:GetPersonaMeter() >= maxMeter && CurTime() > v.Persona_NextRegenMeterSoundT then
+						local snd = "cpthazama/persona5/misc/00084.wav"
+						Persona_CSound(v,snd,65)
+						v.Persona_NextRegenMeterSoundT = CurTime() +SoundDuration(snd)
+					end
+				end
 				if v:HasWeapon(wep) then
 					for _,v in pairs(v:GetWeapons()) do
 						if v:GetClass() == wep then
@@ -750,6 +806,10 @@ if SERVER then
 
 	local function summon_persona(ply)
 		if !ply:Alive() then return end
+		if ply:GetPersonaMeter() <= 0 then
+			ply:ChatPrint("You are currently exhausted. Wait a few seconds to regenerate Persona Meter!")
+			return
+		end
 		if ply:HasPersona() && CurTime() > ply:GetNextPersonaSummonT() then
 			local persona = ply:GetPersona()
 			if !IsValid(persona) then
@@ -941,14 +1001,52 @@ if CLIENT then
 
 	local lerp_hp = 0
 	local calc_hp = 0
+
 	local lerp_e_hp = 0
 	local calc_e_hp = 0
+
 	local lerp_sp = 0
 	local calc_sp = 0
+
+	local lerp_mt = 0
+	local calc_mt = 0
+
 	local lerp_xp = 0
 	local calc_xp = 0
+
 	local lerp_skill_cost = 0
 	local lerp_req = 0
+	
+	local icons = {
+		[1] = "hud_almighty",
+		[2] = "hud_bless",
+		[3] = "hud_curse",
+		[4] = "hud_elec",
+		[5] = "hud_fire",
+		[6] = "hud_frost",
+		[7] = "hud_gun",
+		[8] = "hud_nuclear",
+		[9] = "hud_phys",
+		[10] = "hud_psi",
+		[11] = "hud_sleep",
+		[12] = "hud_wind"
+	}
+	
+	local iconsDMG = {
+		[1] = {DMG_P_ALMIGHTY},
+		[2] = {DMG_P_MIRACLE,DMG_P_BLESS},
+		[3] = {DMG_P_CURSE},
+		[4] = {DMG_P_ELEC,DMG_PHYSGUN,DMG_SHOCK,DMG_ENERGYBEAM,DMG_PLASMA},
+		[5] = {DMG_P_FIRE,DMG_BURN,DMG_SLOWBURN},
+		[6] = {DMG_P_ICE},
+		[7] = {DMG_P_GUN,DMG_BULLET,DMG_AIRBOAT,DMG_BUCKSHOT,DMG_SNIPER,DMG_MISSILEDEFENSE},
+		[8] = {DMG_P_NUCLEAR,DMG_DISSOLVE,67108865,67110912},
+		[9] = {DMG_P_PHYS,DMG_GENERIC,DMG_CRUSH,8197,DMG_SLASH,DMG_VEHICLE,DMG_FALL,DMG_CLUB,DMG_NEVERGIB},
+		[10] = {DMG_P_PSI,DMG_P_PSY},
+		[11] = {DMG_P_SLEEP,DMG_P_PARALYZE,DMG_P_FEAR,DMG_P_DEATH,DMG_PARALYZE},
+		[12] = {DMG_P_WIND}
+	}
+
 	local types = {
 		["hud_almighty"] = "Almighty",
 		["hud_automatic"] = "Automatic",
@@ -1030,6 +1128,8 @@ if CLIENT then
 		local req_xp = ply:GetNW2Int("PXP_RequiredEXP")
 		local hasSkillMenu = ply:GetNW2Bool("Persona_SkillMenu")
 		local skillMenu = ply.Persona_CSSkills or {}
+		local meter = ply:GetPersonaMeter()
+		local maxMeter = ply:GetMaxPersonaMeter()
 
 		local corners = 1
 		local posX = GetConVarNumber("persona_hud_x") or 350
@@ -1049,10 +1149,12 @@ if CLIENT then
 		lerp_sp = Lerp(5 *FrameTime(), lerp_sp, sp)
 		calc_hp = Lerp(5 *FrameTime(), calc_hp, perHP)
 		calc_sp = Lerp(5 *FrameTime(), calc_sp, perSP)
+		lerp_mt = Lerp(5 *FrameTime(), lerp_mt, meter)
 		lerp_xp = Lerp(5 *FrameTime(), lerp_xp, xp)
 		calc_xp = Lerp(5 *FrameTime(), calc_xp, perXP)
 		local perHPB = lerp_hp *100 /hpMax
 		local perSPB = lerp_sp *100 /spMax
+		local perMTB = lerp_mt *100 /maxMeter
 
 		local r,g,b = 255, 101, 239
 		if usesHP then
@@ -1132,6 +1234,48 @@ if CLIENT then
 		end
 		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 
+		// Meter
+		local r,g,b = 255, 255, 0
+		local posX = boxX
+		local posY = boxHeight +50
+		local len = boxX -25
+		local height = 30
+		local bHeight = 110
+		local bDrop = bHeight +30
+		if persona:GetNW2Bool("Overdrive") then
+			local rgb = HSL((RealTime() *350 -(0 *15)),160,160)
+			r,g,b = rgb.r, rgb.g, rgb.b
+		end
+		if meter <= maxMeter *0.15 then
+			r,g,b = 220, 0, 0
+		end
+		draw.RoundedBox(12, ScrW() -posX, ScrH() -posY -bHeight, len, bDrop, bColor)
+		draw.RoundedBox(12, ScrW() -posX, ScrH() -posY, len, height, color(0,0,0,150))
+		draw.RoundedBox(12, ScrW() -posX, ScrH() -posY, math.Clamp(len *((perMTB /100) /(persona:GetNW2Bool("Legendary") && 2 or 1)),0,len), height, color(r, g, b, 255))
+		local push = 0
+		local spacing = 50
+		for i = 1,12 do
+			local iColor = color(35,35,35,255)
+			if i > 6 then
+				push = spacing
+			end
+			if ply.PersonaElements then
+				local hasWK = P_HasDamageType(ply.PersonaElements.WK,iconsDMG[i])
+				local hasRES = P_HasDamageType(ply.PersonaElements.RES,iconsDMG[i])
+				local hasNUL = P_HasDamageType(ply.PersonaElements.NUL,iconsDMG[i])
+				local hasREF = P_HasDamageType(ply.PersonaElements.REF,iconsDMG[i])
+				local hasABS = P_HasDamageType(ply.PersonaElements.ABS,iconsDMG[i])
+				if hasWK then iColor = color(235,0,0,255) end -- Red
+				if hasRES then iColor = color(127,0,255,255) end -- Purple
+				-- if hasNUL then iColor = color(127,255,255,255) end -- Light Blue
+				if hasNUL then iColor = color(150,150,150,255) end -- Light Grey
+				-- if hasREF then iColor = color(225,255,0,255) end -- Yellow
+				if hasREF then iColor = color(127,255,255,255) end -- Light Blue
+				if hasABS then iColor = color(0,255,63,255) end -- Green
+			end
+			DrawTexture("hud/persona/png/stats/" .. icons[i] .. ".png",iColor,ScrW() -posX -32 +(spacing *i) -push *6, ScrH() -posY -bHeight +8 +push,35,35)
+		end
+
 		// EXP Text
 		r,g,b = 200, 0, 0
 		local text = canShowXP && "Req: " .. xp .. "/" .. req_xp or "Req: N/A"
@@ -1145,6 +1289,7 @@ if CLIENT then
 			local rgb = HSL((RealTime() *200 -(0 *15)),128,128)
 			r,g,b = rgb.r, rgb.g, rgb.b
 		end
+
 		local posX = boxX -10
 		local posY = boxHeight -290
 		local len = boxX -45
@@ -1366,6 +1511,7 @@ local pParticleList = {
 	"persona_aura_yellow",
 	"persona_aura_purple",
 	"persona_aura_velvet",
+	"persona_aura_overdrive",
 }
 for _,v in ipairs(pParticleList) do PrecacheParticleSystem(v) end
 
