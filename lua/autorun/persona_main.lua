@@ -2,6 +2,9 @@ include("persona_xp.lua")
 
 local debug = 0
 
+CreateConVar("persona_meter_enabled","1",128,"Toggles the Persona Summon meter. Note that with sv_cheats set to 1, the meter will always be full!",0,1)
+CreateConVar("persona_meter_mul","1",128,"Multiplies the max value of your Persona Summon meter by X amount, allowing you to have your Persona out for longer!",1,20)
+
 local File = FindMetaTable("File")
 
 function File:QuickRead(position)
@@ -254,7 +257,8 @@ function PLY:GetPersonaMeter()
 end
 
 function PLY:GetMaxPersonaMeter()
-	return math.Round(self:GetMaxSP() /5 *(PXP.IsLegendary(self) && 2 or 1))
+	local calc = math.Round(self:GetMaxSP() /2 *(PXP.IsLegendary(self) && 2 or 1)) *GetConVarNumber("persona_meter_mul")
+	return math.Clamp(calc,35,999999999)
 end
 
 function PLY:HasPersona()
@@ -335,7 +339,7 @@ function NPC:GetPersonaMeter()
 end
 
 function NPC:GetMaxPersonaMeter()
-	return math.Round(self:GetMaxSP() /5)
+	return math.Round(self:GetMaxSP() /5) *GetConVarNumber("persona_meter_mul")
 end
 
 function NPC:GetPersona()
@@ -589,7 +593,7 @@ if SERVER then
 
 	local wep = "weapon_persona_nothing"
 	hook.Add("Think","Persona_Think",function()
-		local cheats = GetConVarNumber("sv_cheats") == 1
+		local cheats = GetConVarNumber("persona_meter_enabled") == 0 or GetConVarNumber("sv_cheats") == 1
 		for _,v in pairs(player.GetAll()) do
 			local meter = v:GetPersonaMeter()
 			local maxMeter = v:GetMaxPersonaMeter()
