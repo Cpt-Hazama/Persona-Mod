@@ -142,6 +142,10 @@ if (CLIENT) then
 
 	function ENT:ChangeFlex(name,val,speed) -- Translation value
 		local canContinue = true
+		local constraint = self.FlexConstraints && self.FlexConstraints[name] or false
+		if constraint then
+			val = math.Clamp(val,constraint.min,constraint.max)
+		end
 		for _,v in pairs(self.Flexes) do
 			if v.Name == name then
 				canContinue = false
@@ -1459,10 +1463,12 @@ function ENT:RandomizeExpressions(flexes,anim,frames,chance)
 	end
 	for i = 1,frames do
 		if math.random(1,chance) == 1 then
-			for _,flex in pairs(flexes) do
-				local name, val, speed = flex, math.Rand(0,1), math.Rand(0.1,5)
-				self:AddFlexEvent(anim,i,{Name=name,Value=val,Speed=speed},frames)
-				-- print(name,val,speed)
+			for _,flex in ipairs(flexes) do
+				if math.random(1,math.random(1,4)) == 1 then
+					local name, val, speed = flex, math.Rand(0,1), math.Rand(0.1,5)
+					self:AddFlexEvent(anim,i,{Name=name,Value=val,Speed=speed},frames)
+					-- print(name,val,speed)
+				end
 			end
 		end
 	end

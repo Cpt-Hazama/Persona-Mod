@@ -151,6 +151,7 @@ if CLIENT then
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Main Settings","Combat","Combat","","",function(Panel)
+			Panel:AddControl("CheckBox",{Label = "Enable Level-Based Damage Scaling",Command = "persona_dmg_scaling"})
 			Panel:AddControl("CheckBox",{Label = "Enable Summon Meter",Command = "persona_meter_enabled"})
 			Panel:AddControl("Slider",{Label = "Extend Summon Time by X",Command = "persona_meter_mul",Min = 1,Max = 20})
 			Panel:AddControl("CheckBox",{Label = "Enable Battle Mode",Command = "vj_persona_battle"})
