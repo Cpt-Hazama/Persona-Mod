@@ -456,7 +456,6 @@ hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
 end)
 
 if SERVER then
-
 	function P_HasEnhancements(ent,incSPE)
 		if !IsValid(ent) then return false end
 		local incSPE = incSPE or false

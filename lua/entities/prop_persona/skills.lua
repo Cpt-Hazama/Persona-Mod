@@ -4318,20 +4318,6 @@ function ENT:Freila(ply,persona)
 						if IsValid(ply.Persona_EyeTarget) then
 							self:NuclearEffect(ply.Persona_EyeTarget,DMG_P_MEDIUM)
 						end
-
-						-- local proj = ents.Create("obj_vj_per_nuclearblast")
-						-- proj:SetPos(enemy:GetPos() +enemy:OBBMaxs() +Vector(0,0,400))
-						-- proj:SetAngles((enemy:GetPos() +enemy:OBBCenter() -proj:GetPos()):Angle())
-						-- proj:Spawn()
-						-- proj.RadiusDamage = self:AdditionalInput(DMG_P_MEDIUM,2)
-						-- proj.RadiusDamageType = DMG_P_NUCLEAR
-						-- proj:SetOwner(self.User)
-						-- proj:SetPhysicsAttacker(self.User)
-						-- proj:EmitSound("cpthazama/persona5/skills/0338.wav")
-
-						-- if IsValid(proj:GetPhysicsObject()) then
-							-- proj:GetPhysicsObject():SetVelocity((enemy:GetPos() +enemy:OBBCenter() -proj:GetPos()) *300)
-						-- end
 						timer.Simple(t,function()
 							if IsValid(self) then
 								t = self:PlaySet(skill,"range_end",1)

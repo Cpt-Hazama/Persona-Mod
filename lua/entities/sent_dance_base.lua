@@ -423,7 +423,7 @@ if (CLIENT) then
 		end
 		if input.IsButtonDown(e) then
 			if CurTime() > ply.Persona_ButtonData["e"].CT then
-				ply:EmitSound("cpthazama/persona5_dance/mix.wav")
+				ply:EmitSound("cpthazama/persona5_dance/mix.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
 			end
 			ply.Persona_ButtonData["e"].CT = CurTime() +0.05
 		end
@@ -448,26 +448,26 @@ if (CLIENT) then
 					local hType = note.HitType
 					local hP = note.HitPoints
 					if hType == 1 then -- Perfect
-						ply:EmitSound("cpthazama/persona5_dance/clap_mega.wav")
+						ply:EmitSound("cpthazama/persona5_dance/clap_mega.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
 						didHit = true
 						ply.Persona_Dance_HitData.Perfect = ply.Persona_Dance_HitData.Perfect +1
 						-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(100 *(1 -tDif)) *mul)
 						ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
 					elseif hType == 2 then -- Great
-						ply:EmitSound("cpthazama/persona5_dance/clap_cyl.wav")
+						ply:EmitSound("cpthazama/persona5_dance/clap_cyl.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
 						didHit = true
 						ply.Persona_Dance_HitData.Great = ply.Persona_Dance_HitData.Great +1
 						-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(50 *(1 -tDif)) *mul)
 						ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
 					elseif hType == 3 then -- Good
-						ply:EmitSound("cpthazama/persona5_dance/clap.wav")
+						ply:EmitSound("cpthazama/persona5_dance/clap.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
 						didHit = true
 						ply.Persona_Dance_HitData.Good = ply.Persona_Dance_HitData.Good +1
 						-- ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(25 *(1 -tDif)) *mul)
 						ply.Persona_Dance_Score = math.Round(ply.Persona_Dance_Score +math.Round(hP) *mul)
 					else
 						hType = 0
-						ply:EmitSound("cpthazama/persona5/misc/00103.wav")
+						ply:EmitSound("cpthazama/persona5/misc/00103.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
 						ply.Persona_Dance_HitTimes = 0
 						ply.Persona_Dance_LastNoteT = 0
 						if CurTime() > self.NextSpeakT && math.random(1,15) == 1 then
@@ -496,8 +496,8 @@ if (CLIENT) then
 							ply.Persona_Dance_LastCheerT = CurTime() +10
 							ply.Persona_Dance_HitTimes = 0
 							ply:ChatPrint("SCORE BOOST FOR 10 SECONDS!")
-							ply:EmitSound("cpthazama/persona4/ui_shufflebegin.wav")
-							ply:EmitSound("cpthazama/persona5_dance/crowd.wav")
+							ply:EmitSound("cpthazama/persona4/ui_shufflebegin.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
+							ply:EmitSound("cpthazama/persona5_dance/crowd.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
 						end
 					else
 						ply.Persona_Dance_HitTimes = 0

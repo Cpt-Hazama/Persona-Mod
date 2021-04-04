@@ -4,16 +4,21 @@
 	"$bumpmap" "models/cpthazama/persona5/makoto/body_n"
 	"$phongexponenttexture" "models/cpthazama/persona_shared/exponent"
 
+	"$detail"	"models/cpthazama/persona5/makoto/detail"
+	"$detailbumpmap"	"models/cpthazama/persona5/makoto/detail_n" // If only
+	"$detailscale" "15"
+	"$detailblendfactor" "0.3"
+	"$detailblendmode" "0"
+
 	"$phong"				"1"
-	"$phongboost"			"25"
+	"$phongexponent"		"20"
+	"$phongboost"			"8"
 	"$phongfresnelranges"	"[0.035 0.2 1]"
-	//"$phongtint"			"[0.6 0.6 0.6]"
+	//"$phongtint"	"[0.54 0.54 0.32]"
 	"$phongalbedotint"		"1"
 
-	"$rimlight" "1"
-	"$rimlightexponent" "1"
-	"$rimlightboost" "15"
-	"$rimmask" "1"
+	"$envmap" "models/cpthazama/persona5/makoto/ref"
+	"$envmaptint" "[0.0002 0.0002 0.0002]"
 
 	"$lightwarptexture" "models/cpthazama/persona5/warp2"
 }
