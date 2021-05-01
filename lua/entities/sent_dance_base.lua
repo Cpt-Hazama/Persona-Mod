@@ -28,6 +28,13 @@ ENT.ViewBone = "Spine2"
 ENT.ViewBoneOffset = Vector(0,0,0)
 ENT.WaitForNextSongToStartTime = 0.01
 
+	-- To access developer tools, "persona_dance_dev" must be set to 1!
+	-- To use FFT tool:
+		-- While on song select menu, press your +use key to save the collected data (you must collect the data first!)
+		-- To collect data, simply start a song and let it completely play through. This will generate the data and temporarily store it. To save it, see above line. The Dancer will automatically load the FFT data the next time you play that specific song!
+ENT.DEV_FFTCheckPosition = 175 -- (Default: 128) Any number between 1 and 256. 1 is the highest frequency and 256 is the lowest frequency
+ENT.DEV_FFTCheckStrength = 810 -- (Default: 1000) The frequency strength difference between the last sample and the current sample must be higher than this to be added to our data file
+
 ENT.Difficulty = 2 -- 1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're stupid
 
 ENT.PreviewThemes = {} -- Song that plays during song select/customization. The sounds must be looped using Waveosaur or another program. If left empty, it will play the default song (P3D Theme)
@@ -50,9 +57,9 @@ ENT.Outfits = {}
 -- ENT.Outfits[1] = {Name = "Winter Uniform", Model = "", ReqSong = nil, ReqScore = 0} -- Model = self.Model +whatever is in here, ReqSong must be the song name, not the id/seq name
 
 ENT.SongLength = {}
--- ENT.SongLength["dance_lastsurprise"] = 300
+-- ENT.SongLength["dance_lastsurprise"] = 300 -- OBSOLETE!
 
-ENT.TrackNotes = {} -- Touch THIS one!
+ENT.TrackNotes = {} -- Touch THIS one! PLEASE DONT! USE THE FFT DEV TOOL INSTEAD!
 
 ENT.Notes = {} -- Don't touch this!
 
@@ -295,31 +302,52 @@ if (CLIENT) then
 	end
 
 	function ENT:ApplyNotes(anim,len)
-		if !self.TrackNotes[anim] then -- Random Notes
-			local adjust = math.random(1,self.Difficulty)
-			local clampMin = self.Difficulty == 1 && 1.25 or 0.75
-			local clampMax = self.Difficulty == 1 && 3 or 5
-			local subClamp = self.Difficulty == 1 && 0.95 or 0.5
-			for i = 1,len *adjust do
-				if i > 3 then
-					if math.random(1,2) == 1 then
-						for x = 1,math.random(1,self.Difficulty) do
-							-- local dir = VJ_PICK({"w","a","d","n4","n8","n6"})
-							local dir = VJ_PICK({"s","a","d","n4","n8","n6"})
-							local ogTime = math.Rand(clampMin +0.5,clampMax) /adjust
-							local time = math.Clamp(math.Rand(ogTime -subClamp,ogTime +subClamp),clampMin,clampMax)
-							time = 1
-							self:AddNote(anim,dir,time,i)
-							if math.random(1,8) == 1 then
-								-- dir = VJ_PICK({"w","a","d","n4","n8","n6"})
-								dir = VJ_PICK({"s","a","d","n4","n8","n6"})
+		if !self.TrackNotes[anim] then
+			local diff = self.Difficulty
+
+			local function AutoGenerateCrappyNotes(diff)
+				local adjust = math.random(1,diff)
+				local clampMin = diff == 1 && 1.25 or 0.75
+				local clampMax = diff == 1 && 3 or 5
+				local subClamp = diff == 1 && 0.95 or 0.5
+				for i = 1,len *adjust do
+					if i > 3 then
+						if math.random(1,2) == 1 then
+							for x = 1,math.random(1,(6 -diff)) do
+								local dir = VJ_PICK({"s","a","d","n4","n8","n6"})
+								local ogTime = math.Rand(clampMin +0.5,clampMax) /adjust
+								local time = math.Clamp(math.Rand(ogTime -subClamp,ogTime +subClamp),clampMin,clampMax)
+								time = 1 -- Force the time to be 1, random times don't really make sense
 								self:AddNote(anim,dir,time,i)
+								if math.random(1,8) == 1 then -- Make a clone-note
+									dir = VJ_PICK({"s","a","d","n4","n8","n6"})
+									self:AddNote(anim,dir,time,i)
+								end
 							end
 						end
 					end
 				end
 			end
-			-- return
+			
+			-- New Code --
+			local beats = P_GetFFTTableData(anim)
+			if beats == nil or #beats <= 0 then
+				AutoGenerateCrappyNotes(diff)
+				MsgN("[Persona Mod] Unable to load FFT beat data! Auto-generating basic notes...")
+			else
+				local spawnChance = 6 -diff
+				local speed = GetConVarNumber("persona_dance_notespeed")
+				local max = 4
+				local time = max -(max *(speed *0.1))
+				for _,v in SortedPairs(beats) do
+					if math.random(1,spawnChance) == 1 then
+						local dir = VJ_PICK({"s","a","d","n4","n8","n6"})
+						local setTime = math.Clamp(v -time,0,math.huge)
+						if setTime <= 5 then continue end -- Too close to the start, forget that mess
+						self:AddNote(anim,dir,time,setTime)
+					end
+				end
+			end
 		end
 		self.TotalNotes = #self.TrackNotes[anim]
 		local index = self.DanceIndex
@@ -610,6 +638,12 @@ if (CLIENT) then
 			end
 		end
 	end)
+	
+	local AMP = 8000
+	local oldData = 0
+	local saveData = {}
+	local fftperiod = 1
+	local nextFFTT = 0
 
 	local mat = Material("hud/persona/dance/star_b_new.png")
 	hook.Add("HUDPaint","Persona_DanceViewMode_HUD",function(ply)
@@ -746,6 +780,57 @@ if (CLIENT) then
 		local danceMat = dancer.HUD_SideMaterial
 		local blink = math.Clamp(math.abs(math.sin(CurTime() *1) *255),50,255)
 		
+		if GetConVarNumber("persona_dance_dev") == 1 then
+			local devX, devY = 2.48, 4.7
+			draw.RoundedBox(8,ScrW() /devX,ScrH() /devY,510,45,Color(0,0,0,245))
+			draw.SimpleText("[DEVELOPER MODE ENABLED!]","Persona",ScrW() /(devX -0.03),ScrH() /(devY -0.12),Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+			local lData = lData or {}
+			if #lData <= 0 then
+				for i = 1,256  do
+					lData[i] = 0
+				end
+			end
+			
+			local testRate = dancer.DEV_FFTCheckStrength or 1000
+			local data = {}
+			local audio = ply.VJ_Persona_Dance_Theme_Audio
+			if IsValid(ply.VJ_Persona_Dance_Theme_Audio) then
+				ply.VJ_Persona_Dance_Theme_Audio:FFT(data,1)
+				for i = 1,256 do
+					if data[i] then lData[i] = Lerp(10 *FrameTime(),lData[i],data[i]) end
+					draw.RoundedBox(0,ScrW() /8 +(i *8),ScrH() /2,4,lData[i] *AMP,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+				end
+				if #data > 0 then
+					if CurTime() > nextFFTT then
+						fftperiod = fftperiod +1
+						if fftperiod > 3 then
+							fftperiod = 1
+						end
+						nextFFTT = CurTime() +1
+					end
+					draw.SimpleText("Sampling FFT" .. (fftperiod == 1 && "." or fftperiod == 2 && ".." or "..."),"Persona",ScrW() /2,ScrH() /2,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+					draw.SimpleText("FFT Check Positon - " .. dancer.DEV_FFTCheckPosition or 128,"Persona",ScrW() /2,ScrH() /2.12,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+					draw.SimpleText("FFT Check Strength - " .. dancer.DEV_FFTCheckStrength or 1000,"Persona",ScrW() /2,ScrH() /2.22,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+
+					local newData = data[dancer.DEV_FFTCheckPosition or 128]
+					local lastDifData = lastDifData or 0
+					local difData = math.abs((newData *200000) -(oldData *200000))
+					local d = false
+					if math.abs(difData -lastDifData) > testRate then
+						d = true
+						table.insert(saveData,ply.VJ_Persona_Dance_Theme_Audio:GetTime())
+					end
+					oldData = newData
+					lastDifData = difData
+					-- Entity(1):ChatPrint("-------------------------------------------")
+					-- Entity(1):ChatPrint("Old - " .. oldData .. " | New - " .. newData)
+					-- Entity(1):ChatPrint(difData)
+					-- if d then Entity(1):ChatPrint("Added FFT Beat Time!") end
+					-- Entity(1):ChatPrint("-------------------------------------------")
+				end
+			end
+		end
+		
 		if mode == 2 then
 			dancer:CheckButtons(ply)
 			DrawTexture("hud/persona/dance/bg.png",boost && Color(boostColor.r,boostColor.g,boostColor.b,255) or Color(255,255,255,255),0,0,ScrW(),ScrH())
@@ -834,6 +919,12 @@ if (CLIENT) then
 				surface.PlaySound("cpthazama/persona4/ui_hover.wav")
 			end
 			if ply:KeyReleased(IN_USE) then
+				if GetConVarNumber("persona_dance_dev") == 1 then
+					print("Saved " .. #saveData .. " FFT entries to '/data/persona/fft/" .. dancer.LastDanceSequence .. ".dat'")
+					ply:ChatPrint("Saved " .. #saveData .. " FFT entries!")
+					P_SaveFFTData(dancer.LastDanceSequence,saveData)
+					table.Empty(saveData)
+				end
 				net.Start("Persona_Dance_UpdateOutfit")
 					net.WriteString(dancer.Outfits[dancer.OutfitIndex].Name)
 					net.WriteEntity(dancer)
@@ -901,30 +992,47 @@ if (CLIENT) then
 				draw.SimpleText(name .. " : High Score - " .. tostring(score),"Persona",boxX +10,stPos,i == dancer.SelectedIndex && boostColor or HUDColor)
 			end
 		else
-			if mode == 2 then
+			if mode == 2 && IsValid(ply.VJ_Persona_Dance_Theme_Audio) then
 				// Hit Count
-				local boxTX, boxTY = ScrW() /2.175, ScrH() /1.1
-				local boxTW, boxTH = ScrW() /40, ScrH() /28
-				local hitTimes = ply.Persona_Dance_HitTimes or 0
-				local hitTotalTimes = ply.Persona_Dance_TotalHits or 0
-				local totalNotes = dancer.TotalNotes or 0
-				local text = hitTotalTimes .. " / " .. totalNotes
-				-- if hitTimes > 4 then
-					boxTW = boxTW *(string.len(tostring(text)) /3)
-					draw.RoundedBox(8,boxTX,boxTY,boxTW,boxTH,Color(0,0,0,245)) // 200
-					draw.SimpleText(text,"Persona",boxTX +10,boxTY +10,HUDColor)
-				-- end
+				-- local boxTX, boxTY = ScrW() /2.175, ScrH() /1.1
+				-- local boxTW, boxTH = ScrW() /40, ScrH() /28
+				-- local hitTimes = ply.Persona_Dance_HitTimes or 0
+				-- local hitTotalTimes = ply.Persona_Dance_TotalHits or 0
+				-- local totalNotes = dancer.TotalNotes or 0
+				-- local text = hitTotalTimes .. " / " .. totalNotes
+				-- boxTW = boxTW *(string.len(tostring(text)) /3)
+				-- draw.RoundedBox(8,boxTX,boxTY,boxTW,boxTH,Color(0,0,0,245)) // 200
+				-- draw.SimpleText(text,"Persona",boxTX +10,boxTY +10,HUDColor)
 
 				// Timer
 				local boxTX, boxTY = ScrW() /2.235, ScrH() /1.05
 				local boxTW, boxTH = ScrW() /46, ScrH() /28
 				local startedTime = dancer.StartSongTime or 0
 				local setEndTime = dancer.TimeToEndSong or 0
+				local currentTime = ply.VJ_Persona_Dance_Theme_Audio:GetTime()
 				local currentLength = dancer.CurrentSongLength or 0
-				local text = string.FormattedTime(tostring(math.abs((CurTime() -startedTime))),"%02i:%02i") .. " / " .. string.FormattedTime(tostring(currentLength),"%02i:%02i")
+				local text = string.FormattedTime(tostring(math.abs((currentTime))),"%02i:%02i") .. " / " .. string.FormattedTime(tostring(currentLength),"%02i:%02i")
 				boxTW = boxTW *(string.len(tostring(text)) /3)
 				draw.RoundedBox(8,boxTX,boxTY,boxTW,boxTH,Color(0,0,0,245)) // 200
 				draw.SimpleText(text,"Persona",boxTX +10,boxTY +10,HUDColor)
+				
+				local boxTX, boxTY = ScrW() /5, ScrH() /1.1
+				local boxTW, boxTH = ScrW() /1.7, ScrH() /30
+				draw.RoundedBox(5,boxTX,boxTY,boxTW,boxTH,Color(0,0,0,245))
+
+				local lerp_cpos = lerp_cpos or currentTime
+				lerp_cpos = Lerp(25 *FrameTime(),lerp_cpos,currentTime)
+				local perCPos = lerp_cpos *100 /currentLength
+				local boxTX, boxTY = ScrW() /4.9, ScrH() /1.091
+				-- local boxTW, boxTH = ScrW() /20, ScrH() /56
+				local boxTW, boxTH = ScrW() /1.72, ScrH() /56
+				local targetPos = boxTW *1.33
+				local curPos = boxTW *(perCPos /100)
+				local curPos2 = curPos +(ScrW() /5.11) //500
+				-- ply:ChatPrint(tostring(curPos) .. " | " .. tostring((perCPos /100)))
+				draw.RoundedBox(5,boxTX,boxTY,curPos,boxTH,Color(HUDColor.r,HUDColor.g,HUDColor.b,255)) // Color(20,255,250)
+
+				DrawTexture("hud/persona/dance/position.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),curPos2,boxTY *0.934,50,125)
 			end
 		end
 
@@ -1086,9 +1194,18 @@ if (CLIENT) then
 		local me = net.ReadEntity()
 		local ply = net.ReadEntity()
 		
+		-- if ran then return end
 		if LocalPlayer() != ply then return end
-		
-		if ply.VJ_Persona_Dance_Theme then ply.VJ_Persona_Dance_Theme:Stop() end
+		if !IsValid(me) then return end
+
+		-- if ply.VJ_Persona_Dance_Theme then ply.VJ_Persona_Dance_Theme:Stop() end
+		if me.StopAudio then me:StopAudio(ply.VJ_Persona_Dance_Theme_Audio) end -- Yeah...I really have no fucking clue
+
+		-- if !IsValid(ply.VJ_Persona_DancePreview_Theme_Audio) or IsValid(ply.VJ_Persona_DancePreview_Theme_Audio) && me:IsAudioPlaying(ply.VJ_Persona_DancePreview_Theme_Audio) == false then
+			-- if IsValid(ply.VJ_Persona_DancePreview_Theme_Audio) then print("STOPPED SOUND") return end
+			-- local snd = me.PreviewThemes && VJ_PICK(me.PreviewThemes) or "cpthazama/persona3_dance/music/preview.wav"
+			-- me:CreateAudioStream("Preview",snd,true,true)
+		-- end
 		if ply.VJ_Persona_DancePreview_Theme == nil or ply.VJ_Persona_DancePreview_Theme && !ply.VJ_Persona_DancePreview_Theme:IsPlaying() then
 			local snd = me.PreviewThemes && VJ_PICK(me.PreviewThemes) or "cpthazama/persona3_dance/music/preview.wav"
 			ply.VJ_Persona_DancePreview_Theme = CreateSound(ply,snd)
@@ -1116,12 +1233,10 @@ if (CLIENT) then
 		me.IsCheating = GetConVarNumber("persona_dance_perfect") == 1 or false
 		me.DanceIndex = (me.DanceIndex or 0) +1
 		if !me.ApplyNotes then ply:ChatPrint("A weird problem occured...respawn the Dancer and it will be fixed"); SafeRemoveEntity(me) return end
+		me.LastDanceSequence = seq
+		me:CreateAudioStream("Song",dir,false,false)
 		local hasSongLengthSet = (seq && me.SongLength && me.SongLength[seq]) or false
 		local setLength = (hasSongLengthSet && me.SongLength[seq]) or length
-		me:ApplyNotes(seq,hasSongLengthSet && setLength or setLength -4)
-		me.StartSongTime = CurTime()
-		me.TimeToEndSong = CurTime() +setLength
-		me.CurrentSongLength = setLength
 		me.Persona_NextNoteT = CurTime() +3
 
 		ply.Persona_Dance_LastNoteT = 0
@@ -1143,17 +1258,29 @@ if (CLIENT) then
 			end
 		end
 		local delay = me.SongDelay && me.SongDelay[seq] or me.SongStartDelay
-		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == dir then ply.VJ_Persona_Dance_Theme:Stop() end
+		if delay == 0 then delay = 0.01 end
+		if IsValid(ply.VJ_Persona_Dance_Theme_Audio) && ply.VJ_Persona_Dance_ThemeDir == dir then me:StopAudio(ply.VJ_Persona_Dance_Theme_Audio) end
 		timer.Simple(delay,function()
 			if IsValid(ply) && IsValid(me) then
 				ply.VJ_Persona_Dance_ThemeDir = dir
-				ply.VJ_Persona_Dance_Theme = CreateSound(ply,dir)
-				ply.VJ_Persona_Dance_Theme:SetSoundLevel(0)
-				ply.VJ_Persona_Dance_Theme:Play()
-				ply.VJ_Persona_Dance_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01) // 60
-				ply.VJ_Persona_Dance_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
+				if ply.VJ_Persona_Dance_Theme_Audio then
+					ply.VJ_Persona_Dance_Theme_Audio:Play()
+				else
+					ply:ChatPrint("Something went wrong somehow...please respawn the Dancer")
+				end
 			end
 		end)
+		-- if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == dir then ply.VJ_Persona_Dance_Theme:Stop() end
+		-- timer.Simple(delay,function()
+			-- if IsValid(ply) && IsValid(me) then
+				-- ply.VJ_Persona_Dance_ThemeDir = dir
+				-- ply.VJ_Persona_Dance_Theme = CreateSound(ply,dir)
+				-- ply.VJ_Persona_Dance_Theme:SetSoundLevel(0)
+				-- ply.VJ_Persona_Dance_Theme:Play()
+				-- ply.VJ_Persona_Dance_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01) // 60
+				-- ply.VJ_Persona_Dance_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
+			-- end
+		-- end)
 	end)
 
 	net.Receive("Persona_Dance_ModeStart",function(len)
@@ -1226,17 +1353,26 @@ if (CLIENT) then
 	function ENT:Think()
 		local ply = LocalPlayer()
 		self:ClientThink(ply)
-		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() then
-			ply.VJ_Persona_Dance_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01)
-			ply.VJ_Persona_Dance_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
+		-- if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() then
+			-- ply.VJ_Persona_Dance_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01)
+			-- ply.VJ_Persona_Dance_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
+		-- end
+		if IsValid(ply.VJ_Persona_Dance_Theme_Audio) then
+			ply.VJ_Persona_Dance_Theme_Audio:SetVolume(self:IsAudioPlaying(ply.VJ_Persona_Dance_Theme_Audio) && GetConVarNumber("vj_persona_dancevol") *0.01 or 0.01)
+			ply.VJ_Persona_Dance_Theme_Audio:SetPlaybackRate(GetConVarNumber("host_timescale"))
 		end
+		-- if IsValid(ply.VJ_Persona_DancePreview_Theme_Audio) then
+			-- ply.VJ_Persona_DancePreview_Theme_Audio:SetVolume(ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() && 0 or GetConVarNumber("vj_persona_dancevol") *0.01)
+			-- ply.VJ_Persona_DancePreview_Theme_Audio:SetPlaybackRate(GetConVarNumber("host_timescale"))
+		-- end
 		if ply.VJ_Persona_DancePreview_Theme then
 			-- if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() then
-				-- ply.VJ_Persona_DancePreview_Theme:ChangeVolume(0)
-				-- return
-			-- end
-			-- print(GetConVarNumber("vj_persona_dancevol"))
-			ply.VJ_Persona_DancePreview_Theme:ChangeVolume(ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() && 0 or GetConVarNumber("vj_persona_dancevol") *0.01)
+			if self:IsAudioPlaying(ply.VJ_Persona_Dance_Theme_Audio) then
+				ply.VJ_Persona_DancePreview_Theme:ChangeVolume(0)
+				return
+			end
+			-- ply.VJ_Persona_DancePreview_Theme:ChangeVolume(ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() && 0 or GetConVarNumber("vj_persona_dancevol") *0.01)
+			ply.VJ_Persona_DancePreview_Theme:ChangeVolume(self:IsAudioPlaying(ply.VJ_Persona_Dance_Theme_Audio) && 0 or GetConVarNumber("vj_persona_dancevol") *0.01)
 			ply.VJ_Persona_DancePreview_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
 		end
 	end
@@ -1258,7 +1394,19 @@ if (CLIENT) then
 		-- if ply != self.Persona_Player then return end
 		-- print(ply,self.Persona_Player)
 		if ply.VJ_Persona_DancePreview_Theme && ply.VJ_Persona_DancePreview_Theme:IsPlaying() then ply.VJ_Persona_DancePreview_Theme:FadeOut(2) end
-		if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == self:GetSong() then
+		-- self:StopAudio(ply.VJ_Persona_DancePreview_Theme_Audio)
+		-- if ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_ThemeDir == self:GetSong() then
+			-- local cont = true
+			-- for _,v in pairs(ents.FindByClass("sent_dance_*")) do
+				-- if v:GetSong() != nil && v != self && v:GetSong() == self:GetSong() then
+					-- cont = false
+				-- end
+			-- end
+			-- if cont then
+				-- ply.VJ_Persona_Dance_Theme:FadeOut(2)
+			-- end
+		-- end
+		if IsValid(ply.VJ_Persona_Dance_Theme_Audio) && ply.VJ_Persona_Dance_ThemeDir == self:GetSong() then
 			local cont = true
 			for _,v in pairs(ents.FindByClass("sent_dance_*")) do
 				if v:GetSong() != nil && v != self && v:GetSong() == self:GetSong() then
@@ -1266,9 +1414,50 @@ if (CLIENT) then
 				end
 			end
 			if cont then
-				ply.VJ_Persona_Dance_Theme:FadeOut(2)
+				self:StopAudio(ply.VJ_Persona_Dance_Theme_Audio)
 			end
 		end
+	end
+	
+	function ENT:IsAudioPlaying(audio)
+		return IsValid(audio) && audio:GetState() == 1
+	end
+	
+	function ENT:StopAudio(audio)
+		if self:IsAudioPlaying(audio) then
+			audio:Stop()
+		end
+	end
+	
+	function ENT:OnCreatedAudioStream(audio,tag)
+		if tag == "Preview" then
+			ply.VJ_Persona_DancePreview_Theme_Audio = audio
+		end
+		if tag == "Song" then
+			ply.VJ_Persona_Dance_Theme_Audio = audio
+
+			local len = audio:GetLength()
+			self:ApplyNotes(self.LastDanceSequence,len)
+			self.StartSongTime = CurTime()
+			self.TimeToEndSong = CurTime() +len
+			self.CurrentSongLength = len
+		end
+	end
+	
+	function ENT:CreateAudioStream(tag,snd,play,loop,vol,pit)
+		sound.PlayFile("sound/" .. snd,"noplay noblock",function(station,errCode,errStr)
+			if IsValid(station) then
+				station:EnableLooping(loop)
+				if play then station:Play() end
+				station:SetVolume(vol or GetConVarNumber("vj_persona_dancevol") *0.01)
+				station:SetPlaybackRate(pit or GetConVarNumber("host_timescale"))
+				self:OnCreatedAudioStream(station,tag)
+				if self.CustomOnCreatedAudioStream then self:CustomOnCreatedAudioStream(station,tag) end
+			else
+				print("Error playing sound!",errCode,errStr)
+			end
+			return station
+		end)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------

@@ -5,6 +5,47 @@ local debug = 0
 CreateConVar("persona_dmg_scaling","1",128,"Toggles the damage scaling feature of the mod.",0,1)
 CreateConVar("persona_meter_enabled","1",128,"Toggles the Persona Summon meter. Note that with sv_cheats set to 1, the meter will always be full!",0,1)
 CreateConVar("persona_meter_mul","1",128,"Multiplies the max value of your Persona Summon meter by X amount, allowing you to have your Persona out for longer!",1,20)
+CreateConVar("persona_dance_dev","0",128,"Enables development tools for Dance! Dance! mode.",0,1)
+
+function P_SaveTableData(filename,tbl)
+	local dir = "persona/temp_data/"
+	file.CreateDir(dir)
+	file.Write(dir .. filename .. ".dat",util.TableToJSON({Name = "Temp Data",Set = tbl},true))
+end
+
+function P_GetTableData(filename)
+	local dir = "persona/temp_data/" .. filename .. ".dat"
+	local data = file.Read(dir,"DATA")
+	if data == nil then MsgN("Could not load data file!") return {} end
+	local json = util.JSONToTable(data)
+	local tbData = {}
+	if json && json.Name && json.Set then
+		for _,v in pairs(json.Set) do
+			table.insert(tbData,v)
+		end
+	end
+	return tbData
+end
+
+function P_SaveFFTData(filename,tbl)
+	local dir = "persona/fft/"
+	file.CreateDir(dir)
+	file.Write(dir .. filename .. ".dat",util.TableToJSON({Name = "FFT Data",Set = tbl},true))
+end
+
+function P_GetFFTTableData(filename)
+	local dir = "persona/fft/" .. filename .. ".dat"
+	local data = file.Read(dir,"DATA")
+	if data == nil then MsgN("Could not load FFT data file!") return {} end
+	local json = util.JSONToTable(data)
+	local tbData = {}
+	if json && json.Name && json.Set then
+		for _,v in pairs(json.Set) do
+			table.insert(tbData,v)
+		end
+	end
+	return tbData
+end
 
 local File = FindMetaTable("File")
 
@@ -89,6 +130,7 @@ if CLIENT then
 	CConVar("persona_dance_perfect","0",true,0,1)
 	CConVar("persona_dance_controller","0",true,0,1)
 	CConVar("persona_dance_cinematic","0",true,0,1)
+	CConVar("persona_dance_notespeed","4",true,1,8)
 
 	CConVar("persona_dance_top_l","11",true,0,159)
 	CConVar("persona_dance_mid_l","29",true,0,159)

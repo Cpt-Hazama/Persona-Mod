@@ -171,12 +171,18 @@ if CLIENT then
 			Panel:AddControl("Label",{Text = "1 = Spectate, 2 = Dance, Dance!"})
 			Panel:AddControl("Slider",{Label = "Dance Difficulty",Command = "vj_persona_dancedifficulty",Min = 1,Max = 5})
 			Panel:AddControl("Label",{Text = "1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're Crazy"})
+			Panel:AddControl("Slider",{Label = "Note Speed",Command = "persona_dance_notespeed",Min = 1,Max = 8})
+			Panel:AddControl("Label",{Text = "Default = 4"})
 			Panel:AddControl("CheckBox",{Label = "Enable Perfect Play",Command = "persona_dance_perfect"})
 			Panel:AddControl("Label",{Text = "Scores will not be saved in Perfect Play mode!"})
 			Panel:AddControl("CheckBox",{Label = "Controller Mode",Command = "persona_dance_controller"})
 			Panel:AddControl("Label",{Text = "Enable this to play with a controller!"})
 			Panel:AddControl("CheckBox",{Label = "Cinematic Mode",Command = "persona_dance_cinematic"})
 			Panel:AddControl("Label",{Text = "If the Dancer has a Cinematic Mode, this will give Dance Mode 1 & 2 an authentic feel!"})
+			if !(!game.SinglePlayer() && !LocalPlayer():IsAdmin()) then
+				Panel:AddControl("Label",{Text = "Admin Settings"})
+				Panel:AddControl("CheckBox",{Label = "Enable Developer Tools",Command = "persona_dance_dev"})
+			end
 			Panel:AddControl("Numpad",{Label = "Top-Left Key", Command = "persona_dance_top_l"})
 			Panel:AddControl("Numpad",{Label = "Middle-Left Key", Command = "persona_dance_mid_l"})
 			Panel:AddControl("Numpad",{Label = "Bottom-Left Key", Command = "persona_dance_bot_l"})
