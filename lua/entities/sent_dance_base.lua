@@ -32,8 +32,8 @@ ENT.WaitForNextSongToStartTime = 0.01
 	-- To use FFT tool:
 		-- While on song select menu, press your +use key to save the collected data (you must collect the data first!)
 		-- To collect data, simply start a song and let it completely play through. This will generate the data and temporarily store it. To save it, see above line. The Dancer will automatically load the FFT data the next time you play that specific song!
-ENT.DEV_FFTCheckPosition = 175 -- (Default: 128) Any number between 1 and 256. 1 is the highest frequency and 256 is the lowest frequency
-ENT.DEV_FFTCheckStrength = 810 -- (Default: 1000) The frequency strength difference between the last sample and the current sample must be higher than this to be added to our data file
+ENT.DEV_FFTCheckPosition = 128 -- (Default: 128) Any number between 1 and 256. 1 is the highest frequency and 256 is the lowest frequency
+ENT.DEV_FFTCheckStrength = 800 -- (Default: 1000) The frequency strength difference between the last sample and the current sample must be higher than this to be added to our data file
 
 ENT.Difficulty = 2 -- 1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're stupid
 
@@ -354,7 +354,7 @@ if (CLIENT) then
 		for _,v in pairs(self.TrackNotes[anim]) do
 			timer.Simple(v.Activate,function()
 				if IsValid(self) && self.DanceIndex == index && self:GetSelectedSong() != "false" then
-					self:SpawnNote(v.Dir,v.Life)
+					self:SpawnNote(v.Dir,v.Life *GetConVarNumber("host_timescale"))
 				end
 			end)
 		end
@@ -789,6 +789,7 @@ if (CLIENT) then
 				for i = 1,256  do
 					lData[i] = 0
 				end
+				-- saveData = {}
 			end
 			
 			local testRate = dancer.DEV_FFTCheckStrength or 1000
@@ -796,9 +797,10 @@ if (CLIENT) then
 			local audio = ply.VJ_Persona_Dance_Theme_Audio
 			if IsValid(ply.VJ_Persona_Dance_Theme_Audio) then
 				ply.VJ_Persona_Dance_Theme_Audio:FFT(data,1)
+				local getAll = GetConVarNumber("persona_dance_dev_fftall") == 1
 				for i = 1,256 do
 					if data[i] then lData[i] = Lerp(10 *FrameTime(),lData[i],data[i]) end
-					draw.RoundedBox(0,ScrW() /8 +(i *8),ScrH() /2,4,lData[i] *AMP,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+					draw.RoundedBox(0,ScrW() /8 +(i *8),ScrH() /2,4,lData[i] *AMP,i == dancer.DEV_FFTCheckPosition && Color(boostColor.r,boostColor.g,boostColor.b,255) or Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
 				end
 				if #data > 0 then
 					if CurTime() > nextFFTT then
@@ -809,24 +811,50 @@ if (CLIENT) then
 						nextFFTT = CurTime() +1
 					end
 					draw.SimpleText("Sampling FFT" .. (fftperiod == 1 && "." or fftperiod == 2 && ".." or "..."),"Persona",ScrW() /2,ScrH() /2,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
-					draw.SimpleText("FFT Check Positon - " .. dancer.DEV_FFTCheckPosition or 128,"Persona",ScrW() /2,ScrH() /2.12,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
-					draw.SimpleText("FFT Check Strength - " .. dancer.DEV_FFTCheckStrength or 1000,"Persona",ScrW() /2,ScrH() /2.22,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
-
-					local newData = data[dancer.DEV_FFTCheckPosition or 128]
-					local lastDifData = lastDifData or 0
-					local difData = math.abs((newData *200000) -(oldData *200000))
-					local d = false
-					if math.abs(difData -lastDifData) > testRate then
-						d = true
-						table.insert(saveData,ply.VJ_Persona_Dance_Theme_Audio:GetTime())
+					if getAll == true then
+						draw.SimpleText("FFT Check Position - ALL","Persona",ScrW() /2,ScrH() /2.12,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+					else
+						draw.SimpleText("FFT Check Position - " .. dancer.DEV_FFTCheckPosition or 128,"Persona",ScrW() /2,ScrH() /2.12,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
 					end
-					oldData = newData
-					lastDifData = difData
-					-- Entity(1):ChatPrint("-------------------------------------------")
-					-- Entity(1):ChatPrint("Old - " .. oldData .. " | New - " .. newData)
-					-- Entity(1):ChatPrint(difData)
-					-- if d then Entity(1):ChatPrint("Added FFT Beat Time!") end
-					-- Entity(1):ChatPrint("-------------------------------------------")
+					draw.SimpleText("FFT Check Strength - " .. dancer.DEV_FFTCheckStrength or 1000,"Persona",ScrW() /2,ScrH() /2.22,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+					if !getAll then draw.SimpleText("FFT Findings - " .. #saveData or 0,"Persona",ScrW() /2,ScrH() /2.32,Color(HUDColor.r,HUDColor.g,HUDColor.b,255)) end
+
+					if getAll == true then
+						local average = 0
+						local all = 0
+						for i = 1,256 do
+							local newData = data[i]
+							local lastDifData = lastDifData or 0
+							local difData = math.abs((newData *200000) -(oldData *200000))
+							local d = false
+							saveData[i] = saveData[i] or {}
+							if math.abs(difData -lastDifData) > testRate then
+								d = true
+								table.insert(saveData[i],ply.VJ_Persona_Dance_Theme_Audio:GetTime())
+								all = all +#saveData[i]
+							end
+							oldData = newData
+							lastDifData = difData
+						end
+						average = all /#saveData
+						draw.SimpleText("FFT Average - " .. average,"Persona",ScrW() /2,ScrH() /2.32,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+					else
+						local newData = data[dancer.DEV_FFTCheckPosition or 128]
+						local lastDifData = lastDifData or 0
+						local difData = math.abs((newData *200000) -(oldData *200000))
+						local d = false
+						if math.abs(difData -lastDifData) > testRate then
+							d = true
+							table.insert(saveData,ply.VJ_Persona_Dance_Theme_Audio:GetTime())
+						end
+						oldData = newData
+						lastDifData = difData
+						-- Entity(1):ChatPrint("-------------------------------------------")
+						-- Entity(1):ChatPrint("Old - " .. oldData .. " | New - " .. newData)
+						-- Entity(1):ChatPrint(difData)
+						-- if d then Entity(1):ChatPrint("Added FFT Beat Time!") end
+						-- Entity(1):ChatPrint("-------------------------------------------")
+					end
 				end
 			end
 		end
@@ -922,7 +950,8 @@ if (CLIENT) then
 				if GetConVarNumber("persona_dance_dev") == 1 then
 					print("Saved " .. #saveData .. " FFT entries to '/data/persona/fft/" .. dancer.LastDanceSequence .. ".dat'")
 					ply:ChatPrint("Saved " .. #saveData .. " FFT entries!")
-					P_SaveFFTData(dancer.LastDanceSequence,saveData)
+					-- P_SaveFFTData("dance_whenthemoonsreachingoutstars",saveData,130,800)
+					P_SaveFFTData(dancer.LastDanceSequence,saveData,dancer.DEV_FFTCheckPosition,dancer.DEV_FFTCheckStrength)
 					table.Empty(saveData)
 				end
 				net.Start("Persona_Dance_UpdateOutfit")
@@ -1247,6 +1276,9 @@ if (CLIENT) then
 		me.HUD_SideMaterial = math.random(1,2) == 1 && "hud/persona/dance/bg_stars" or "hud/persona/dance/bg_hex"
 		ply.Persona_HUD_LoadT = CurTime() +math.Rand(0.1,0.6)
 		me:SetShowSongMenu(false)
+		if saveData then
+			table.Empty(saveData)
+		end
 
 		local extraSongs = P_GetAvailableSongs(me.PrintName)
 		if extraSongs then

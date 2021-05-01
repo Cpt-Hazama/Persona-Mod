@@ -182,6 +182,7 @@ if CLIENT then
 			if !(!game.SinglePlayer() && !LocalPlayer():IsAdmin()) then
 				Panel:AddControl("Label",{Text = "Admin Settings"})
 				Panel:AddControl("CheckBox",{Label = "Enable Developer Tools",Command = "persona_dance_dev"})
+				Panel:AddControl("CheckBox",{Label = "Check All FFT Channels?",Command = "persona_dance_dev_fftall"})
 			end
 			Panel:AddControl("Numpad",{Label = "Top-Left Key", Command = "persona_dance_top_l"})
 			Panel:AddControl("Numpad",{Label = "Middle-Left Key", Command = "persona_dance_mid_l"})

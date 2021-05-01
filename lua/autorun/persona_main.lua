@@ -6,6 +6,7 @@ CreateConVar("persona_dmg_scaling","1",128,"Toggles the damage scaling feature o
 CreateConVar("persona_meter_enabled","1",128,"Toggles the Persona Summon meter. Note that with sv_cheats set to 1, the meter will always be full!",0,1)
 CreateConVar("persona_meter_mul","1",128,"Multiplies the max value of your Persona Summon meter by X amount, allowing you to have your Persona out for longer!",1,20)
 CreateConVar("persona_dance_dev","0",128,"Enables development tools for Dance! Dance! mode.",0,1)
+CreateConVar("persona_dance_dev_fftall","0",128,"Grab all FFT values?",0,1)
 
 function P_SaveTableData(filename,tbl)
 	local dir = "persona/temp_data/"
@@ -27,10 +28,12 @@ function P_GetTableData(filename)
 	return tbData
 end
 
-function P_SaveFFTData(filename,tbl)
+function P_SaveFFTData(filename,tbl,pos,str)
+	pos = pos or 128
+	str = str or 1000
 	local dir = "persona/fft/"
 	file.CreateDir(dir)
-	file.Write(dir .. filename .. ".dat",util.TableToJSON({Name = "FFT Data",Set = tbl},true))
+	file.Write(dir .. filename .. ".dat",util.TableToJSON({Name = "FFT Data",CheckPosition = pos,CheckStrength = str,Set = tbl},true))
 end
 
 function P_GetFFTTableData(filename)
