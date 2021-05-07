@@ -50,6 +50,30 @@ function P_GetFFTTableData(filename)
 	return tbData
 end
 
+function P_SaveAverageFFTData(filename,reTblID)
+	local avTbl = P_GetAverageFFTData(filename,reTblID)
+	P_SaveFFTData(filename,avTbl,reTblID,0)
+end
+
+function P_GetAverageFFTData(filename,reTblID)
+	local tbl = P_GetFFTTableData(filename)
+	local r = {}
+	for _,v in SortedPairs(tbl) do
+		if reTblID then
+			if _ == reTblID then
+				for __,time in SortedPairs(v) do
+					table.insert(r,time)
+					print(time)
+				end
+			end
+		else
+			print(_,#v)
+		end
+	end
+
+	return r
+end
+
 local File = FindMetaTable("File")
 
 function File:QuickRead(position)

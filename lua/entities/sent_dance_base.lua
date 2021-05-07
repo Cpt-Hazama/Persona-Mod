@@ -275,9 +275,9 @@ if (CLIENT) then
 		self:SetViewMode(GetConVarNumber("vj_persona_dancemode"))
 	end
 
-	function ENT:AddNote(seq,dir,timer,spawnTime)
+	function ENT:AddNote(seq,dir,timer,spawnTime,speed)
 		self.TrackNotes[seq] = self.TrackNotes[seq] or {}
-		table_insert(self.TrackNotes[seq],{Dir = dir,Life = timer,Activate = spawnTime})
+		table_insert(self.TrackNotes[seq],{Dir = dir,Life = timer,Activate = spawnTime,Speed = speed or 1})
 	end
 	
 	function ENT:CustomCalcView(ply,pos,angles,fov,danceBone) end
@@ -318,7 +318,7 @@ if (CLIENT) then
 								local ogTime = math.Rand(clampMin +0.5,clampMax) /adjust
 								local time = math.Clamp(math.Rand(ogTime -subClamp,ogTime +subClamp),clampMin,clampMax)
 								time = 1 -- Force the time to be 1, random times don't really make sense
-								self:AddNote(anim,dir,time,i)
+								self:AddNote(anim,dir,time,i,time)
 								if math.random(1,8) == 1 then -- Make a clone-note
 									dir = VJ_PICK({"s","a","d","n4","n8","n6"})
 									self:AddNote(anim,dir,time,i)
@@ -337,14 +337,15 @@ if (CLIENT) then
 			else
 				local spawnChance = 6 -diff
 				local speed = GetConVarNumber("persona_dance_notespeed")
+				local targetSpeed = speed /2.5
 				local max = 4
-				local time = max -(max *(speed *0.1))
+				local time = max -(max *(targetSpeed *0.1))
 				for _,v in SortedPairs(beats) do
 					if math.random(1,spawnChance) == 1 then
 						local dir = VJ_PICK({"s","a","d","n4","n8","n6"})
 						local setTime = math.Clamp(v -time,0,math.huge)
 						if setTime <= 5 then continue end -- Too close to the start, forget that mess
-						self:AddNote(anim,dir,time,setTime)
+						self:AddNote(anim,dir,time,setTime,speed)
 					end
 				end
 			end
@@ -354,19 +355,20 @@ if (CLIENT) then
 		for _,v in pairs(self.TrackNotes[anim]) do
 			timer.Simple(v.Activate,function()
 				if IsValid(self) && self.DanceIndex == index && self:GetSelectedSong() != "false" then
-					self:SpawnNote(v.Dir,v.Life *GetConVarNumber("host_timescale"))
+					self:SpawnNote(v.Dir,v.Life *GetConVarNumber("host_timescale"),v.Speed)
 				end
 			end)
 		end
 	end
 
-	function ENT:SpawnNote(dir,time)
+	function ENT:SpawnNote(dir,time,speed)
 		local ind = #self.Notes +1
 		self.Notes[ind] = {}
 		self.Notes[ind].Hit = false
 		self.Notes[ind].HitType = -1
 		self.Notes[ind].Direction = dir
 		self.Notes[ind].Timer = CurTime() +time
+		self.Notes[ind].Speed = speed or 1
 	end
 
 	function ENT:OnNoteHit(ply,ind,note,type)
@@ -709,7 +711,7 @@ if (CLIENT) then
 		local function DrawNote(note)
 			local nDir = note.Direction
 			local nTime = note.Timer -CurTime()
-			if !note.Speed then note.Speed = nTime end
+			-- if !note.A then note.A = nTime print(nTime) end
 			if !note.StartPosW then note.StartPosW = ScrW() /2 end
 			if !note.StartPosH then note.StartPosH = ScrH() /2 end
 			if !note.LastPosW then note.LastPosW = Angle(ScrW() /2,0,0) end
@@ -722,7 +724,7 @@ if (CLIENT) then
 			local scrWData = ScrW() /dA
 			local scrHData = ScrH() /dA
 			local targetW,targetH = nil,nil
-			local speed = note.Speed > 1 && note.Speed -1 or 1 +note.Speed
+			local speed = note.Speed /2.5
 			if nDir == "s" then
 				note.LastPosW = note.LastPosW +Angle(-speed,0,0)
 				note.LastPosH = note.LastPosH
@@ -784,6 +786,8 @@ if (CLIENT) then
 			local devX, devY = 2.48, 4.7
 			draw.RoundedBox(8,ScrW() /devX,ScrH() /devY,510,45,Color(0,0,0,245))
 			draw.SimpleText("[DEVELOPER MODE ENABLED!]","Persona",ScrW() /(devX -0.03),ScrH() /(devY -0.12),Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+			draw.SimpleText("Current Dance Index - " .. dancer:GetNW2Float("Index") or 0,"Persona",ScrW() /2,ScrH() /2.6,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+			draw.SimpleText("Current Animation - " .. dancer:GetSequenceName(dancer:GetSequence()),"Persona",ScrW() /2,ScrH() /2.45,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
 			local lData = lData or {}
 			if #lData <= 0 then
 				for i = 1,256  do
@@ -800,7 +804,7 @@ if (CLIENT) then
 				local getAll = GetConVarNumber("persona_dance_dev_fftall") == 1
 				for i = 1,256 do
 					if data[i] then lData[i] = Lerp(10 *FrameTime(),lData[i],data[i]) end
-					draw.RoundedBox(0,ScrW() /8 +(i *8),ScrH() /2,4,lData[i] *AMP,i == dancer.DEV_FFTCheckPosition && Color(boostColor.r,boostColor.g,boostColor.b,255) or Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+					draw.RoundedBox(0,ScrW() /8 +(i *8),ScrH() /2,4,lData[i] *AMP *10,i == dancer.DEV_FFTCheckPosition && Color(boostColor.r,boostColor.g,boostColor.b,255) or Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
 				end
 				if #data > 0 then
 					if CurTime() > nextFFTT then
@@ -1987,6 +1991,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Think()
 	self:HandleKeys(IsValid(self.Creator) && self.Creator)
+	self:SetNW2Float("Index",self.Index)
 	if self:GetSelectedSong() == "false" then
 		for _,v in ipairs(self.SoundTracks) do
 			local highscore = PXP.GetDanceData(self.Creator,v.name) or 0
