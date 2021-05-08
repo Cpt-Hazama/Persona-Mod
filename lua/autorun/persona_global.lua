@@ -1,6 +1,7 @@
 PERSONA_COSTUMES = {}
 PERSONA_SONGS = {}
 PERSONA_SONGANIMATIONS = {}
+PERSONA_VOICES = {}
 
 function PGM()
 	return gmod.GetGamemode()
@@ -20,6 +21,63 @@ function GetDancerFlexData(seqID,ent) -- Get a really good randomly generated fa
 			print(frame .. ",{Name='" .. d.Name .. "',Value=" .. d.Value .. ",Speed=" .. d.Speed .. "}")
 		end
 	end
+end
+
+function P_AddVoice(name,vType,vSound)
+	local canAdd = true
+	if !PERSONA_VOICES then
+		PERSONA_VOICES = {}
+	end
+	if !PERSONA_VOICES[name] then
+		PERSONA_VOICES[name] = {}
+	end
+	if !PERSONA_VOICES[name][vType] then
+		PERSONA_VOICES[name][vType] = {}
+	end
+	if type(vSound) == "table" then
+		for _,v in ipairs(vSound) do
+			if !VJ_HasValue(PERSONA_VOICES[name][vType],v) then
+				table.insert(PERSONA_VOICES[name][vType],v)
+			else
+				print("[Persona Mod] Unable to add '" .. v .. "', file already exists in registry!")
+			end
+		end
+	else
+		if !VJ_HasValue(PERSONA_VOICES[name][vType],vSound) then
+			table.insert(PERSONA_VOICES[name][vType],vSound)
+		else
+			print("[Persona Mod] Unable to add '" .. v .. "', file already exists in registry!")
+		end
+	end
+end
+
+function P_GetVoices(name,vType)
+	if name then
+		return PERSONA_VOICES[name][vType]
+	end
+	local tbl = {}
+	for _,v in SortedPairs(PERSONA_VOICES) do
+		if v then
+			table.Merge(tbl,v[vType])
+		end
+	end
+	return tbl
+end
+
+function P_GetRandomVoice(name,vType)
+	local vSound = P_GetVoices(name,vType)
+	return VJ_PICK(vSound)
+end
+
+function P_PlayVoice(ply,name,vType)
+	ply.Persona_VoiceT = ply.Persona_VoiceT or 0
+	-- if ply:GetNW2Int("Persona_VoiceT") >= CurTime() then return end
+	if ply.Persona_VoiceT >= CurTime() then return end
+	local vSound = P_GetRandomVoice(name,vType)
+	if vSound == false then return end
+	Persona_CSound(ply,vSound,GetConVarNumber("persona_dance_voicevolume"))
+	ply.Persona_VoiceT = CurTime() +SoundDuration(vSound) +math.Rand(4,10)
+	-- ply:SetNW2Int("Persona_VoiceT",CurTime() +SoundDuration(vSound) +math.Rand(4,10))
 end
 
 function P_AddCostume(dancer,data)

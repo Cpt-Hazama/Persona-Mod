@@ -36,6 +36,39 @@ function P_SaveFFTData(filename,tbl,pos,str)
 	file.Write(dir .. filename .. ".dat",util.TableToJSON({Name = "FFT Data",CheckPosition = pos,CheckStrength = str,Set = tbl},true))
 end
 
+function P_SaveHighScoreData(tbl,song,ply)
+	-- local tbl = {
+		-- ["1"] = 3805,
+		-- ["2"] = 16985,
+		-- ["3"] = 49453,
+		-- ["4"] = 75494,
+		-- ["5"] = 108396,
+	-- }
+	local id = string.gsub(ply:SteamID(),":","_")
+	local name = song
+	song = string.lower(song)
+	local dir = "persona/dance/"
+	file.CreateDir(dir)
+	file.Write(dir .. id .. "_" .. song .. ".dat",util.TableToJSON({Song = name,Player = ply:Nick(),Scores = tbl},true))
+end
+
+function P_GetHighScoreData(song,ply) -- local highscore = P_GetHighScoreData("Break Out Of -Remix-",ply)[tostring(self.Difficulty)]
+	local id = string.gsub(ply:SteamID(),":","_")
+	local name = song
+	song = string.lower(song)
+	local dir = "persona/dance/" .. id .. "_" .. song .. ".dat"
+	local data = file.Read(dir,"DATA")
+	if data == nil then
+		MsgN("Could not load dance high-score data file! " .. dir)
+		P_SaveHighScoreData({["1"] = 0,["2"] = 0,["3"] = 0,["4"] = 0,["5"] = 0},name,ply)
+		MsgN("Auto-Generated blank save data file!")
+		return P_GetHighScoreData(name,ply)
+		-- return {["1"] = 0,["2"] = 0,["3"] = 0,["4"] = 0,["5"] = 0}
+	end
+	local json = util.JSONToTable(data)
+	return json.Scores
+end
+
 function P_GetFFTTableData(filename)
 	local dir = "persona/fft/" .. filename .. ".dat"
 	local data = file.Read(dir,"DATA")
@@ -158,6 +191,8 @@ if CLIENT then
 	CConVar("persona_dance_controller","0",true,0,1)
 	CConVar("persona_dance_cinematic","0",true,0,1)
 	CConVar("persona_dance_notespeed","4",true,1,8)
+	CConVar("persona_dance_voicechance","15",true,1,100)
+	CConVar("persona_dance_voicevolume","50",true,0,100)
 
 	CConVar("persona_dance_top_l","11",true,0,159)
 	CConVar("persona_dance_mid_l","29",true,0,159)
@@ -185,7 +220,12 @@ if CLIENT then
 		local pit = net.ReadFloat()
 
 		if !IsValid(ply) then return end
-		ply:EmitSound(snd,vol,pit)
+		-- ply:EmitSound(snd,vol,pit)
+		local snd = CreateSound(ply,snd)
+		snd:SetSoundLevel(0)
+		snd:Play()
+		snd:ChangeVolume(vol *0.01)
+		snd:ChangePitch(pit)
 	end)
 
 	local function SpawnMarker(text,col,pos,vel,dmg,bonus)
@@ -387,6 +427,15 @@ function PLY:SetNextPersonaSummonT(t)
 end
 
 function Persona_CSound(ply,snd,vol,pit)
+	if snd == nil or snd == false then return end
+	if CLIENT then
+		local snd = CreateSound(ply,snd)
+		snd:SetSoundLevel(0)
+		snd:Play()
+		snd:ChangeVolume(vol *0.01)
+		snd:ChangePitch(pit or 100)
+		return
+	end
 	net.Start("persona_csound")
 		net.WriteEntity(ply)
 		net.WriteString(snd)
@@ -504,6 +553,7 @@ hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
 	-- ply:SetMaxSP(ply:GetSP())
 	ply:SetNW2Bool("Persona_BattleMode",false)
 	ply:SetNW2Bool("Persona_SkillMenu",false)
+	ply:SetNW2Int("Persona_VoiceT",0)
 	timer.Simple(0,function()
 		ply.Persona_MaxHealth = 100
 		ply:SetMaxHealth(100)
@@ -541,6 +591,7 @@ if SERVER then
 	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
 		ply:SetNW2Bool("Persona_BattleMode",false)
 		ply:SetNW2Bool("Persona_SkillMenu",false)
+		ply:SetNW2Int("Persona_VoiceT",0)
 		local lvl = PXP.GetPlayerLevel(ply)
 		local shouldBe = math.Clamp(math.Round(lvl *10.09),100,654698468)
 		local shouldBeSP = math.Clamp(math.Round(lvl *8),25,654698468)

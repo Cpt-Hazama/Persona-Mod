@@ -114,6 +114,7 @@ if SERVER then
 	util.AddNetworkString("Persona_Dance_UpdateOutfit")
 	util.AddNetworkString("Persona_Dance_UpdateSong")
 	util.AddNetworkString("Persona_Dance_SendScore")
+	util.AddNetworkString("Persona_Dance_UpdateDifficulty")
 	util.AddNetworkString("Persona_Dance_SongEnd")
 	util.AddNetworkString("Persona_Dance_ModeStart")
 	util.AddNetworkString("Persona_Dance_ChangeFlex")
@@ -273,6 +274,9 @@ if (CLIENT) then
 		
 		self.ViewMode = GetConVarNumber("vj_persona_dancemode")
 		self:SetViewMode(GetConVarNumber("vj_persona_dancemode"))
+
+		-- self:SetNW2Float("Difficulty",GetConVarNumber("vj_persona_dancedifficulty"))
+		self:SetNW2Float("Difficulty",self.Difficulty)
 	end
 
 	function ENT:AddNote(seq,dir,timer,spawnTime,speed)
@@ -303,7 +307,8 @@ if (CLIENT) then
 
 	function ENT:ApplyNotes(anim,len)
 		if !self.TrackNotes[anim] then
-			local diff = self.Difficulty
+			-- local diff = self.Difficulty
+			local diff = self:GetNW2Float("Difficulty")
 
 			local function AutoGenerateCrappyNotes(diff)
 				local adjust = math.random(1,diff)
@@ -377,6 +382,13 @@ if (CLIENT) then
 		note.HitType = type
 		if type == 0 then
 			ply.Persona_Dance_HitData.Miss = ply.Persona_Dance_HitData.Miss +1
+			if math.random(1,GetConVarNumber("persona_dance_voicechance")) == 1 then
+				P_PlayVoice(ply,nil,"failing")
+			end
+			if CurTime() > self.NextSpeakT && math.random(1,15) == 1 then
+				local snd = self:PlaySound("failing")
+				self.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
+			end
 		end
 		
 		local mats = {
@@ -500,10 +512,13 @@ if (CLIENT) then
 						ply:EmitSound("cpthazama/persona5/misc/00103.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
 						ply.Persona_Dance_HitTimes = 0
 						ply.Persona_Dance_LastNoteT = 0
-						if CurTime() > self.NextSpeakT && math.random(1,15) == 1 then
-							local snd = self:PlaySound("failing")
-							self.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
-						end
+						-- if math.random(1,GetConVarNumber("persona_dance_voicechance")) == 1 then
+							-- P_PlayVoice(ply,nil,"failing")
+						-- end
+						-- if CurTime() > self.NextSpeakT && math.random(1,15) == 1 then
+							-- local snd = self:PlaySound("failing")
+							-- self.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
+						-- end
 					end
 					self:OnNoteHit(ply,ind,note,hType)
 					if ply.Persona_Dance_LastNoteT < CurTime() then
@@ -511,6 +526,9 @@ if (CLIENT) then
 					end
 					if didHit then
 						ply.Persona_Dance_TotalHits = ply.Persona_Dance_TotalHits +1
+						if math.random(1,GetConVarNumber("persona_dance_voicechance")) == 1 then
+							P_PlayVoice(ply,nil,"winning")
+						end
 						if CurTime() > self.NextSpeakT && math.random(1,15) == 1 then
 							local snd = self:PlaySound("winning")
 							self.NextSpeakT = CurTime() +SoundDuration(snd[2]) +0.5
@@ -526,6 +544,7 @@ if (CLIENT) then
 							ply.Persona_Dance_LastCheerT = CurTime() +10
 							ply.Persona_Dance_HitTimes = 0
 							ply:ChatPrint("SCORE BOOST FOR 10 SECONDS!")
+							P_PlayVoice(ply,nil,"fever")
 							ply:EmitSound("cpthazama/persona4/ui_shufflebegin.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
 							ply:EmitSound("cpthazama/persona5_dance/crowd.wav",nil,nil,GetConVarNumber("vj_persona_dancevol") *0.01)
 						end
@@ -724,7 +743,7 @@ if (CLIENT) then
 			local scrWData = ScrW() /dA
 			local scrHData = ScrH() /dA
 			local targetW,targetH = nil,nil
-			local speed = note.Speed /2.5
+			local speed = (note.Speed /2.5) *(GetConVarNumber("sv_cheats") == 1 && GetConVarNumber("host_timescale") or 1)
 			if nDir == "s" then
 				note.LastPosW = note.LastPosW +Angle(-speed,0,0)
 				note.LastPosH = note.LastPosH
@@ -769,6 +788,8 @@ if (CLIENT) then
 		local songName = dancer:GetSongName()
 		local score = ply.Persona_Dance_Score
 		local scoreText = "Score - " .. score
+		local iDif = dancer:GetNW2Float("Difficulty")
+		local dif = iDif == 1 && "Easy" or iDif == 2 && "Normal" or iDif == 3 && "Hard" or iDif == 4 && "Crazy" or "Insane"
 		local boxX, boxY = ScrW() /4, ScrH() /150
 		local boxW, boxH = ScrW() /4.2, ScrH() /16
 		local boxSX, boxSY = ScrW() /1.9, ScrH() /150
@@ -923,8 +944,6 @@ if (CLIENT) then
 			draw.SimpleText(getInputName(n6),"Persona_Large",currentX +75,currentY +54,HUDColor)
 			DrawTexture("hud/persona/dance/ico_blank.png",Color(HUDColor.r,HUDColor.g,HUDColor.b,255),buttonN6_W,buttonN6_H,200,200)
 
-			local iDif = dancer.Difficulty
-			local dif = iDif == 1 && "Easy" or iDif == 2 && "Normal" or iDif == 3 && "Hard" or iDif == 4 && "Crazy" or "Insane"
 			draw.RoundedBox(8,boxSX,boxSY,boxSW,boxSH,Color(0,0,0,245))
 		
 			draw.RoundedBox(8,boxX,boxY,boxW,boxH,Color(0,0,0,245)) // 200
@@ -1022,7 +1041,7 @@ if (CLIENT) then
 				stPos = stPos +40
 				local name = dancer.SoundTracks[i].name
 				local score = dancer:GetNW2Int("HS_" .. name)
-				draw.SimpleText(name .. " : High Score - " .. tostring(score),"Persona",boxX +10,stPos,i == dancer.SelectedIndex && boostColor or HUDColor)
+				draw.SimpleText(name .. " : High Score - " .. tostring(score) .. " / " .. dif,"Persona",boxX +10,stPos,i == dancer.SelectedIndex && boostColor or HUDColor)
 			end
 		else
 			if mode == 2 && IsValid(ply.VJ_Persona_Dance_Theme_Audio) then
@@ -1263,6 +1282,7 @@ if (CLIENT) then
 		-- end
 		me.Persona_Player = ply
 		me.Difficulty = GetConVarNumber("vj_persona_dancedifficulty")
+		me:SetNW2Float("Difficulty",GetConVarNumber("vj_persona_dancedifficulty"))
 		me.IsCheating = GetConVarNumber("persona_dance_perfect") == 1 or false
 		me.DanceIndex = (me.DanceIndex or 0) +1
 		if !me.ApplyNotes then ply:ChatPrint("A weird problem occured...respawn the Dancer and it will be fixed"); SafeRemoveEntity(me) return end
@@ -1350,6 +1370,7 @@ if (CLIENT) then
 		
 		net.Start("Persona_Dance_SendScore")
 			net.WriteInt(score,24)
+			net.WriteFloat(dancer:GetNW2Float("Difficulty"),24)
 			net.WriteString(song)
 			net.WriteEntity(ply)
 			net.WriteEntity(dancer)
@@ -1407,6 +1428,15 @@ if (CLIENT) then
 				ply.VJ_Persona_DancePreview_Theme:ChangeVolume(0)
 				return
 			end
+			local oldDif = self:GetNW2Float("Difficulty")
+			if oldDif != GetConVarNumber("vj_persona_dancedifficulty") then
+				net.Start("Persona_Dance_UpdateDifficulty")
+					net.WriteFloat(GetConVarNumber("vj_persona_dancedifficulty"),24)
+					net.WriteEntity(ply)
+					net.WriteEntity(self)
+				net.SendToServer()
+			end
+			self:SetNW2Float("Difficulty",GetConVarNumber("vj_persona_dancedifficulty"))
 			-- ply.VJ_Persona_DancePreview_Theme:ChangeVolume(ply.VJ_Persona_Dance_Theme && ply.VJ_Persona_Dance_Theme:IsPlaying() && 0 or GetConVarNumber("vj_persona_dancevol") *0.01)
 			ply.VJ_Persona_DancePreview_Theme:ChangeVolume(self:IsAudioPlaying(ply.VJ_Persona_Dance_Theme_Audio) && 0 or GetConVarNumber("vj_persona_dancevol") *0.01)
 			ply.VJ_Persona_DancePreview_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
@@ -1502,18 +1532,34 @@ function ENT:SetAnimationRate(rate)
 	self.DefaultPlaybackRate = rate
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetHighScores(ply,song,highest)
+	local scores = P_GetHighScoreData(song,ply)
+	if highest then
+		local hScore = 0
+		for dif,v in SortedPairs(scores) do
+			if v > hScore then
+				hScore = v
+			end
+		end
+		return hScore
+	end
+	return scores
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OutfitUnlocked(outfit,ply)
 	if PERSONA_UNLOCKALL then return true end
 	if GetConVarNumber("sv_cheats") == 1 then return true end
 	if type(outfit) == "number" && self.Outfits[outfit] then
 		if self.Outfits[outfit].ReqSong == nil then return true end
-		local highscore = PXP.GetDanceData(ply,self.Outfits[outfit].ReqSong)
+		local highscore = self:GetHighScores(ply,self.Outfits[outfit].ReqSong,true)
+		-- local highscore = PXP.GetDanceData(ply,self.Outfits[outfit].ReqSong)
 		return highscore >= self.Outfits[outfit].ReqScore
 	end
 	for _,v in pairs(self.Outfits) do
 		if v.Name == outfit then
 			if v.ReqSong == nil then return true end
-			local highscore = PXP.GetDanceData(ply,v.ReqSong)
+			-- local highscore = PXP.GetDanceData(ply,v.ReqSong)
+			local highscore = self:GetHighScores(ply,v.ReqSong,true)
 			return highscore >= v.ReqScore
 		end
 	end
@@ -1612,6 +1658,7 @@ function ENT:PlayAnimation(seq,rate,cycle,index,name,noReset)
 				self.SongName = songName
 				self:SetSongName(songName)
 				self:OnStartDance(seq,song,songName,dance)
+				P_PlayVoice(self.Creator,nil,"start")
 			end
 			self:OnPlayDance(seq,t)
 			local dur = self:GetSequenceDuration(self,seq)
@@ -1749,6 +1796,8 @@ function ENT:Initialize()
 
 	self.AnimationEvents = {}
 	
+	-- self:SetNW2Float("Difficulty",self.Difficulty)
+	
 	self:SetNW2Bool("CustomView",false)
 	self.CanShowMenu = CurTime() +0.15
 	local extraCostumes = P_GetAvailableCostumes(self.PrintName)
@@ -1813,7 +1862,9 @@ function ENT:Initialize()
 					}
 					self.Creator:StripWeapons()
 					for _,v in ipairs(self.SoundTracks) do
-						self:SetNW2Int("HS_" .. v.name,PXP.GetDanceData(self.Creator,v.name) or 0)
+						local highscore = self:GetHighScores(self.Creator,v.name)[tostring(self.Difficulty)]
+						self:SetNW2Int("HS_" .. v.name,highscore or 0)
+						-- self:SetNW2Int("HS_" .. v.name,PXP.GetDanceData(self.Creator,v.name) or 0)
 					end
 				end
 				-- self:SetShowSongMenu(true)
@@ -1994,7 +2045,12 @@ function ENT:Think()
 	self:SetNW2Float("Index",self.Index)
 	if self:GetSelectedSong() == "false" then
 		for _,v in ipairs(self.SoundTracks) do
-			local highscore = PXP.GetDanceData(self.Creator,v.name) or 0
+			-- local highscore = PXP.GetDanceData(self.Creator,v.name) or 0
+			local scores = P_GetHighScoreData(v.name,self.Creator)
+			local highscore = scores[self.Difficulty]
+			-- print("--------------------------------------")
+			-- PrintTable(scores)
+			-- print(v.name,highscore,self:GetNW2Float("Difficulty"),self.Difficulty)
 			self:SetNW2Int("HS_" .. v.name,highscore)
 		end
 		self:PlayPreview(self.Creator)
@@ -2027,7 +2083,8 @@ function ENT:Think()
 		local t = self:PlayAnimation(anim,1,0,1,anim) +delay +0.1
 		if IsValid(self.Creator) && self.ViewMode == 2 then
 			local ply = self.Creator
-			local highscore = PXP.GetDanceData(ply,self:GetSelectedSong())
+			local highscore = self:GetHighScores(ply,self:GetSelectedSong())[self.Difficulty]
+			-- local highscore = PXP.GetDanceData(ply,self:GetSelectedSong())
 			ply:SetNW2Int("Persona_Dance_Score",highscore or 0)
 			net.Start("Persona_Dance_ModeStart")
 				net.WriteEntity(self.Creator)
@@ -2135,16 +2192,33 @@ if SERVER then
 		dancer:SetSelectedSong(song)
 	end)
 
+	net.Receive("Persona_Dance_UpdateDifficulty",function(len)
+		local difficulty = net.ReadFloat(24)
+		local ply = net.ReadEntity()
+		local dancer = net.ReadEntity()
+		local checkDancer = ply:GetNW2Entity("Persona_Dancer")
+
+		if !IsValid(checkDancer) then return end
+		if checkDancer != dancer then return end
+
+		dancer:SetNW2Float("Difficulty",difficulty)
+		checkDancer.Difficulty = difficulty
+	end)
+
 	net.Receive("Persona_Dance_SendScore",function(len)
 		local score = net.ReadInt(24)
+		local difficulty = net.ReadFloat(24)
 		local song = net.ReadString()
 		local ply = net.ReadEntity()
 		local dancer = net.ReadEntity()
-		local highscore = PXP.GetDanceData(ply,song)
+		local scores = P_GetHighScoreData(song,ply)
+		local highscore = scores[difficulty]
 
 		if score > highscore then
 			-- dancer:SetNW2Int("HS_" .. song,highscore or 0)
-			PXP.SaveDanceData(ply,song,score)
+			-- PXP.SaveDanceData(ply,song,score)
+			scores[tostring(difficulty)] = score
+			P_SaveHighScoreData(scores,song,ply)
 		end
 	end)
 end

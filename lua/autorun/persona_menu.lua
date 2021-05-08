@@ -165,7 +165,7 @@ if CLIENT then
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Dance Settings","Dance","Dance","","",function(Panel)
-			Panel:AddControl("Slider",{Label = "Music Volume",Command = "vj_persona_dancevol",Min = 15,Max = 100})
+			Panel:AddControl("Slider",{Label = "Music Volume",Command = "vj_persona_dancevol",Min = 0,Max = 100})
 			Panel:AddControl("Label",{Text = "Default = 60%"})
 			Panel:AddControl("Slider",{Label = "Dance Mode",Command = "vj_persona_dancemode",Min = 1,Max = 2})
 			Panel:AddControl("Label",{Text = "1 = Spectate, 2 = Dance, Dance!"})
@@ -179,11 +179,19 @@ if CLIENT then
 			Panel:AddControl("Label",{Text = "Enable this to play with a controller!"})
 			Panel:AddControl("CheckBox",{Label = "Cinematic Mode",Command = "persona_dance_cinematic"})
 			Panel:AddControl("Label",{Text = "If the Dancer has a Cinematic Mode, this will give Dance Mode 1 & 2 an authentic feel!"})
+			
 			if !(!game.SinglePlayer() && !LocalPlayer():IsAdmin()) then
 				Panel:AddControl("Label",{Text = "Admin Settings"})
 				Panel:AddControl("CheckBox",{Label = "Enable Developer Tools",Command = "persona_dance_dev"})
 				Panel:AddControl("CheckBox",{Label = "Check All FFT Channels?",Command = "persona_dance_dev_fftall"})
 			end
+
+			Panel:AddControl("Slider",{Label = "Commentator Chance",Command = "persona_dance_voicechance",Min = 0,Max = 100})
+			Panel:AddControl("Label",{Text = "Chance they will talk during an action."})
+			Panel:AddControl("Label",{Text = "This only works if you have a commentator pack!"})
+			Panel:AddControl("Slider",{Label = "Commentator Volume",Command = "persona_dance_voicevolume",Min = 0,Max = 100})
+			Panel:AddControl("Label",{Text = "Default = 50%"})
+
 			Panel:AddControl("Numpad",{Label = "Top-Left Key", Command = "persona_dance_top_l"})
 			Panel:AddControl("Numpad",{Label = "Middle-Left Key", Command = "persona_dance_mid_l"})
 			Panel:AddControl("Numpad",{Label = "Bottom-Left Key", Command = "persona_dance_bot_l"})
