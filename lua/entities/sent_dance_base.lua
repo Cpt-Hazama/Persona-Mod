@@ -32,8 +32,9 @@ ENT.WaitForNextSongToStartTime = 0.01
 	-- To use FFT tool:
 		-- While on song select menu, press your +use key to save the collected data (you must collect the data first!)
 		-- To collect data, simply start a song and let it completely play through. This will generate the data and temporarily store it. To save it, see above line. The Dancer will automatically load the FFT data the next time you play that specific song!
-ENT.DEV_FFTCheckPosition = 128 -- (Default: 128) Any number between 1 and 256. 1 is the highest frequency and 256 is the lowest frequency
-ENT.DEV_FFTCheckStrength = 800 -- (Default: 1000) The frequency strength difference between the last sample and the current sample must be higher than this to be added to our data file
+		-- Obsolete variables, use the in-game dev-menu instead!
+-- ENT.DEV_FFTCheckPosition = 128 -- (Default: 128) Any number between 1 and 256. 1 is the highest frequency and 256 is the lowest frequency
+-- ENT.DEV_FFTCheckStrength = 800 -- (Default: 1000) The frequency strength difference between the last sample and the current sample must be higher than this to be added to our data file
 
 ENT.Difficulty = 2 -- 1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're stupid
 
@@ -665,6 +666,7 @@ if (CLIENT) then
 	local saveData = {}
 	local fftperiod = 1
 	local nextFFTT = 0
+	local averageLast = 0
 
 	local mat = Material("hud/persona/dance/star_b_new.png")
 	hook.Add("HUDPaint","Persona_DanceViewMode_HUD",function(ply)
@@ -862,7 +864,8 @@ if (CLIENT) then
 							lastDifData = difData
 						end
 						average = all /#saveData
-						draw.SimpleText("FFT Average - " .. average,"Persona",ScrW() /2,ScrH() /2.32,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+						averageLast = Lerp(FrameTime() *1,averageLast,average)
+						draw.SimpleText("FFT Average - " .. averageLast,"Persona",ScrW() /2,ScrH() /2.32,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
 					else
 						local newData = data[dancer.DEV_FFTCheckPosition or 128]
 						local lastDifData = lastDifData or 0
@@ -1414,6 +1417,10 @@ if (CLIENT) then
 			-- ply.VJ_Persona_Dance_Theme:ChangeVolume(GetConVarNumber("vj_persona_dancevol") *0.01)
 			-- ply.VJ_Persona_Dance_Theme:ChangePitch(100 *GetConVarNumber("host_timescale"))
 		-- end
+		if !self:IsAudioPlaying(ply.VJ_Persona_Dance_Theme_Audio) then
+			self.DEV_FFTCheckPosition = GetConVarNumber("persona_dance_dev_fftpos")
+			self.DEV_FFTCheckStrength = GetConVarNumber("persona_dance_dev_fftstr")
+		end
 		if IsValid(ply.VJ_Persona_Dance_Theme_Audio) then
 			ply.VJ_Persona_Dance_Theme_Audio:SetVolume(self:IsAudioPlaying(ply.VJ_Persona_Dance_Theme_Audio) && GetConVarNumber("vj_persona_dancevol") *0.01 or 0.01)
 			ply.VJ_Persona_Dance_Theme_Audio:SetPlaybackRate(GetConVarNumber("host_timescale"))

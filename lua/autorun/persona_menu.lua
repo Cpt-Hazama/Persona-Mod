@@ -173,25 +173,32 @@ if CLIENT then
 			Panel:AddControl("Label",{Text = "1 = Easy, 2 = Normal, 3 = Hard, 4+ = You're Crazy"})
 			Panel:AddControl("Slider",{Label = "Note Speed",Command = "persona_dance_notespeed",Min = 1,Max = 8})
 			Panel:AddControl("Label",{Text = "Default = 4"})
+			
+			Panel:AddControl("Label",{Text = " "})
 			Panel:AddControl("CheckBox",{Label = "Enable Perfect Play",Command = "persona_dance_perfect"})
 			Panel:AddControl("Label",{Text = "Scores will not be saved in Perfect Play mode!"})
 			Panel:AddControl("CheckBox",{Label = "Controller Mode",Command = "persona_dance_controller"})
 			Panel:AddControl("Label",{Text = "Enable this to play with a controller!"})
 			Panel:AddControl("CheckBox",{Label = "Cinematic Mode",Command = "persona_dance_cinematic"})
 			Panel:AddControl("Label",{Text = "If the Dancer has a Cinematic Mode, this will give Dance Mode 1 & 2 an authentic feel!"})
-			
-			if !(!game.SinglePlayer() && !LocalPlayer():IsAdmin()) then
-				Panel:AddControl("Label",{Text = "Admin Settings"})
-				Panel:AddControl("CheckBox",{Label = "Enable Developer Tools",Command = "persona_dance_dev"})
-				Panel:AddControl("CheckBox",{Label = "Check All FFT Channels?",Command = "persona_dance_dev_fftall"})
-			end
 
+			Panel:AddControl("Label",{Text = " "})
 			Panel:AddControl("Slider",{Label = "Commentator Chance",Command = "persona_dance_voicechance",Min = 0,Max = 100})
 			Panel:AddControl("Label",{Text = "Chance they will talk during an action."})
 			Panel:AddControl("Label",{Text = "This only works if you have a commentator pack!"})
 			Panel:AddControl("Slider",{Label = "Commentator Volume",Command = "persona_dance_voicevolume",Min = 0,Max = 100})
 			Panel:AddControl("Label",{Text = "Default = 50%"})
+			
+			if !(!game.SinglePlayer() && !LocalPlayer():IsAdmin()) then
+				Panel:AddControl("Label",{Text = " "})
+				Panel:AddControl("Label",{Text = "Developer Settings"})
+				Panel:AddControl("CheckBox",{Label = "Enable Developer Tools",Command = "persona_dance_dev"})
+				Panel:AddControl("Slider",{Label = "FFT Channel To Check",Command = "persona_dance_dev_fftpos",Min = 0,Max = 256})
+				Panel:AddControl("CheckBox",{Label = "Check All FFT Channels?",Command = "persona_dance_dev_fftall"})
+				Panel:AddControl("Slider",{Label = "FFT Channel Check Strength",Command = "persona_dance_dev_fftstr",Min = 0,Max = 3000})
+			end
 
+			Panel:AddControl("Label",{Text = " "})
 			Panel:AddControl("Numpad",{Label = "Top-Left Key", Command = "persona_dance_top_l"})
 			Panel:AddControl("Numpad",{Label = "Middle-Left Key", Command = "persona_dance_mid_l"})
 			Panel:AddControl("Numpad",{Label = "Bottom-Left Key", Command = "persona_dance_bot_l"})
