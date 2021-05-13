@@ -3,8 +3,7 @@
 CreateConVar("vj_persona_battle","0",FCVAR_NONE,"When enabled, attacking an enemy will activate Battle Mode for you and your party.",0,1)
 CreateConVar("vj_persona_battle_positions","0",FCVAR_NONE,"When enabled, all enemy targets will be pre-positioned for battle",0,1)
 CreateConVar("vj_persona_battle_visible","0",FCVAR_NONE,"When enabled, only enemies that are visible will be targeted",0,1)
-
-PERSONA_BATTLETRACKS = {}
+CreateConVar("vj_persona_battle_turns","0",FCVAR_NONE,"When enabled, players/SNPCs will take turns battling. Note this will only work with players and Persona SNPCs!",0,1)
 
 function P_AddBattleTrack(name,dir,len,bossTrack,specific)
 	bossTrack = bossTrack or false
@@ -74,7 +73,23 @@ if SERVER then
 		local positions = tobool(GetConVarNumber("vj_persona_battle_positions"))
 		local vis = tobool(GetConVarNumber("vj_persona_battle_visible"))
 		local max = positions && 5 or 15
-		-- local persona = attacker.GetPersona && attacker:GetPersona() or false
+		local persona = IsValid(attacker:GetNW2Entity("PersonaEntity"))
+		local battleEnt = attacker.GetBattleEntity && IsValid(attacker:GetBattleEntity()) && attacker:GetBattleEntity() or false
+		
+		if battleEnt then
+			-- print("Found battleEnt!")
+			if attacker:GetCurrentBattleTurnEntity() == attacker then
+				-- print("I AM THE ATTACKER!")
+				if persona then return end
+				-- print("I DONT HAVE A PERSONA, NEXT TURN!")
+				battleEnt:NextCurrentTurn()
+			else
+				-- print("NOT MY TURN!! SCALING!!!")
+				dmginfo:SetDamage(0)
+			end
+			return
+		end
+
 		if attacker:IsPlayer() && !inBattle && (ent:IsNPC() or ent:IsPlayer() or ent:IsNextBot()) then
 			dmginfo:SetDamage(0)
 			local ply = attacker
@@ -82,22 +97,40 @@ if SERVER then
 			ply.Persona_BattleEntity = ents.Create("logic_battle")
 			ply.Persona_BattleEntity:SetPos(ply:GetPos())
 			ply.Persona_BattleEntity:SetAngles(Angle(0,ply:GetAngles().y,0))
-			ply.Persona_BattleEntity:Spawn()
 			ply.Persona_BattleEntity.Starter = ply
+			ply.Persona_BattleEntity:Spawn()
 			local tbl = {}
 			if IsValid(ent) then
+				table.insert(tbl,ply)
 				table.insert(tbl,ent)
 				ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
+				ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
+				ent:SetNW2Bool("VJ_P_DisableChasingEnemy",ent.DisableChasingEnemy)
+				ent:SetNW2Bool("VJ_P_HasMeleeAttack",ent.HasMeleeAttack)
+				ent:SetNW2Bool("VJ_P_HasRangeAttack",ent.HasRangeAttack)
+				ent:SetNW2Bool("VJ_P_HasLeapAttack",ent.HasLeapAttack)
+				ent:SetNW2Bool("VJ_P_HasGrenadeAttack",ent.HasGrenadeAttack)
+				ent:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",ent.CanUseSecondaryOnWeaponAttack)
+				ent:SetNW2Int("VJ_P_NextWeaponAttackT",ent.NextWeaponAttackT)
+				ent.Persona_BattleEntity = ply.Persona_BattleEntity
 				for _,v in pairs(ents.FindInSphere(ent:GetPos(),2000)) do
 					if v:IsNPC() && v != ent && (v:Disposition(ent) == D_LI or v:Disposition(ent) == D_NU) then
-						if #tbl >= max then
-							break
-						end
+						-- if #tbl >= max then
+							-- break
+						-- end
 						if vis && !ply:Visible(v) then continue end
 						if v.IsPersonaShadow && !v.MetaVerseMode then
 							v:Transform(true,ply)
 						end
 						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
+						v.Persona_BattleEntity = ply.Persona_BattleEntity
+						v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
+						v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
+						v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
+						v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
+						v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
+						v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
+						v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
 						table.insert(tbl,v)
 					end
 				end
@@ -113,6 +146,9 @@ if SERVER then
 				ply:ConCommand("summon_persona")
 			else
 				ply:SetNW2Bool("Persona_BattleMode",false)
+			end
+			if ply.Persona_BattleEntity:GetNW2Bool("TakeTurns") then
+				ply.Persona_BattleEntity:NextCurrentTurn()
 			end
 		elseif attacker:IsNPC() && ent:IsPlayer() && ent:GetNW2Bool("Persona_BattleMode") == false then
 			dmginfo:SetDamage(0)
@@ -121,22 +157,37 @@ if SERVER then
 			ply.Persona_BattleEntity = ents.Create("logic_battle")
 			ply.Persona_BattleEntity:SetPos(ply:GetPos())
 			ply.Persona_BattleEntity:SetAngles(Angle(0,(attacker:GetPos() -ply:GetPos()):Angle().y,0))
-			ply.Persona_BattleEntity:Spawn()
 			ply.Persona_BattleEntity.Starter = ply
+			ply.Persona_BattleEntity:Spawn()
 			local tbl = {}
 			if IsValid(attacker) then
 				table.insert(tbl,attacker)
 				attacker:SetNW2Bool("VJ_IsHugeMonster",attacker.VJ_IsHugeMonster)
+				attacker:SetNW2Bool("VJ_P_DisableChasingEnemy",attacker.DisableChasingEnemy)
+				attacker:SetNW2Bool("VJ_P_HasMeleeAttack",attacker.HasMeleeAttack)
+				attacker:SetNW2Bool("VJ_P_HasRangeAttack",attacker.HasRangeAttack)
+				attacker:SetNW2Bool("VJ_P_HasLeapAttack",attacker.HasLeapAttack)
+				attacker:SetNW2Bool("VJ_P_HasGrenadeAttack",attacker.HasGrenadeAttack)
+				attacker:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",attacker.CanUseSecondaryOnWeaponAttack)
+				attacker:SetNW2Int("VJ_P_NextWeaponAttackT",attacker.NextWeaponAttackT)
+				attacker.Persona_BattleEntity = ply.Persona_BattleEntity
 				for _,v in pairs(ents.FindInSphere(attacker:GetPos(),2000)) do
 					if v:IsNPC() && v != attacker && (v:Disposition(attacker) == D_LI or v:Disposition(attacker) == D_NU) then
-						if #tbl >= max then
-							break
-						end
+						-- if #tbl >= max then
+							-- break
+						-- end
 						if vis && !ply:Visible(v) then continue end
-						v.VJ_P_DisableChasingEnemy = v.DisableChasingEnemy
+						v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
+						v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
+						v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
+						v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
+						v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
+						v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
+						v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
 						if v.IsPersonaShadow && !v.MetaVerseMode then
 							v:Transform(true,ply)
 						end
+						v.Persona_BattleEntity = ply.Persona_BattleEntity
 						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
 						table.insert(tbl,v)
 					end
@@ -145,6 +196,7 @@ if SERVER then
 			
 			if #tbl > 0 then
 				ply.BattleEntitiesTable = tbl
+				table.insert(tbl,ply)
 				net.Start("Persona_StartBattle")
 					net.WriteEntity(ply.Persona_BattleEntity)
 					net.WriteEntity(ply)
@@ -153,6 +205,9 @@ if SERVER then
 				ply:ConCommand("summon_persona")
 			else
 				ply:SetNW2Bool("Persona_BattleMode",false)
+			end
+			if ply.Persona_BattleEntity:GetNW2Bool("TakeTurns") then
+				ply.Persona_BattleEntity:NextCurrentTurn()
 			end
 		end
 	end)

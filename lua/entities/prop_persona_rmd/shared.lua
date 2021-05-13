@@ -23,11 +23,17 @@ function ENT:PlaySet(skill,name,rate,cycle)
 		self:FadeIn()
 	end
 	if name == "melee" then
+		timer.Simple(self:GetSequenceDuration(self,self.Animations["melee"]),function()
+			if IsValid(self) then self:OnFinishedAttack(skill) end
+		end)
 		timer.Simple(self:GetSequenceDuration(self,self.Animations["melee"]) *0.5,function()
 			if IsValid(self) then self:FadeOut() end
 		end)
 	end
 	if name == "range_end" then
+		timer.Simple(self:GetSequenceDuration(self,self.Animations["range"]),function()
+			if IsValid(self) then self:OnFinishedAttack(skill) end
+		end)
 		timer.Simple(self:GetSequenceDuration(self,self.Animations["range"]) *0.5,function()
 			if IsValid(self) then self:FadeOut() end
 		end)

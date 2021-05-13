@@ -149,8 +149,33 @@ function ENT:FadeOut()
 	-- self:SetRenderFX(kRenderFxFadeSlow)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:IsMyTurn()
+	local ply = self.User
+	local battleEnt = ply:GetBattleEntity()
+	if !IsValid(battleEnt) then return true end -- Not in Battle Mode, just attack like normal
+	return ply:GetCurrentBattleTurnEntity() == ply -- Current selected entity in the turn table matches my user
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnFinishedAttack(skill)
+	local ply = self.User
+	local battleEnt = ply:GetBattleEntity()
+	if IsValid(ply) && IsValid(battleEnt) then
+		battleEnt:NextCurrentTurn()
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:PlaySet(skill,name,rate,cycle)
 	local seq = self.Animations[name]
+	if name == "melee" then
+		timer.Simple(self:GetSequenceDuration(self,self.Animations["melee"]),function()
+			if IsValid(self) then self:OnFinishedAttack(skill) end
+		end)
+	end
+	if name == "range_end" then
+		timer.Simple(self:GetSequenceDuration(self,self.Animations["range_end"]),function()
+			if IsValid(self) then self:OnFinishedAttack(skill) end
+		end)
+	end
 	if self.AllowFading then
 		if name == "idle" then
 			self:FadeIn()

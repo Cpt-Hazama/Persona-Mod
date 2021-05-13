@@ -361,6 +361,18 @@ end
 
 local PLY = FindMetaTable("Player")
 
+function PLY:GetBattleEntity()
+	return self.Persona_BattleEntity
+end
+
+function PLY:GetCurrentBattleTurn()
+	return self.Persona_BattleEntity.CurrentTurn
+end
+
+function PLY:GetCurrentBattleTurnEntity()
+	return self.Persona_BattleEntity.CurrentTurnEntity
+end
+
 function PLY:SetPersonaMeter(i)
 	return self:SetNW2Float("PersonaMeter",i)
 end
@@ -447,6 +459,18 @@ function Persona_CSound(ply,snd,vol,pit)
 end
 
 local NPC = FindMetaTable("NPC")
+
+function NPC:GetBattleEntity()
+	return self.Persona_BattleEntity
+end
+
+function NPC:GetCurrentBattleTurn()
+	return self.Persona_BattleEntity.CurrentTurn
+end
+
+function NPC:GetCurrentBattleTurnEntity()
+	return self.Persona_BattleEntity.CurrentTurnEntity
+end
 
 function NPC:Alive()
 	return self:Health() > 0
@@ -1491,7 +1515,7 @@ if CLIENT then
 		-- PrintTable(ply.BattleEntitiesTable)
 		if bTbl && #bTbl > 0 then
 			for _,v in ipairs(bTbl) do
-				if v != target then
+				if v != target && v != ply then
 					DrawEntHealth(v)
 				end
 			end

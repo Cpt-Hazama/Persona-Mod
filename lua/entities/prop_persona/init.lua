@@ -377,18 +377,22 @@ function ENT:PersonaCards(lmb,rmb,r)
 	local ply = self.User
 	local persona = self
 	local melee = self.CurrentMeleeSkill
+	local isTurn = self:IsMyTurn()
 	if IsPersonaGamemode() then
 		if ply:InBattle() && GMP().Battles[ply:CurrentBattle()] && GMP().Battles[ply:CurrentBattle()].CurrentTurn != ply then
 			return -- Not my turn, can't do anything
 		end
 	end
 	if r && CurTime() > self.NextCardSwitchT then
+		if !isTurn then if ply:IsPlayer() then ply:ChatPrint("Unable to switch cards, not your turn!") end return end
 		self:CycleCards()
 	end
 	if lmb then
+		if !isTurn then if ply:IsPlayer() then ply:ChatPrint("Unable to use card, not your turn!") end return end
 		self:DoMeleeAttack(ply,persona,melee,rmb)
 	end
 	if rmb then
+		if !isTurn then if ply:IsPlayer() then ply:ChatPrint("Unable to use card, not your turn!") end return end
 		self:DoSpecialAttack(ply,persona,melee,rmb)
 	end
 end
@@ -452,6 +456,8 @@ function ENT:HasSkill(name)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoMeleeAttack(ply,persona,melee,rmb)
+	local isTurn = self:IsMyTurn()
+	if !isTurn then return end
 	if melee == "Heaven's Blade" then
 		self:HeavensBlade(ply,persona)
 		return
@@ -538,8 +544,10 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoSpecialAttack(ply,persona,melee,rmb)
+	local isTurn = self:IsMyTurn()
+	if !isTurn then return end
 	local card = self:GetCard()
-	if card == "Myriad Truths" then 
+	if card == "Myriad Truths" then
 		self:MyriadTruths(ply,persona)
 		return
 	elseif card == "Piercing Strike" then
@@ -1237,6 +1245,8 @@ function ENT:SetMeleeCard(name,cost)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CycleCards()
+	local isTurn = self:IsMyTurn()
+	if !isTurn then return end
 	local index = self.CurrentCardID
 	local finalIndex = index +1
 	local target = self.CardTable[finalIndex]

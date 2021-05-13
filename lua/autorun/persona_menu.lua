@@ -157,6 +157,7 @@ if CLIENT then
 			Panel:AddControl("CheckBox",{Label = "Enable Battle Mode",Command = "vj_persona_battle"})
 			Panel:AddControl("CheckBox",{Label = "Force Positions In Battle Mode",Command = "vj_persona_battle_positions"})
 			Panel:AddControl("CheckBox",{Label = "Only Target Visible Enemies In Battle Mode",Command = "vj_persona_battle_visible"})
+			Panel:AddControl("CheckBox",{Label = "Take Turns In Battle (Players/Persona SNPCs only!)",Command = "vj_persona_battle_turns"})
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Main Settings","NPCs","NPCs","","",function(Panel)
