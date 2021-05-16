@@ -48,7 +48,7 @@ if SERVER then
 		local tEnt = net.ReadEntity()
 		local tblEnemies = net.ReadTable()
 
-		ply.BattleEntitiesTable = tblEnemies
+		-- ply.BattleEntitiesTable = tblEnemies
 		-- self.CurrentTurnEntity = tEnt
 	end)
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ if (CLIENT) then
 		if self.BattleEntitiesTable != nil then
 			for _,v in SortedPairs(self.BattleEntitiesTable) do
 				if IsValid(v) && v:IsPlayer() then
-					v:ChatPrint("It is now " .. language.GetPhrase(self.CurrentTurnEntity:GetClass()) .. "'s turn!")
+					v:ChatPrint("It is now " .. (tEnt:IsPlayer() && tEnt:Nick() or language.GetPhrase(self.CurrentTurnEntity:GetClass())) .. "'s turn!")
 				end
 			end
 		end
@@ -206,16 +206,16 @@ if (CLIENT) then
 			if v == ply then continue end
 			if !IsValid(v) or IsValid(v) && v:Health() <= 0 then
 				-- print("Removed ent")
-				table.remove(self.BattleEntitiesTable,i)
+				-- table.remove(self.BattleEntitiesTable,i)
 				table.remove(ply.BattleEntitiesTable,i)
 			end
 		end
-		net.Start("Persona_UpdateBattleData")
-			net.WriteEntity(self)
-			net.WriteEntity(ply)
-			net.WriteEntity(self.CurrentTurnEntity)
-			net.WriteTable(self.BattleEntitiesTable)
-		net.SendToServer()
+		-- net.Start("Persona_UpdateBattleData")
+			-- net.WriteEntity(self)
+			-- net.WriteEntity(ply)
+			-- net.WriteEntity(self.CurrentTurnEntity)
+			-- net.WriteTable(self.BattleEntitiesTable)
+		-- net.SendToServer()
 		if #self:GetRemainingEnemies() <= 0 or ply:Health() <= 0 then
 			ply:SetNW2Bool("Persona_BattleMode",false)
 			if ply.Persona_BattleTheme then
@@ -304,16 +304,21 @@ function ENT:Initialize()
 	self.Sets[4] = {f=400,r=400}
 	self.Sets[5] = {f=400,r=-400}
 	self.Sets[6] = {f=500,r=0}
+	self.Sets[7] = {f=650,r=0} -- Some fallback shit, idk how this even happens
 	
 	self.CurrentTurn = 0
 	self.CurrentTurnEntity = NULL
 	
 	self:SetNW2Bool("TakeTurns",tobool(GetConVarNumber("vj_persona_battle_turns")))
+	self:SetNW2Int("TurnTime",CurTime() +GetConVarNumber("vj_persona_battle_turntime"))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSetPos(i)
-	local rowMax = #self.Sets
-	i = i -1
+	local rowMax = #self.Sets -1
+	-- i = i -1
+	-- if i <= 0 then
+		-- i = i +1
+	-- end
 	local row = math.Clamp(math.Round(i /rowMax),1,50)
 	local targetI = i
 	if targetI > rowMax then
@@ -324,6 +329,9 @@ function ENT:GetSetPos(i)
 			targetI = targetI -rowMax
 		end
 	end
+	if targetI == nil or targetI == 0 then
+		targetI = #self.Sets
+	end
 	local set = self.Sets[targetI]
 	return self:GetPos() +self:GetForward() *(set.f *row) +self:GetRight() *(set.r /**row */)
 end
@@ -332,10 +340,11 @@ function ENT:GetCurrentTurn()
 	return self.CurrentTurn
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:NextCurrentTurn()
+function ENT:NextCurrentTurn(didChange)
 	if !self:GetNW2Bool("TakeTurns") then return end
+	self:SetNW2Int("TurnTime",CurTime() +GetConVarNumber("vj_persona_battle_turntime"))
 	for _,v in SortedPairs(self.Starter.BattleEntitiesTable) do
-		if IsValid(v) && v:IsNPC() then
+		if IsValid(v) && v:IsNPC() && v.IsVJBaseSNPC then
 			v.DisableChasingEnemy = self.UsePositions
 			v.HasMeleeAttack = false
 			v.HasRangeAttack = false
@@ -347,13 +356,13 @@ function ENT:NextCurrentTurn()
 			-- print("Set values to false",v)
 		end
 	end
-	self.CurrentTurn = self.CurrentTurn +1
+	self.CurrentTurn = didChange && self.CurrentTurn or self.CurrentTurn +1
 	if self.CurrentTurn > #self.Starter.BattleEntitiesTable then
 		self.CurrentTurn = 1
 	end
 	self.CurrentTurnEntity = self.Starter.BattleEntitiesTable[self.CurrentTurn]
 	local newEnt = self.CurrentTurnEntity -- newEnt
-	if IsValid(newEnt) && newEnt:IsNPC() then
+	if IsValid(newEnt) && newEnt:IsNPC() && newEnt.IsVJBaseSNPC then
 		newEnt.DisableChasingEnemy = newEnt:GetNW2Bool("VJ_P_DisableChasingEnemy")
 		newEnt.HasMeleeAttack = newEnt:GetNW2Bool("VJ_P_HasMeleeAttack")
 		newEnt.HasRangeAttack = newEnt:GetNW2Bool("VJ_P_HasRangeAttack")
@@ -363,7 +372,7 @@ function ENT:NextCurrentTurn()
 		if CurTime() > newEnt:GetNW2Int("VJ_P_NextWeaponAttackT") then
 			newEnt.NextWeaponAttackT = 0
 		end
-		newEnt:SetState()
+		if newEnt.IsVJBaseSNPC then newEnt:SetState() end
 		-- print("Set values to their originals",newEnt.DisableChasingEnemy,newEnt.HasMeleeAttack,newEnt.HasRangeAttack,newEnt.HasLeapAttack)
 	end
 	net.Start("Persona_SetTurn")
@@ -375,27 +384,43 @@ function ENT:NextCurrentTurn()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Think()
+	local usePos = self.UsePositions
+	local useTurns = self:GetNW2Bool("TakeTurns")
+	local currentEnt = self.CurrentTurnEntity
+
 	for i,v in SortedPairs(self.Starter.BattleEntitiesTable) do
 		if v == self.Starter then continue end
 		if !IsValid(v) or IsValid(v) && v:Health() <= 0 then
 			table.remove(self.Starter.BattleEntitiesTable,i)
+			if v == self.CurrentTurnEntity then -- Current combatant died/got removed, change turns
+				self:NextCurrentTurn(true)
+			end
 		end
 	end
-
-	local usePos = self.UsePositions
-	local useTurns = self:GetNW2Bool("TakeTurns")
-	local currentEnt = self.CurrentTurnEntity
+	
+	if useTurns then
+		if self:GetNW2Int("TurnTime") < CurTime() then
+			self:NextCurrentTurn()
+		end
+	end
 	for i,v in pairs(self.Starter.BattleEntitiesTable) do
 		if IsValid(v) && v:Health() > 0 && self.Starter != v then
 			if usePos then
 				if useTurns && currentEnt == v then continue end
 				local pos = self:GetSetPos(i)
-				print(v,i,pos)
+				-- print(v,i,pos)
 				if v:GetPos() != pos then
 					v:SetPos(pos)
 				end
-				v.DisableChasingEnemy = true
-				v:SetState(VJ_STATE_ONLY_ANIMATION)
+				if v:IsMoving() then
+					v:StopMoving()
+					v:ClearSchedule()
+					v:ClearGoal()
+				end
+				if v.IsVJBaseSNPC then
+					v.DisableChasingEnemy = true
+					v:SetState(VJ_STATE_ONLY_ANIMATION)
+				end
 			end
 		end
 	end

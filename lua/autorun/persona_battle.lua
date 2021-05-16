@@ -1,9 +1,11 @@
-	--// Thanks NPP, very cool \\--
+PERSONA_BATTLETRACKS = {}
 
 CreateConVar("vj_persona_battle","0",FCVAR_NONE,"When enabled, attacking an enemy will activate Battle Mode for you and your party.",0,1)
 CreateConVar("vj_persona_battle_positions","0",FCVAR_NONE,"When enabled, all enemy targets will be pre-positioned for battle",0,1)
 CreateConVar("vj_persona_battle_visible","0",FCVAR_NONE,"When enabled, only enemies that are visible will be targeted",0,1)
 CreateConVar("vj_persona_battle_turns","0",FCVAR_NONE,"When enabled, players/SNPCs will take turns battling. Note this will only work with players and Persona SNPCs!",0,1)
+CreateConVar("vj_persona_battle_turntime","30",FCVAR_NONE,"Amount of time the current combatant has to do their turn.",5,180)
+CreateConVar("vj_persona_battle_damagetime","0.5",FCVAR_NONE,"Amount of time to give non-Persona users to deal damage after their initial hit.",0.01,10)
 
 function P_AddBattleTrack(name,dir,len,bossTrack,specific)
 	bossTrack = bossTrack or false
@@ -80,9 +82,27 @@ if SERVER then
 			-- print("Found battleEnt!")
 			if attacker:GetCurrentBattleTurnEntity() == attacker then
 				-- print("I AM THE ATTACKER!")
-				if persona then return end
-				-- print("I DONT HAVE A PERSONA, NEXT TURN!")
-				battleEnt:NextCurrentTurn()
+				if persona then return end -- Personas have Battle Mode code built into them, no need for this extra code
+				attacker.Persona_LastBattleDMGT = attacker.Persona_LastBattleDMGT or false
+				if attacker.Persona_LastBattleDMGT == false then
+					attacker.Persona_LastBattleDMGT = CurTime() +GetConVarNumber("vj_persona_battle_damagetime")
+					timer.Simple(GetConVarNumber("vj_persona_battle_damagetime"),function()
+						if IsValid(battleEnt) then
+							if IsValid(attacker) then
+								attacker.Persona_LastBattleDMGT = false
+								if attacker:GetCurrentBattleTurnEntity() != attacker then
+									return -- Something happened, the battleEnt already changed turns
+								end
+							end
+							battleEnt:NextCurrentTurn()
+						end
+					end)
+				end
+				if CurTime() > attacker.Persona_LastBattleDMGT then -- Give them some time to get all possible hits in
+					-- print("I DONT HAVE A PERSONA, NEXT TURN!")
+					battleEnt:NextCurrentTurn()
+					attacker.Persona_LastBattleDMGT = false
+				end
 			else
 				-- print("NOT MY TURN!! SCALING!!!")
 				dmginfo:SetDamage(0)

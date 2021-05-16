@@ -2,7 +2,6 @@ PERSONA_COSTUMES = {}
 PERSONA_SONGS = {}
 PERSONA_SONGANIMATIONS = {}
 PERSONA_VOICES = {}
-PERSONA_BATTLETRACKS = {}
 
 function PGM()
 	return gmod.GetGamemode()
