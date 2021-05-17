@@ -320,8 +320,8 @@ PXP.ResetXPStats = function(ply)
 	ply:ChatPrint("All Stats Reset!")
 end
 
-PXP.GetDataStorage = function()
-	local dir = "persona/data/"
+PXP.GetDataStorage = function(test)
+	local dir = test && "persona/data_test/" or "persona/data/"
 	file.CreateDir(dir)
 	return dir
 end
@@ -336,7 +336,21 @@ PXP.DataExists = function(ent,tbData)
 	return count == #tbData
 end
 
-PXP.GetPersonaData = function(ply,type)
+PXP.SetSocialLinkData = function(ply,char,rank)
+	if !ply:IsPlayer() then return end
+	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
+	ply:ChatPrint("Your Social Link with " .. char .. " has increased to " .. tostring(rank) .. "!")
+	ply:EmitSound("cpthazama/persona5/misc/00108_streaming.wav")
+	PXP.WriteFile(dir .. "_SOCIAL_" .. char .. ".txt",val)
+end
+
+PXP.GetSocialLinkData = function(ply,char)
+	if !ply:IsPlayer() then return end
+	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
+	return tonumber(file.Read(dir .. "_SOCIAL_" .. char .. ".txt","DATA") or 0) or 0
+end
+
+PXP.GetPersonaData_Legacy = function(ply,type)
 	if !ply:IsPlayer() then return end
 	local name = type <= 8 && ply:GetPersonaName() or PXP.GetPersonaData(ply,5)
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
@@ -372,21 +386,87 @@ PXP.GetPersonaData = function(ply,type)
 	end
 end
 
-PXP.SetSocialLinkData = function(ply,char,rank)
+PXP.GetPersonaData = function(ply,type)
 	if !ply:IsPlayer() then return end
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
-	ply:ChatPrint("Your Social Link with " .. char .. " has increased to " .. tostring(rank) .. "!")
-	ply:EmitSound("cpthazama/persona5/misc/00108_streaming.wav")
-	PXP.WriteFile(dir .. "_SOCIAL_" .. char .. ".txt",val)
+	local name = (type >= 1 && type <= 3 or type >= 6 && type <= 8) && ply:GetPersonaName() or nil
+	local isPersona = name && (type >= 1 && type <= 3 or type >= 6 && type <= 8)
+	if isPersona then
+		dir = dir .. "_" .. name .. ".dat"
+	else
+		dir = dir .. ".dat"
+	end
+	local pData = PXP.ReadTable(dir)
+	if pData == nil then
+		-- PXP.CreateSaveData(ply)
+		return
+	end
+	if type == 5 then -- Last Persona
+		if pData.PreviousPersona == nil then
+			PXP.SetPersonaData(ply,5,"izanagi")
+		end
+		return "izanagi"
+	end
+	if isPersona then
+		return type == 1 && pData.EXP or type == 2 && pData.Level or type == 3 && pData.Skills or type == 6 && pData.ReqEXP or type == 7 && pData.Stats or type == 8 && pData.Enhancement or nil
+	end
+	return type == 4 && pData.Compendium or type == 9 && pData.PlayerLevel or type == 10 && pData.PlayerEXP or nil
 end
 
-PXP.GetSocialLinkData = function(ply,char)
+PXP.CreateSaveData = function(ply,name)
 	if !ply:IsPlayer() then return end
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
-	return tonumber(file.Read(dir .. "_SOCIAL_" .. char .. ".txt","DATA") or 0) or 0
+	local dirPersona = name && dir .. "_" .. name .. ".dat" or false
+	local dirPly = dir .. ".dat"
+	local tbl = {
+		EXP = 0,
+		Level = 0,
+		Skills = {},
+		ReqEXP = 0,
+		Stats = {},
+		Enhancement = 0,
+	}
+	local tblPly = {
+		Compendium = {"izanagi"},
+		PreviousPersona = "izanagi",
+		PlayerLevel = 0,
+		PlayerEXP = 0
+	}
+	if dirPersona then
+		PXP.SaveTable(dirPersona,tbl,true)
+	end
+	PXP.SaveTable(dirPly,tblPly,true)
 end
 
 PXP.SetPersonaData = function(ply,type,val)
+	if !ply:IsPlayer() then return end
+	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
+	local name = (type >= 1 && type <= 3 or type >= 6 && type <= 8) && ply:GetPersonaName() or nil
+	local tbl = {
+		EXP = (type == 1 && val) or PXP.GetPersonaData(ply,1) or 0,
+		Level = (type == 2 && val) or PXP.GetPersonaData(ply,2) or 0,
+		Skills = (type == 3 && val) or PXP.GetPersonaData(ply,3) or {},
+		ReqEXP = (type == 6 && val) or PXP.GetPersonaData(ply,6) or 0,
+		Stats = (type == 7 && val) or PXP.GetPersonaData(ply,7) or {},
+		Enhancement = (type == 8 && val) or PXP.GetPersonaData(ply,8) or 0,
+	}
+	local tblPly = {
+		Compendium = (type == 4 && val) or PXP.GetPersonaData(ply,4) or {"izanagi"},
+		PreviousPersona = (type == 5 && val) or PXP.GetPersonaData(ply,5) or "izanagi",
+		PlayerLevel = (type == 9 && val) or PXP.GetPersonaData(ply,9) or 0,
+		PlayerEXP = (type == 10 && val) or PXP.GetPersonaData(ply,10) or 0
+	}
+
+	local isPersona = name && (type >= 1 && type <= 3 or type >= 6 && type <= 8)
+	if isPersona then -- Persona Data
+		dir = dir .. "_" .. name .. ".dat"
+	else
+		dir = dir .. ".dat"
+	end
+	PXP.SaveTable(dir,isPersona && tbl or tblPly,true)
+end
+
+PXP.SetPersonaData_Legacy = function(ply,type,val)
 	if !ply:IsPlayer() then return end
 	local name = type <= 8 && ply:GetPersonaName() or PXP.GetPersonaData(ply,5) or nil
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
@@ -439,6 +519,11 @@ end
 
 PXP.ReadCompendium = function(ply)
 	if !ply:IsPlayer() then return end
+	-- return PXP.GetPersonaData(ply,4)
+end
+
+PXP.ReadCompendium_Legacy = function(ply)
+	if !ply:IsPlayer() then return end
 	return PXP.ReadDataTable(PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_") .. "_COMPENDIUM.txt")
 end
 
@@ -449,7 +534,7 @@ if SERVER then
 		return dir
 	end
 
-	PXP.GetDanceData = function(ply,song)
+	PXP.GetDanceData = function(ply,song) -- Obsolete
 		if !ply:IsPlayer() then return end
 		local dir = PXP.GetDanceDataStorage() .. string.gsub(ply:SteamID(),":","_")
 		-- MsgN("Loading Dance Data For " .. song)
@@ -459,7 +544,7 @@ if SERVER then
 		return toReturn
 	end
 
-	PXP.SaveDanceData = function(ply,song,val)
+	PXP.SaveDanceData = function(ply,song,val) -- Obsolete
 		if !ply:IsPlayer() then return end
 		local dir = PXP.GetDanceDataStorage() .. string.gsub(ply:SteamID(),":","_")
 		-- MsgN("Saving Dance Data For " .. song)
@@ -478,6 +563,21 @@ PXP.WriteTable = function(dir,name,cont,erase)
 		return
 	end
 	file.Append(dir,util.TableToJSON({Name = name,Set = cont},true))
+end
+
+PXP.SaveTable = function(dir,table,erase)
+	if erase then
+		file.Write(dir,util.TableToJSON(table,true))
+		return
+	end
+	file.Append(dir,util.TableToJSON(table,true))
+end
+
+PXP.ReadTable = function(sFile)
+	local data = file.Read(sFile,"DATA")
+	if data == nil then return end
+	local json = util.JSONToTable(data)
+	return json
 end
 
 PXP.ReadDataTable = function(dir)

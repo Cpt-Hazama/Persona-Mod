@@ -393,7 +393,7 @@ end
 
 function PLY:SetPersona(persona)
 	-- self:SetNW2Bool("PersonaUser",true)
-	self:SetNW2String("PersonaName",persona)
+	self:SetNW2String("PersonaName",persona or "izanagi")
 end
 
 function PLY:SetSP(sp)
@@ -413,7 +413,7 @@ function PLY:GetMaxSP()
 end
 
 function PLY:GetPersonaName()
-	return self:GetNW2String("PersonaName")
+	return self:GetNW2String("PersonaName") or "izanagi"
 end
 
 function PLY:SetPersonaEntity(ent)
@@ -494,12 +494,12 @@ end
 
 function NPC:SetPersonaEntity(ent,name)
 	self:SetNW2Entity("PersonaEntity",ent)
-	self:SetNW2String("PersonaName",name)
+	self:SetNW2String("PersonaName",name or "izanagi")
 	ent.User = self
 end
 
 function NPC:GetPersonaName()
-	return self:GetNW2String("PersonaName")
+	return self:GetNW2String("PersonaName") or "izanagi"
 end
 
 function NPC:SetSP(sp)
@@ -560,7 +560,7 @@ function NPC:SummonPersona(persona)
 end
 
 hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
-	ply:SetPersona(PXP.GetPersonaData(ply,5))
+	ply:SetPersona(PXP.GetPersonaData(ply,5) or "izanagi")
 	local exp = PXP.GetPersonaData(ply,1)
 	local lvl = PXP.GetPersonaData(ply,2)
 	local comp = PXP.GetPersonaData(ply,4)
@@ -961,7 +961,7 @@ if SERVER then
 		if ply:HasPersona() && CurTime() > ply:GetNextPersonaSummonT() then
 			local persona = ply:GetPersona()
 			if !IsValid(persona) then
-				local class = "prop_persona_" .. ply:GetPersonaName()
+				local class = "prop_persona_" .. (ply:GetPersonaName() != "" && ply:GetPersonaName() or "izanagi")
 				local ent = ents.Create(class)
 				ent:SetModel(PERSONA[ply:GetPersonaName()].Model)
 				ent:SetPos(ent:GetSpawnPosition(ply) or ply:GetPos())

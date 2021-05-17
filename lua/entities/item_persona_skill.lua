@@ -47,7 +47,28 @@ function ENT:Initialize()
 		if IsValid(ply) then
 			self:SetPos(ply:GetPos() +Vector(0,0,10))
 			if !IsValid(ply:GetPersona()) then
-				ply:PrintMessage(HUD_PRINTTALK,"Summon your Persona first!")
+				local skills = PXP.GetPersonaData(ply,3)
+				if skills == nil then
+					ply:PrintMessage(HUD_PRINTTALK,"Summon your Persona first!")
+					SafeRemoveEntity(self)
+					return
+				end
+				local data = self.SkillData
+				local proceed = true
+				for _,v in pairs(skills) do
+					if v.Name == data.Name then
+						proceed = false
+						break
+					end
+				end
+				if !proceed then
+					ply:ChatPrint("Your Persona already knows " .. data.Name .. "!")
+					SafeRemoveEntity(self)
+					return
+				end
+				table.insert(skills,data)
+				PXP.SetPersonaData(ply,3,skills)
+				ply:ChatPrint("Obtained a new skill, " .. data.Name .. "!")
 				SafeRemoveEntity(self)
 				return
 			end
