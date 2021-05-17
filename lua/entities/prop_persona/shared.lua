@@ -153,6 +153,7 @@ function ENT:IsMyTurn()
 	local ply = self.User
 	local battleEnt = ply:GetBattleEntity()
 	if !IsValid(battleEnt) then return true end -- Not in Battle Mode, just attack like normal
+	if battleEnt:GetNW2Bool("TakeTurns") == false then return true end -- Not taking turns, attack like normal
 	return ply:GetCurrentBattleTurnEntity() == ply -- Current selected entity in the turn table matches my user
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------

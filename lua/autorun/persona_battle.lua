@@ -6,6 +6,7 @@ CreateConVar("vj_persona_battle_visible","0",FCVAR_NONE,"When enabled, only enem
 CreateConVar("vj_persona_battle_turns","0",FCVAR_NONE,"When enabled, players/SNPCs will take turns battling. Note this will only work with players and Persona SNPCs!",0,1)
 CreateConVar("vj_persona_battle_turntime","30",FCVAR_NONE,"Amount of time the current combatant has to do their turn.",5,180)
 CreateConVar("vj_persona_battle_damagetime","0.5",FCVAR_NONE,"Amount of time to give non-Persona users to deal damage after their initial hit.",0.01,10)
+CreateConVar("vj_persona_battle_newcomers","1",FCVAR_NONE,"Allow more enemies to join battles at any time?",0,1)
 
 function P_AddBattleTrack(name,dir,len,bossTrack,specific)
 	bossTrack = bossTrack or false
@@ -76,36 +77,94 @@ if SERVER then
 		local vis = tobool(GetConVarNumber("vj_persona_battle_visible"))
 		local max = positions && 5 or 15
 		local persona = IsValid(attacker:GetNW2Entity("PersonaEntity"))
-		local battleEnt = attacker.GetBattleEntity && IsValid(attacker:GetBattleEntity()) && attacker:GetBattleEntity() or false
+		local battleEnt = (attacker:IsPlayer() && attacker.GetBattleEntity && IsValid(attacker:GetBattleEntity()) && attacker:GetBattleEntity()) or (attacker:IsNPC() && ent:IsPlayer() && (ent.GetBattleEntity && IsValid(ent:GetBattleEntity()) && ent:GetBattleEntity())) or false
 		
 		if battleEnt then
+			if GetConVarNumber("vj_persona_battle_newcomers") == 1 then
+				if (ent:IsNPC() or ent:IsPlayer() or ent:IsNextBot()) && !IsValid(ent:GetBattleEntity()) then
+					ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
+					ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
+					ent:SetNW2Bool("VJ_P_DisableChasingEnemy",ent.DisableChasingEnemy)
+					ent:SetNW2Bool("VJ_P_HasMeleeAttack",ent.HasMeleeAttack)
+					ent:SetNW2Bool("VJ_P_HasRangeAttack",ent.HasRangeAttack)
+					ent:SetNW2Bool("VJ_P_HasLeapAttack",ent.HasLeapAttack)
+					ent:SetNW2Bool("VJ_P_HasGrenadeAttack",ent.HasGrenadeAttack)
+					ent:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",ent.CanUseSecondaryOnWeaponAttack)
+					ent:SetNW2Int("VJ_P_NextWeaponAttackT",ent.NextWeaponAttackT)
+					ent.Persona_BattleEntity = attacker.Persona_BattleEntity
+					table.insert(battleEnt.Starter.BattleEntitiesTable,ent)
+					net.Start("Persona_UpdateCSBattleData")
+						net.WriteEntity(battleEnt)
+						net.WriteEntity(ent)
+					net.Send(attacker)
+					if ent.IsVJBaseSNPC then
+						ent.DisableChasingEnemy = battleEnt.UsePositions
+						ent.HasMeleeAttack = false
+						ent.HasRangeAttack = false
+						ent.HasLeapAttack = false
+						ent.HasGrenadeAttack = false
+						ent.CanUseSecondaryOnWeaponAttack = false
+						ent.NextWeaponAttackT = 999999999
+						ent:SetState(battleEnt.UsePositions && VJ_STATE_ONLY_ANIMATION or nil)
+					end
+				elseif attacker:IsNPC() && ent:IsPlayer() && !IsValid(attacker:GetBattleEntity()) then
+					attacker:SetNW2Bool("VJ_IsHugeMonster",attacker.VJ_IsHugeMonster)
+					attacker:SetNW2Bool("VJ_IsHugeMonster",attacker.VJ_IsHugeMonster)
+					attacker:SetNW2Bool("VJ_P_DisableChasingEnemy",attacker.DisableChasingEnemy)
+					attacker:SetNW2Bool("VJ_P_HasMeleeAttack",attacker.HasMeleeAttack)
+					attacker:SetNW2Bool("VJ_P_HasRangeAttack",attacker.HasRangeAttack)
+					attacker:SetNW2Bool("VJ_P_HasLeapAttack",attacker.HasLeapAttack)
+					attacker:SetNW2Bool("VJ_P_HasGrenadeAttack",attacker.HasGrenadeAttack)
+					attacker:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",attacker.CanUseSecondaryOnWeaponAttack)
+					attacker:SetNW2Int("VJ_P_NextWeaponAttackT",attacker.NextWeaponAttackT)
+					attacker.Persona_BattleEntity = ent.Persona_BattleEntity
+					table.insert(battleEnt.Starter.BattleEntitiesTable,attacker)
+					net.Start("Persona_UpdateCSBattleData")
+						net.WriteEntity(battleEnt)
+						net.WriteEntity(attacker)
+					net.Send(ent)
+					if attacker.IsVJBaseSNPC then
+						attacker.DisableChasingEnemy = battleEnt.UsePositions
+						attacker.HasMeleeAttack = false
+						attacker.HasRangeAttack = false
+						attacker.HasLeapAttack = false
+						attacker.HasGrenadeAttack = false
+						attacker.CanUseSecondaryOnWeaponAttack = false
+						attacker.NextWeaponAttackT = 999999999
+						attacker:SetState(battleEnt.UsePositions && VJ_STATE_ONLY_ANIMATION or nil)
+					end
+				end
+			end
 			-- print("Found battleEnt!")
-			if attacker:GetCurrentBattleTurnEntity() == attacker then
-				-- print("I AM THE ATTACKER!")
-				if persona then return end -- Personas have Battle Mode code built into them, no need for this extra code
-				attacker.Persona_LastBattleDMGT = attacker.Persona_LastBattleDMGT or false
-				if attacker.Persona_LastBattleDMGT == false then
-					attacker.Persona_LastBattleDMGT = CurTime() +GetConVarNumber("vj_persona_battle_damagetime")
-					timer.Simple(GetConVarNumber("vj_persona_battle_damagetime"),function()
-						if IsValid(battleEnt) then
-							if IsValid(attacker) then
-								attacker.Persona_LastBattleDMGT = false
-								if attacker:GetCurrentBattleTurnEntity() != attacker then
-									return -- Something happened, the battleEnt already changed turns
+			-- print(attacker,attacker:GetCurrentBattleTurnEntity(),attacker:GetCurrentBattleTurnEntity() == attacker)
+			if battleEnt:GetNW2Bool("TakeTurns") then
+				if attacker:GetCurrentBattleTurnEntity() == attacker then
+					-- print("I AM THE ATTACKER!")
+					if persona then return end -- Personas have Battle Mode code built into them, no need for this extra code
+					attacker.Persona_LastBattleDMGT = attacker.Persona_LastBattleDMGT or false
+					if attacker.Persona_LastBattleDMGT == false then
+						attacker.Persona_LastBattleDMGT = CurTime() +GetConVarNumber("vj_persona_battle_damagetime")
+						timer.Simple(GetConVarNumber("vj_persona_battle_damagetime"),function()
+							if IsValid(battleEnt) then
+								if IsValid(attacker) then
+									attacker.Persona_LastBattleDMGT = false
+									if attacker:GetCurrentBattleTurnEntity() != attacker then
+										return -- Something happened, the battleEnt already changed turns
+									end
 								end
+								battleEnt:NextCurrentTurn()
 							end
-							battleEnt:NextCurrentTurn()
-						end
-					end)
+						end)
+					end
+					if CurTime() > attacker.Persona_LastBattleDMGT then -- Give them some time to get all possible hits in
+						-- print("I DONT HAVE A PERSONA, NEXT TURN!")
+						battleEnt:NextCurrentTurn()
+						attacker.Persona_LastBattleDMGT = false
+					end
+				else
+					-- print("NOT MY TURN!! SCALING!!!")
+					dmginfo:SetDamage(0)
 				end
-				if CurTime() > attacker.Persona_LastBattleDMGT then -- Give them some time to get all possible hits in
-					-- print("I DONT HAVE A PERSONA, NEXT TURN!")
-					battleEnt:NextCurrentTurn()
-					attacker.Persona_LastBattleDMGT = false
-				end
-			else
-				-- print("NOT MY TURN!! SCALING!!!")
-				dmginfo:SetDamage(0)
 			end
 			return
 		end

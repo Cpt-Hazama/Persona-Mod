@@ -29,6 +29,7 @@ if SERVER then
 	util.AddNetworkString("Persona_SetTurn")
 	util.AddNetworkString("Persona_EndBattle")
 	util.AddNetworkString("Persona_UpdateBattleData")
+	util.AddNetworkString("Persona_UpdateCSBattleData")
 ---------------------------------------------------------------------------------------------------------------------------------------------
 	function ENT:SetupDataTables()
 		self:AddVar("Entity","Starter")
@@ -85,6 +86,15 @@ if (CLIENT) then
 					v:ChatPrint("It is now " .. (tEnt:IsPlayer() && tEnt:Nick() or language.GetPhrase(self.CurrentTurnEntity:GetClass())) .. "'s turn!")
 				end
 			end
+		end
+	end)
+
+	net.Receive("Persona_UpdateCSBattleData",function(len,ply)
+		local self = net.ReadEntity()
+		local tEnt = net.ReadEntity()
+
+		if self.Starter.BattleEntitiesTable != nil then
+			table.insert(self.Starter.BattleEntitiesTable,tEnt)
 		end
 	end)
 
@@ -311,6 +321,35 @@ function ENT:Initialize()
 	
 	self:SetNW2Bool("TakeTurns",tobool(GetConVarNumber("vj_persona_battle_turns")))
 	self:SetNW2Int("TurnTime",CurTime() +GetConVarNumber("vj_persona_battle_turntime"))
+	
+	if GetConVarNumber("vj_persona_battle_newcomers") == 0 then
+		local hookName = "Persona_LogicBattle_Think_" .. self:EntIndex()
+		hook.Add("Think",hookName,function()
+			if !IsValid(self) then
+				hook.Remove("Think",hookName)
+				return
+			end
+			if !IsValid(self.Starter) then
+				hook.Remove("Think",hookName)
+				return
+			end
+			local tbl = self.Starter.BattleEntitiesTable
+			if tbl != nil && table.Count(tbl) > 0 then
+				for _,v in SortedPairs(ents.GetAll()) do
+					if VJ_HasValue(tbl,v) then -- Ignore entities in battle mode
+						continue
+					end
+					if v.GetEnemy then -- Has the GetEnemy() function, must be a NPC or nextbot
+						if IsValid(v:GetEnemy()) && VJ_HasValue(tbl,v:GetEnemy()) then
+							if v.SetEnemy then
+								v:SetEnemy(NULL)
+							end
+						end
+					end
+				end
+			end
+		end)
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSetPos(i)
@@ -352,7 +391,7 @@ function ENT:NextCurrentTurn(didChange)
 			v.HasGrenadeAttack = false
 			v.CanUseSecondaryOnWeaponAttack = false
 			v.NextWeaponAttackT = 999999999
-			v:SetState(VJ_STATE_ONLY_ANIMATION)
+			v:SetState(self.UsePositions && VJ_STATE_ONLY_ANIMATION or nil)
 			-- print("Set values to false",v)
 		end
 	end
@@ -372,7 +411,7 @@ function ENT:NextCurrentTurn(didChange)
 		if CurTime() > newEnt:GetNW2Int("VJ_P_NextWeaponAttackT") then
 			newEnt.NextWeaponAttackT = 0
 		end
-		if newEnt.IsVJBaseSNPC then newEnt:SetState() end
+		if newEnt.IsVJBaseSNPC && self.UsePositions then newEnt:SetState() end
 		-- print("Set values to their originals",newEnt.DisableChasingEnemy,newEnt.HasMeleeAttack,newEnt.HasRangeAttack,newEnt.HasLeapAttack)
 	end
 	net.Start("Persona_SetTurn")
@@ -387,6 +426,8 @@ function ENT:Think()
 	local usePos = self.UsePositions
 	local useTurns = self:GetNW2Bool("TakeTurns")
 	local currentEnt = self.CurrentTurnEntity
+	
+	self.BattleEntitiesTable = self.Starter.BattleEntitiesTable
 
 	for i,v in SortedPairs(self.Starter.BattleEntitiesTable) do
 		if v == self.Starter then continue end

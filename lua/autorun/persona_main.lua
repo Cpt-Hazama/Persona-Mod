@@ -465,11 +465,11 @@ function NPC:GetBattleEntity()
 end
 
 function NPC:GetCurrentBattleTurn()
-	return self.Persona_BattleEntity.CurrentTurn
+	return self.Persona_BattleEntity && self.Persona_BattleEntity.CurrentTurn
 end
 
 function NPC:GetCurrentBattleTurnEntity()
-	return self.Persona_BattleEntity.CurrentTurnEntity
+	return self.Persona_BattleEntity && self.Persona_BattleEntity.CurrentTurnEntity
 end
 
 function NPC:Alive()
