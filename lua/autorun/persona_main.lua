@@ -1563,6 +1563,11 @@ if CLIENT then
 
 	hook.Add("ShouldDrawLocalPlayer","Persona_DrawPlayer",function(ply)
 		if IsPersonaGamemode() then return end
+		local battleEnt = ply:GetNW2Entity("BattleEnt")
+		local camEnt = IsValid(battleEnt) && battleEnt:GetNW2Entity("CurrentTurnEntity") && battleEnt:GetNW2Entity("CurrentTurnEntity") != ply
+		local usePos = IsValid(battleEnt) && battleEnt:GetNW2Bool("UsePositions")
+		local useTurns = IsValid(battleEnt) && battleEnt:GetNW2Bool("TakeTurns")
+		if (camEnt && usePos && useTurns) then return true end
 		if IsValid(ply:GetNW2Entity("PersonaEntity")) then return true end
 	end)
 
@@ -1572,6 +1577,12 @@ if CLIENT then
 		local persona = ply:GetNW2Entity("PersonaEntity")
 		local cPos = ply:GetNW2Vector("Persona_CustomPos")
 		local enabled = IsValid(persona)
+
+		local battleEnt = ply:GetNW2Entity("BattleEnt")
+		local camEnt = IsValid(battleEnt) && battleEnt:GetNW2Entity("CurrentTurnEntity") && battleEnt:GetNW2Entity("CurrentTurnEntity") != ply
+		local usePos = IsValid(battleEnt) && battleEnt:GetNW2Bool("UsePositions")
+		local useTurns = IsValid(battleEnt) && battleEnt:GetNW2Bool("TakeTurns")
+		if (camEnt && usePos && useTurns) then enabled = false end
 		if enabled then
 			if IsValid(ply:GetViewEntity()) && ply:GetViewEntity():GetClass() == "gmod_cameraprop" then
 				return

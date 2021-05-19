@@ -458,6 +458,7 @@ end
 function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 	local isTurn = self:IsMyTurn()
 	if !isTurn then return end
+	self:SetNW2String("LastCard",melee)
 	if melee == "Heaven's Blade" then
 		self:HeavensBlade(ply,persona)
 		return
@@ -493,6 +494,7 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 		return
 	elseif melee == "Magatsu Blade" then
 		self:MagatsuBlade(ply,persona)
+		return
 	elseif melee == "Vajra Blast" then
 		self:VajraBlast(ply,persona)
 		return
@@ -534,11 +536,13 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 		return
 	elseif melee == "Terror Claw" then
 		self:TerrorClaw(ply,persona)
+		return
 	else
 		if ply:IsPlayer() && melee then
 			ply:ChatPrint("Sorry, " .. melee .. " has not been programmed yet. It will be available in the future!")
 			ply:EmitSound("cpthazama/persona5/misc/00103.wav")
 		end
+		self:SetNW2String("LastCard","")
 		return
 	end
 end
@@ -547,6 +551,7 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	local isTurn = self:IsMyTurn()
 	if !isTurn then return end
 	local card = self:GetCard()
+	self:SetNW2String("LastCard",card)
 	if card == "Myriad Truths" then
 		self:MyriadTruths(ply,persona)
 		return
@@ -1041,6 +1046,7 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 			ply:ChatPrint("Sorry, " .. card .. " has not been programmed yet. It will be available in the future!")
 			ply:EmitSound("cpthazama/persona5/misc/00103.wav")
 		end
+		self:SetNW2String("LastCard","")
 		return
 	end
 end

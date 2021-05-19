@@ -168,10 +168,28 @@ end
 function ENT:PlaySet(skill,name,rate,cycle)
 	local seq = self.Animations[name]
 	if name == "melee" then
+		-- timer.Simple(self:GetSequenceDuration(self,self.Animations["melee"]) *0.5,function()
+			-- if IsValid(self) && IsValid(self.User) then
+				-- local battleEnt = self.User:GetNW2Entity("BattleEnt")
+				-- local target = self.User:GetNW2Entity("Persona_Target")
+				-- if IsValid(battleEnt) && IsValid(target) then
+					-- battleEnt:SetNW2Entity("CurrentTurnEntity",target)
+				-- end
+			-- end
+		-- end)
 		timer.Simple(self:GetSequenceDuration(self,self.Animations["melee"]),function()
 			if IsValid(self) then self:OnFinishedAttack(skill) end
 		end)
 	end
+	-- if name == "range_idle" then
+		-- if IsValid(self) && IsValid(self.User) then
+			-- local battleEnt = self.User:GetNW2Entity("BattleEnt")
+			-- local target = self.User:GetNW2Entity("Persona_Target")
+			-- if IsValid(battleEnt) && IsValid(target) then
+				-- battleEnt:SetNW2Entity("CurrentTurnEntity",target)
+			-- end
+		-- end
+	-- end
 	if name == "range_end" then
 		timer.Simple(self:GetSequenceDuration(self,self.Animations["range_end"]),function()
 			if IsValid(self) then self:OnFinishedAttack(skill) end

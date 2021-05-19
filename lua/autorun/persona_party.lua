@@ -552,7 +552,7 @@ if SERVER then
 		if ply:Alive() then
 			if CurTime() > ply.Persona_PartyCommand then
 				local ent = ply:GetEyeTrace().Entity
-				if ent:GetPos():Distance(ply:GetPos()) <= 150 then
+				if ent:GetPos():Distance(ply:GetPos()) <= 300 then
 					if ent:IsPlayer() then
 						ply:AddToParty(ent)
 					else
@@ -570,7 +570,7 @@ if SERVER then
 		if ply:Alive() then
 			if CurTime() > ply.Persona_PartyCommand then
 				local ent = ply:GetEyeTrace().Entity
-				if ent:GetPos():Distance(ply:GetPos()) <= 150 then
+				if ent:GetPos():Distance(ply:GetPos()) <= 300 then
 					if ent:IsPlayer() then
 						ply:RemoveFromParty(ent)
 					else

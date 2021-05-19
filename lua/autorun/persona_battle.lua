@@ -77,7 +77,7 @@ if SERVER then
 		local vis = tobool(GetConVarNumber("vj_persona_battle_visible"))
 		local max = positions && 5 or 15
 		local persona = IsValid(attacker:GetNW2Entity("PersonaEntity"))
-		local battleEnt = (attacker:IsPlayer() && attacker.GetBattleEntity && IsValid(attacker:GetBattleEntity()) && attacker:GetBattleEntity()) or (attacker:IsNPC() && ent:IsPlayer() && (ent.GetBattleEntity && IsValid(ent:GetBattleEntity()) && ent:GetBattleEntity())) or false
+		local battleEnt = (attacker:IsPlayer() && attacker.GetBattleEntity && IsValid(attacker:GetBattleEntity()) && attacker:GetBattleEntity()) or (attacker:IsNPC() && (ent:IsPlayer() or ent:IsNPC()) && (ent.GetBattleEntity && IsValid(ent:GetBattleEntity()) && ent:GetBattleEntity())) or false
 		
 		if battleEnt then
 			if GetConVarNumber("vj_persona_battle_newcomers") == 1 then
@@ -181,6 +181,21 @@ if SERVER then
 			local tbl = {}
 			if IsValid(ent) then
 				table.insert(tbl,ply)
+				for i,v in SortedPairs(ply:GetFullParty()) do
+					if IsValid(v) && v:Health() > 0 then
+						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
+						v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
+						v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
+						v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
+						v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
+						v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
+						v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
+						v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
+						v.Persona_BattleEntity = ply.Persona_BattleEntity
+
+						table.insert(tbl,v)
+					end
+				end
 				table.insert(tbl,ent)
 				ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
 				ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
@@ -275,7 +290,24 @@ if SERVER then
 			
 			if #tbl > 0 then
 				ply.BattleEntitiesTable = tbl
+				table.insert(ply.BattleEntitiesTable,ply)
 				table.insert(tbl,ply)
+				for i,v in SortedPairs(ply:GetFullParty()) do
+					if IsValid(v) && v:Health() > 0 then
+						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
+						v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
+						v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
+						v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
+						v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
+						v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
+						v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
+						v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
+						v.Persona_BattleEntity = ply.Persona_BattleEntity
+
+						table.insert(ply.BattleEntitiesTable,v)
+						table.insert(tbl,v)
+					end
+				end
 				net.Start("Persona_StartBattle")
 					net.WriteEntity(ply.Persona_BattleEntity)
 					net.WriteEntity(ply)

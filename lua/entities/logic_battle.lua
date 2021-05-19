@@ -30,6 +30,7 @@ if SERVER then
 	util.AddNetworkString("Persona_EndBattle")
 	util.AddNetworkString("Persona_UpdateBattleData")
 	util.AddNetworkString("Persona_UpdateCSBattleData")
+	util.AddNetworkString("Persona_UpdateCSFriendData")
 ---------------------------------------------------------------------------------------------------------------------------------------------
 	function ENT:SetupDataTables()
 		self:AddVar("Entity","Starter")
@@ -89,6 +90,14 @@ if (CLIENT) then
 		end
 	end)
 
+	net.Receive("Persona_UpdateCSFriendData",function(len,ply)
+		local self = net.ReadEntity()
+		local tEnt = net.ReadEntity()
+		local party = net.ReadTable()
+		
+		self.Party = party
+	end)
+
 	net.Receive("Persona_UpdateCSBattleData",function(len,ply)
 		local self = net.ReadEntity()
 		local tEnt = net.ReadEntity()
@@ -128,7 +137,53 @@ if (CLIENT) then
 		ply:ConCommand("target_persona")
 	end)
 
+	local P_LerpVec = Vector(0,0,0)
+	local P_LerpAng = Angle(0,0,0)
 	function ENT:Initialize()
+		local hookName = "Persona_LogicBattle_Camera_" .. self:EntIndex()
+		hook.Add("CalcView",hookName,function(ply,pos,angles,fov)
+			if !IsValid(self) then
+				hook.Remove("CalcView",hookName)
+				return
+			end
+			if self.BattleEntitiesTable && #self.BattleEntitiesTable <= 0 then
+				hook.Remove("CalcView",hookName)
+				return
+			end
+			local ply = LocalPlayer()
+			local camEnt = self:GetNW2Entity("CurrentTurnEntity")
+			local usePos = self:GetNW2Bool("UsePositions")
+			local useTurns = self:GetNW2Bool("TakeTurns")
+			if usePos == false then hook.Remove("CalcView",hookName) return end
+			if useTurns == false then hook.Remove("CalcView",hookName) return end
+			if camEnt == ply then return end
+			if IsValid(camEnt) then
+				local cPos = self:GetNW2Vector("CurrentTurnEntity_Cam") or Vector(0,0,0)
+				local startPos = camEnt:GetPos() +camEnt:OBBCenter()
+				local _x = camEnt:GetForward() *cPos.y
+				local _y = camEnt:GetRight() *cPos.x
+				local _z = camEnt:GetUp() *cPos.z
+				local tr = util.TraceHull({
+					start = startPos,
+					endpos = startPos +ply:EyeAngles():Forward() *-math.max(50,camEnt:BoundingRadius()) +_x +_y +_z,
+					mask = MASK_SHOT,
+					filter = {camEnt,ply},
+					mins = Vector(-8,-8,-8),
+					maxs = Vector(8,8,8)
+				})
+				targetPos = tr.HitPos +tr.HitNormal *5
+				P_LerpVec = LerpVector(FrameTime() *15,P_LerpVec,targetPos)
+				P_LerpAng = LerpAngle(FrameTime() *15,P_LerpAng,ply:EyeAngles())
+				ply:SetEyeAngles((startPos -targetPos):Angle())
+
+				local view = {}
+				view.origin = P_LerpVec
+				view.angles = P_LerpAng
+				view.fov = fov
+				return view
+			end
+		end)
+
 		local hookName = "Persona_LogicBattle_Halo_" .. self:EntIndex()
 		hook.Add("PreDrawHalos",hookName,function()
 			if !IsValid(self) then
@@ -184,6 +239,7 @@ if (CLIENT) then
 		local tbl = {}
 		for _,v in SortedPairs(self.BattleEntitiesTable) do
 			if v == self.Starter then continue end
+			if VJ_HasValue(self.Party,v) then continue end
 			if !IsValid(v) or IsValid(v) && v:Health() <= 0 then continue end
 			table.insert(tbl,v)
 		end
@@ -319,8 +375,17 @@ function ENT:Initialize()
 	self.CurrentTurn = 0
 	self.CurrentTurnEntity = NULL
 	
+	self:SetNW2Bool("UsePositions",self.UsePositions)
 	self:SetNW2Bool("TakeTurns",tobool(GetConVarNumber("vj_persona_battle_turns")))
 	self:SetNW2Int("TurnTime",CurTime() +GetConVarNumber("vj_persona_battle_turntime"))
+	if IsValid(self.Starter) then self.Starter:SetNW2Entity("BattleEnt",self) end
+
+	net.Start("Persona_UpdateCSFriendData")
+		net.WriteEntity(self)
+		net.WriteEntity(self.Starter)
+		net.WriteTable(self.Starter:GetFullParty())
+	net.Send(self.Starter)
+	self.Party = self.Starter:GetFullParty()
 	
 	if GetConVarNumber("vj_persona_battle_newcomers") == 0 then
 		local hookName = "Persona_LogicBattle_Think_" .. self:EntIndex()
@@ -352,12 +417,8 @@ function ENT:Initialize()
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:GetSetPos(i)
+function ENT:GetSetPos(i,rev)
 	local rowMax = #self.Sets -1
-	-- i = i -1
-	-- if i <= 0 then
-		-- i = i +1
-	-- end
 	local row = math.Clamp(math.Round(i /rowMax),1,50)
 	local targetI = i
 	if targetI > rowMax then
@@ -372,7 +433,7 @@ function ENT:GetSetPos(i)
 		targetI = #self.Sets
 	end
 	local set = self.Sets[targetI]
-	return self:GetPos() +self:GetForward() *(set.f *row) +self:GetRight() *(set.r /**row */)
+	return self:GetPos() +self:GetForward() *(((rev && set.f *-1) or set.f) *row) +self:GetRight() *(((rev && set.r *-1) or set.r) /**row */)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetCurrentTurn()
@@ -401,6 +462,8 @@ function ENT:NextCurrentTurn(didChange)
 	end
 	self.CurrentTurnEntity = self.Starter.BattleEntitiesTable[self.CurrentTurn]
 	local newEnt = self.CurrentTurnEntity -- newEnt
+	self:SetNW2Entity("CurrentTurnEntity",newEnt)
+	self:SetNW2Vector("CurrentTurnEntity_Cam",Vector(math.random(-200,200),math.random(50,200),math.random(10,50)))
 	if IsValid(newEnt) && newEnt:IsNPC() && newEnt.IsVJBaseSNPC then
 		newEnt.DisableChasingEnemy = newEnt:GetNW2Bool("VJ_P_DisableChasingEnemy")
 		newEnt.HasMeleeAttack = newEnt:GetNW2Bool("VJ_P_HasMeleeAttack")
@@ -444,19 +507,24 @@ function ENT:Think()
 			self:NextCurrentTurn()
 		end
 	end
-	for i,v in pairs(self.Starter.BattleEntitiesTable) do
-		if IsValid(v) && v:Health() > 0 && self.Starter != v then
+	for i,v in SortedPairs(self.Starter.BattleEntitiesTable) do
+		if IsValid(v) && v:Health() > 0 /*&& self.Starter != v*/ then
+			-- print(i,v)
 			if usePos then
-				if useTurns && currentEnt == v then continue end
-				local pos = self:GetSetPos(i)
+				if useTurns && currentEnt == v then
+					continue
+				end
+				local pos = self:GetSetPos(i,v == self.Starter or VJ_HasValue(self.Party,v))
 				-- print(v,i,pos)
 				if v:GetPos() != pos then
 					v:SetPos(pos)
 				end
-				if v:IsMoving() then
+				if v:IsNPC() && v:IsMoving() then
 					v:StopMoving()
 					v:ClearSchedule()
 					v:ClearGoal()
+				elseif v:IsPlayer() then
+					-- v:Freeze(true)
 				end
 				if v.IsVJBaseSNPC then
 					v.DisableChasingEnemy = true
