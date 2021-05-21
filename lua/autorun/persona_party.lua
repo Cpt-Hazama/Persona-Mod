@@ -87,6 +87,26 @@ function PLY:CreateParty_NPC(ent)
 		ent.Persona_Party = ent.Persona_Party or {}
 		table.insert(ent.Persona_Party,self)
 	end
+	ent:AddEntityRelationship(self,D_LI,99)
+	ent.FollowingPlayer = false
+	ent.FollowPlayer_GoingAfter = false
+	ent.FollowPlayer_Entity = NULL
+	ent.GuardingPosition = nil
+	ent.GuardingFacePosition = nil
+	ent.FollowPlayer_Entity = self
+	ent.FollowingPlayer = true
+	ent:PlaySoundSystem("FollowPlayer")
+	ent:SetTarget(self)
+	if ent:BusyWithActivity() == false then -- Face the player and then walk or run to it
+		ent:StopMoving()
+		ent:VJ_TASK_FACE_X("TASK_FACE_TARGET", function(x)
+			x.RunCode_OnFinish = function()
+				local movet = ((ent:GetPos():Distance(ent.FollowPlayer_Entity:GetPos()) < 220) and "TASK_WALK_PATH") or "TASK_RUN_PATH"
+				ent:VJ_TASK_GOTO_TARGET(movet, function(y) y.CanShootWhenMoving = true y.ConstantlyFaceEnemy = true end) 
+			end
+		end)
+	end
+	if IsValid(self.Persona_BattleEntity) then self.Persona_BattleEntity:UpdateParty() end
 end
 
 function PLY:AddToParty_NPC(ent)
@@ -110,6 +130,26 @@ function PLY:AddToParty_NPC(ent)
 		ent.Persona_Party = ent.Persona_Party or {}
 		table.insert(ent.Persona_Party,self)
 	end
+	ent:AddEntityRelationship(self,D_LI,99)
+	ent.FollowingPlayer = false
+	ent.FollowPlayer_GoingAfter = false
+	ent.FollowPlayer_Entity = NULL
+	ent.GuardingPosition = nil
+	ent.GuardingFacePosition = nil
+	ent.FollowPlayer_Entity = self
+	ent.FollowingPlayer = true
+	ent:PlaySoundSystem("FollowPlayer")
+	ent:SetTarget(self)
+	if ent:BusyWithActivity() == false then -- Face the player and then walk or run to it
+		ent:StopMoving()
+		ent:VJ_TASK_FACE_X("TASK_FACE_TARGET", function(x)
+			x.RunCode_OnFinish = function()
+				local movet = ((ent:GetPos():Distance(ent.FollowPlayer_Entity:GetPos()) < 220) and "TASK_WALK_PATH") or "TASK_RUN_PATH"
+				ent:VJ_TASK_GOTO_TARGET(movet, function(y) y.CanShootWhenMoving = true y.ConstantlyFaceEnemy = true end) 
+			end
+		end)
+	end
+	if IsValid(self.Persona_BattleEntity) then self.Persona_BattleEntity:UpdateParty() end
 end
 
 function PLY:RemoveFromParty_NPC(ent)
@@ -139,6 +179,7 @@ function PLY:RemoveFromParty_NPC(ent)
 			end
 		end
 	end
+	ent:FollowPlayerReset()
 end
 
 function PLY:ClearParty_NPC()
@@ -155,6 +196,7 @@ function PLY:ClearParty_NPC()
 					end
 				end
 			end
+			ent:FollowPlayerReset()
 		end
 	end
 	table.Empty(self.Persona_NPC_Party)
@@ -178,6 +220,10 @@ function PLY:CreateParty(ent)
 end
 
 function PLY:AddToParty(ent)
+	if ent:IsNPC() then
+		self:AddToParty_NPC(ent)
+		return
+	end
 	net.Start("persona_party")
 		net.WriteEntity(self)
 		net.WriteEntity(ent)
@@ -198,6 +244,10 @@ function PLY:AddToParty(ent)
 end
 
 function PLY:RemoveFromParty(ent)
+	if ent:IsNPC() then
+		self:RemoveFromParty_NPC(ent)
+		return
+	end
 	-- print(ent)
 	net.Start("persona_party")
 		net.WriteEntity(self)
@@ -220,6 +270,7 @@ function PLY:RemoveFromParty(ent)
 end
 
 function PLY:ClearParty()
+	self:ClearParty_NPC()
 	net.Start("persona_party")
 		net.WriteEntity(self)
 		net.WriteEntity(Entity(0))

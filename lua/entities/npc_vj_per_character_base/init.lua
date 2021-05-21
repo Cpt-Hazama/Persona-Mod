@@ -563,6 +563,7 @@ function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
 	GetCorpse:SetCycle(1)
 	GetCorpse.SP = self.SP
 	GetCorpse.Class = self:GetClass()
+	GetCorpse.Party = self:GetFullParty(true)
 	undo.ReplaceEntity(self,GetCorpse)
 	timer.Simple(20,function()
 		if IsValid(GetCorpse) then
@@ -574,6 +575,14 @@ function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
 			e:SetPos(GetCorpse:GetPos() +Vector(0,0,4))
 			e:SetAngles(GetCorpse:GetAngles())
 			e:Spawn()
+			for _,v in SortedPairs(GetCorpse.Party) do
+				if IsValid(v) then
+					e:AddToParty(v)
+					if v.AddToParty then
+						v:AddToParty(e)
+					end
+				end
+			end
 			if self.DeathCorpseSubMaterials != nil then
 				for _, x in ipairs(self.DeathCorpseSubMaterials) do
 					if self:GetSubMaterial(x) != "" then

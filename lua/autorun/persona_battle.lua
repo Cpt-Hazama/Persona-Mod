@@ -64,6 +64,23 @@ P_AddBattleTrack("Will Power","cpthazama/persona_shared/battlemode_boss_3.mp3",1
 
 P_AddBattleTrack("Yaldabaoth","cpthazama/persona5/music/Yaldabaoth.mp3",180,true,"npc_vj_per_yaldabaoth")
 
+hook.Add("StartCommand","Persona_BattleMode_Command",function(ply,cmd)
+	local battleEnt = ply:GetNW2Entity("BattleEnt")
+	if IsValid(battleEnt) && ply:Alive() then
+		local usePos = battleEnt:GetNW2Bool("UsePositions")
+		local useTurns = battleEnt:GetNW2Bool("TakeTurns")
+		local turnEnt = battleEnt:GetNW2Entity("CurrentTurnEntity")
+		if useTurns && ply != turnEnt then
+			cmd:ClearMovement()
+			cmd:ClearButtons()
+		end
+		if usePos then
+			if useTurns && ply == turnEnt then return end
+			cmd:ClearMovement()
+		end
+	end
+end)
+
 if SERVER then
 	hook.Add("EntityTakeDamage","Persona_BattleMode",function(ent,dmginfo)
 		if GetConVarNumber("vj_persona_battle") == 0 then return end
@@ -83,14 +100,14 @@ if SERVER then
 			if GetConVarNumber("vj_persona_battle_newcomers") == 1 then
 				if (ent:IsNPC() or ent:IsPlayer() or ent:IsNextBot()) && !IsValid(ent:GetBattleEntity()) then
 					ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
-					ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
-					ent:SetNW2Bool("VJ_P_DisableChasingEnemy",ent.DisableChasingEnemy)
-					ent:SetNW2Bool("VJ_P_HasMeleeAttack",ent.HasMeleeAttack)
-					ent:SetNW2Bool("VJ_P_HasRangeAttack",ent.HasRangeAttack)
-					ent:SetNW2Bool("VJ_P_HasLeapAttack",ent.HasLeapAttack)
-					ent:SetNW2Bool("VJ_P_HasGrenadeAttack",ent.HasGrenadeAttack)
-					ent:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",ent.CanUseSecondaryOnWeaponAttack)
-					ent:SetNW2Int("VJ_P_NextWeaponAttackT",ent.NextWeaponAttackT)
+					-- ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
+					-- ent:SetNW2Bool("VJ_P_DisableChasingEnemy",ent.DisableChasingEnemy)
+					-- ent:SetNW2Bool("VJ_P_HasMeleeAttack",ent.HasMeleeAttack)
+					-- ent:SetNW2Bool("VJ_P_HasRangeAttack",ent.HasRangeAttack)
+					-- ent:SetNW2Bool("VJ_P_HasLeapAttack",ent.HasLeapAttack)
+					-- ent:SetNW2Bool("VJ_P_HasGrenadeAttack",ent.HasGrenadeAttack)
+					-- ent:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",ent.CanUseSecondaryOnWeaponAttack)
+					-- ent:SetNW2Int("VJ_P_NextWeaponAttackT",ent.NextWeaponAttackT)
 					ent.Persona_BattleEntity = attacker.Persona_BattleEntity
 					table.insert(battleEnt.Starter.BattleEntitiesTable,ent)
 					net.Start("Persona_UpdateCSBattleData")
@@ -98,25 +115,25 @@ if SERVER then
 						net.WriteEntity(ent)
 					net.Send(attacker)
 					if ent.IsVJBaseSNPC then
-						ent.DisableChasingEnemy = battleEnt.UsePositions
-						ent.HasMeleeAttack = false
-						ent.HasRangeAttack = false
-						ent.HasLeapAttack = false
-						ent.HasGrenadeAttack = false
-						ent.CanUseSecondaryOnWeaponAttack = false
-						ent.NextWeaponAttackT = 999999999
-						ent:SetState(battleEnt.UsePositions && VJ_STATE_ONLY_ANIMATION or nil)
+						-- ent.DisableChasingEnemy = battleEnt.UsePositions
+						-- ent.HasMeleeAttack = false
+						-- ent.HasRangeAttack = false
+						-- ent.HasLeapAttack = false
+						-- ent.HasGrenadeAttack = false
+						-- ent.CanUseSecondaryOnWeaponAttack = false
+						-- ent.NextWeaponAttackT = 999999999
+						ent:SetState(battleEnt.UsePositions && VJ_STATE_FREEZE or nil)
 					end
 				elseif attacker:IsNPC() && ent:IsPlayer() && !IsValid(attacker:GetBattleEntity()) then
 					attacker:SetNW2Bool("VJ_IsHugeMonster",attacker.VJ_IsHugeMonster)
-					attacker:SetNW2Bool("VJ_IsHugeMonster",attacker.VJ_IsHugeMonster)
-					attacker:SetNW2Bool("VJ_P_DisableChasingEnemy",attacker.DisableChasingEnemy)
-					attacker:SetNW2Bool("VJ_P_HasMeleeAttack",attacker.HasMeleeAttack)
-					attacker:SetNW2Bool("VJ_P_HasRangeAttack",attacker.HasRangeAttack)
-					attacker:SetNW2Bool("VJ_P_HasLeapAttack",attacker.HasLeapAttack)
-					attacker:SetNW2Bool("VJ_P_HasGrenadeAttack",attacker.HasGrenadeAttack)
-					attacker:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",attacker.CanUseSecondaryOnWeaponAttack)
-					attacker:SetNW2Int("VJ_P_NextWeaponAttackT",attacker.NextWeaponAttackT)
+					-- attacker:SetNW2Bool("VJ_IsHugeMonster",attacker.VJ_IsHugeMonster)
+					-- attacker:SetNW2Bool("VJ_P_DisableChasingEnemy",attacker.DisableChasingEnemy)
+					-- attacker:SetNW2Bool("VJ_P_HasMeleeAttack",attacker.HasMeleeAttack)
+					-- attacker:SetNW2Bool("VJ_P_HasRangeAttack",attacker.HasRangeAttack)
+					-- attacker:SetNW2Bool("VJ_P_HasLeapAttack",attacker.HasLeapAttack)
+					-- attacker:SetNW2Bool("VJ_P_HasGrenadeAttack",attacker.HasGrenadeAttack)
+					-- attacker:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",attacker.CanUseSecondaryOnWeaponAttack)
+					-- attacker:SetNW2Int("VJ_P_NextWeaponAttackT",attacker.NextWeaponAttackT)
 					attacker.Persona_BattleEntity = ent.Persona_BattleEntity
 					table.insert(battleEnt.Starter.BattleEntitiesTable,attacker)
 					net.Start("Persona_UpdateCSBattleData")
@@ -124,14 +141,14 @@ if SERVER then
 						net.WriteEntity(attacker)
 					net.Send(ent)
 					if attacker.IsVJBaseSNPC then
-						attacker.DisableChasingEnemy = battleEnt.UsePositions
-						attacker.HasMeleeAttack = false
-						attacker.HasRangeAttack = false
-						attacker.HasLeapAttack = false
-						attacker.HasGrenadeAttack = false
-						attacker.CanUseSecondaryOnWeaponAttack = false
-						attacker.NextWeaponAttackT = 999999999
-						attacker:SetState(battleEnt.UsePositions && VJ_STATE_ONLY_ANIMATION or nil)
+						-- attacker.DisableChasingEnemy = battleEnt.UsePositions
+						-- attacker.HasMeleeAttack = false
+						-- attacker.HasRangeAttack = false
+						-- attacker.HasLeapAttack = false
+						-- attacker.HasGrenadeAttack = false
+						-- attacker.CanUseSecondaryOnWeaponAttack = false
+						-- attacker.NextWeaponAttackT = 999999999
+						attacker:SetState(battleEnt.UsePositions && VJ_STATE_FREEZE or nil)
 					end
 				end
 			end
@@ -184,13 +201,13 @@ if SERVER then
 				for i,v in SortedPairs(ply:GetFullParty()) do
 					if IsValid(v) && v:Health() > 0 then
 						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
-						v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
-						v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
-						v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
-						v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
-						v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
-						v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
-						v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
+						-- v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
+						-- v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
+						-- v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
+						-- v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
+						-- v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
+						-- v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
+						-- v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
 						v.Persona_BattleEntity = ply.Persona_BattleEntity
 
 						table.insert(tbl,v)
@@ -198,14 +215,14 @@ if SERVER then
 				end
 				table.insert(tbl,ent)
 				ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
-				ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
-				ent:SetNW2Bool("VJ_P_DisableChasingEnemy",ent.DisableChasingEnemy)
-				ent:SetNW2Bool("VJ_P_HasMeleeAttack",ent.HasMeleeAttack)
-				ent:SetNW2Bool("VJ_P_HasRangeAttack",ent.HasRangeAttack)
-				ent:SetNW2Bool("VJ_P_HasLeapAttack",ent.HasLeapAttack)
-				ent:SetNW2Bool("VJ_P_HasGrenadeAttack",ent.HasGrenadeAttack)
-				ent:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",ent.CanUseSecondaryOnWeaponAttack)
-				ent:SetNW2Int("VJ_P_NextWeaponAttackT",ent.NextWeaponAttackT)
+				-- ent:SetNW2Bool("VJ_IsHugeMonster",ent.VJ_IsHugeMonster)
+				-- ent:SetNW2Bool("VJ_P_DisableChasingEnemy",ent.DisableChasingEnemy)
+				-- ent:SetNW2Bool("VJ_P_HasMeleeAttack",ent.HasMeleeAttack)
+				-- ent:SetNW2Bool("VJ_P_HasRangeAttack",ent.HasRangeAttack)
+				-- ent:SetNW2Bool("VJ_P_HasLeapAttack",ent.HasLeapAttack)
+				-- ent:SetNW2Bool("VJ_P_HasGrenadeAttack",ent.HasGrenadeAttack)
+				-- ent:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",ent.CanUseSecondaryOnWeaponAttack)
+				-- ent:SetNW2Int("VJ_P_NextWeaponAttackT",ent.NextWeaponAttackT)
 				ent.Persona_BattleEntity = ply.Persona_BattleEntity
 				for _,v in pairs(ents.FindInSphere(ent:GetPos(),2000)) do
 					if v:IsNPC() && v != ent && (v:Disposition(ent) == D_LI or v:Disposition(ent) == D_NU) then
@@ -218,13 +235,13 @@ if SERVER then
 						end
 						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
 						v.Persona_BattleEntity = ply.Persona_BattleEntity
-						v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
-						v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
-						v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
-						v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
-						v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
-						v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
-						v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
+						-- v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
+						-- v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
+						-- v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
+						-- v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
+						-- v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
+						-- v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
+						-- v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
 						table.insert(tbl,v)
 					end
 				end
@@ -257,13 +274,13 @@ if SERVER then
 			if IsValid(attacker) then
 				table.insert(tbl,attacker)
 				attacker:SetNW2Bool("VJ_IsHugeMonster",attacker.VJ_IsHugeMonster)
-				attacker:SetNW2Bool("VJ_P_DisableChasingEnemy",attacker.DisableChasingEnemy)
-				attacker:SetNW2Bool("VJ_P_HasMeleeAttack",attacker.HasMeleeAttack)
-				attacker:SetNW2Bool("VJ_P_HasRangeAttack",attacker.HasRangeAttack)
-				attacker:SetNW2Bool("VJ_P_HasLeapAttack",attacker.HasLeapAttack)
-				attacker:SetNW2Bool("VJ_P_HasGrenadeAttack",attacker.HasGrenadeAttack)
-				attacker:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",attacker.CanUseSecondaryOnWeaponAttack)
-				attacker:SetNW2Int("VJ_P_NextWeaponAttackT",attacker.NextWeaponAttackT)
+				-- attacker:SetNW2Bool("VJ_P_DisableChasingEnemy",attacker.DisableChasingEnemy)
+				-- attacker:SetNW2Bool("VJ_P_HasMeleeAttack",attacker.HasMeleeAttack)
+				-- attacker:SetNW2Bool("VJ_P_HasRangeAttack",attacker.HasRangeAttack)
+				-- attacker:SetNW2Bool("VJ_P_HasLeapAttack",attacker.HasLeapAttack)
+				-- attacker:SetNW2Bool("VJ_P_HasGrenadeAttack",attacker.HasGrenadeAttack)
+				-- attacker:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",attacker.CanUseSecondaryOnWeaponAttack)
+				-- attacker:SetNW2Int("VJ_P_NextWeaponAttackT",attacker.NextWeaponAttackT)
 				attacker.Persona_BattleEntity = ply.Persona_BattleEntity
 				for _,v in pairs(ents.FindInSphere(attacker:GetPos(),2000)) do
 					if v:IsNPC() && v != attacker && (v:Disposition(attacker) == D_LI or v:Disposition(attacker) == D_NU) then
@@ -271,13 +288,13 @@ if SERVER then
 							-- break
 						-- end
 						if vis && !ply:Visible(v) then continue end
-						v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
-						v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
-						v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
-						v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
-						v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
-						v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
-						v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
+						-- v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
+						-- v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
+						-- v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
+						-- v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
+						-- v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
+						-- v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
+						-- v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
 						if v.IsPersonaShadow && !v.MetaVerseMode then
 							v:Transform(true,ply)
 						end
@@ -295,13 +312,13 @@ if SERVER then
 				for i,v in SortedPairs(ply:GetFullParty()) do
 					if IsValid(v) && v:Health() > 0 then
 						v:SetNW2Bool("VJ_IsHugeMonster",v.VJ_IsHugeMonster)
-						v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
-						v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
-						v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
-						v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
-						v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
-						v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
-						v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
+						-- v:SetNW2Bool("VJ_P_DisableChasingEnemy",v.DisableChasingEnemy)
+						-- v:SetNW2Bool("VJ_P_HasMeleeAttack",v.HasMeleeAttack)
+						-- v:SetNW2Bool("VJ_P_HasRangeAttack",v.HasRangeAttack)
+						-- v:SetNW2Bool("VJ_P_HasLeapAttack",v.HasLeapAttack)
+						-- v:SetNW2Bool("VJ_P_HasGrenadeAttack",v.HasGrenadeAttack)
+						-- v:SetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack",v.CanUseSecondaryOnWeaponAttack)
+						-- v:SetNW2Int("VJ_P_NextWeaponAttackT",v.NextWeaponAttackT)
 						v.Persona_BattleEntity = ply.Persona_BattleEntity
 
 						table.insert(ply.BattleEntitiesTable,v)
