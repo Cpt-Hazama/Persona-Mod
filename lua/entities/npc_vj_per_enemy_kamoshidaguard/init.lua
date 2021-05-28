@@ -11,7 +11,8 @@ ENT.VJ_NPC_Class = {"CLASS_PERSONA_ENEMY","CLASS_KAMOSHIDA","CLASS_SHADOW"}
 
 ENT.AvailablePersonae = {
 	"jack",
-	"hastur",
+	"hypnos",
+	"medea",
 	"yoshitsune",
 }
 ---------------------------------------------------------------------------------------------------------------------------------------------

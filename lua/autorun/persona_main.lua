@@ -10,6 +10,16 @@ CreateConVar("persona_dance_dev_fftall","0",128,"Grab all FFT values?",0,1)
 CreateConVar("persona_dance_dev_fftpos","128",128,"Any number between 1 and 256. 1 is the highest frequency and 256 is the lowest frequency.",0,256)
 CreateConVar("persona_dance_dev_fftstr","800",128,"The frequency strength difference between the last sample and the current sample must be higher than this to be added to our data file.",0,3000)
 
+if CLIENT then
+		-- HUD Scaling --
+	P_ScrW = ScrW() /2560
+	P_ScrH = ScrH() /1440
+	hook.Add("Think","Persona_UpdateCSData",function()
+		P_ScrW = ScrW() /2560
+		P_ScrH = ScrH() /1440
+	end)
+end
+
 function P_SaveTableData(filename,tbl)
 	local dir = "persona/temp_data/"
 	file.CreateDir(dir)
