@@ -2,6 +2,11 @@
  
 This mod adds a fully functioning, usable Persona system for players as well as VJ SNPCs of some of the cast from the Persona series.
 
+YOU MUST DOWNLOAD THIS FOR DANCE! DANCE! TO WORK PROPERLY!!
+
+https://github.com/Cpt-Hazama/Persona-Mod-Data-Files
+
+
 More Information:
 https://trello.com/b/8qYaZWHB/addon-development-board
 https://trello.com/b/oViEFpqB/persona-mod
