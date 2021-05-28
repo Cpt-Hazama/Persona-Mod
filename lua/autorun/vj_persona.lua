@@ -44,6 +44,8 @@ if VJExists == true then
 	VJ.AddNPC("Tohru Adachi (Shadow)","npc_vj_per_adachi_boss",vCatBad)
 	VJ.AddNPC("Yu Narukami (Shadow)","npc_vj_per_yu_shadow",vCatBad)
 
+	VJ.AddNPC("(Shadow) Player","npc_vj_per_shadow",vCatBad)
+
 		-- Persona Gamemode Exclusives --
 	VJ.AddNPC("(Shadow) Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCatBad)
 	-- VJ.AddNPC("Kamoshida Guard","npc_vj_per_enemy_kamoshidaguard",vCat .. " - Gamemode")

@@ -1985,7 +1985,7 @@ function ENT:BlessEffect(ent,chance,effect)
 			
 			self:InstaKillDamage(ent,chance,DMG_P_BLESS)
 		else
-			if IsValid(self) then
+			if IsValid(self) && self.User:IsPlayer() then
 				self.User:ChatPrint("Missed Target!")
 			end
 		end
@@ -2039,7 +2039,7 @@ function ENT:MudoEffect(ent,chance,effect)
 
 			self:InstaKillDamage(ent,chance,DMG_P_CURSE)
 		else
-			if IsValid(self) then
+			if IsValid(self) && self.User:IsPlayer() then
 				self.User:ChatPrint("Missed Target!")
 			end
 		end

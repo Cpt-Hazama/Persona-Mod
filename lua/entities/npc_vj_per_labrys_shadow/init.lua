@@ -58,6 +58,7 @@ function ENT:Controller_Initialize(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnDisablePersona(persona)
+	self.VJC_Data.ThirdP_Offset = Vector(-15, 40, -35)
 	ParticleEffectAttach("vj_per_shadow_idle",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------

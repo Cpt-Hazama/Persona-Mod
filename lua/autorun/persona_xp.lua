@@ -519,7 +519,7 @@ end
 
 PXP.ReadCompendium = function(ply)
 	if !ply:IsPlayer() then return end
-	-- return PXP.GetPersonaData(ply,4)
+	return PXP.GetPersonaData(ply,4) or {}
 end
 
 PXP.ReadCompendium_Legacy = function(ply)

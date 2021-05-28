@@ -1,5 +1,7 @@
 include("persona_xp.lua")
 
+PERSONA_STARTERS = {"arsene","izanagi","orpheus"}
+
 local debug = 0
 
 CreateConVar("persona_dmg_scaling","1",128,"Toggles the damage scaling feature of the mod.",0,1)

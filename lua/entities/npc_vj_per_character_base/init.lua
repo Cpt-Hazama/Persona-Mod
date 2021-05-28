@@ -98,7 +98,7 @@ function ENT:CustomOnTakeDamage_BeforeDamage(dmginfo,hitgroup)
 	local dmgtype = dmginfo:GetDamageType()
 
 	if dmginfo:GetDamage() > 0 then
-		local canDodge = math.random(1,100) <= self.Stats.AGI
+		local canDodge = math.random(1,100) <= (self.Stats.AGI or 35)
 		if canDodge && self:BusyWithActivity() == false && self:GetState() != VJ_STATE_ONLY_ANIMATION && math.random(1,2) == 1 then
 			if self:LookupSequence("dodge") then
 				self:VJ_ACT_PLAYACTIVITY("dodge",true,false,true)
@@ -148,6 +148,8 @@ function ENT:CustomOnTakeDamage_OnBleed(dmginfo,hitgroup)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()
+	if self.BeforeInit then self:BeforeInit() end
+
 	self:SetHealth((GetConVarNumber("vj_npc_allhealth") > 0) and GetConVarNumber("vj_npc_allhealth") or self:VJ_GetDifficultyValue(self.Stats.HP))
 	local mul = self.SelectedDifficulty +3
 	if mul <= 0 then
@@ -558,6 +560,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,GetCorpse)
 	if self.HasDeathAnimation == false then return end
+	if self.DeathCorpseEntityClass == "UseDefaultBehavior" then return end
 	local respawn = self.CanRespawn
 	GetCorpse:ResetSequence("death")
 	GetCorpse:SetCycle(1)
