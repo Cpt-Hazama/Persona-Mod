@@ -386,10 +386,10 @@ PXP.GetPersonaData_Legacy = function(ply,type)
 	end
 end
 
-PXP.GetPersonaData = function(ply,type)
+PXP.GetPersonaData = function(ply,type,sName)
 	if !ply:IsPlayer() then return end
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
-	local name = (type >= 1 && type <= 3 or type >= 6 && type <= 8) && ply:GetPersonaName() or nil
+	local name = (type >= 1 && type <= 3 or type >= 6 && type <= 8) && (sName or ply:GetPersonaName()) or nil
 	local isPersona = name && (type >= 1 && type <= 3 or type >= 6 && type <= 8)
 	if isPersona then
 		dir = dir .. "_" .. name .. ".dat"

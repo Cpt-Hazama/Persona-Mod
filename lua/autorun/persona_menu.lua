@@ -30,83 +30,246 @@ if CLIENT then
 
 	net.Receive("Persona_ShowStatsMenu",function(len,ply)
 		local pName = net.ReadString()
-		-- local pSTR = net.ReadInt(32)
-		-- local pMAG = net.ReadInt(32)
-		-- local pEND = net.ReadInt(32)
-		-- local pAGI = net.ReadInt(32)
-		-- local pLUC = net.ReadInt(32)
-		local tbl = {}
-		tbl[1] = {t="STR",val=net.ReadInt(32)}
-		tbl[2] = {t="MAG",val=net.ReadInt(32)}
-		tbl[3] = {t="END",val=net.ReadInt(32)}
-		tbl[4] = {t="AGI",val=net.ReadInt(32)}
-		tbl[5] = {t="LUC",val=net.ReadInt(32)}
+		local ply = LocalPlayer()
+	
+		sound.PlayFile("sound/cpthazama/persona_shared/velvet.mp3","noplay noblock",function(station,errCode,errStr)
+			if IsValid(station) then
+				station:EnableLooping(true)
+				station:Play()
+				station:SetVolume(0.6)
+				station:SetPlaybackRate(1)
+				ply.Persona_VelvetTheme = station
+			else
+				print("Error playing sound!",errCode,errStr)
+			end
+			return station
+		end)
 
-		local Frame = vgui.Create("DFrame")
-		Frame:SetSize(225,175)
-		Frame:SetPos(ScrW() *0.5, ScrH() *0.5)
-		Frame:SetTitle(pName .. "'s Stats")
-		Frame:SetBackgroundBlur(true)
-		Frame:SetSizable(false)
-		Frame:SetDeleteOnClose(false)
-		Frame:MakePopup()
-		Frame.OnClose = function()
+		local wMin,wMax = 1538,864
+		local window = vgui.Create("DFrame")
+		window:SetTitle(LocalPlayer():Nick() .. "'s Compendium")
+		window:SetSize(math.min(ScrW() -16,wMin),math.min(ScrH() -16,wMax))
+		window:SetSizable(true)
+		window:SetBackgroundBlur(true)
+		window:SetMinWidth(wMin)
+		window:SetMinHeight(wMax)
+		window:SetDeleteOnClose(false)
+		window:Center()
+		window:MakePopup()
+		window:SetBGColor(15,44,180,255)
+		window.OnClose = function()
 			if IsValid(ply) then
 				ply:EmitSound("cpthazama/persona4/ui_hover.wav",65)
+				if IsValid(ply.Persona_VelvetTheme) && ply.Persona_VelvetTheme:GetState() == 1 then
+					ply.Persona_VelvetTheme:Stop()
+				end
 			end
 		end
 
-		local posChange = 30
-		for _,v in pairs(tbl) do
-			local label = vgui.Create("DLabel",Frame)
-			label:SetPos(10,posChange)
-			label:SetText(v.t .. " - " .. v.val .. " / 99")
-			label:SizeToContents()
-			posChange = posChange +30
+		local mdl = window:Add("DModelPanel")
+		mdl:Dock(FILL)
+		mdl:SetFOV(36)
+		mdl:SetCamPos(vector_origin)
+		mdl:SetDirectionalLight(BOX_RIGHT,Color(255,160,80,255))
+		mdl:SetDirectionalLight(BOX_LEFT,Color(80,160,255,255))
+		mdl:SetAmbientLight(Vector(-64,-64,-64))
+		mdl:SetAnimated(true)
+		mdl.Angles = angle_zero
+		mdl:SetLookAt(Vector(-100,0,-22))
+
+		-- Persona Menu --
+		local sheet = window:Add("DPropertySheet")
+		sheet:Dock(LEFT)
+		sheet:SetSize(430,0)
+
+		local modelListPnl = window:Add("DPanel")
+		modelListPnl:DockPadding(8,8,8,8)
+
+		-- local SearchBar = modelListPnl:Add("DTextEntry")
+		-- SearchBar:Dock(TOP)
+		-- SearchBar:DockMargin(0,0,0,8)
+		-- SearchBar:SetUpdateOnType(true)
+		-- SearchBar:SetPlaceholderText("Search Compendium")
+
+		local PanelSelect = modelListPnl:Add("DPanelSelect")
+		PanelSelect:Dock(FILL)
+
+		for index,idName in SortedPairs(PXP.GetPersonaData(LocalPlayer(),4) or PERSONA_STARTERS) do
+			local name = PERSONA[idName].Name
+			local model = PERSONA[idName].Model
+			local icon = vgui.Create("SpawnIcon")
+			icon:SetModel(model)
+			icon:SetSize(64,64)
+			icon:SetTooltip(name)
+			icon.PersonaID = idName
+			icon.PersonaName = name
+			icon.PersonaModel = model
+			PanelSelect:AddPanel(icon,{persona_comp_name = idName})
 		end
+		
+		sheet:AddSheet("Persona",modelListPnl,"icon16/user.png")
+
+		-- SearchBar.OnValueChange = function(s,searched)
+			-- for id,pnl in pairs(PanelSelect:GetItems()) do
+				-- if (pnl.PersonaName:find(searched,1,true)) then
+					-- pnl:SetVisible(true)
+				-- else
+					-- pnl:SetVisible(false)
+				-- end
+			-- end
+			-- PanelSelect:InvalidateLayout()
+		-- end
+
+		local function PlayPreviewAnimation(panel,anim)
+			if (!panel or !IsValid(panel.Entity)) then return end
+
+			local seq = panel.Entity:LookupSequence(anim or "idle")
+			panel.Entity:SetCycle(0)
+			panel.Entity:ResetSequence(seq)
+		end
+
+		local currentPersona = LocalPlayer():GetInfo("persona_comp_name")
+		local modelname = PERSONA[currentPersona].Model
+		local aura = PERSONA[currentPersona].Aura
+		util.PrecacheModel(modelname)
+		mdl:SetModel(modelname)
+		mdl.LastModel = modelname
+		local dist = select(2,mdl.Entity:GetModelBounds()).z
+		mdl.Entity:SetPos(Vector(-dist *2,0,-dist))
+
+		-- ParticleEffectAttach(aura == "persona_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,mdl.Entity,mdl.Entity:LookupAttachment("origin"))
+		-- ParticleEffectAttach(aura == "persona_aura_red" && "jojo_aura_red" or "jojo_aura_blue",PATTACH_POINT_FOLLOW,mdl.Entity,mdl.Entity:LookupAttachment("origin"))
+
+		PlayPreviewAnimation(mdl)
+
+		function mdl:OnMouseReleased(key)
+			if key == MOUSE_LEFT then
+				self.Pressed = false
+			end
+		end
+
+		function mdl:OnMousePressed(key)
+			if key == MOUSE_LEFT then
+				self.PressX, self.PressY = gui.MousePos()
+				self.Pressed = true
+			end
+			if key == MOUSE_RIGHT then
+				if self.Entity:GetSequenceName(self.Entity:GetSequence()) == "idle" then
+					local seq = (self.Entity:LookupSequence("attack") != -1 && self.Entity:LookupSequence("attack")) or (self.Entity:LookupSequence("melee") != -1 && self.Entity:LookupSequence("melee")) or (self.Entity:LookupSequence("atk_cross_slash") != -1 && self.Entity:LookupSequence("atk_cross_slash"))
+					if seq then
+						local oldMdl = self.LastModel
+						self.Entity:SetCycle(0)
+						self.Entity:ResetSequence(seq)
+						timer.Simple(self.Entity:SequenceDuration(seq),function()
+							if IsValid(self) && IsValid(self.Entity) && self.LastModel == oldMdl then
+								PlayPreviewAnimation(self)
+							end
+						end)
+					end
+				end
+			end
+		end
+
+		function mdl:LayoutEntity(ent)
+			if (self.bAnimated) then
+				self:RunAnimation()
+			end
+			if (self.Pressed) then
+				local mx = gui.MousePos()
+				self.Angles = self.Angles -Angle(0,((self.PressX or mx) -mx) /2,0)
+				self.PressX, self.PressY = gui.MousePos()
+			end
+
+			ent:SetAngles(self.Angles)
+		end
+
+		-- Skill Menu --
+
+		local skillPanel = window:Add("DPanel")
+		skillPanel:DockPadding(8,8,8,8)
+		
+		local skillList = vgui.Create("DListView")
+		skillList:SetTooltip(false)
+		skillList:Dock(FILL)
+		skillList:SetMultiSelect(false)
+		local skills = PXP.GetPersonaData(LocalPlayer(),3,currentPersona)
+		if skills then
+			for _,skill in SortedPairs(skills) do
+				skillList:AddLine(skill.Name,skill.Cost,skill.UsesHP,(skill.Icon:gsub("^%l",string.upper)))
+			end
+		end
+		skillList:SortByColumn(1,false)
+		skillPanel:Add(skillList)
+
+		local skillsTab = sheet:AddSheet("Skills",skillPanel,"icon16/fire.png")
+
+		-- Add Skills Menu --
+
+		local skillPanel = window:Add("DPanel")
+		skillPanel:DockPadding(8,8,8,8)
+
+		local skill_box_list = vgui.Create("DComboBox")
+		skill_box_list:SetSize(100,30)
+		skill_box_list:Dock(TOP)
+		skill_box_list:SetValue("Select A Skill")
+		for i = 1,#PERSONA_SKILLS do
+			local skill = PERSONA_SKILLS[i]
+			local name = skill.Name
+			local cost = skill.Cost
+			local useshp = skill.UsesHP
+			local icon = skill.Icon
+			local canAdd = skill.CanObtain or true
+			if canAdd == false then return end
+			skill_box_list:AddChoice(name,{Name = name,Cost = cost,UsesHP = useshp,Icon = icon},false,"hud/persona/png/hud_" .. icon .. ".png")
+		end
+		skill_box_list.OnSelect = function(comboIndex,comboName,comboData)
+			local data = skill_box_list:GetOptionData(comboName)
+			RunConsoleCommand("persona_skill_name",data.Name)
+			RunConsoleCommand("persona_skill_cost",data.Cost)
+			RunConsoleCommand("persona_skill_useshp",data.UsesHP == true && 1 or 0)
+			RunConsoleCommand("persona_skill_icon",data.Icon)
+			-- skillPanel.PName:SetText("Skill Name: " .. data.Name)
+			skillPanel.PCost:SetText("Cost: " .. tostring(data.Cost))
+			skillPanel.PHP:SetText(data.UsesHP == 1 && "Uses HP: Yes" or "Uses HP: No")
+			skillPanel.PIcon:SetImage("hud/persona/png/hud_" .. data.Icon .. ".png")
+			surface.PlaySound("cpthazama/persona4/ui_hover.wav")
+			-- surface.PlaySound("cpthazama/persona4/ui_newskill.wav")
+		end
+		skillPanel:Add(skill_box_list)
+
+		skillPanel.PIcon = vgui.Create("DImage",skillPanel)
+		skillPanel.PIcon:SetSize(122,80)
+		skillPanel.PIcon:Dock(TOP)
+		skillPanel.PIcon:SetImage("hud/persona/png/hud_" .. GetConVarString("persona_skill_icon") .. ".png")
+		skillPanel:Add(skillPanel.PIcon)
+
+		skillPanel.PCost = vgui.Create("DLabel")
+		skillPanel.PCost:SetText("Cost: " .. tostring(GetConVarNumber("persona_skill_cost")))
+		skillPanel.PCost:Dock(TOP)
+		skillPanel:Add(skillPanel.PCost)
+
+		skillPanel.PHP = vgui.Create("DLabel")
+		skillPanel.PHP:SetText(GetConVarNumber("persona_skill_useshp") == 1 && "Uses HP: Yes" or "Uses HP: No")
+		skillPanel.PHP:Dock(TOP)
+		skillPanel:Add(skillPanel.PHP)
+
+
+		skillPanel.PButton = vgui.Create("DButton")
+		skillPanel.PButton:SetText("Add Skill")
+		skillPanel.PButton:SetSize(100,64)
+		skillPanel.PButton:SetConsoleCommand("persona_addskill")
+		skillPanel.PButton:Dock(TOP)
+		skillPanel:Add(skillPanel.PButton)
+
+		local skillTab = sheet:AddSheet("Add Skills",skillPanel,"icon16/wand.png")
 	end)
 end
 
 local function ShowStats(ply)
-	-- if SERVER then
-		local persona = ply:GetPersona()
-		if !IsValid(persona) then
-			ply:ChatPrint("Summon your Persona first!")
-			return
-		end
-		local stats = persona.Stats
-		if stats then
-			net.Start("Persona_ShowStatsMenu")
-				net.WriteString(PERSONA[ply:GetPersonaName()].Name)
-				net.WriteInt(stats.STR,32)
-				net.WriteInt(stats.MAG,32)
-				net.WriteInt(stats.END,32)
-				net.WriteInt(stats.AGI,32)
-				net.WriteInt(stats.LUC,32)
-			net.Send(ply)
-		end
-		local stats = persona.Stats
-		ply:ChatPrint(persona.FeedName .. "'s Stats:")
-		ply:ChatPrint("STR - " .. stats.STR)
-		ply:ChatPrint("MAG - " .. stats.MAG)
-		ply:ChatPrint("END - " .. stats.END)
-		ply:ChatPrint("AGI - " .. stats.AGI)
-		ply:ChatPrint("LUC - " .. stats.LUC)
-		ply:EmitSound(Sound("cpthazama/persona4/ui_shufflebegin.wav"))
-	-- end
-	-- local persona = ply:GetPersona()
-	-- if IsValid(persona) then
-		-- local stats = persona.Stats
-		-- ply:ChatPrint(persona.FeedName .. " Stats:")
-		-- ply:ChatPrint("STR - " .. stats.STR)
-		-- ply:ChatPrint("MAG - " .. stats.MAG)
-		-- ply:ChatPrint("END - " .. stats.END)
-		-- ply:ChatPrint("AGI - " .. stats.AGI)
-		-- ply:ChatPrint("LUC - " .. stats.LUC)
-	-- else
-		-- ply:ChatPrint("Summon your Persona first!")
-	-- end
-	-- ply:EmitSound(Sound("cpthazama/persona4/ui_changepersona.wav"))
+	net.Start("Persona_ShowStatsMenu")
+		net.WriteString(PERSONA[ply:GetPersonaName()].Name)
+	net.Send(ply)
+	ply:EmitSound(Sound("cpthazama/persona4/ui_shufflebegin.wav"))
 end
 concommand.Add("persona_showstats",ShowStats)
 
@@ -223,7 +386,7 @@ if CLIENT then
 		end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)
-			Panel:AddControl("Button",{Label = "Print Persona Stats",Command = "persona_showstats"})
+			Panel:AddControl("Button",{Label = "Open Compendium",Command = "persona_showstats"})
 			Panel:AddControl("Button",{Label = "Create Legendary Persona",Command = "persona_legendary"})
 			Panel:AddControl("Label",{Text = "Persona must be LVL 99 to become Legendary!"})
 

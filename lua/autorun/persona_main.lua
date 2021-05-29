@@ -227,6 +227,8 @@ if CLIENT then
 	CConVar("persona_hud_damage","1",true,0,1)
 	CConVar("persona_hud_raidboss","0",true,0,1)
 
+	CConVar("persona_comp_name","izanagi",true)
+
 	net.Receive("persona_csound",function(len,pl)
 		local ply = net.ReadEntity()
 		local snd = net.ReadString()
