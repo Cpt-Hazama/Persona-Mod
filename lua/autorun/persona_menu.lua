@@ -2,6 +2,41 @@
 if SERVER then
 	util.AddNetworkString("Persona_ShowStatsMenu")
 	util.AddNetworkString("Persona_UpdateSkillMenu")
+
+	local function MakeLegendary(ply,cmd,args)
+		local persona = ply:GetInfo("persona_comp_name")
+		if persona == nil then return end
+		if PXP.GetLevel(ply) >= 99 && !PXP.IsLegendary(ply) && !PXP.IsVelvet(ply) then
+			-- PXP.SetLegendary(ply)
+			ply:EmitSound(Sound("cpthazama/persona4/ui_changepersona.wav"))
+			ply:ChatPrint("You must defeat your shadow-Persona to obtain its' Legendary form!")
+			local tr = util.TraceLine({
+				start = ply:EyePos(),
+				endpos = ply:EyeAngles():Forward() *350,
+				filter = ply
+			})
+
+			local shadow = ents.Create("npc_vj_per_shadow")
+			shadow:SetPos((tr.Hit && tr.HitPos +tr.HitNormal *35 +Vector(0,0,4)) or ply:GetPos() +ply:OBBCenter() +ply:GetForward() *300)
+			shadow:SetAngles(Angle(0,(shadow:GetPos() -ply:GetPos()):Angle().y,0))
+			shadow.Player = ply
+			shadow.SetPersona = persona
+			shadow:Spawn()
+			shadow:SetEnemy(ply)
+			return
+		end
+		if PXP.IsLegendary(ply) then
+			ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " is already a Legendary Persona!")
+			return
+		elseif PXP.IsVelvet(ply) then
+			ply:ChatPrint("Velvet Personas can not evolve any further!")
+			return
+		else
+			ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " must be a LVL 99 to become a Legendary Persona!")
+			return
+		end
+	end
+	concommand.Add("persona_legendary",MakeLegendary)
 end
 
 local function UpdateTable(ply)
@@ -44,6 +79,9 @@ if CLIENT then
 			end
 			return station
 		end)
+		
+		local currentPersona = LocalPlayer():GetInfo("persona_comp_name")
+		surface.PlaySound("cpthazama/persona5/misc/00017.wav")
 
 		local wMin,wMax = 1538,864
 		local window = vgui.Create("DFrame")
@@ -85,12 +123,6 @@ if CLIENT then
 		local modelListPnl = window:Add("DPanel")
 		modelListPnl:DockPadding(8,8,8,8)
 
-		-- local SearchBar = modelListPnl:Add("DTextEntry")
-		-- SearchBar:Dock(TOP)
-		-- SearchBar:DockMargin(0,0,0,8)
-		-- SearchBar:SetUpdateOnType(true)
-		-- SearchBar:SetPlaceholderText("Search Compendium")
-
 		local PanelSelect = modelListPnl:Add("DPanelSelect")
 		PanelSelect:Dock(FILL)
 
@@ -107,18 +139,60 @@ if CLIENT then
 			PanelSelect:AddPanel(icon,{persona_comp_name = idName})
 		end
 		
-		sheet:AddSheet("Persona",modelListPnl,"icon16/user.png")
+		local function UpdateStats(panel,optPersona)
+			local persona = (mdl.LastName or currentPersona)
+			if optPersona then
+				persona = optPersona
+			end
+			local stats = PXP.GetPersonaData(LocalPlayer(),7,persona)
+			local stats_lvl = PXP.GetPersonaData(LocalPlayer(),2,persona)
+			local stats_exp = PXP.GetPersonaData(LocalPlayer(),1,persona)
+			local stats_reqexp = PXP.GetPersonaData(LocalPlayer(),6,persona)
+			local stats_enh = PXP.GetPersonaData(LocalPlayer(),8,persona)
+			panel.StatsList_Last = persona
+			
+			local stats5 = panel.Stats5 or vgui.Create("RichText",panel)
+			stats5:Dock(BOTTOM)
+			stats5:SetText("LUC - " .. stats.LUC)
+			local stats4 = panel.Stats4 or vgui.Create("RichText",panel)
+			stats4:Dock(BOTTOM)
+			stats4:SetText("AGI - " .. stats.AGI)
+			local stats3 = panel.Stats3 or vgui.Create("RichText",panel)
+			stats3:Dock(BOTTOM)
+			stats3:SetText("END - " .. stats.END)
+			local stats2 = panel.Stats2 or vgui.Create("RichText",panel)
+			stats2:Dock(BOTTOM)
+			stats2:SetText("MAG - " .. stats.MAG)
+			local stats1 = panel.Stats1 or vgui.Create("RichText",panel)
+			stats1:Dock(BOTTOM)
+			stats1:SetText("STR - " .. stats.STR)
+			local enh = panel.Gap or vgui.Create("RichText",panel)
+			enh:Dock(BOTTOM)
+			enh:SetText(" ")
+			local exp = panel.EXP or vgui.Create("RichText",panel)
+			exp:Dock(BOTTOM)
+			exp:SetText("EXP - " .. stats_exp .. " / " .. stats_reqexp)
+			local level = panel.Level or vgui.Create("RichText",panel)
+			level:Dock(BOTTOM)
+			level:SetText("Level " .. stats_lvl)
+			local statsName = panel.StatsName or vgui.Create("RichText",panel)
+			statsName:Dock(BOTTOM)
+			statsName:SetText(PERSONA[persona].Name .. (stats_enh > 0 && (stats_enh == 1 && " (Legendary)") or "") .. "'s Stats")
 
-		-- SearchBar.OnValueChange = function(s,searched)
-			-- for id,pnl in pairs(PanelSelect:GetItems()) do
-				-- if (pnl.PersonaName:find(searched,1,true)) then
-					-- pnl:SetVisible(true)
-				-- else
-					-- pnl:SetVisible(false)
-				-- end
-			-- end
-			-- PanelSelect:InvalidateLayout()
-		-- end
+			panel.Stats1 = stats1
+			panel.Stats2 = stats2
+			panel.Stats3 = stats3
+			panel.Stats4 = stats4
+			panel.Stats5 = stats5
+			panel.Level = level
+			panel.EXP = exp
+			panel.Gap = enh
+			panel.StatsName = statsName
+		end
+
+		UpdateStats(modelListPnl)
+		
+		sheet:AddSheet("Persona",modelListPnl,"vj_hud/persona16.png")
 
 		local function PlayPreviewAnimation(panel,anim)
 			if (!panel or !IsValid(panel.Entity)) then return end
@@ -128,12 +202,12 @@ if CLIENT then
 			panel.Entity:ResetSequence(seq)
 		end
 
-		local currentPersona = LocalPlayer():GetInfo("persona_comp_name")
 		local modelname = PERSONA[currentPersona].Model
 		local aura = PERSONA[currentPersona].Aura
 		util.PrecacheModel(modelname)
 		mdl:SetModel(modelname)
 		mdl.LastModel = modelname
+		mdl.LastName = currentPersona
 		local dist = select(2,mdl.Entity:GetModelBounds()).z
 		mdl.Entity:SetPos(Vector(-dist *2,0,-dist))
 
@@ -170,6 +244,27 @@ if CLIENT then
 			end
 		end
 
+		function modelListPnl:Think()
+			local currentPersona = LocalPlayer():GetInfo("persona_comp_name")
+			if self.StatsList_Last && self.StatsList_Last != currentPersona then
+				UpdateStats(self,currentPersona)
+				self.StatsList_Last = currentPersona
+				surface.PlaySound("cpthazama/persona5/misc/00086.wav")
+			end
+		end
+
+		function mdl:PreDrawModel(ent)
+			local currentPersona = LocalPlayer():GetInfo("persona_comp_name")
+			local modelname = PERSONA[currentPersona].Model
+			local aura = PERSONA[currentPersona].Aura
+			util.PrecacheModel(modelname)
+			ent:SetModel(modelname)
+			ent.LastModel = modelname
+			ent.LastName = currentPersona
+			local dist = select(2,ent.Entity:GetModelBounds()).z
+			ent.Entity:SetPos(Vector(-dist *2,0,-dist))
+		end
+
 		function mdl:LayoutEntity(ent)
 			if (self.bAnimated) then
 				self:RunAnimation()
@@ -188,29 +283,70 @@ if CLIENT then
 		local skillPanel = window:Add("DPanel")
 		skillPanel:DockPadding(8,8,8,8)
 		
+		local function UpdateSkillList(panel)
+			local currentPersona = LocalPlayer():GetInfo("persona_comp_name")
+			panel.SkillList:Clear()
+			local skills = PXP.GetPersonaData(LocalPlayer(),3,currentPersona)
+			panel.SkillCount = 0
+			if skills then
+				for _,skill in SortedPairs(skills) do
+					panel.SkillList:AddLine(skill.Name,skill.Cost,skill.UsesHP && "HP" or "SP",(skill.Icon:gsub("^%l",string.upper)))
+					panel.SkillCount = panel.SkillCount +1
+				end
+			end
+			panel.SkillList:SortByColumn(1,false)
+		end
+		
 		local skillList = vgui.Create("DListView")
+		skillPanel.SkillList = skillList
 		skillList:SetTooltip(false)
 		skillList:Dock(FILL)
 		skillList:SetMultiSelect(false)
-		local skills = PXP.GetPersonaData(LocalPlayer(),3,currentPersona)
-		if skills then
-			for _,skill in SortedPairs(skills) do
-				skillList:AddLine(skill.Name,skill.Cost,skill.UsesHP,(skill.Icon:gsub("^%l",string.upper)))
-			end
-		end
-		skillList:SortByColumn(1,false)
+		skillList:AddColumn("Name",1)
+		skillList:AddColumn("Cost",2)
+		skillList:AddColumn("Cost Type",3)
+		skillList:AddColumn("Attack Type",4)
+		UpdateSkillList(skillPanel)
 		skillPanel:Add(skillList)
 
 		local skillsTab = sheet:AddSheet("Skills",skillPanel,"icon16/fire.png")
 
+		function skillPanel:Think()
+			local currentPersona = LocalPlayer():GetInfo("persona_comp_name")
+			local skills = PXP.GetPersonaData(LocalPlayer(),3,currentPersona)
+			if skills && self.SkillCount != #skills then
+				UpdateSkillList(skillPanel)
+			end
+		end
+
 		-- Add Skills Menu --
 
-		local skillPanel = window:Add("DPanel")
-		skillPanel:DockPadding(8,8,8,8)
+		skillPanel.PButton = vgui.Create("DButton")
+		skillPanel.PButton:SetText("Add Skill")
+		skillPanel.PButton:SetSize(100,64)
+		skillPanel.PButton:SetConsoleCommand("persona_addskill")
+		skillPanel.PButton:Dock(BOTTOM)
+		skillPanel:Add(skillPanel.PButton)
+
+		skillPanel.PHP = vgui.Create("DLabel")
+		skillPanel.PHP:SetText(GetConVarNumber("persona_skill_useshp") == 1 && "Cost Type: HP" or "Cost Type: SP")
+		skillPanel.PHP:Dock(BOTTOM)
+		skillPanel:Add(skillPanel.PHP)
+
+		skillPanel.PCost = vgui.Create("DLabel")
+		skillPanel.PCost:SetText("Cost: " .. tostring(GetConVarNumber("persona_skill_cost")))
+		skillPanel.PCost:Dock(BOTTOM)
+		skillPanel:Add(skillPanel.PCost)
+
+		skillPanel.PIcon = vgui.Create("DImage",skillPanel)
+		skillPanel.PIcon:SetSize(122,80)
+		skillPanel.PIcon:Dock(BOTTOM)
+		skillPanel.PIcon:SetImage("hud/persona/png/hud_" .. GetConVarString("persona_skill_icon") .. ".png")
+		skillPanel:Add(skillPanel.PIcon)
 
 		local skill_box_list = vgui.Create("DComboBox")
 		skill_box_list:SetSize(100,30)
-		skill_box_list:Dock(TOP)
+		skill_box_list:Dock(BOTTOM)
 		skill_box_list:SetValue("Select A Skill")
 		for i = 1,#PERSONA_SKILLS do
 			local skill = PERSONA_SKILLS[i]
@@ -230,38 +366,37 @@ if CLIENT then
 			RunConsoleCommand("persona_skill_icon",data.Icon)
 			-- skillPanel.PName:SetText("Skill Name: " .. data.Name)
 			skillPanel.PCost:SetText("Cost: " .. tostring(data.Cost))
-			skillPanel.PHP:SetText(data.UsesHP == 1 && "Uses HP: Yes" or "Uses HP: No")
+			skillPanel.PHP:SetText(data.UsesHP == true && "Cost Type: HP" or "Cost Type: SP")
 			skillPanel.PIcon:SetImage("hud/persona/png/hud_" .. data.Icon .. ".png")
 			surface.PlaySound("cpthazama/persona4/ui_hover.wav")
 			-- surface.PlaySound("cpthazama/persona4/ui_newskill.wav")
 		end
 		skillPanel:Add(skill_box_list)
+		skillPanel:Add(skillPanel)
 
-		skillPanel.PIcon = vgui.Create("DImage",skillPanel)
-		skillPanel.PIcon:SetSize(122,80)
-		skillPanel.PIcon:Dock(TOP)
-		skillPanel.PIcon:SetImage("hud/persona/png/hud_" .. GetConVarString("persona_skill_icon") .. ".png")
-		skillPanel:Add(skillPanel.PIcon)
+		-- Misc Menu --
 
-		skillPanel.PCost = vgui.Create("DLabel")
-		skillPanel.PCost:SetText("Cost: " .. tostring(GetConVarNumber("persona_skill_cost")))
-		skillPanel.PCost:Dock(TOP)
-		skillPanel:Add(skillPanel.PCost)
+		local miscPanel = window:Add("DPanel")
+		miscPanel:DockPadding(8,8,8,8)
 
-		skillPanel.PHP = vgui.Create("DLabel")
-		skillPanel.PHP:SetText(GetConVarNumber("persona_skill_useshp") == 1 && "Uses HP: Yes" or "Uses HP: No")
-		skillPanel.PHP:Dock(TOP)
-		skillPanel:Add(skillPanel.PHP)
+		local lText = vgui.Create("DLabel")
+		lText:SetText("Once your Persona is Level 99, you can battle your Shadow-Persona")
+		lText:Dock(TOP)
+		miscPanel:Add(lText)
 
+		local lText = vgui.Create("DLabel")
+		lText:SetText("in hopes of evolving your Persona even further!")
+		lText:Dock(TOP)
+		miscPanel:Add(lText)
 
-		skillPanel.PButton = vgui.Create("DButton")
-		skillPanel.PButton:SetText("Add Skill")
-		skillPanel.PButton:SetSize(100,64)
-		skillPanel.PButton:SetConsoleCommand("persona_addskill")
-		skillPanel.PButton:Dock(TOP)
-		skillPanel:Add(skillPanel.PButton)
-
-		local skillTab = sheet:AddSheet("Add Skills",skillPanel,"icon16/wand.png")
+		local lButton = vgui.Create("DButton")
+		lButton:SetText("Legendary Trial")
+		lButton:SetSize(100,54)
+		lButton:SetConsoleCommand("persona_legendary",LocalPlayer(),LocalPlayer():GetInfo("persona_comp_name"))
+		lButton:Dock(TOP)
+		miscPanel:Add(lButton)
+		
+		local miscTab = sheet:AddSheet("Misc.",miscPanel,"vj_icons/persona16.png")
 	end)
 end
 
@@ -273,25 +408,25 @@ local function ShowStats(ply)
 end
 concommand.Add("persona_showstats",ShowStats)
 
-local function MakeLegendary(ply)
-	if PXP.GetLevel(ply) >= 99 && !PXP.IsLegendary(ply) && !PXP.IsVelvet(ply) then
-		PXP.SetLegendary(ply)
-		ply:EmitSound(Sound("cpthazama/persona4/ui_changepersona.wav"))
-		ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " is now a Legendary Persona!")
-		return
-	end
-	if PXP.IsLegendary(ply) then
-		ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " is already a Legendary Persona!")
-		return
-	elseif PXP.IsVelvet(ply) then
-		ply:ChatPrint("Velvet Personas can not evolve any further!")
-		return
-	else
-		ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " must be a LVL 99 to become a Legendary Persona!")
-		return
-	end
-end
-concommand.Add("persona_legendary",MakeLegendary)
+-- local function MakeLegendary_Legacy(ply)
+	-- if PXP.GetLevel(ply) >= 99 && !PXP.IsLegendary(ply) && !PXP.IsVelvet(ply) then
+		-- PXP.SetLegendary(ply)
+		-- ply:EmitSound(Sound("cpthazama/persona4/ui_changepersona.wav"))
+		-- ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " is now a Legendary Persona!")
+		-- return
+	-- end
+	-- if PXP.IsLegendary(ply) then
+		-- ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " is already a Legendary Persona!")
+		-- return
+	-- elseif PXP.IsVelvet(ply) then
+		-- ply:ChatPrint("Velvet Personas can not evolve any further!")
+		-- return
+	-- else
+		-- ply:ChatPrint(PERSONA[ply:GetPersonaName()].Name .. " must be a LVL 99 to become a Legendary Persona!")
+		-- return
+	-- end
+-- end
+-- concommand.Add("persona_legendary",MakeLegendary)
 
 if CLIENT then
 	hook.Add("AddToolMenuTabs","Persona_MainMenuIcon",function()
@@ -387,8 +522,8 @@ if CLIENT then
 
 		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)
 			Panel:AddControl("Button",{Label = "Open Compendium",Command = "persona_showstats"})
-			Panel:AddControl("Button",{Label = "Create Legendary Persona",Command = "persona_legendary"})
-			Panel:AddControl("Label",{Text = "Persona must be LVL 99 to become Legendary!"})
+			-- Panel:AddControl("Button",{Label = "Create Legendary Persona",Command = "persona_legendary"})
+			-- Panel:AddControl("Label",{Text = "Persona must be LVL 99 to become Legendary!"})
 
 			local skill_box_list = vgui.Create("DComboBox")
 			skill_box_list:SetSize(100,30)

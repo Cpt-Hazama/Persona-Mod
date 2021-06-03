@@ -88,9 +88,9 @@ PXP.SetLevel = function(ply,lvl,chat)
 	-- PXP.SavePersonaData(ply)
 end
 
-PXP.GetLevel = function(ply)
+PXP.GetLevel = function(ply,name)
 	if !ply:IsPlayer() then return end
-	return PXP.GetPersonaData(ply,2)
+	return PXP.GetPersonaData(ply,2,name)
 end
 
 PXP.SetPlayerLevel = function(ply,lvl,chat)
@@ -162,10 +162,10 @@ PXP.FindRemainingPlayerXP = function(ply)
 	return PXP.GetRequiredPlayerXP(ply) -PXP.GetPlayerEXP(ply)
 end
 
-PXP.SetRequiredXP = function(ply,amount)
+PXP.SetRequiredXP = function(ply,amount,name)
 	if !ply:IsPlayer() then return end
 	ply:SetNW2Int("PXP_RequiredEXP",amount)
-	PXP.SetPersonaData(ply,6,amount)
+	PXP.SetPersonaData(ply,6,amount,name)
 	-- PXP.SavePersonaData(ply)
 end
 
@@ -194,11 +194,11 @@ PXP.GetRequiredXP = function(ply)
 	return PXP.GetLevel(ply) == 99 && 0 or PXP.GetPersonaData(ply,6)
 end
 
-PXP.CalculateRequiredXP = function(ply)
+PXP.CalculateRequiredXP = function(ply,name)
 	if !ply:IsPlayer() then return end
 	-- local formula = (75 *(PXP.GetLevel(ply) -1) +200)
-	local formula = PXP.GetLevel(ply) *1500
-	PXP.SetRequiredXP(ply,formula)
+	local formula = PXP.GetLevel(ply,name) *1500
+	PXP.SetRequiredXP(ply,formula,name)
 	return formula
 end
 
@@ -294,7 +294,7 @@ end
 
 PXP.AddToCompendium = function(ply,persona)
 	if !ply:IsPlayer() then return end
-	if ply.PXP_Compendium == nil then ply.PXP_Compendium = {} end
+	if ply.PXP_Compendium == nil then ply.PXP_Compendium = PXP.ReadCompendium(ply) end
 	if !VJ_HasValue(ply.PXP_Compendium,persona) then
 		table.insert(ply.PXP_Compendium,persona)
 		if ply:IsPlayer() then
@@ -438,10 +438,10 @@ PXP.CreateSaveData = function(ply,name)
 	PXP.SaveTable(dirPly,tblPly,true)
 end
 
-PXP.SetPersonaData = function(ply,type,val)
+PXP.SetPersonaData = function(ply,type,val,sName)
 	if !ply:IsPlayer() then return end
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
-	local name = (type >= 1 && type <= 3 or type >= 6 && type <= 8) && ply:GetPersonaName() or nil
+	local name = (type >= 1 && type <= 3 or type >= 6 && type <= 8) && (sName or ply:GetPersonaName()) or nil
 	local tbl = {
 		EXP = (type == 1 && val) or PXP.GetPersonaData(ply,1) or 0,
 		Level = (type == 2 && val) or PXP.GetPersonaData(ply,2) or 0,

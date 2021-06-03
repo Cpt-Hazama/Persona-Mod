@@ -12,6 +12,7 @@ ENT.Stats = {
 }
 ENT.VJ_NPC_Class = {"CLASS_PERSONA_ENEMY","CLASS_SHADOW"}
 
+ENT.BloodColor = "Oil"
 
 ENT.HasDeathAnimation = true
 ENT.DeathCorpseEntityClass = "UseDefaultBehavior"
@@ -46,13 +47,23 @@ ENT.Animations["range_end"] = "vjseq_taunt_cheer_base"
 function ENT:BeforeInit()
 	if !IsValid(self.Player) then
 		self.Player = VJ_PICK(player.GetAll()) or Entity(1)
+		self:SetNW2Entity("Player",self.Player)
 		print("No Player set! Picking randomly...")
 	end
 	
 	local b,b2 = self:GetCollisionBounds()[1],self:OBBMaxs().z
 	self:SetModel(self.Player:GetModel())
+	self:SetSkin(self.Player:GetSkin())
+	for i,v in SortedPairs(self.Player:GetBodyGroups()) do
+		self:SetBodygroup(i,v.num)
+	end
+	local col = self.Player:GetPlayerColor()
+	self:SetPlayerColor(Vector(col[1] *255,col[2] *255,col[3] *255))
 	self.StarterPersona = VJ_PICK(PERSONA_STARTERS)
 	self.AvailablePersonae = PXP.GetPersonaData(self.Player,4) or {self.StarterPersona}
+	if self.SetPersona then
+		self.AvailablePersonae = {self.SetPersona}
+	end
 	self.Persona = VJ_PICK(self.AvailablePersonae)
 	
 	self.Animations["idle_combat"] = VJ_SequenceToActivity(self,"pose_standing_01")
@@ -179,6 +190,36 @@ function ENT:CustomOnKilled(dmginfo,hitgroup)
 			ply:ChatPrint("You feel a power awaken inside of you...")
 			PXP.AddToCompendium(ply,self.StarterPersona)
 		end
+		if self.SetPersona then
+			local persona = self.SetPersona
+			if !IsValid(ply:GetPersona()) then
+				self:SetNW2String("PersonaName",persona)
+				ply:ConCommand("summon_persona")
+			end
+			timer.Simple(0.01,function()
+				if IsValid(ply:GetPersona()) && ply:GetPersona():GetClass() == "prop_persona_" .. persona then
+					PXP.SetLegendary(ply)
+				end
+			end)
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnDeath_AfterCorpseSpawned(dmginfo,hitgroup,corpseEnt)
+	local col = self:GetPlayerColor()
+	corpseEnt:SetPlayerColor(Vector(col[1] *255,col[2] *255,col[3] *255))
+	corpseEnt:SetRenderMode(RENDERMODE_TRANSALPHA)
+	ParticleEffectAttach("vj_per_shadow_idle",PATTACH_POINT_FOLLOW,corpseEnt,corpseEnt:LookupAttachment("origin"))
+	for i = 1,255 do
+		timer.Simple(i *0.01,function()
+			if IsValid(corpseEnt) then
+				corpseEnt:SetColor(Color(col[1] *255,col[2] *255,col[3] *255,corpseEnt:GetColor().a -1))
+				corpseEnt:SetPlayerColor(Vector(col[1] *255,col[2] *255,col[3] *255))
+				if i == 255 or corpseEnt:GetColor().a <= 0 then
+					SafeRemoveEntity(corpseEnt)
+				end
+			end
+		end)
 	end
 end
 /*-----------------------------------------------

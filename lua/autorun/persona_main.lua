@@ -373,6 +373,18 @@ function Persona_Pick(tbl)
 	return tbl[math.random(1,#tbl)]
 end
 
+local ENT = FindMetaTable("Entity")
+
+function ENT:SetPlayerColor(vec)
+	self.PlayerColor = vec
+	self:SetNW2Vector("PlayerColor",vec)
+end
+
+function ENT:GetPlayerColor()
+	local vec = self.PlayerColor or self:GetNW2Vector("PlayerColor") or Vector(1,1,1)
+	return Vector((vec.x /255),(vec.y /255),(vec.z /255))
+end
+
 local PLY = FindMetaTable("Player")
 
 function PLY:GetBattleEntity()
