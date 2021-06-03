@@ -198,8 +198,10 @@ if CLIENT then
 			if (!panel or !IsValid(panel.Entity)) then return end
 
 			local seq = panel.Entity:LookupSequence(anim or "idle")
-			panel.Entity:SetCycle(0)
-			panel.Entity:ResetSequence(seq)
+			if panel.Entity:GetCycle() >= 1 then
+				panel.Entity:SetCycle(0)
+				panel.Entity:ResetSequence(seq)
+			end
 		end
 
 		local modelname = PERSONA[currentPersona].Model
@@ -263,6 +265,8 @@ if CLIENT then
 			ent.LastName = currentPersona
 			local dist = select(2,ent.Entity:GetModelBounds()).z
 			ent.Entity:SetPos(Vector(-dist *2,0,-dist))
+			
+			PlayPreviewAnimation(self)
 		end
 
 		function mdl:LayoutEntity(ent)
@@ -522,58 +526,53 @@ if CLIENT then
 
 		spawnmenu.AddToolMenuOption("Persona","Persona","Commands","Commands","","",function(Panel)
 			Panel:AddControl("Button",{Label = "Open Compendium",Command = "persona_showstats"})
+			Panel:AddControl("Button",{Label = "Add To Party",Command = "persona_party"})
+			Panel:AddControl("Button",{Label = "Remove From Party",Command = "persona_partyremove"})
+			Panel:AddControl("Button",{Label = "Disband Party",Command = "persona_partyclear"})
+			Panel:AddControl("Label",{Text = "Must be looking at a Player to add/remove them!"})
 			-- Panel:AddControl("Button",{Label = "Create Legendary Persona",Command = "persona_legendary"})
 			-- Panel:AddControl("Label",{Text = "Persona must be LVL 99 to become Legendary!"})
 
-			local skill_box_list = vgui.Create("DComboBox")
-			skill_box_list:SetSize(100,30)
-			skill_box_list:SetValue("Select A Skill")
-			for i = 1,#PERSONA_SKILLS do
-				local skill = PERSONA_SKILLS[i]
-				local name = skill.Name
-				local cost = skill.Cost
-				local useshp = skill.UsesHP
-				local icon = skill.Icon
-				local canAdd = skill.CanObtain or true
-				if canAdd == false then return end
-				skill_box_list:AddChoice(name,{Name = name,Cost = cost,UsesHP = useshp,Icon = icon},false,"hud/persona/png/hud_" .. icon .. ".png")
-			end
-			skill_box_list.OnSelect = function(comboIndex,comboName,comboData)
-				local data = skill_box_list:GetOptionData(comboName)
-				RunConsoleCommand("persona_skill_name",data.Name)
-				RunConsoleCommand("persona_skill_cost",data.Cost)
-				RunConsoleCommand("persona_skill_useshp",data.UsesHP == true && 1 or 0)
-				RunConsoleCommand("persona_skill_icon",data.Icon)
-				-- Panel.PName:SetText("Skill Name: " .. data.Name)
-				Panel.PCost:SetText("Cost: " .. tostring(data.Cost))
-				Panel.PHP:SetText(data.UsesHP == 1 && "Uses HP: Yes" or "Uses HP: No")
-				Panel.PIcon:SetImage("hud/persona/png/hud_" .. data.Icon .. ".png")
-				surface.PlaySound("cpthazama/persona4/ui_hover.wav")
-				-- surface.PlaySound("cpthazama/persona4/ui_newskill.wav")
-			end
-			Panel:AddPanel(skill_box_list)
+			-- local skill_box_list = vgui.Create("DComboBox")
+			-- skill_box_list:SetSize(100,30)
+			-- skill_box_list:SetValue("Select A Skill")
+			-- for i = 1,#PERSONA_SKILLS do
+				-- local skill = PERSONA_SKILLS[i]
+				-- local name = skill.Name
+				-- local cost = skill.Cost
+				-- local useshp = skill.UsesHP
+				-- local icon = skill.Icon
+				-- local canAdd = skill.CanObtain or true
+				-- if canAdd == false then return end
+				-- skill_box_list:AddChoice(name,{Name = name,Cost = cost,UsesHP = useshp,Icon = icon},false,"hud/persona/png/hud_" .. icon .. ".png")
+			-- end
+			-- skill_box_list.OnSelect = function(comboIndex,comboName,comboData)
+				-- local data = skill_box_list:GetOptionData(comboName)
+				-- RunConsoleCommand("persona_skill_name",data.Name)
+				-- RunConsoleCommand("persona_skill_cost",data.Cost)
+				-- RunConsoleCommand("persona_skill_useshp",data.UsesHP == true && 1 or 0)
+				-- RunConsoleCommand("persona_skill_icon",data.Icon)
+				-- Panel.PCost:SetText("Cost: " .. tostring(data.Cost))
+				-- Panel.PHP:SetText(data.UsesHP == 1 && "Uses HP: Yes" or "Uses HP: No")
+				-- Panel.PIcon:SetImage("hud/persona/png/hud_" .. data.Icon .. ".png")
+				-- surface.PlaySound("cpthazama/persona4/ui_hover.wav")
+			-- end
+			-- Panel:AddPanel(skill_box_list)
 
-			-- local text = vgui.Create("DLabel")
-			-- text:SetText("Current Selected Skill")
+			-- Panel.PIcon = vgui.Create("DImage",Panel)
+			-- Panel.PIcon:SetSize(122,41)
+			-- Panel.PIcon:SetImage("hud/persona/png/hud_" .. GetConVarString("persona_skill_icon") .. ".png")
+			-- Panel:AddPanel(Panel.PIcon)
 
-			Panel.PIcon = vgui.Create("DImage",Panel)
-			Panel.PIcon:SetSize(122,41)
-			Panel.PIcon:SetImage("hud/persona/png/hud_" .. GetConVarString("persona_skill_icon") .. ".png")
-			Panel:AddPanel(Panel.PIcon)
+			-- Panel.PCost = vgui.Create("DLabel")
+			-- Panel.PCost:SetText("Cost: " .. tostring(GetConVarNumber("persona_skill_cost")))
+			-- Panel:AddPanel(Panel.PCost)
 
-			-- Panel.PName = vgui.Create("DLabel")
-			-- Panel.PName:SetText("Skill Name: " .. GetConVarString("persona_skill_name"))
-			-- Panel:AddPanel(Panel.PName)
+			-- Panel.PHP = vgui.Create("DLabel")
+			-- Panel.PHP:SetText(GetConVarNumber("persona_skill_useshp") == 1 && "Uses HP: Yes" or "Uses HP: No")
+			-- Panel:AddPanel(Panel.PHP)
 
-			Panel.PCost = vgui.Create("DLabel")
-			Panel.PCost:SetText("Cost: " .. tostring(GetConVarNumber("persona_skill_cost")))
-			Panel:AddPanel(Panel.PCost)
-
-			Panel.PHP = vgui.Create("DLabel")
-			Panel.PHP:SetText(GetConVarNumber("persona_skill_useshp") == 1 && "Uses HP: Yes" or "Uses HP: No")
-			Panel:AddPanel(Panel.PHP)
-
-			Panel:AddControl("Button",{Label = "Add Skill",Command = "persona_addskill"})
+			-- Panel:AddControl("Button",{Label = "Add Skill",Command = "persona_addskill"})
 		end,{})
 
 		-- spawnmenu.AddToolMenuOption("Persona","Persona","Skill Select","Skill Select","","",function(Panel)
@@ -601,12 +600,12 @@ if CLIENT then
 			-- Panel:AddPanel(Panel.SkillList)
 		-- end,{})
 
-		spawnmenu.AddToolMenuOption("Persona","Party","Set-Up","Set-Up","","",function(Panel)
-			Panel:AddControl("Button",{Label = "Add To Party",Command = "persona_party"})
-			Panel:AddControl("Button",{Label = "Remove From Party",Command = "persona_partyremove"})
-			Panel:AddControl("Button",{Label = "Disband Party",Command = "persona_partyclear"})
-			Panel:AddControl("Label",{Text = "Must be looking at a Player to add/remove them!"})
-		end,{})
+		-- spawnmenu.AddToolMenuOption("Persona","Party","Set-Up","Set-Up","","",function(Panel)
+			-- Panel:AddControl("Button",{Label = "Add To Party",Command = "persona_party"})
+			-- Panel:AddControl("Button",{Label = "Remove From Party",Command = "persona_partyremove"})
+			-- Panel:AddControl("Button",{Label = "Disband Party",Command = "persona_partyclear"})
+			-- Panel:AddControl("Label",{Text = "Must be looking at a Player to add/remove them!"})
+		-- end,{})
 
 		spawnmenu.AddToolMenuOption("Persona","Admin Settings","Cheats","Cheats","","",function(Panel)
 			Panel:AddControl("TextBox",{Label = "Player Level",Command = "persona_i_ply_setlevel",WaitForEnter = "1"})
@@ -642,6 +641,7 @@ if CLIENT then
 end
 
 local function persona_addskill(ply)
+	local persona = ply:GetInfo("persona_comp_name")
 	if ply:IsAdmin() or ply:IsSuperAdmin() then
 		local Data = {}
 		Data.Name = GetConVarString("persona_skill_name") or "BLANK"
@@ -671,6 +671,7 @@ local function persona_addskill(ply)
 			if IsValid(skill) then
 				skill:SetPos(ply:GetPos() +Vector(0,0,10))
 				skill:SetSpawner(ply)
+				skill:SetPersona(persona)
 				skill:Spawn()
 				skill.SkillData = {Name = Data.Name, Cost = Data.Cost, UsesHP = Data.UsesHP, Icon = Data.Icon}
 			end

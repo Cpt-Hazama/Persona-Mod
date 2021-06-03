@@ -35,6 +35,14 @@ function ENT:GetSpawner()
 	return self.Spawner
 end
 
+function ENT:SetPersona(ply)
+	self.Persona = ply
+end
+
+function ENT:GetPersona()
+	return self.Persona
+end
+
 function ENT:Initialize()
 	self:SetModel("models/props_lab/jar01a.mdl")
 	self:PhysicsInit(SOLID_VPHYSICS)
@@ -46,33 +54,28 @@ function ENT:Initialize()
 		local ply = self:GetSpawner() or self:GetCreator()
 		if IsValid(ply) then
 			self:SetPos(ply:GetPos() +Vector(0,0,10))
-			if !IsValid(ply:GetPersona()) then
-				local skills = PXP.GetPersonaData(ply,3)
-				if skills == nil then
-					ply:PrintMessage(HUD_PRINTTALK,"Summon your Persona first!")
-					SafeRemoveEntity(self)
-					return
-				end
-				local data = self.SkillData
-				local proceed = true
-				for _,v in pairs(skills) do
-					if v.Name == data.Name then
-						proceed = false
-						break
-					end
-				end
-				if !proceed then
-					ply:ChatPrint("Your Persona already knows " .. data.Name .. "!")
-					SafeRemoveEntity(self)
-					return
-				end
-				table.insert(skills,data)
-				PXP.SetPersonaData(ply,3,skills)
-				ply:ChatPrint("Obtained a new skill, " .. data.Name .. "!")
+			local skills = PXP.GetPersonaData(ply,3,self:GetPersona())
+			if skills == nil then
+				ply:PrintMessage(HUD_PRINTTALK,"Summon your Persona first!")
 				SafeRemoveEntity(self)
 				return
 			end
-			ply:GetPersona():AddItemSkill(self.SkillData)
+			local data = self.SkillData
+			local proceed = true
+			for _,v in pairs(skills) do
+				if v.Name == data.Name then
+					proceed = false
+					break
+				end
+			end
+			if !proceed then
+				ply:ChatPrint("Your Persona already knows " .. data.Name .. "!")
+				SafeRemoveEntity(self)
+				return
+			end
+			table.insert(skills,data)
+			PXP.SetPersonaData(ply,3,skills,self:GetPersona())
+			ply:ChatPrint("Obtained a new skill, " .. data.Name .. "!")
 			SafeRemoveEntity(self)
 		end
 	end)
