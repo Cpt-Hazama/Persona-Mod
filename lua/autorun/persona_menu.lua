@@ -2,6 +2,16 @@
 if SERVER then
 	util.AddNetworkString("Persona_ShowStatsMenu")
 	util.AddNetworkString("Persona_UpdateSkillMenu")
+	util.AddNetworkString("PersonaMod_UpdateSVPersona")
+
+	net.Receive("PersonaMod_UpdateSVPersona",function(len,pl)
+		local ply = net.ReadEntity()
+		local persona = net.ReadString()
+		
+		if ply == pl then
+			ply:SetPersona(persona)
+		end
+	end)
 
 	local function MakeLegendary(ply,cmd,args)
 		local persona = ply:GetInfo("persona_comp_name")
@@ -251,6 +261,10 @@ if CLIENT then
 			if self.StatsList_Last && self.StatsList_Last != currentPersona then
 				UpdateStats(self,currentPersona)
 				self.StatsList_Last = currentPersona
+				net.Start("PersonaMod_UpdateSVPersona")
+					net.WriteEntity(LocalPlayer())
+					net.WriteString(currentPersona)
+				net.SendToServer()
 				surface.PlaySound("cpthazama/persona5/misc/00086.wav")
 			end
 		end

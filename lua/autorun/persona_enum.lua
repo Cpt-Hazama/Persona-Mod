@@ -200,7 +200,6 @@ P_ADDSKILL({Name = "Makouga",Cost = 16,UsesHP = false,Icon = "bless"})
 P_ADDSKILL({Name = "Makougaon",Cost = 22,UsesHP = false,Icon = "bless"})
 P_ADDSKILL({Name = "Divine Judgement",Cost = 48,UsesHP = false,Icon = "bless"})
 P_ADDSKILL({Name = "Mahamaon",Cost = 34,UsesHP = false,Icon = "bless"})
--- P_ADDSKILL({Name = "Shining Arrows",Cost = 22,UsesHP = false,Icon = "bless"})
 
 P_ADDSKILL({Name = "Hama",Cost = 8,UsesHP = false,Icon = "bless"})
 P_ADDSKILL({Name = "Hamaon",Cost = 15,UsesHP = false,Icon = "bless"})
