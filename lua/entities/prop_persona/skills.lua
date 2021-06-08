@@ -4422,7 +4422,7 @@ function ENT:NuclearCrush(ply,persona)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Charge(ply,persona)
-	if self.User:GetSP() >= self.CurrentCardCost /*&& CurTime() > ply.Persona_ChargedT*/ && self:GetTask() == "TASK_IDLE" then
+	if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
 		self:SetTask("TASK_PLAY_ANIMATION")
 		self:TakeSP(self.CurrentCardCost)
 		local t = self:PlaySet("Charge","range_start",1)

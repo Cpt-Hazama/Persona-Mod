@@ -1,3 +1,6 @@
+	--// Skills \\--
+PERSONA_SKILLS = {}
+
 	//-- Functions --\\
 function P_ADDSKILL(data)
 	local canAdd = true
@@ -11,7 +14,7 @@ function P_ADDSKILL(data)
 end
 
 function P_GETSKILL(name)
-	local data = {Name = "N/A", Cost = 0, UsesHP = false, Icon = "unknown", CanObtain = true}
+	local data = {Name = "N/A", Cost = 0, UsesHP = false, Icon = "unknown", CanObtain = true, Code = nil}
 	for _,v in pairs(PERSONA_SKILLS) do
 		if v.Name == name then
 			data = v
@@ -108,9 +111,6 @@ COST_P_LIFE_DRAIN = 3
 COST_P_VORPAL_BLADE = 23
 COST_P_DIARAMA = 6
 COST_P_HASSOUTOBI = 25
-
-	--// Skills \\--
-PERSONA_SKILLS = {}
 
 	-- Physical --
 P_ADDSKILL({Name = "Cross Slash",Cost = 20,UsesHP = true,Icon = "phys"})
@@ -234,6 +234,29 @@ P_ADDSKILL({Name = "Salvation",Cost = 48,UsesHP = false,Icon = "heal"})
 P_ADDSKILL({Name = "Cadenza",Cost = 24,UsesHP = false,Icon = "heal"})
 
 	-- Support/Passive --
+-- P_ADDSKILL({Name = "Boots With The Fur",Cost = 1,UsesHP = true,Icon = "phys",Code = function(ply,self)
+	-- self:DoDefaultAnimation(1,"Boots With The Fur",function(self) print("meleedmg") end,{A=0,B=0.8})
+-- end})
+-- P_ADDSKILL({Name = "Apple Bottom Jeans",Cost = 1,UsesHP = false,Icon = "passive",Code = function(ply,self)
+	-- self:DoDefaultAnimation(2,"Apple Bottom Jeans",{
+		-- ["range_start"] = function(self)
+			-- print("1!")
+		-- end,
+		-- ["range_start_idle"] = function(self)
+			-- print("2!")
+		-- end,
+		-- ["range"] = function(self)
+			-- print("3!")
+			-- print("I AM DOING STUFF")
+		-- end,
+		-- ["range_idle"] = function(self)
+			-- print("4!")
+		-- end,
+		-- ["range_end"] = function(self)
+			-- print("5!")
+		-- end,
+	-- })
+-- end})
 P_ADDSKILL({Name = "Charge",Cost = 15,UsesHP = false,Icon = "passive"})
 P_ADDSKILL({Name = "Concentrate",Cost = 15,UsesHP = false,Icon = "passive"})
 P_ADDSKILL({Name = "Debilitate",Cost = 30,UsesHP = false,Icon = "passive"})

@@ -21,6 +21,93 @@ if SERVER then
 	util.AddNetworkString("Persona_InstaKill")
 	util.AddNetworkString("Persona_UpdateCards")
 	util.AddNetworkString("Persona_Elements")
+	
+	/*
+	self:DoDefaultAnimation(1,"Cleave",function(self) print("meleedmg") end,{A=0,B=0.8})
+	self:DoDefaultAnimation(2,"Charge",{
+		["range_start"] = function(self)
+			// Code here
+		end,
+		["range_start_idle"] = function(self)
+			// Code here
+		end,
+		["range"] = function(self)
+			// Code here
+		end,
+		["range_idle"] = function(self)
+			// Code here
+		end,
+		["range_end"] = function(self)
+			// Code here
+		end,
+	})
+	*/
+	function ENT:DoDefaultAnimation(type,skill,tableCode,defTable)
+		if type == 1 then
+			if self.User:Health() > self.User:GetMaxHealth() *self:GetMeleeCost() && self:GetTask() == "TASK_IDLE" then
+				def1 = defTable.A or 0
+				def2 = defTable.B or 0.8
+				self:SetTask("TASK_ATTACK")
+				self:TakeHP(self.User:GetMaxHealth() *self:GetMeleeCost())
+				self:SetAngles(self.User:GetAngles())
+				local t = self:PlaySet(skill,"melee",1)
+				timer.Simple((self.StartMeleeDamageCode or def1),function()
+					if IsValid(self) then
+						if math.random(1,100) <= self.Stats.LUC && math.random(1,2) == 1 then self:DoCritical(2) end
+						timer.Simple((self.FirstMeleeDamageTime or def2),function()
+							if IsValid(self) then
+								if tableCode then
+									tableCode(self)
+								end
+							end
+						end)
+					end
+				end)
+				timer.Simple(t,function()
+					if IsValid(self) then
+						self:DoIdle()
+					end
+				end)
+			end
+		else
+			if self.User:GetSP() >= self.CurrentCardCost && self:GetTask() == "TASK_IDLE" then
+				self:TakeSP(self.CurrentCardCost)
+				self:SetTask("TASK_PLAY_ANIMATION")
+				local t = self:PlaySet(skill,"range_start",1)
+				if tableCode["range_start"] then tableCode["range_start"](self) end
+				timer.Simple(t,function()
+					if IsValid(self) then
+						t = self:PlaySet(skill,"range_start_idle",1,1)
+						if tableCode["range_start_idle"] then tableCode["range_start_idle"](self) end
+						timer.Simple(t,function()
+							if IsValid(self) then
+								t = self:PlaySet(skill,"range",1)
+								if tableCode["range"] then tableCode["range"](self) end
+								timer.Simple(t,function()
+									if IsValid(self) then
+										t = self:PlaySet(skill,"range_idle",1,1)
+										if tableCode["range_idle"] then tableCode["range_idle"](self) end
+										timer.Simple(t,function()
+											if IsValid(self) then
+												t = self:PlaySet(skill,"range_end",1)
+												if tableCode["range_end"] then tableCode["range_end"](self) end
+												timer.Simple(t,function()
+													if IsValid(self) then
+														self:SetTask("TASK_IDLE")
+														self:DoIdle()
+													end
+												end)
+											end
+										end)
+									end
+								end)
+							end
+						end)
+					end
+				end)
+			end
+		end
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 -- if CLIENT then

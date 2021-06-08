@@ -459,6 +459,11 @@ function ENT:DoMeleeAttack(ply,persona,melee,rmb)
 	local isTurn = self:IsMyTurn()
 	if !isTurn then return end
 	self:SetNW2String("LastCard",melee)
+	local skillData = P_GETSKILL(melee)
+	if skillData && skillData.Code then
+		skillData.Code(ply,self)
+		return
+	end
 	if melee == "Heaven's Blade" then
 		self:HeavensBlade(ply,persona)
 		return
@@ -552,6 +557,18 @@ function ENT:DoSpecialAttack(ply,persona,melee,rmb)
 	if !isTurn then return end
 	local card = self:GetCard()
 	self:SetNW2String("LastCard",card)
+	local skillData = P_GETSKILL(card)
+	if skillData && skillData.Code then
+		if skillData.UsesHP then
+			self.CurrentMeleeSkill = card
+			if ply:IsNPC() then
+				self:DoMeleeAttack(ply,persona,melee,rmb)
+			end
+			return
+		end
+		skillData.Code(ply,self)
+		return
+	end
 	if card == "Myriad Truths" then
 		self:MyriadTruths(ply,persona)
 		return
