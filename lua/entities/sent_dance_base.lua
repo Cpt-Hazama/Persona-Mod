@@ -1503,6 +1503,7 @@ if (CLIENT) then
 	end
 	
 	function ENT:OnCreatedAudioStream(audio,tag)
+		local ply = LocalPlayer()
 		if tag == "Preview" then
 			ply.VJ_Persona_DancePreview_Theme_Audio = audio
 		end
