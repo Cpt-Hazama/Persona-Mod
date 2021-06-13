@@ -1259,7 +1259,7 @@ if (CLIENT) then
 		-- if !IsValid(ply.VJ_Persona_DancePreview_Theme_Audio) or IsValid(ply.VJ_Persona_DancePreview_Theme_Audio) && me:IsAudioPlaying(ply.VJ_Persona_DancePreview_Theme_Audio) == false then
 			-- if IsValid(ply.VJ_Persona_DancePreview_Theme_Audio) then print("STOPPED SOUND") return end
 			-- local snd = me.PreviewThemes && VJ_PICK(me.PreviewThemes) or "cpthazama/persona3_dance/music/preview.wav"
-			-- me:CreateAudioStream("Preview",snd,true,true)
+			-- me:CreateAudioStream(ply,"Preview",snd,true,true)
 		-- end
 		if ply.VJ_Persona_DancePreview_Theme == nil or ply.VJ_Persona_DancePreview_Theme && !ply.VJ_Persona_DancePreview_Theme:IsPlaying() then
 			local snd = me.PreviewThemes && VJ_PICK(me.PreviewThemes) or "cpthazama/persona3_dance/music/preview.wav"
@@ -1290,7 +1290,7 @@ if (CLIENT) then
 		me.DanceIndex = (me.DanceIndex or 0) +1
 		if !me.ApplyNotes then ply:ChatPrint("A weird problem occured...respawn the Dancer and it will be fixed"); SafeRemoveEntity(me) return end
 		me.LastDanceSequence = seq
-		me:CreateAudioStream("Song",dir,false,false)
+		me:CreateAudioStream(ply,"Song",dir,false,false)
 		local hasSongLengthSet = (seq && me.SongLength && me.SongLength[seq]) or false
 		local setLength = (hasSongLengthSet && me.SongLength[seq]) or length
 		me.Persona_NextNoteT = CurTime() +3
@@ -1502,7 +1502,7 @@ if (CLIENT) then
 		end
 	end
 	
-	function ENT:OnCreatedAudioStream(audio,tag)
+	function ENT:OnCreatedAudioStream(audio,tag,ply)
 		if tag == "Preview" then
 			ply.VJ_Persona_DancePreview_Theme_Audio = audio
 		end
@@ -1517,15 +1517,15 @@ if (CLIENT) then
 		end
 	end
 	
-	function ENT:CreateAudioStream(tag,snd,play,loop,vol,pit)
+	function ENT:CreateAudioStream(ply,tag,snd,play,loop,vol,pit)
 		sound.PlayFile("sound/" .. snd,"noplay noblock",function(station,errCode,errStr)
 			if IsValid(station) then
 				station:EnableLooping(loop)
 				if play then station:Play() end
 				station:SetVolume(vol or GetConVarNumber("vj_persona_dancevol") *0.01)
 				station:SetPlaybackRate(pit or GetConVarNumber("host_timescale"))
-				self:OnCreatedAudioStream(station,tag)
-				if self.CustomOnCreatedAudioStream then self:CustomOnCreatedAudioStream(station,tag) end
+				self:OnCreatedAudioStream(station,tag,ply)
+				if self.CustomOnCreatedAudioStream then self:CustomOnCreatedAudioStream(station,tag,ply) end
 			else
 				print("Error playing sound!",errCode,errStr)
 			end

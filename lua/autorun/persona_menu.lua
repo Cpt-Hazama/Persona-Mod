@@ -220,6 +220,7 @@ if CLIENT then
 		mdl:SetModel(modelname)
 		mdl.LastModel = modelname
 		mdl.LastName = currentPersona
+		mdl.LastAura = aura
 		local dist = select(2,mdl.Entity:GetModelBounds()).z
 		mdl.Entity:SetPos(Vector(-dist *2,0,-dist))
 
@@ -277,10 +278,68 @@ if CLIENT then
 			ent:SetModel(modelname)
 			ent.LastModel = modelname
 			ent.LastName = currentPersona
+			ent.LastAura = aura
 			local dist = select(2,ent.Entity:GetModelBounds()).z
 			ent.Entity:SetPos(Vector(-dist *2,0,-dist))
 			
 			PlayPreviewAnimation(self)
+		end
+
+		function mdl:Paint()
+			if (!IsValid(self.Entity)) then return end
+			local x,y = self:LocalToScreen(0,0)
+			self:LayoutEntity(self.Entity)
+
+			if !IsValid(self.Room) then
+				self.Room = ClientsideModel("models/cpthazama/persona5/maps/velvetroom_battle.mdl",RENDER_GROUP_OPAQUE_ENTITY)
+				self.Room:SetPos(self.Entity:GetPos())
+				self.Room:SetModelScale(2)
+				self.Room:SetParent(self.Entity)
+				self.Room:SetNoDraw(true)
+				local index = "Persona_CSRemove_" .. self.Entity:EntIndex()
+				hook.Add("Think",index,function()
+					if !IsValid(self.Entity) then
+						self.Room:StopParticles()
+						SafeRemoveEntity(self.Room)
+						hook.Remove("Think",index)
+					end
+				end)
+			end
+
+			local ang = self.aLookAngle
+			if (!ang) then
+				ang = (self.vLookatPos -self.vCamPos):Angle()
+			end
+			local w,h = self:GetSize()
+			cam.Start3D(self.vCamPos,ang,self.fFOV,x,y,w,h,5,4096)
+			cam.IgnoreZ(true)
+			render.SuppressEngineLighting(true)
+			render.SetLightingOrigin(self.Entity:GetPos())
+			render.ResetModelLighting(self.colAmbientLight.r /255,self.colAmbientLight.g /255,self.colAmbientLight.b /255)
+			render.SetColorModulation(self.colColor.r /255,self.colColor.g /255,self.colColor.b /255)
+			render.SetBlend(self.colColor.a /255)
+			for i = 0,6 do
+				local col = self.DirectionalLight[i]
+				if (col) then
+					render.SetModelLighting(i,col.r /255,col.g /255,col.b /255)
+				end
+			end
+			if IsValid(self.Room) then
+				self.Room:DrawModel()
+				-- local aura = self.LastAura
+				-- if self.Room.LastAura != aura then
+					-- self.Room.LastAura = aura
+					-- self.Room:StopParticles()
+					-- ParticleEffectAttach(aura == "persona_aura_red" && "vj_per_idle_chains_evil" or "vj_per_idle_chains",PATTACH_POINT_FOLLOW,self.Entity,self.Entity:LookupAttachment("origin"))
+					-- ParticleEffectAttach(aura == "persona_aura_red" && "jojo_aura_red" or "jojo_aura_blue",PATTACH_POINT_FOLLOW,self.Entity,self.Entity:LookupAttachment("origin"))
+				-- end
+			end
+			self:DrawModel()
+			self.Entity:DrawModel()
+			render.SuppressEngineLighting(false)
+			cam.IgnoreZ(false)
+			cam.End3D()
+			self.LastPaint = RealTime()
 		end
 
 		function mdl:LayoutEntity(ent)
