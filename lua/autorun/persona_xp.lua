@@ -591,17 +591,17 @@ end
 PXP.SaveTable = function(dir,table,erase) -- New Function
 	table = P_LZMA(table,true)
 	if erase then
-		file.Write(dir,util.TableToJSON(table,true))
+		file.Write(dir,table)
 		return
 	end
-	file.Append(dir,util.TableToJSON(table,true))
+	file.Append(dir,table)
 end
 
 PXP.ReadTable = function(sFile) -- New Function
 	local data = file.Read(sFile,"DATA")
 	if data == nil then return end
-	local json = util.JSONToTable(data)
-	return P_LZMA(json)
+	local decompressed = P_LZMA(data)
+	return (decompressed != nil && util.JSONToTable(decompressed)) or util.JSONToTable(data)
 end
 
 PXP.ReadDataTable = function(dir) -- Obsolete

@@ -34,6 +34,27 @@ if CLIENT then
 	end)
 end
 
+-- local tbl = {
+	-- PlayerLevel = 99,
+	-- PreviousPersona = "loki",
+	-- Compendium = {
+		-- "izanagi",
+		-- "tsukiyomi",
+		-- "yoshitsune",
+		-- "loki",	
+	-- },
+	-- PlayerEXP = 136600742,
+	-- PersonaPoints = 33,
+	-- Skills = {
+		-- {Name="Peepee",Cost=8,UsesHP=true,Icon="phys"},
+		-- {Name="Peepee34556",Cost=345,UsesHP=false,Icon="ice"},
+	-- },
+-- }
+-- PrintTable(tbl)
+-- local compressed = pC(util.TableToJSON(tbl))
+-- local decompressed = util.JSONToTable(pD(compressed))
+-- PrintTable(decompressed)
+
 function P_SaveTableData(filename,tbl)
 	local dir = "persona/temp_data/"
 	file.CreateDir(dir)
@@ -75,7 +96,7 @@ function P_SaveHighScoreData(tbl,song,ply)
 	song = string.lower(song)
 	local dir = "persona/dance/"
 	file.CreateDir(dir)
-	file.Write(dir .. id .. "_" .. song .. ".dat",util.TableToJSON({Song = name,Player = ply:Nick(),Scores = tbl},true))
+	P_WriteDat(dir .. id .. "_" .. song .. ".dat",{Song = name,Player = ply:Nick(),Scores = tbl},true)
 end
 
 function P_GetHighScoreData(song,ply) -- local highscore = P_GetHighScoreData("Break Out Of -Remix-",ply)[tostring(self.Difficulty)]
@@ -83,7 +104,7 @@ function P_GetHighScoreData(song,ply) -- local highscore = P_GetHighScoreData("B
 	local name = song
 	song = string.lower(song)
 	local dir = "persona/dance/" .. id .. "_" .. song .. ".dat"
-	local data = file.Read(dir,"DATA")
+	local data = P_ReadDat(dir)
 	if data == nil then
 		MsgN("Could not load dance high-score data file! " .. dir)
 		P_SaveHighScoreData({["1"] = 0,["2"] = 0,["3"] = 0,["4"] = 0,["5"] = 0},name,ply)
@@ -91,8 +112,8 @@ function P_GetHighScoreData(song,ply) -- local highscore = P_GetHighScoreData("B
 		return P_GetHighScoreData(name,ply)
 		-- return {["1"] = 0,["2"] = 0,["3"] = 0,["4"] = 0,["5"] = 0}
 	end
-	local json = util.JSONToTable(data)
-	return json.Scores
+	-- local json = util.JSONToTable(data)
+	return data.Scores
 end
 
 function P_GetFFTTableData(filename)
@@ -133,39 +154,35 @@ function P_GetAverageFFTData(filename,reTblID)
 	return r
 end
 
+function P_WriteDat(fileName,dat,delete)
+	dat = P_LZMA(dat,true)
+	if delete then
+		file.Write(fileName,dat)
+		return
+	end
+	file.Append(fileName,dat)
+end
+
+function P_ReadDat(fileName)
+	local data = file.Read(fileName,"DATA")
+	if data == nil then return end
+	local decompressed = P_LZMA(data)
+	return (decompressed != nil && util.JSONToTable(decompressed)) or util.JSONToTable(data)
+end
+
 function P_LZMA(dat,c)
-	if dat then
-		return dat -- Remove me
-	end
 	if c then
-		if type(dat) == "boolean" then return dat end -- Backwards compatibility for old data(?)
-		if type(dat) == "table" then
-			local nDat = {}
-			for _,d in SortedPairs(data) do
-				if type(d) == "table" then
-					d = P_LZMA(d,true)
-				end
-				table.insert(nDat,compress(d) or d)
-			end
-			return nDat
-		end
-		return compress(dat) or dat
+		local cDat = pC(util.TableToJSON(dat,true))
+		return cDat
 	end
-	if type(dat) == "table" then
-		local nDat = {}
-		for n,d in SortedPairs(dat) do
-			if type(d) == "table" then
-				d = P_LZMA(d)
-			end
-			table.insert(nDat,decompress(d) or d)
-		end
-		PrintTable(nDat)
-		if #nDat <= 1 then
-			return tostring(nDat)
-		end
-		return nDat
-	end
-	return decompress(dat) or dat
+	local dDat = pD(dat)
+	-- print("-------------Input Data-------------")
+	-- print(type(dat))
+	-- print(dat)
+	-- print("-------------Output Data-------------")
+	-- print(type(dDat))
+	-- print(dDat)
+	return dDat
 end
 
 function PGM_T()
