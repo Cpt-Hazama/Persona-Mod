@@ -1,5 +1,26 @@
 PXP = {}
 
+PXP.SetPoints = function(ply,a)
+	if !ply:IsPlayer() then return end
+	local oldData = PXP.GetPoints(ply)
+	PXP.SetPersonaData(ply,11,a)
+end
+
+PXP.GivePoints = function(ply,a)
+	if !ply:IsPlayer() then return end
+	local oldData = PXP.GetPoints(ply)
+	if ply:IsPlayer() then
+		ply:ChatPrint("You obtained " .. a .. " Persona Points! You now have " .. oldData +a .. " Persona Points!")
+		ply:EmitSound("cpthazama/persona4/ui_skillup.wav")
+	end
+	PXP.SetPoints(ply,oldData +a)
+end
+
+PXP.GetPoints = function(ply)
+	if !ply:IsPlayer() then return end
+	return PXP.GetPersonaData(ply,11)
+end
+
 PXP.SetEXP = function(ply,xp)
 	if !ply:IsPlayer() then return end
 	local oldXP = PXP.GetEXP(ply)
@@ -410,7 +431,7 @@ PXP.GetPersonaData = function(ply,type,sName)
 	if isPersona then
 		return type == 1 && pData.EXP or type == 2 && pData.Level or type == 3 && pData.Skills or type == 6 && pData.ReqEXP or type == 7 && pData.Stats or type == 8 && pData.Enhancement or nil
 	end
-	return type == 4 && pData.Compendium or type == 9 && pData.PlayerLevel or type == 10 && pData.PlayerEXP or nil
+	return type == 4 && pData.Compendium or type == 9 && pData.PlayerLevel or type == 10 && pData.PlayerEXP or type == 11 && pData.PersonaPoints or nil
 end
 
 PXP.CreateSaveData = function(ply,name)
@@ -430,7 +451,8 @@ PXP.CreateSaveData = function(ply,name)
 		Compendium = {"izanagi"},
 		PreviousPersona = "izanagi",
 		PlayerLevel = 0,
-		PlayerEXP = 0
+		PlayerEXP = 0,
+		PersonaPoints = 0
 	}
 	if dirPersona then
 		PXP.SaveTable(dirPersona,tbl,true)
@@ -454,7 +476,8 @@ PXP.SetPersonaData = function(ply,type,val,sName)
 		Compendium = (type == 4 && val) or PXP.GetPersonaData(ply,4) or {"izanagi"},
 		PreviousPersona = (type == 5 && val) or PXP.GetPersonaData(ply,5) or "izanagi",
 		PlayerLevel = (type == 9 && val) or PXP.GetPersonaData(ply,9) or 0,
-		PlayerEXP = (type == 10 && val) or PXP.GetPersonaData(ply,10) or 0
+		PlayerEXP = (type == 10 && val) or PXP.GetPersonaData(ply,10) or 0,
+		PersonaPoints = (type == 11 && val) or PXP.GetPersonaData(ply,11) or 0
 	}
 
 	local isPersona = name && (type >= 1 && type <= 3 or type >= 6 && type <= 8)
@@ -553,11 +576,11 @@ if SERVER then
 	end
 end
 
-PXP.WriteFile = function(dir,cont)
-	file.Write(dir,tostring(cont))
+PXP.WriteFile = function(dir,cont) -- Obsolete
+	file.Write(dir,P_LZMA(tostring(cont),true))
 end
 
-PXP.WriteTable = function(dir,name,cont,erase)
+PXP.WriteTable = function(dir,name,cont,erase) -- Obsolete
 	if erase then
 		file.Write(dir,util.TableToJSON({Name = name,Set = cont},true))
 		return
@@ -565,7 +588,8 @@ PXP.WriteTable = function(dir,name,cont,erase)
 	file.Append(dir,util.TableToJSON({Name = name,Set = cont},true))
 end
 
-PXP.SaveTable = function(dir,table,erase)
+PXP.SaveTable = function(dir,table,erase) -- New Function
+	table = P_LZMA(table,true)
 	if erase then
 		file.Write(dir,util.TableToJSON(table,true))
 		return
@@ -573,14 +597,14 @@ PXP.SaveTable = function(dir,table,erase)
 	file.Append(dir,util.TableToJSON(table,true))
 end
 
-PXP.ReadTable = function(sFile)
+PXP.ReadTable = function(sFile) -- New Function
 	local data = file.Read(sFile,"DATA")
 	if data == nil then return end
 	local json = util.JSONToTable(data)
-	return json
+	return P_LZMA(json)
 end
 
-PXP.ReadDataTable = function(dir)
+PXP.ReadDataTable = function(dir) -- Obsolete
 	local data = file.Read(dir,"DATA")
 	if data == nil then return end
 	local json = util.JSONToTable(data)

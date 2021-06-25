@@ -137,6 +137,7 @@ if CLIENT then
 		PanelSelect:Dock(FILL)
 
 		for index,idName in SortedPairs(PXP.GetPersonaData(LocalPlayer(),4) or PERSONA_STARTERS) do
+			if PERSONA[idName] == nil then MsgN("WARNING: Unable to load " .. idName .. "'s compendium data! Did you uninstall the mod this Persona was from?") continue end
 			local name = PERSONA[idName].Name
 			local model = PERSONA[idName].Model
 			local icon = vgui.Create("SpawnIcon")
@@ -391,6 +392,14 @@ if CLIENT then
 		function skillPanel:Think()
 			local currentPersona = LocalPlayer():GetInfo("persona_comp_name")
 			local skills = PXP.GetPersonaData(LocalPlayer(),3,currentPersona)
+			local points = PXP.GetPersonaData(LocalPlayer(),11,currentPersona)
+			local cost = math.Round(GetConVarNumber("persona_skill_cost") *3.5)
+			if self.PButton then
+				self.PButton:SetText(cost > points && "Not Enough Persona Points! " .. tostring(cost) .. " Points Required!" or "Buy Skill (" .. tostring(cost) .. " Points)")
+			end
+			if self.PPT then
+				self.PPT:SetText("Persona Points: " .. points)
+			end
 			if skills && self.SkillCount != #skills then
 				UpdateSkillList(skillPanel)
 			end
@@ -449,6 +458,12 @@ if CLIENT then
 			-- surface.PlaySound("cpthazama/persona4/ui_newskill.wav")
 		end
 		skillPanel:Add(skill_box_list)
+
+		skillPanel.PPT = vgui.Create("DLabel")
+		skillPanel.PPT:SetText("Persona Points: 0")
+		skillPanel.PPT:Dock(BOTTOM)
+		skillPanel:Add(skillPanel.PPT)
+
 		skillPanel:Add(skillPanel)
 
 		-- Misc Menu --
@@ -715,7 +730,17 @@ end
 
 local function persona_addskill(ply)
 	local persona = ply:GetInfo("persona_comp_name")
-	if ply:IsAdmin() or ply:IsSuperAdmin() then
+	-- if ply:IsAdmin() or ply:IsSuperAdmin() then
+		local points = PXP.GetPersonaData(ply,11,currentPersona)
+		local pointCost = math.Round(GetConVarNumber("persona_skill_cost") *3.5)
+		if points < pointCost then
+			local snd = CreateSound(ply,"cpthazama/persona5/persona_destroy.wav")
+			snd:SetSoundLevel(0)
+			snd:Play()
+			snd:ChangeVolume(0.5)
+			ply:ChatPrint("Skill costs too much! You need " .. pointCost -points .. " Persona Points to purchase this skill!")
+			return
+		end
 		local Data = {}
 		Data.Name = GetConVarString("persona_skill_name") or "BLANK"
 		Data.Cost = GetConVarNumber("persona_skill_cost") or 0
@@ -749,7 +774,8 @@ local function persona_addskill(ply)
 				skill.SkillData = {Name = Data.Name, Cost = Data.Cost, UsesHP = Data.UsesHP, Icon = Data.Icon}
 			end
 		end
-	end
+		PXP.SetPoints(ply,math.Clamp(points -pointCost,0,points))
+	-- end
 end
 concommand.Add("persona_addskill",persona_addskill)
 

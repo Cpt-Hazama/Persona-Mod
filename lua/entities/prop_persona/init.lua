@@ -1597,11 +1597,15 @@ function ENT:OnKilledEnemy(ent) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnKilledEnemy_EXP(ent)
 	local ply = self.User
+	local pLevel = PXP.GetLevel(ply)
 	local level = ent:GetNW2Int("PXP_Level")
 	local exp = ent:GetNW2Int("PXP_EXP")
 	
 	PXP.GiveEXP(ply,exp)
 	PXP.GivePlayerEXP(ply,exp)
+	if level > pLevel then
+		PXP.GivePoints(ply,math.Clamp(math.Round((level -pLevel) *0.2),1,99))
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:BrainWash(ent,min,max)

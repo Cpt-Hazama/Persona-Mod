@@ -3,6 +3,18 @@ include("persona_xp.lua")
 PERSONA_STARTERS = {"arsene","izanagi","orpheus"}
 
 local debug = 0
+local pC = util.Compress
+local pD = util.Decompress
+
+local function compress(d)
+	return pC(d)
+end
+
+local function decompress(d)
+	if type(d) == "table" then print("THIS RETARD BELOW ME") PrintTable(d) print("END OF THE RETARD") end
+	if type(d) == "boolean" then return d end
+	return pD(d)
+end
 
 CreateConVar("persona_dmg_scaling","1",128,"Toggles the damage scaling feature of the mod.",0,1)
 CreateConVar("persona_meter_enabled","1",128,"Toggles the Persona Summon meter. Note that with sv_cheats set to 1, the meter will always be full!",0,1)
@@ -121,23 +133,40 @@ function P_GetAverageFFTData(filename,reTblID)
 	return r
 end
 
-local File = FindMetaTable("File")
-
-function File:QuickRead(position)
-	local text = self:Read(3)
-	self:Seek(0)
-	return text
+function P_LZMA(dat,c)
+	if dat then
+		return dat -- Remove me
+	end
+	if c then
+		if type(dat) == "boolean" then return dat end -- Backwards compatibility for old data(?)
+		if type(dat) == "table" then
+			local nDat = {}
+			for _,d in SortedPairs(data) do
+				if type(d) == "table" then
+					d = P_LZMA(d,true)
+				end
+				table.insert(nDat,compress(d) or d)
+			end
+			return nDat
+		end
+		return compress(dat) or dat
+	end
+	if type(dat) == "table" then
+		local nDat = {}
+		for n,d in SortedPairs(dat) do
+			if type(d) == "table" then
+				d = P_LZMA(d)
+			end
+			table.insert(nDat,decompress(d) or d)
+		end
+		PrintTable(nDat)
+		if #nDat <= 1 then
+			return tostring(nDat)
+		end
+		return nDat
+	end
+	return decompress(dat) or dat
 end
-
--- function PGM_B()
-	-- local f = file.Open("sound/cpthazama/persona_resource/music/Awakening.mp3","rb","GAME")
-	-- for i = 1,8192 do
-		-- local uShort = f:ReadUShort()
-		-- print("Unassigned 16bit Int - " .. uShort)
-		-- print("Pointer Position - " .. tostring(f:Tell()))
-	-- end
-	-- f:Close()
--- end
 
 function PGM_T()
 	local pos = Vector(-2923.764648,-6386.504883,364.3)
