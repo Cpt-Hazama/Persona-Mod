@@ -11,7 +11,7 @@ local function compress(d)
 end
 
 local function decompress(d)
-	if type(d) == "table" then print("THIS RETARD BELOW ME") PrintTable(d) print("END OF THE RETARD") end
+	if type(d) == "table" then return d end
 	if type(d) == "boolean" then return d end
 	return pD(d)
 end
@@ -99,13 +99,17 @@ function P_SaveHighScoreData(tbl,song,ply)
 	P_WriteDat(dir .. id .. "_" .. song .. ".dat",{Song = name,Player = ply:Nick(),Scores = tbl},true)
 end
 
-function P_GetHighScoreData(song,ply) -- local highscore = P_GetHighScoreData("Break Out Of -Remix-",ply)[tostring(self.Difficulty)]
+function P_GetHighScoreData(song,ply,it) -- local highscore = P_GetHighScoreData("Break Out Of -Remix-",ply)[tostring(self.Difficulty)]
+	it = it or 0
 	local id = string.gsub(ply:SteamID(),":","_")
 	local name = song
 	song = string.lower(song)
 	local dir = "persona/dance/" .. id .. "_" .. song .. ".dat"
 	local data = P_ReadDat(dir)
 	if data == nil then
+		if it == 0 then
+			return P_GetHighScoreData(name,ply,1)
+		end
 		MsgN("Could not load dance high-score data file! " .. dir)
 		P_SaveHighScoreData({["1"] = 0,["2"] = 0,["3"] = 0,["4"] = 0,["5"] = 0},name,ply)
 		MsgN("Auto-Generated blank save data file!")

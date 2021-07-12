@@ -407,8 +407,9 @@ PXP.GetPersonaData_Legacy = function(ply,type)
 	end
 end
 
-PXP.GetPersonaData = function(ply,type,sName)
+PXP.GetPersonaData = function(ply,type,sName,it)
 	if !ply:IsPlayer() then return end
+	it = it or 0
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
 	local name = (type >= 1 && type <= 3 or type >= 6 && type <= 8) && (sName or ply:GetPersonaName()) or nil
 	local isPersona = name && (type >= 1 && type <= 3 or type >= 6 && type <= 8)
@@ -419,6 +420,9 @@ PXP.GetPersonaData = function(ply,type,sName)
 	end
 	local pData = PXP.ReadTable(dir)
 	if pData == nil then
+		if it == 0 then
+			return PXP.GetPersonaData(ply,type,sName,1)
+		end
 		-- PXP.CreateSaveData(ply)
 		return
 	end

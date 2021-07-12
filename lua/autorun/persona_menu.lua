@@ -1,4 +1,3 @@
-	--// Thanks NPP, very cool \\--
 if SERVER then
 	util.AddNetworkString("Persona_ShowStatsMenu")
 	util.AddNetworkString("Persona_UpdateSkillMenu")
