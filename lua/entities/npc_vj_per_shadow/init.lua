@@ -11,6 +11,7 @@ ENT.Stats = {
 	SP = 50,
 }
 ENT.VJ_NPC_Class = {"CLASS_PERSONA_ENEMY","CLASS_SHADOW"}
+ENT.UsePlayerModelMovement = true
 
 ENT.BloodColor = "Oil"
 
@@ -78,6 +79,8 @@ function ENT:BeforeInit()
 	timer.Simple(0.02,function()
 		self:SetNW2Int("PXP_Level",l)
 		self:SetNW2Int("PXP_EXP",e)
+		-- self:SetNW2Int("PXP_Level",99)
+		-- self:SetNW2Int("PXP_EXP",99999999)
 	end)
 	
 	ParticleEffectAttach("vj_per_shadow_idle",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
@@ -113,14 +116,8 @@ function ENT:SwitchPersona(persona)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink()
-	self:DecideXY()
 	if IsValid(self:GetEnemy()) && CurTime() > self.NextSwitchT && math.random(1,30) == 1 then
 		self:SwitchPersona()
-	end
-	if self:IsMoving() then
-		if !self:BusyWithActivity() && self:GetPos():Distance(self:GetCurWaypointPos()) > 75 then
-			self:FaceCertainPosition(self:GetCurWaypointPos())
-		end
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -140,46 +137,6 @@ function ENT:UseItem(class,t)
 			end
 		end)
 	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Between(a,b)
-	local waypoint = self:GetCurWaypointPos()
-	local ang = (waypoint -self:GetPos()):Angle()
-	local dif = math.AngleDifference(self:GetAngles().y,ang.y)
-	return dif < a && dif > b
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:DecideXY()
-	local x = 0
-	local y = 0
-	if self:Between(30,-30) then
-		x = 1
-		y = 0
-	elseif self:Between(70,30) then
-		x = 1
-		y = 1
-	elseif self:Between(120,70) then
-		x = 0
-		y = 1
-	elseif self:Between(150,120) then
-		x = -1
-		y = 1
-	elseif !self:Between(150,-150) then
-		x = -1
-		y = 0
-	elseif self:Between(-110,-150) then
-		x = -1
-		y = -1
-	elseif self:Between(-70,-110) then
-		x = 0
-		y = -1
-	elseif self:Between(-30,-70) then
-		x = 1
-		y = -1
-	end
-
-	self:SetPoseParameter("move_x",x)
-	self:SetPoseParameter("move_y",y)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnKilled(dmginfo,hitgroup)

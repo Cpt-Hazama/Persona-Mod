@@ -444,7 +444,7 @@ function ENT:PersonaCode()
 			if !IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
 				self:SummonPersona(self.Persona)
 			end
-			self:PersonaThink(self:GetPersona(),self:GetEnemy(),self:VJ_GetNearestPointToEntityDistance(self:GetEnemy()),self.VJ_IsBeingControlled)
+			self:PersonaThink(self:GetPersona(),self:GetEnemy(),IsValid(self:GetEnemy()) && self:VJ_GetNearestPointToEntityDistance(self:GetEnemy()) or 999999999,self.VJ_IsBeingControlled)
 		end
 	end
 end

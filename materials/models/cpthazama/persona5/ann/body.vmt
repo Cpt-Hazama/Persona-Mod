@@ -1,17 +1,20 @@
 "VertexlitGeneric"
 {
-	"$basetexture" "models/cpthazama/persona5/ann/body"
-	"$bumpmap" "models/cpthazama/persona5/ann/body_n2"
-	"$phongexponenttexture" "models/cpthazama/persona5/ann/body_s"
+	"$basetexture" 				"models/cpthazama/persona5/ann/body"
+	"$bumpmap" 					"models/cpthazama/persona5/ann/body_n2"
+	"$phongexponenttexture" 	"models/cpthazama/persona_shared/exponent"
+	"$ambientocclusion"	"1"
+	"$nocull"	"1"
 
-	"$phong"				"1"
-	"$phongboost"			"4"
-	"$phongfresnelranges"	"[0.67 0.83 1]"
-	"$phongtint"			"[1 0.1 0.1]"
+	"$phong" 					"1"
+	"$phongboost"				"4"
+	"$phongfresnelranges"		"[0.67 0.83 1]"
+	"$phongalbedotint" 			"1"
+	"$phongtint"				"[1 0.05 0.05]"
 
 	"$envmap" "models/cpthazama/persona5/makoto/envmap"
 	"$envmaptint" "[0.01 0.001 0.001]"
 	"$envmapfresnel" "0.45"
 
-	"$lightwarptexture" "models/cpthazama/persona5/warp2"
+	"$lightwarptexture" "models/cpthazama/persona_shared/shaders/hard_black"
 }

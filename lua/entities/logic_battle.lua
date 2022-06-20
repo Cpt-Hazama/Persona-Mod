@@ -67,7 +67,7 @@ if SERVER then
 				end
 			end
 			ply:SetNW2Bool("Persona_BattleMode",false)
-			ent:Remove()
+			SafeRemoveEntity(ent)
 		-- end
 	end)
 end
@@ -137,8 +137,10 @@ if (CLIENT) then
 		ply:ConCommand("target_persona")
 	end)
 
-	local P_LerpVec = Vector(0,0,0)
+	local vec0 = Vector(0,0,0)
 	local P_LerpAng = Angle(0,0,0)
+	local P_LerpAng2 = Angle(0,0,0)
+	local P_LerpVec = nil
 	function ENT:Initialize()
 		local hookName = "Persona_LogicBattle_Camera_" .. self:EntIndex()
 		hook.Add("CalcView",hookName,function(ply,pos,angles,fov)
@@ -150,6 +152,7 @@ if (CLIENT) then
 				hook.Remove("CalcView",hookName)
 				return
 			end
+
 			local ply = LocalPlayer()
 			local camEnt = self:GetNW2Entity("CurrentTurnEntity")
 			local usePos = self:GetNW2Bool("UsePositions")
@@ -158,23 +161,51 @@ if (CLIENT) then
 			if useTurns == false then hook.Remove("CalcView",hookName) return end
 			if camEnt == ply then return end
 			if IsValid(camEnt) then
-				local cPos = self:GetNW2Vector("CurrentTurnEntity_Cam") or Vector(0,0,0)
+				local persona = camEnt.GetPersona && camEnt:GetPersona() or false
+				local currentSet = IsValid(persona) && persona.GetLastSet && persona:GetLastSet() or "idle"
+				local showBoth = false
+				if currentSet && currentSet == "range" or currentSet == "range_idle" or currentSet == "range_end" or currentSet == "melee" then
+					showBoth = true
+				end
 				local startPos = camEnt:GetPos() +camEnt:OBBCenter()
-				local _x = camEnt:GetForward() *cPos.y
-				local _y = camEnt:GetRight() *cPos.x
-				local _z = camEnt:GetUp() *cPos.z
-				local tr = util.TraceHull({
-					start = startPos,
-					endpos = startPos +ply:EyeAngles():Forward() *-math.max(50,camEnt:BoundingRadius()) +_x +_y +_z,
-					mask = MASK_SHOT,
-					filter = {camEnt,ply},
-					mins = Vector(-8,-8,-8),
-					maxs = Vector(8,8,8)
-				})
-				targetPos = tr.HitPos +tr.HitNormal *5
-				P_LerpVec = LerpVector(FrameTime() *15,P_LerpVec,targetPos)
-				P_LerpAng = LerpAngle(FrameTime() *15,P_LerpAng,ply:EyeAngles())
-				ply:SetEyeAngles((startPos -targetPos):Angle())
+				local targetEnt = IsValid(persona) && persona:GetNW2Entity("EyeTarget")
+
+				P_LerpVec = P_LerpVec or startPos
+				camEnt.PCam_RandomPos = camEnt.PCam_RandomPos or startPos
+
+				local refreshRate = 2
+				local tr
+				if showBoth && IsValid(targetEnt) then
+					local rad = targetEnt:BoundingRadius()
+					tr = util.TraceHull({
+						start = camEnt.PCam_RandomPos,
+						endpos = (targetEnt:GetPos() +targetEnt:OBBCenter()) +targetEnt:GetForward() *(rad *-4.5) +targetEnt:GetRight() *(rad *2),
+						mask = MASK_SHOT,
+						filter = {camEnt,ply,targetEnt},
+						mins = Vector(-8,-8,-8),
+						maxs = Vector(8,8,8)
+					})
+					refreshRate = 4
+				else
+					tr = util.TraceHull({
+						start = startPos,
+						endpos = camEnt.PCam_RandomPos,
+						mask = MASK_SHOT,
+						filter = {camEnt,ply},
+						mins = Vector(-8,-8,-8),
+						maxs = Vector(8,8,8)
+					})
+				end
+				local targetPos = tr.HitPos +tr.HitNormal *5
+				P_LerpVec = LerpVector(FrameTime() *refreshRate,P_LerpVec,targetPos)
+				P_LerpAng2 = LerpAngle(FrameTime() *15,P_LerpAng2,(startPos -P_LerpVec):Angle())
+				P_LerpAng = LerpAngle(FrameTime() *15,P_LerpAng,P_LerpAng2)
+
+				if camEnt.PCam_RandomPos:Distance(P_LerpVec) < 15 then
+					local rad = IsValid(persona) && persona:BoundingRadius() *3 or camEnt:BoundingRadius() *2
+					local midPos = IsValid(persona) && persona:GetPos() +persona:OBBCenter() or startPos
+					camEnt.PCam_RandomPos = midPos +camEnt:GetForward() *math.random(rad *0.5,rad) +camEnt:GetRight() *math.random(-rad,rad) +camEnt:GetUp() *math.random(-rad *0.15,rad)
+				end
 
 				local view = {}
 				view.origin = P_LerpVec

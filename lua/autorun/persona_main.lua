@@ -74,7 +74,7 @@ function P_GetTableData(filename)
 	end
 	return tbData
 end
-
+//- Dev ability to click keys during a song to setup beats
 function P_SaveFFTData(filename,tbl,pos,str)
 	pos = pos or 128
 	str = str or 1000
@@ -159,6 +159,7 @@ function P_GetAverageFFTData(filename,reTblID)
 end
 
 function P_WriteDat(fileName,dat,delete)
+	print(fileName,"write")
 	dat = P_LZMA(dat,true)
 	if delete then
 		file.Write(fileName,dat)
@@ -168,6 +169,7 @@ function P_WriteDat(fileName,dat,delete)
 end
 
 function P_ReadDat(fileName)
+	print(fileName,"read")
 	local data = file.Read(fileName,"DATA")
 	if data == nil then return end
 	local decompressed = P_LZMA(data)
@@ -630,6 +632,7 @@ function NPC:SummonPersona(persona)
 		if personaEntity:GetTask() != "TASK_RETURN" then
 			personaEntity:SetTask("TASK_RETURN")
 			personaEntity:OnRequestDisappear(self)
+            personaEntity:FadeOut()
 		end
 		hook.Call("PersonaMod_PersonaUnsummoned",nil,self,personaEntity)
 	end
@@ -767,6 +770,7 @@ if SERVER then
 							if !persona.IsFlinching then
 								persona:SetTask("TASK_RETURN")
 								persona:OnRequestDisappear(ply)
+            					persona:FadeOut()
 							end
 						end
 					end
@@ -841,6 +845,7 @@ if SERVER then
 				if meter <= 0 && persona:GetTask() != "TASK_RETURN" then
 					persona:SetTask("TASK_RETURN")
 					persona:OnRequestDisappear(v)
+            		persona:FadeOut()
 					if CurTime() > v.Persona_NextRegenMeterStopSoundT then
 						local snd = "cpthazama/persona5/misc/00045.wav"
 						Persona_CSound(v,snd,65)
@@ -1071,6 +1076,7 @@ if SERVER then
 					if !persona.IsFlinching then
 						persona:SetTask("TASK_RETURN")
 						persona:OnRequestDisappear(ply)
+            			persona:FadeOut()
 					end
 				end
 			end

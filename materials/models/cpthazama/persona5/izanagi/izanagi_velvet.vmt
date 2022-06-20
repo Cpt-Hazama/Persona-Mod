@@ -1,26 +1,24 @@
 "VertexlitGeneric"
 {
-	"$basetexture" "models/cpthazama/persona5/izanagi/izanagi_velvet"
-	"$bumpmap" "models/cpthazama/persona5/izanagi/izanagi_n"
-	"$phongexponenttexture" "models/cpthazama/persona5/izanagi/izanagi_s"
+	"$basetexture" 				"models/cpthazama/persona5/izanagi/izanagi_velvet"
+	"$bumpmap" 					"models/cpthazama/persona_shared/flat"
+	"$phongexponenttexture" 	"models/cpthazama/persona_shared/exponent"
+	"$ambientocclusion"	"1"
 
-	"$emissiveBlendEnabled" 		"1"
-    "$emissiveBlendTexture"    		"dev/null"
-    "$emissiveBlendBaseTexture"    	"models/cpthazama/persona5/izanagi/izanagi_velvet_g"
-    "$emissiveBlendFlowTexture"    	"dev/null"
-    "$emissiveBlendTint" 			"[1 1 1]"
-    "$emissiveBlendStrength" 		"1"
-    "$emissiveBlendScrollVector" 	"[0 0]"
-
-	"$phong"				"1"
-	"$phongboost"			"0"
-	"$phongfresnelranges"	"[0.035 0.2 1]"
-	"$phongtint"			"[0 0 1]"
+	"$phong" 					"1"
+	"$phongboost"				"25"
+	"$phongfresnelranges"		"[0.035 0.2 1]"
+	"$phongalbedotint" 			"1"
+	"$phongtint" 				"[0 0 1]"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"
 	"$rimlightboost" "200"
 	"$rimmask" "1"
+	
+	$selfillum "1"
+	$selfillummask "models/cpthazama/persona5/izanagi/izanagi_velvet_g"
+	$selfillumtint "[1 1 0]"
 
-	"$lightwarptexture" "models/cpthazama/persona5/cel_velvet"
+	"$lightwarptexture" "models/cpthazama/persona_shared/shaders/hard_black"
 }

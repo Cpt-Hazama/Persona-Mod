@@ -108,6 +108,7 @@ function ENT:Initialize()
 	self.P_LerpAng = self:GetAngles()
 
 	timer.Simple(0,function()
+		self:FadeIn()
 		if self.User:IsPlayer() then
 			net.Start("Persona_Elements")
 				net.WriteEntity(self.User)
@@ -269,9 +270,19 @@ function ENT:IdleAnimationCode(ply)
 	if self:GetSequenceName(self:GetSequence()) != self.Animations[self.CurrentIdle] then
 		self:DoIdle()
 	end
-	self.P_LerpVec = LerpVector(FrameTime() *50,self.P_LerpVec,self.User.IsPersonaShadow && self.User:GetPos() or self:GetIdlePosition(ply))
+
+	local adjust = self.P_Adjustment or 1
+	self.P_LerpVec = LerpVector(FrameTime() *60,self.P_LerpVec,self:GetIdlePosition(ply) +(ply:GetVelocity() *0.1) +(self.MovesWithUser && (ply:GetForward() *-adjust +ply:GetUp() *-(adjust *0.35)) or Vector(0,0,0)))
+
+	-- self.P_LerpVec = LerpVector(FrameTime() *50,self.P_LerpVec,self.User.IsPersonaShadow && self.User:GetPos() or self:GetIdlePosition(ply))
 	self:SetPos(self.P_LerpVec)
 	self:FacePlayerAim(self.User)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetMoveDirection(ply,ignoreZ)
+	local dir = ply:GetVelocity() or Vector(0,0,0)
+	if ignoreZ then dir.z = 0 end
+	return (self:GetAngles() -dir:Angle()):Forward()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnThink(ply) end
@@ -284,92 +295,38 @@ function ENT:DefaultPersonaControls(ply,persona)
 	self:SetAGI(self.Stats.AGI)
 	self:SetLUC(self.Stats.LUC)
 	if ply:IsPlayer() then
+		self.P_Adjustment = ply:EyeAngles().p *0.2
+
 		local ent = ply.Persona_EyeTarget
 		if IsValid(ent) && ent:Health() <= 0 then
 			ply.Persona_EyeTarget = NULL
 		end
 		ply:SetNW2Entity("Persona_Target",ent)
 		ply:SetNW2Int("Persona_TargetHealth",IsValid(ent) && ent:Health() or 100)
-		-- if ply:KeyReleased(IN_WALK) && CurTime() > self.NextLockOnT then
-			-- if IsValid(ply.Persona_EyeTarget) then
-				-- ply.Persona_EyeTarget = NULL
-				-- ply:EmitSound("cpthazama/persona5/misc/00019.wav",70,100)
-			-- else
-				-- local ent = ply:GetEyeTrace().Entity
-				-- if IsValid(ent) then
-					-- if (ent:IsNPC() or ent:IsPlayer() or (ent.IsPersona && ent != persona)) then
-						-- ply.Persona_EyeTarget = ent
-						-- ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
-					-- end
-				-- else
-					-- local ents = self:FindEnemies(ply:GetPos(),2000)
-					-- local ent = VJ_PICK(ents)
-					-- if IsValid(ent) then
-						-- ply.Persona_EyeTarget = ent
-						-- ply:EmitSound("cpthazama/persona5/misc/00007.wav",70,100)
-					-- end
-				-- end
-			-- end
-			-- self.NextLockOnT = CurTime() +0.2
-		-- end
 		if IsValid(ply.Persona_EyeTarget) then
-			-- ply:SetEyeAngles(LerpAngle(5 *FrameTime(),ply:EyeAngles(),((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetShootPos()):Angle()))
 			local ang = ply:GetAngles()
 			ply:SetAngles(Angle(ang.x,((ply.Persona_EyeTarget:GetPos() +ply.Persona_EyeTarget:OBBCenter()) -ply:GetPos()):Angle().y,ang.z))
 		end
 	end
-	if self:GetTask() == "TASK_IDLE" then
+	if (self:GetTask() == "TASK_IDLE" or self:GetTask() == "TASK_PLAY_AND_FOLLOW") then
 		self:IdleAnimationCode(ply)
 
+		local FT = FrameTime() *15
 		if ply:IsPlayer() && self.MovesWithUser then
-			local w = ply:KeyDown(IN_FORWARD)
-			local a = ply:KeyDown(IN_MOVELEFT)
-			local d = ply:KeyDown(IN_MOVERIGHT)
-			local s = ply:KeyDown(IN_BACK)
-			local ang = self.User:GetAngles()
-			local speed = 3
-			local speedS = 2
-			if !w && !a && !d && !s then
-				self.P_LerpAng = LerpAngle(FrameTime() *15,self.P_LerpAng,self.User:GetAngles())
-				self:SetAngles(self.P_LerpAng)
-			end
-			if w then
-				if self.CurrentForwardAng != 15 then
-					self.CurrentForwardAng = self.CurrentForwardAng +speed
-				end
-			elseif s then
-				if self.CurrentForwardAng != -15 then
-					self.CurrentForwardAng = self.CurrentForwardAng -speed
-				end
-			else
-				if self.CurrentForwardAng != 0 then
-					self.CurrentForwardAng = (self.CurrentForwardAng > 0 && self.CurrentForwardAng -speed) or self.CurrentForwardAng +speed
-				end
-			end
-			if a then
-				if self.CurrentSideAng != -8 then
-					self.CurrentSideAng = self.CurrentSideAng -speedS
-				end
-			elseif d then
-				if self.CurrentSideAng != 8 then
-					self.CurrentSideAng = self.CurrentSideAng +speedS
-				end
-			else
-				if self.CurrentSideAng != 0 then
-					self.CurrentSideAng = (self.CurrentSideAng > 0 && self.CurrentSideAng -speedS) or self.CurrentSideAng +speedS
-				end
-			end
-			self.P_LerpAng = LerpAngle(FrameTime() *15,self.P_LerpAng,Angle(self.CurrentForwardAng,ang.y,self.CurrentSideAng))
-			self:SetAngles(self.P_LerpAng)
+			local velDir = self:GetMoveDirection(ply,true)
+			local targAng = ply:GetAngles()
+			local eyeAng = ply:EyeAngles()
+			targAng.x = targAng.x +(8 *velDir.x) +self.P_Adjustment *1.5
+			targAng.z = targAng.z +(8 *velDir.y)
+			-- targAng.y = eyeAng.y +(8 *velDir.y)
+
+			self.P_LerpAng = LerpAngle(FT,self.P_LerpAng,targAng)
 		else
-			self.P_LerpAng = LerpAngle(FrameTime() *15,self.P_LerpAng,self.User:GetAngles())
-			self:SetAngles(self.P_LerpAng)
+			self.P_LerpAng = LerpAngle(FT,self.P_LerpAng,ply:GetAngles())
 		end
+		self:SetAngles(self.P_LerpAng)
 	elseif self:GetTask() == "TASK_ATTACK" then
-		-- if !IsValid(ply.Persona_EyeTarget) then self:FindTarget(ply) end
 		self:FaceTarget()
-	else
-		-- self:SetColor(Color(255,255,255,255))
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1118,50 +1075,53 @@ function ENT:Think()
 		end
 	end
 	self:NextThink(CurTime() +(0.069696968793869 +FrameTime()))
-	if IsValid(self.User) then
-		if !self.User:Alive() then
+	local user = self.User
+	if IsValid(user) then
+		if !user:Alive() then
 			self:Remove()
 		end
+		self:SetNW2Entity("EyeTarget",user.Persona_EyeTarget)
 		if self:GetTask() == "TASK_RETURN" then
-			local dist = self.User:GetPos():Distance(self:GetPos())
-			self:FacePlayerAim(self.User)
+			self.RemoveT = self.RemoveT or CurTime() +1
+			local dist = user:GetPos():Distance(self:GetPos())
+			self:FacePlayerAim(user)
 			local speed = 80
 			if dist <= 170 then
 				speed = 20
 			end
-			self:MoveToPos(self.User:GetPos(),speed)
-			if dist <= 15 then
-				self.User:EmitSound("cpthazama/persona5/persona_disapper.wav",65)
-				-- if self.User:IsNPC() && self.User.OnDisablePersona then
-					-- self.User:OnDisablePersona(self)
+			self:MoveToPos(user:GetPos(),speed)
+			if dist <= 15 or CurTime() > self.RemoveT then
+				user:EmitSound("cpthazama/persona5/persona_disapper.wav",65)
+				-- if user:IsNPC() && user.OnDisablePersona then
+					-- user:OnDisablePersona(self)
 				-- end
-				-- self.User:SetNW2Bool("Persona_SkillMenu",false)
+				-- user:SetNW2Bool("Persona_SkillMenu",false)
 				SafeRemoveEntity(self)
 			end
 			return
 		end
 		if self.HasChaosParticle then
-			if CurTime() > self.User.Persona_ChaosT then
+			if CurTime() > user.Persona_ChaosT then
 				self.HasChaosParticle = false
-				self.User:StopParticles()
-				self:CreateAura(self.User)
+				user:StopParticles()
+				self:CreateAura(user)
 				if !self.CurrentCardUsesHP then
 					self.CurrentCardCost = self.CurrentCardCost /2
 				end
 				self:SetNW2Int("SpecialAttackCost",self.CurrentCardCost)
 			end
 		end
-		if self.User:IsPlayer() then
-			self:PersonaCards(self.User:KeyDown(IN_ATTACK),self.User:KeyDown(IN_ATTACK2),self.User:KeyDown(IN_RELOAD))
-			self:PersonaControls(self.User,self)
-		elseif self.User:IsNPC() then
-			if IsValid(self.User:GetEnemy()) then
-				self.User.Persona_EyeTarget = self.User:GetEnemy()
+		if user:IsPlayer() then
+			self:PersonaCards(user:KeyDown(IN_ATTACK),user:KeyDown(IN_ATTACK2),user:KeyDown(IN_RELOAD))
+			self:PersonaControls(user,self)
+		elseif user:IsNPC() then
+			if IsValid(user:GetEnemy()) then
+				user.Persona_EyeTarget = user:GetEnemy()
 			end
-			self:PersonaThink_NPC(self.User,self)
+			self:PersonaThink_NPC(user,self)
 		end
-		self:DefaultPersonaControls(self.User,self)
-		self:OnThink(self.User)
+		self:DefaultPersonaControls(user,self)
+		self:OnThink(user)
 	else
 		self:Remove()
 	end

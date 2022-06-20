@@ -1,18 +1,20 @@
 "VertexlitGeneric"
 {
-	"$basetexture" "models/cpthazama/persona5/satanael/satanael"
-	"$bumpmap" "models/cpthazama/persona5/satanael/satanael_n"
-	"$phongexponenttexture" "models/cpthazama/persona5/satanael/satanael_s"
+	"$basetexture" 				"models/cpthazama/persona5/satanael/satanael"
+	"$bumpmap" 					"models/cpthazama/persona_shared/flat"
+	"$phongexponenttexture" 	"models/cpthazama/persona_shared/exponent"
+	"$ambientocclusion"	"1"
 
-	"$phong"				"1"
-	"$phongboost"			"0"
-	"$phongfresnelranges"	"[0.035 0.2 1]"
-	"$phongtint"			"[0 0.15 1]"
+	"$phong" 					"1"
+	"$phongboost"				"25"
+	"$phongfresnelranges"		"[0.035 0.2 1]"
+	"$phongalbedotint" 			"1"
+	"$phongtint" 				"[0 0.15 1]"
 
 	"$rimlight" "1"
 	"$rimlightexponent" "1"
 	"$rimlightboost" "200"
 	"$rimmask" "1"
 
-	"$lightwarptexture" "models/cpthazama/persona5/cel_blue"
+	"$lightwarptexture" "models/cpthazama/persona_shared/shaders/hard_black"
 }

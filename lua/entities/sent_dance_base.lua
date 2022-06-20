@@ -788,13 +788,14 @@ if (CLIENT) then
 
 		local canExpand = ply.Persona_Dance_LastNoteT && ply.Persona_Dance_LastNoteT > CurTime() || boost
 		local songName = dancer:GetSongName()
-		local score = ply.Persona_Dance_Score
+		local score = ply.Persona_Dance_Score or 0
 		local scoreText = "Score - " .. score
 		local iDif = dancer:GetNW2Float("Difficulty")
 		local dif = iDif == 1 && "Easy" or iDif == 2 && "Normal" or iDif == 3 && "Hard" or iDif == 4 && "Crazy" or "Insane"
 		local boxX, boxY = ScrW() /4, ScrH() /150
 		local boxW, boxH = ScrW() /4.2, ScrH() /16
 		local boxSX, boxSY = ScrW() /1.9, ScrH() /150
+		surface.SetFont("Persona")
 		local boxSW, boxSH = ScrW() /28 +surface.GetTextSize(scoreText) *1.35, canExpand && ScrH() /16 or ScrH() /28
 
 		local hT = ply.Persona_Dance_HitData
@@ -2047,18 +2048,23 @@ function ENT:SpawnLamp(ent)
 	return {Ent=lamp,Ind=index}
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+local lastCheckDif = -2
 function ENT:Think()
 	self:HandleKeys(IsValid(self.Creator) && self.Creator)
 	self:SetNW2Float("Index",self.Index)
+	local diff = self.Difficulty
 	if self:GetSelectedSong() == "false" then
-		for _,v in ipairs(self.SoundTracks) do
-			-- local highscore = PXP.GetDanceData(self.Creator,v.name) or 0
-			local scores = P_GetHighScoreData(v.name,self.Creator)
-			local highscore = scores[self.Difficulty]
-			-- print("--------------------------------------")
-			-- PrintTable(scores)
-			-- print(v.name,highscore,self:GetNW2Float("Difficulty"),self.Difficulty)
-			self:SetNW2Int("HS_" .. v.name,highscore)
+		if lastCheckDif != diff then
+			for _,v in ipairs(self.SoundTracks) do
+				-- local highscore = PXP.GetDanceData(self.Creator,v.name) or 0
+				local scores = P_GetHighScoreData(v.name,self.Creator)
+				local highscore = scores[diff]
+				-- print("--------------------------------------")
+				-- PrintTable(scores)
+				-- print(v.name,highscore,self:GetNW2Float("Difficulty"),self.Difficulty)
+				self:SetNW2Int("HS_" .. v.name,highscore)
+			end
+			lastCheckDif = self.Difficulty
 		end
 		self:PlayPreview(self.Creator)
 		if CurTime() > self.CanShowMenu then
@@ -2066,6 +2072,7 @@ function ENT:Think()
 		end
 	end
 	if self.NextDanceT < CurTime() && self.StartedSong then
+		lastCheckDif = -2
 		net.Start("Persona_Dance_SongEnd")
 			net.WriteString(self:GetSelectedSong())
 			net.WriteEntity(self.Creator)
@@ -2077,6 +2084,7 @@ function ENT:Think()
 	end
 	if self:GetSelectedSong() != "false" && !self.StartedSong then
 		self.StartedSong = true
+		lastCheckDif = -2
 		local anim = "preview"
 		local songName = self:GetSelectedSong()
 		local delay = self.SongStartAnimationDelay
@@ -2090,7 +2098,7 @@ function ENT:Think()
 		local t = self:PlayAnimation(anim,1,0,1,anim) +delay +0.1
 		if IsValid(self.Creator) && self.ViewMode == 2 then
 			local ply = self.Creator
-			local highscore = self:GetHighScores(ply,self:GetSelectedSong())[self.Difficulty]
+			local highscore = self:GetHighScores(ply,self:GetSelectedSong())[diff]
 			-- local highscore = PXP.GetDanceData(ply,self:GetSelectedSong())
 			ply:SetNW2Int("Persona_Dance_Score",highscore or 0)
 			net.Start("Persona_Dance_ModeStart")
