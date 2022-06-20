@@ -154,11 +154,11 @@ if CLIENT then
 			if optPersona then
 				persona = optPersona
 			end
-			local stats = PXP.GetPersonaData(LocalPlayer(),7,persona)
-			local stats_lvl = PXP.GetPersonaData(LocalPlayer(),2,persona)
-			local stats_exp = PXP.GetPersonaData(LocalPlayer(),1,persona)
-			local stats_reqexp = PXP.GetPersonaData(LocalPlayer(),6,persona)
-			local stats_enh = PXP.GetPersonaData(LocalPlayer(),8,persona)
+			local stats = PXP.GetPersonaData(LocalPlayer(),7,persona) or {LUC=0,AGI=0,END=0,STR=0,MAG=0}
+			local stats_lvl = PXP.GetPersonaData(LocalPlayer(),2,persona) or 1
+			local stats_exp = PXP.GetPersonaData(LocalPlayer(),1,persona) or 0
+			local stats_reqexp = PXP.GetPersonaData(LocalPlayer(),6,persona) or 0
+			local stats_enh = PXP.GetPersonaData(LocalPlayer(),8,persona) or 0
 			panel.StatsList_Last = persona
 			
 			local stats5 = panel.Stats5 or vgui.Create("RichText",panel)
