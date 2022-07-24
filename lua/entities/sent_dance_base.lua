@@ -91,6 +91,31 @@ function ENT:HSL(h,s,l)
 	return Color(math.ceil((r +m) *256),math.ceil((g +m) *256),math.ceil((b +m) *256))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetAnimationData(seq)
+	if type(seq) == "number" then
+		seq = self:GetSequenceName(self:SelectWeightedSequence(seq))
+	end
+	local info = nil
+	local done = self:GetAnimInfo(0).label
+	local i = 1
+	while i < 1600 do
+		info = self:GetAnimInfo(i)
+		if string.find(info.label,"@" .. seq) or string.find(info.label,"a_" .. seq) then
+			return info
+		end
+		if(info.label == done) then break end
+		i = i + 1
+	end
+	return nil
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetAnimationFrameCount(seq)
+	if type(seq) == "number" then
+		seq = self:GetSequenceName(self:SelectWeightedSequence(seq))
+	end
+	return self:GetAnimationData(seq).numframes
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	function ENT:HandleKeys(ply) end
 
@@ -154,6 +179,9 @@ if (CLIENT) then
 		local constraint = self.FlexConstraints && self.FlexConstraints[name] or false
 		if constraint then
 			val = math.Clamp(val,constraint.min,constraint.max)
+			if constraint.speed then
+				speed = constraint.speed
+			end
 		end
 		for _,v in pairs(self.Flexes) do
 			if v.Name == name then
@@ -824,65 +852,73 @@ if (CLIENT) then
 			local data = {}
 			local audio = ply.VJ_Persona_Dance_Theme_Audio
 			if IsValid(ply.VJ_Persona_Dance_Theme_Audio) then
-				ply.VJ_Persona_Dance_Theme_Audio:FFT(data,1)
-				local getAll = GetConVarNumber("persona_dance_dev_fftall") == 1
-				for i = 1,256 do
-					if data[i] then lData[i] = Lerp(10 *FrameTime(),lData[i],data[i]) end
-					draw.RoundedBox(0,ScrW() /8 +(i *8),ScrH() /2,4,lData[i] *AMP *10,i == dancer.DEV_FFTCheckPosition && Color(boostColor.r,boostColor.g,boostColor.b,255) or Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
-				end
-				if #data > 0 then
-					if CurTime() > nextFFTT then
-						fftperiod = fftperiod +1
-						if fftperiod > 3 then
-							fftperiod = 1
+				local manualNotes = GetConVar("persona_dance_dev_manual"):GetInt() == 1
+				if !manualNotes then
+					ply.VJ_Persona_Dance_Theme_Audio:FFT(data,1)
+					local getAll = GetConVarNumber("persona_dance_dev_fftall") == 1
+					for i = 1,256 do
+						if data[i] then lData[i] = Lerp(10 *FrameTime(),lData[i],data[i]) end
+						draw.RoundedBox(0,ScrW() /8 +(i *8),ScrH() /2,4,lData[i] *AMP *10,i == dancer.DEV_FFTCheckPosition && Color(boostColor.r,boostColor.g,boostColor.b,255) or Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+					end
+					if #data > 0 then
+						if CurTime() > nextFFTT then
+							fftperiod = fftperiod +1
+							if fftperiod > 3 then
+								fftperiod = 1
+							end
+							nextFFTT = CurTime() +1
 						end
-						nextFFTT = CurTime() +1
-					end
-					draw.SimpleText("Sampling FFT" .. (fftperiod == 1 && "." or fftperiod == 2 && ".." or "..."),"Persona",ScrW() /2,ScrH() /2,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
-					if getAll == true then
-						draw.SimpleText("FFT Check Position - ALL","Persona",ScrW() /2,ScrH() /2.12,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
-					else
-						draw.SimpleText("FFT Check Position - " .. dancer.DEV_FFTCheckPosition or 128,"Persona",ScrW() /2,ScrH() /2.12,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
-					end
-					draw.SimpleText("FFT Check Strength - " .. dancer.DEV_FFTCheckStrength or 1000,"Persona",ScrW() /2,ScrH() /2.22,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
-					if !getAll then draw.SimpleText("FFT Findings - " .. #saveData or 0,"Persona",ScrW() /2,ScrH() /2.32,Color(HUDColor.r,HUDColor.g,HUDColor.b,255)) end
+						draw.SimpleText("Sampling FFT" .. (fftperiod == 1 && "." or fftperiod == 2 && ".." or "..."),"Persona",ScrW() /2,ScrH() /2,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+						if getAll == true then
+							draw.SimpleText("FFT Check Position - ALL","Persona",ScrW() /2,ScrH() /2.12,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+						else
+							draw.SimpleText("FFT Check Position - " .. dancer.DEV_FFTCheckPosition or 128,"Persona",ScrW() /2,ScrH() /2.12,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+						end
+						draw.SimpleText("FFT Check Strength - " .. dancer.DEV_FFTCheckStrength or 1000,"Persona",ScrW() /2,ScrH() /2.22,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+						if !getAll then draw.SimpleText("FFT Findings - " .. #saveData or 0,"Persona",ScrW() /2,ScrH() /2.32,Color(HUDColor.r,HUDColor.g,HUDColor.b,255)) end
 
-					if getAll == true then
-						local average = 0
-						local all = 0
-						for i = 1,256 do
-							local newData = data[i]
+						if getAll == true then
+							local average = 0
+							local all = 0
+							for i = 1,256 do
+								local newData = data[i]
+								local lastDifData = lastDifData or 0
+								local difData = math.abs((newData *200000) -(oldData *200000))
+								local d = false
+								saveData[i] = saveData[i] or {}
+								if math.abs(difData -lastDifData) > testRate then
+									d = true
+									table.insert(saveData[i],ply.VJ_Persona_Dance_Theme_Audio:GetTime())
+									all = all +#saveData[i]
+								end
+								oldData = newData
+								lastDifData = difData
+							end
+							average = all /#saveData
+							averageLast = Lerp(FrameTime() *1,averageLast,average)
+							draw.SimpleText("FFT Average - " .. averageLast,"Persona",ScrW() /2,ScrH() /2.32,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
+						else
+							local newData = data[dancer.DEV_FFTCheckPosition or 128]
 							local lastDifData = lastDifData or 0
 							local difData = math.abs((newData *200000) -(oldData *200000))
 							local d = false
-							saveData[i] = saveData[i] or {}
 							if math.abs(difData -lastDifData) > testRate then
 								d = true
-								table.insert(saveData[i],ply.VJ_Persona_Dance_Theme_Audio:GetTime())
-								all = all +#saveData[i]
+								table.insert(saveData,ply.VJ_Persona_Dance_Theme_Audio:GetTime())
 							end
 							oldData = newData
 							lastDifData = difData
+							-- Entity(1):ChatPrint("-------------------------------------------")
+							-- Entity(1):ChatPrint("Old - " .. oldData .. " | New - " .. newData)
+							-- Entity(1):ChatPrint(difData)
+							-- if d then Entity(1):ChatPrint("Added FFT Beat Time!") end
+							-- Entity(1):ChatPrint("-------------------------------------------")
 						end
-						average = all /#saveData
-						averageLast = Lerp(FrameTime() *1,averageLast,average)
-						draw.SimpleText("FFT Average - " .. averageLast,"Persona",ScrW() /2,ScrH() /2.32,Color(HUDColor.r,HUDColor.g,HUDColor.b,255))
-					else
-						local newData = data[dancer.DEV_FFTCheckPosition or 128]
-						local lastDifData = lastDifData or 0
-						local difData = math.abs((newData *200000) -(oldData *200000))
-						local d = false
-						if math.abs(difData -lastDifData) > testRate then
-							d = true
-							table.insert(saveData,ply.VJ_Persona_Dance_Theme_Audio:GetTime())
-						end
-						oldData = newData
-						lastDifData = difData
-						-- Entity(1):ChatPrint("-------------------------------------------")
-						-- Entity(1):ChatPrint("Old - " .. oldData .. " | New - " .. newData)
-						-- Entity(1):ChatPrint(difData)
-						-- if d then Entity(1):ChatPrint("Added FFT Beat Time!") end
-						-- Entity(1):ChatPrint("-------------------------------------------")
+					end
+				else
+					if ply:KeyReleased(IN_JUMP) then
+						surface.PlaySound("cpthazama/persona5_dance/clap_mega.wav")
+						table.insert(saveData,ply.VJ_Persona_Dance_Theme_Audio:GetTime())
 					end
 				end
 			end
@@ -1735,6 +1771,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RandomizeExpressions(flexes,anim,frames,chance)
 	local chance = chance or 50
+	local frames = frames or self:GetAnimationFrameCount(anim)
 
 	self.RandomizedFlexes = self.RandomizedFlexes or {}
 	self.RandomizedFlexes[anim] = self.RandomizedFlexes[anim] or {}
@@ -1756,6 +1793,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:RandomizeCinematics(anim,frames,chance)
 	local chance = chance or 100
+	local frames = frames or self:GetAnimationFrameCount(anim)
 	
 	for i = 1,frames do
 		if i == 1 then
@@ -1782,6 +1820,21 @@ function ENT:SetCinematicData(pos,dist,speed,bone)
 	self:SetNW2String("LastCinematicBone",cBone)
 	local new = {pos=self:GetNW2Vector("LastCinematicPos"),dist=self:GetNW2Int("LastCinematicDist"),speed=self:GetNW2Int("LastCinematicSpeed"),bone=self:GetNW2String("LastCinematicBone")}
 	self:OnChangeCinematicData(old,new)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:PlayGesture(seq,rate,onFinish)
+	local rate = rate or 1
+	local gesture = self:AddGestureSequence(self:LookupSequence(seq))
+	self:SetLayerPriority(gesture, 1)
+	self:SetLayerPlaybackRate(gesture, rate *0.5)
+
+	if onFinish then
+		timer.Simple(VJ_GetSequenceDuration(self,seq) *rate, function()
+			if IsValid(self) then
+				onFinish(seq)
+			end
+		end)
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:Initialize()

@@ -1,6 +1,6 @@
 "VertexlitGeneric"
 {
-	"$basetexture" 				"models/cpthazama/persona5/akechi/mask"
+	"$basetexture" 				"models/cpthazama/persona5/akechi/mask_red"
 	"$bumpmap" 					"models/cpthazama/persona_shared/flat"
 	"$phongexponenttexture" 	"models/cpthazama/persona_shared/exponent"
 	"$ambientocclusion"	"1"

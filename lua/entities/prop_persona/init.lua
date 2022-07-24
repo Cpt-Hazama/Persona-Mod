@@ -48,6 +48,8 @@ ENT.StartMeleeDamageCode = false -- If set to a number, overrides the built-in s
 ENT.FirstMeleeDamageTime = false -- If set to a number, overrides the built-in initial damage timer for melee skills
 ENT.DamageTypes = bit.bor(DMG_SLASH,DMG_CRUSH,DMG_ALWAYSGIB) -- Obsolete
 ---------------------------------------------------------------------------------------------------------------------------------------------
+local tbl_insert = table.insert
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:HandleEvents(skill,animBlock,seq,t) -- Default events, override in your Persona
 	if animBlock == "melee" then
 		self:UserSound("cpthazama/persona5/joker/00" .. math.random(67,68) .. ".wav",80)
@@ -107,32 +109,39 @@ function ENT:Initialize()
 	self.P_LerpVec = self:GetPos()
 	self.P_LerpAng = self:GetAngles()
 
+	self:FadeIn()
+
 	timer.Simple(0,function()
-		self:FadeIn()
-		if self.User:IsPlayer() then
+		if IsValid(self) && IsValid(self.User) && self.User:IsPlayer() then
+			local ply = self.User
 			net.Start("Persona_Elements")
-				net.WriteEntity(self.User)
+				net.WriteEntity(ply)
 				net.WriteTable(self.Stats.WK)
 				net.WriteTable(self.Stats.RES)
 				net.WriteTable(self.Stats.NUL)
 				net.WriteTable(self.Stats.REF)
 				net.WriteTable(self.Stats.ABS)
-			net.Send(self.User)
+			net.Send(ply)
 			if self.IsVelvetPersona then
-				if !PXP.InCompendium(self.User,string.Replace(self:GetClass(),"prop_persona_","")) then
+				if !PXP.InCompendium(ply,string.Replace(self:GetClass(),"prop_persona_","")) then
 					SafeRemoveEntity(self)
 					return
 				end
-				PXP.SetPersonaData(self.User,8,2)
+				PXP.SetPersonaData(ply,8,2)
 			end
-			PXP.SetPersonaData(self.User,5,self.User:GetNW2String("PersonaName"))
+			PXP.SetPersonaData(ply,5,ply:GetNW2String("PersonaName"))
 
 			self:CheckSkillLevel(true)
-			PXP.ManagePersonaStats(self.User)
+			PXP.ManagePersonaStats(ply)
 		else
 			self:UnlockAllSkills()
 		end
 		self:CustomOnInitialize()
+		timer.Simple(0.5,function()
+			if IsValid(self) then
+				self:SetColor(Color(255,255,255,255))
+			end
+		end)
 	end)
 	
 	-- self:AddAnimationEvent("attack",35,"dmgtimer_1",65)
@@ -159,15 +168,17 @@ function ENT:MakeLegendary()
 	self.BaseEND = 1
 	self.BaseAGI = 1
 	self.BaseLUC = 1
+
+	local ply = self.User
 	
-	PXP.ManagePersonaStats(self.User)
+	PXP.ManagePersonaStats(ply)
 
 	for index,mat in pairs(self.LegendaryMaterials) do
 		self:SetSubMaterial(index -1,mat)
 	end
 	
 	self.IsLegendary = true
-	self:RequestAura(self.User,PERSONA[self.User:GetPersonaName()].Aura)
+	self:RequestAura(ply,PERSONA[ply:GetPersonaName()].Aura)
 	-- self:Overdrive(true)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -175,6 +186,7 @@ function ENT:Overdrive(b)
 	self.HasOverdrive = b
 	self:SetNW2Bool("Overdrive",b)
 	self:StopParticles()
+	local ply = self.User
 	if self.OverdriveAura then self.OverdriveAura:Stop() end
 	if b then
 		if !self.OverdriveAura then
@@ -182,11 +194,11 @@ function ENT:Overdrive(b)
 			self.OverdriveAura:SetSoundLevel(65)
 		end
 		self.OverdriveAura:Play()
-		self:RequestAura(self.User,PERSONA[self.User:GetPersonaName()].Aura)
+		self:RequestAura(ply,PERSONA[ply:GetPersonaName()].Aura)
 		ParticleEffectAttach("persona_aura_overdrive",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 		return
 	end
-	self:RequestAura(self.User,PERSONA[self.User:GetPersonaName()].Aura)
+	self:RequestAura(ply,PERSONA[ply:GetPersonaName()].Aura)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize() end
@@ -202,13 +214,15 @@ function ENT:AddItemSkill(data)
 	if !proceed then
 		return
 	end
+	local ply = self.User
 	self:AddCard(data.Name,data.Cost,data.UsesHP,data.Icon)
-	PXP.SetPersonaData(self.User,3,self.CardTable)
-	self.User:ChatPrint("Obtained a new skill, " .. data.Name .. "!")
+	PXP.SetPersonaData(ply,3,self.CardTable)
+	ply:ChatPrint("Obtained a new skill, " .. data.Name .. "!")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CheckSkillLevel(noChat)
-	local lvl = PXP.GetPersonaData(self.User,2)
+	local ply = self.User
+	local lvl = PXP.GetPersonaData(ply,2)
 	if #self.LeveledSkills > 0 then
 		-- for _,skill in pairs(self.LeveledSkills) do
 		for i = 1,#self.LeveledSkills do
@@ -226,8 +240,8 @@ function ENT:CheckSkillLevel(noChat)
 				end
 				self:AddCard(skill.Name,skill.Cost,skill.UsesHP,skill.Icon)
 				if noChat != true then
-					self.User:ChatPrint("Obtained a new skill, " .. skill.Name .. "!")
-					self.User:EmitSound("cpthazama/persona4/ui_newskill.wav")
+					ply:ChatPrint("Obtained a new skill, " .. skill.Name .. "!")
+					ply:EmitSound("cpthazama/persona4/ui_newskill.wav")
 				end
 			end
 		end
@@ -265,7 +279,8 @@ function ENT:PersonaControls(ply,persona) end
 function ENT:PersonaThink_NPC(ply,persona) end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:IdleAnimationCode(ply)
-	self.CurrentIdle = self.User:IsPlayer() && self.User:Crouching() && "idle_low" or "idle"
+	local ply = self.User
+	self.CurrentIdle = ply:IsPlayer() && ply:Crouching() && "idle_low" or "idle"
 	if self.AllowFading then self:FadeIn() end
 	if self:GetSequenceName(self:GetSequence()) != self.Animations[self.CurrentIdle] then
 		self:DoIdle()
@@ -274,9 +289,9 @@ function ENT:IdleAnimationCode(ply)
 	local adjust = self.P_Adjustment or 1
 	self.P_LerpVec = LerpVector(FrameTime() *60,self.P_LerpVec,self:GetIdlePosition(ply) +(ply:GetVelocity() *0.1) +(self.MovesWithUser && (ply:GetForward() *-adjust +ply:GetUp() *-(adjust *0.35)) or Vector(0,0,0)))
 
-	-- self.P_LerpVec = LerpVector(FrameTime() *50,self.P_LerpVec,self.User.IsPersonaShadow && self.User:GetPos() or self:GetIdlePosition(ply))
+	-- self.P_LerpVec = LerpVector(FrameTime() *50,self.P_LerpVec,ply.IsPersonaShadow && ply:GetPos() or self:GetIdlePosition(ply))
 	self:SetPos(self.P_LerpVec)
-	self:FacePlayerAim(self.User)
+	self:FacePlayerAim(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetMoveDirection(ply,ignoreZ)
@@ -358,7 +373,7 @@ function ENT:GetUsableSkillsBesidesType(type,cost,allowMelee)
 	local tbl = {}
 	for _,card in pairs(self:GetSkillsBesides(type,allowMelee)) do
 		if card.Cost <= cost then
-			table.insert(tbl,card.Name)
+			tbl_insert(tbl,card.Name)
 		end
 	end
 	return VJ_PICK(tbl)
@@ -368,7 +383,7 @@ function ENT:GetUsableSkillsByType(type,cost,allowMelee)
 	local tbl = {}
 	for _,card in pairs(self:GetSelectSkills(type,allowMelee)) do
 		if card.Cost <= cost then
-			table.insert(tbl,card.Name)
+			tbl_insert(tbl,card.Name)
 		end
 	end
 	return VJ_PICK(tbl)
@@ -378,7 +393,7 @@ function ENT:GetSelectSkills(type,allowMelee)
 	local tbl = {}
 	for ind,card in pairs(self.CardTable) do
 		if card.Icon == type && (allowMelee && !card.UsesHP or true) then
-			table.insert(tbl,{Name=card.Name,Cost=card.Cost})
+			tbl_insert(tbl,{Name=card.Name,Cost=card.Cost})
 		end
 	end
 	return tbl
@@ -388,7 +403,7 @@ function ENT:GetSkillsBesides(type,allowMelee)
 	local tbl = {}
 	for ind,card in pairs(self.CardTable) do
 		if card.Icon != type && (allowMelee && !card.UsesHP or true) then
-			table.insert(tbl,{Name=card.Name,Cost=card.Cost})
+			tbl_insert(tbl,{Name=card.Name,Cost=card.Cost})
 		end
 	end
 	return tbl
@@ -1042,12 +1057,12 @@ function ENT:AddAnimationEvent(seq,frame,eventName,frameCount)
 	self.AnimationEvents = self.AnimationEvents or {}
 	self.AnimationEvents[seq] = self.AnimationEvents[seq] or {}
 	self.AnimationEvents[seq][frame] = self.AnimationEvents[seq][frame] or {}
-	table.insert(self.AnimationEvents[seq][frame],eventName)
+	tbl_insert(self.AnimationEvents[seq][frame],eventName)
 	
 	self.EventCoolDown = self.EventCoolDown or {}
 	self.EventCoolDown[seq] = self.EventCoolDown[seq] or {}
 	self.EventCoolDown[seq][frame] = self.EventCoolDown[seq][frame] or {}
-	table.insert(self.EventCoolDown[seq][frame],CurTime())
+	tbl_insert(self.EventCoolDown[seq][frame],CurTime())
 
 	if frameCount then
 		self.RegisteredSequences = self.RegisteredSequences or {}
@@ -1189,19 +1204,20 @@ function ENT:AddCard(name,req,isHP,icon)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CheckCards()
-	if self.User:IsNPC() then return end
+	local ply = self.User
+	if ply:IsNPC() then return end
 
 	local oldSkills = {}
 	for _,v in pairs(self.CardTable) do
-		table.insert(oldSkills,v.Name)
+		tbl_insert(oldSkills,v.Name)
 	end
-	local tbl = PXP.GetPersonaData(self.User,3)
+	local tbl = PXP.GetPersonaData(ply,3)
 	local newSkills = {}
 	if tbl == nil then return end
 	for index,skill in pairs(tbl) do
 		-- print("Checking " .. skill.Name)
 		if !VJ_HasValue(oldSkills,skill.Name) then
-			table.insert(newSkills,skill)
+			tbl_insert(newSkills,skill)
 			-- print("Added " .. skill.Name .. " to new skills")
 		end
 	end
@@ -1245,7 +1261,8 @@ function ENT:CycleCards()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SetActiveCard(name,cost,useHP,icon,index)
-	cost = (!useHP && (IsValid(self.User) && self.User.Persona_ChaosT && self.User.Persona_ChaosT > CurTime())) && cost *2 or cost
+	local ply = self.User
+	cost = (!useHP && (IsValid(ply) && ply.Persona_ChaosT && ply.Persona_ChaosT > CurTime())) && cost *2 or cost
 	self:SetNW2String("SpecialAttack",name)
 	self:SetNW2Int("SpecialAttackCost",cost)
 	self:SetNW2Bool("SpecialAttackUsesHP",useHP or false)
@@ -1286,20 +1303,22 @@ function ENT:GetCard()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeSP(sp)
-	if self.User:HasGodMode() then return end
-	-- self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,self.User:IsPlayer() && 999 or 9999))
-	self.User:SetSP(math.Clamp(self.User:GetSP() -sp,0,self.User:GetMaxSP()))
+	local ply = self.User
+	if ply:HasGodMode() then return end
+	-- ply:SetSP(math.Clamp(ply:GetSP() -sp,0,ply:IsPlayer() && 999 or 9999))
+	ply:SetSP(math.Clamp(ply:GetSP() -sp,0,ply:GetMaxSP()))
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:TakeHP(hp)
-	if self.User:HasGodMode() then return end
-	self.User:SetHealth(self.User:Health() -hp)
+	local ply = self.User
+	if ply:HasGodMode() then return end
+	ply:SetHealth(ply:Health() -hp)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AddLoop(snd,sndlevel)
 	local lp = CreateSound(self,snd)
 	lp:SetSoundLevel(sndlevel)
-	table.insert(self.Loops,lp)
+	tbl_insert(self.Loops,lp)
 	return lp
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1315,21 +1334,22 @@ function ENT:DoGesture(seq,speed)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:UserTrace(maxDist)
+	local ply = self.User
 	if maxDist then
 		local tracedata = {}
-		tracedata.start = self.User:EyePos()
-		tracedata.endpos = self.User:EyePos() +self.User:EyeAngles():Forward() *maxDist
-		tracedata.filter = {self.User,self}
+		tracedata.start = ply:EyePos()
+		tracedata.endpos = ply:EyePos() +ply:EyeAngles():Forward() *maxDist
+		tracedata.filter = {ply,self}
 		local tr = util.TraceLine(tracedata)
 		
-		-- util.ParticleTracerEx("Weapon_Combine_Ion_Cannon_Beam",tr.StartPos,tr.HitPos,false,self.User:EntIndex(),0)
+		-- util.ParticleTracerEx("Weapon_Combine_Ion_Cannon_Beam",tr.StartPos,tr.HitPos,false,ply:EntIndex(),0)
 
 		return tr
 	end
 	local tracedata = {}
-	tracedata.start = self.User:EyePos()
-	tracedata.endpos = self.User:IsNPC() && (IsValid(self.User:GetEnemy()) && self.User:GetEnemy():GetPos() or self.User:EyePos() +self.User:EyeAngles():Forward() *5000) or self.User:GetEyeTrace().HitPos
-	tracedata.filter = {self.User,self}
+	tracedata.start = ply:EyePos()
+	tracedata.endpos = ply:IsNPC() && (IsValid(ply:GetEnemy()) && ply:GetEnemy():GetPos() or ply:EyePos() +ply:EyeAngles():Forward() *5000) or ply:GetEyeTrace().HitPos
+	tracedata.filter = {ply,self}
 	local tr = util.TraceLine(tracedata)
 
 	return tr
@@ -1352,9 +1372,10 @@ function ENT:FindTarget(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:FaceTarget()
-	if IsValid(self.User.Persona_EyeTarget) then
+	local ply = self.User
+	if IsValid(ply.Persona_EyeTarget) then
 		local ang = self:GetAngles()
-		self:SetAngles(Angle(ang.x,(self.User.Persona_EyeTarget:GetPos() -self:GetPos()):Angle().y,ang.z))
+		self:SetAngles(Angle(ang.x,(ply.Persona_EyeTarget:GetPos() -self:GetPos()):Angle().y,ang.z))
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1382,26 +1403,27 @@ function ENT:FacePlayerAim(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:AdditionalInput(dmg,type)
-	if !IsValid(self.User) then return dmg end
-	dmg = self.User.Persona_TarukajaT > CurTime() && dmg *1.25 or dmg
-	dmg = self.User.Persona_TarundaT > CurTime() && dmg *0.5 or dmg
-	dmg = self.User.Persona_DebilitateT > CurTime() && dmg *0.5 or dmg
-	dmg = self.User.Persona_HeatRiserT > CurTime() && dmg *1.5 or dmg
-	dmg = self.User.Persona_ChaosT > CurTime() && dmg *3 or dmg
+	local ply = self.User
+	if !IsValid(ply) then return dmg end
+	dmg = ply.Persona_TarukajaT > CurTime() && dmg *1.25 or dmg
+	dmg = ply.Persona_TarundaT > CurTime() && dmg *0.5 or dmg
+	dmg = ply.Persona_DebilitateT > CurTime() && dmg *0.5 or dmg
+	dmg = ply.Persona_HeatRiserT > CurTime() && dmg *1.5 or dmg
+	dmg = ply.Persona_ChaosT > CurTime() && dmg *3 or dmg
 	dmg = self:GetCritical() && dmg *1.25 or dmg
 	dmg = self.HasOverdrive && dmg *1.25 or dmg
 	if type == 1 then -- Physical
-		dmg = self.User.Persona_ChargedT > CurTime() && dmg *2 or dmg
+		dmg = ply.Persona_ChargedT > CurTime() && dmg *2 or dmg
 		dmg = (dmg *self.Stats.STR) /6
 	elseif type == 2 then -- Magic
-		dmg = self.User.Persona_FocusedT > CurTime() && dmg *2 or dmg
+		dmg = ply.Persona_FocusedT > CurTime() && dmg *2 or dmg
 		dmg = (dmg *self.Stats.MAG) /6
 	end
 	return dmg
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnMissedEnemy(ent)
-	print("MISSED")
+	-- print("MISSED")
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAttackPosition()
@@ -1411,24 +1433,25 @@ end
 function ENT:FindEnemies(pos,dist)
 	local FindEnts = ents.FindInSphere(pos,dist)
 	local foundEnts = {}
-	local user = self.User
+	if !IsValid(self.User) then return end
+	local ply = self.User
 	local checkPlayers = true
-	if (user:IsNPC() && GetConVarNumber("ai_ignoreplayers") == 1) then
+	if (ply:IsNPC() && GetConVarNumber("ai_ignoreplayers") == 1) then
 		checkPlayers = false
 	end
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
-			if (v != self && v != user) && ((v:IsNPC() or (checkPlayers == true && v:IsPlayer() && v:Alive()))) then
-				if self.User:IsNPC() && self.User:Disposition(v) == 3 then
+			if (v != self && v != ply) && ((v:IsNPC() or (checkPlayers == true && v:IsPlayer() && v:Alive()))) then
+				if ply:IsNPC() && ply:Disposition(v) == 3 then
 					continue
 				end
-				if self.User:IsPlayer() && v:IsNPC() && VJ_HasValue(self.User:GetParty_NPC(),v) then
+				if ply:IsPlayer() && v:IsNPC() && VJ_HasValue(ply:GetParty_NPC(),v) then
 					continue
 				end
-				if self.User:IsPlayer() && v:IsPlayer() && VJ_HasValue(self.User:GetParty(),v:UniqueID()) then
+				if ply:IsPlayer() && v:IsPlayer() && VJ_HasValue(ply:GetParty(),v:UniqueID()) then
 					continue
 				end
-				table.insert(foundEnts,v)
+				tbl_insert(foundEnts,v)
 			end
 		end
 	end
@@ -1436,14 +1459,15 @@ function ENT:FindEnemies(pos,dist)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DealDamage(ent,dmg,dmgtype,type)
+	local ply = self.User
 	dmg = self:AdditionalInput(dmg,type or 1)
 	local doactualdmg = DamageInfo()
 	doactualdmg:SetDamage(dmg)
 	doactualdmg:SetDamageType(dmgtype)
 	doactualdmg:SetInflictor(self)
-	doactualdmg:SetAttacker(IsValid(self.User) && self.User or self)
+	doactualdmg:SetAttacker(IsValid(ply) && ply or self)
 	doactualdmg:SetDamagePosition(ent:NearestPoint(self:GetAttackPosition()))
-	ent:TakeDamageInfo(doactualdmg,IsValid(self.User) && self.User or self)
+	ent:TakeDamageInfo(doactualdmg,IsValid(ply) && ply or self)
 	if ent:IsPlayer() then
 		ent:ViewPunch(Angle(math.random(-1,1) *dmg,math.random(-1,1) *dmg,math.random(-1,1) *dmg))
 	end
@@ -1467,22 +1491,23 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd,inflict,inflictT)
 	local agility = self.Stats.AGI
 	dmg = self:AdditionalInput(dmg,1)
 	local checkPlayers = true
-	if (self.User:IsNPC() && GetConVarNumber("ai_ignoreplayers") == 1) then
+	local ply = self.User
+	if (ply:IsNPC() && GetConVarNumber("ai_ignoreplayers") == 1) then
 		checkPlayers = false
 	end
 	inflict = inflict or false
 	inflictT = inflictT or 1
 	if FindEnts != nil then
 		for _,v in pairs(FindEnts) do
-			if (v != self && v != self.User) && (((v:IsNPC() or (checkPlayers && v:IsPlayer() && v:Alive()))) or v:IsNextBot() or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
+			if (v != self && v != ply) && (((v:IsNPC() or (checkPlayers && v:IsPlayer() && v:Alive()))) or v:IsNextBot() or v:GetClass() == "func_breakable_surf" or v:GetClass() == "prop_physics") then
 				if (self:GetForward():Dot((Vector(v:GetPos().x,v:GetPos().y,0) - Vector(self:GetPos().x,self:GetPos().y,0)):GetNormalized()) > math.cos(math.rad(rad))) then
-					if self.User:IsNPC() && self.User:Disposition(v) == 3 then
+					if ply:IsNPC() && ply:Disposition(v) == 3 then
 						continue
 					end
-					if self.User:IsPlayer() && v:IsNPC() && VJ_HasValue(self.User:GetParty_NPC(),v) then
+					if ply:IsPlayer() && v:IsNPC() && VJ_HasValue(ply:GetParty_NPC(),v) then
 						continue
 					end
-					if self.User:IsPlayer() && v:IsPlayer() && VJ_HasValue(self.User:GetParty(),v:UniqueID()) then
+					if ply:IsPlayer() && v:IsPlayer() && VJ_HasValue(ply:GetParty(),v:UniqueID()) then
 						continue
 					end
 					-- if math.random(1,100) > agility then
@@ -1493,9 +1518,9 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd,inflict,inflictT)
 					doactualdmg:SetDamageType(snd != nil && type(snd) == "number" && snd or self.DamageTypes or DMG_P_PHYSICAL)
 					doactualdmg:SetDamageForce(self:GetForward() *((doactualdmg:GetDamage() +100) *70))
 					doactualdmg:SetInflictor(self)
-					doactualdmg:SetAttacker(self.User)
+					doactualdmg:SetAttacker(ply)
 					doactualdmg:SetDamagePosition(v:NearestPoint(attackPos))
-					v:TakeDamageInfo(doactualdmg,self.User)
+					v:TakeDamageInfo(doactualdmg,ply)
 					if v:IsPlayer() then
 						v:ViewPunch(Angle(math.random(-1,1) *dmg,math.random(-1,1) *dmg,math.random(-1,1) *dmg))
 					end
@@ -1514,7 +1539,7 @@ function ENT:MeleeAttackCode(dmg,dmgdist,rad,snd,inflict,inflictT)
 					util.Effect("Persona_Hit_Cut",effectdata)
 
 					hitentity = true
-					table.insert(hitEnts,v)
+					tbl_insert(hitEnts,v)
 					if snd && type(snd) == "string" then v:EmitSound("cpthazama/persona5/misc/00051.wav",math.random(60,72),math.random(100,120)) end
 					
 					-- if v:GetClass() == "prop_physics" then
@@ -1542,7 +1567,10 @@ function ENT:CreateAura(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:DoChat(text)
-	if self.User:IsPlayer() then self.User:ChatPrint(text) end
+	local ply = self.User
+	if ply:IsPlayer() then
+		ply:ChatPrint(text)
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:SoundTimer(t,ent,snd)
@@ -1595,7 +1623,7 @@ function ENT:BrainWash(ent,min,max)
 					ent.PlayerFriendly = true
 					ent.FriendsWithAllPlayerAllies = true
 					ent.VJ_NPC_Class = ply.VJ_NPC_Class or {"CLASS_PLAYER_ALLY"}
-					if ent.VJ_AddCertainEntityAsFriendly then table.insert(ent.VJ_AddCertainEntityAsFriendly,ply) end
+					if ent.VJ_AddCertainEntityAsFriendly then tbl_insert(ent.VJ_AddCertainEntityAsFriendly,ply) end
 					timer.Simple(20,function()
 						if IsValid(ent) then
 							ent.Persona_BrainWashed = false
@@ -1613,7 +1641,7 @@ function ENT:BrainWash(ent,min,max)
 				elseif ent:IsPlayer() && !ent.Persona_BrainWashed && ent:Alive() then
 					ent.Persona_BrainWashed = true
 					ent.Persona_BrainWashers = ent.Persona_BrainWashers or {}
-					table.insert(ent.Persona_BrainWashers,ply)
+					tbl_insert(ent.Persona_BrainWashers,ply)
 					timer.Simple(20,function()
 						if IsValid(ent) then
 							ent.Persona_BrainWashed = false
@@ -1657,10 +1685,11 @@ function ENT:IceEffect(ent,dmg,scale)
 	m:EmitSound(snds[dmg] or "cpthazama/persona5/skills/0021.wav",80)
 	timer.Simple(0.85,function()
 		if IsValid(ent) && IsValid(self) then
+			local ply = self.User
 			if math.random(1,4) == 1 then
 				-- ent:SetFrozen(20) -- No code for this yet!
-				if IsValid(self.User) && self.User:IsPlayer() then
-					self.User:ChatPrint("Inflicted Freeze!")
+				if IsValid(ply) && ply:IsPlayer() then
+					ply:ChatPrint("Inflicted Freeze!")
 				end
 			end
 			ent:EmitSound("cpthazama/persona5/skills/0210.wav",75)
@@ -1709,10 +1738,11 @@ function ENT:AgiEffect(ent,dmg,scale,extraFX)
 	end)
 	timer.Simple(2,function()
 		if IsValid(ent) && IsValid(self) then
+			local ply = self.User
 			if math.random(1,4) == 1 then
 				ent:Ignite(20)
-				if IsValid(self.User) && self.User:IsPlayer() then
-					self.User:ChatPrint("Inflicted Burn!")
+				if IsValid(ply) && ply:IsPlayer() then
+					ply:ChatPrint("Inflicted Burn!")
 				end
 			end
 			ent:EmitSound("cpthazama/persona5/skills/0011.wav",75)
@@ -1752,34 +1782,17 @@ function ENT:NuclearEffect(ent,dmg,t,sc)
 	Light:Fire("TurnOn","",0)
 	Light:Fire("TurnOff","",5)
 	m:DeleteOnRemove(Light)
-	-- timer.Simple(time -0.5,function()
-		-- if IsValid(m) && IsValid(self) then
-			-- local ents = self:FindEnemies(m:GetPos(),30 *scale)
-			-- if ents != nil then
-				-- for _,v in pairs(ents) do
-					-- if IsValid(v) then
-						-- local dmginfo = DamageInfo()
-						-- dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
-						-- dmginfo:SetDamageType(DMG_P_NUCLEAR)
-						-- dmginfo:SetInflictor(IsValid(self) && self or v)
-						-- dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or v)
-						-- dmginfo:SetDamagePosition(m:NearestPoint(v:GetPos() +v:OBBCenter()))
-						-- v:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or v)
-						-- v:EmitSound("cpthazama/persona5/skills/0014.wav",70)
-					-- end
-				-- end
-			-- end
-		-- end
-	-- end)
+
 	timer.Simple(time -0.5,function()
 		if IsValid(ent) && IsValid(self) then
+			local ply = self.User
 			local dmginfo = DamageInfo()
 			dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
 			dmginfo:SetDamageType(DMG_P_NUCLEAR)
 			dmginfo:SetInflictor(IsValid(self) && self or v)
-			dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
+			dmginfo:SetAttacker(IsValid(self) && IsValid(ply) && ply or ent)
 			dmginfo:SetDamagePosition(m:NearestPoint(ent:GetPos() +ent:OBBCenter()))
-			ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)
+			ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(ply) && ply or ent)
 			ent:EmitSound("cpthazama/persona5/skills/0230.wav",90)
 		end
 	end)
@@ -1823,13 +1836,14 @@ function ENT:BlackViperEffect(ent,dmg)
 
 			timer.Simple(0.8,function()
 				if IsValid(ent) && IsValid(self) then
+					local ply = self.User
 					local dmginfo = DamageInfo()
 					dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
 					dmginfo:SetDamageType(DMG_P_ALMIGHTY)
 					dmginfo:SetInflictor(IsValid(self) && self or v)
-					dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
+					dmginfo:SetAttacker(IsValid(self) && IsValid(ply) && ply or ent)
 					dmginfo:SetDamagePosition(m:NearestPoint(ent:GetPos() +ent:OBBCenter()))
-					ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)
+					ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(ply) && ply or ent)
 				end
 			end)
 			timer.Simple(VJ_GetSequenceDuration(m,"bite"),function()
@@ -1869,7 +1883,7 @@ function ENT:PsiEffect(ent,dmg,t,sc,cnt,sound)
 		m:SetPlaybackRate(math.random(2,6))
 		m:SetModelScale(scale,time /2)
 		VJ_CreateSound(m,"cpthazama/persona5/skills/0190.wav",90)
-		table.insert(tbl,m)
+		tbl_insert(tbl,m)
 	end
 	local spawnparticle = ents.Create("info_particle_system")
 	spawnparticle:SetKeyValue("effect_name","vj_per_skill_psy")
@@ -1889,13 +1903,14 @@ function ENT:PsiEffect(ent,dmg,t,sc,cnt,sound)
 	end)
 	timer.Simple(time -0.5,function()
 		if IsValid(ent) && IsValid(self) then
+			local ply = self.User
 			local dmginfo = DamageInfo()
 			dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
 			dmginfo:SetDamageType(DMG_P_PSI)
 			dmginfo:SetInflictor(IsValid(self) && self or v)
-			dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
+			dmginfo:SetAttacker(IsValid(self) && IsValid(ply) && ply or ent)
 			dmginfo:SetDamagePosition(self:NearestPoint(ent:GetPos() +ent:OBBCenter()))
-			ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)
+			ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(ply) && ply or ent)
 			ent:EmitSound("cpthazama/persona5/skills/0190.wav",90)
 		end
 	end)
@@ -2062,12 +2077,13 @@ function ENT:MegidolaonEffect(ent,dmg,time,scale)
 				for _,v in pairs(ents) do
 					if IsValid(v) then
 						local dmginfo = DamageInfo()
+						local ply = self.User
 						dmginfo:SetDamage(IsValid(self) && self:AdditionalInput(dmg,2) or dmg)
 						dmginfo:SetDamageType(DMG_P_ALMIGHTY)
 						dmginfo:SetInflictor(IsValid(self) && self or v)
-						dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or v)
+						dmginfo:SetAttacker(IsValid(self) && IsValid(ply) && ply or v)
 						dmginfo:SetDamagePosition(m:NearestPoint(v:GetPos() +v:OBBCenter()))
-						v:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or v)
+						v:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(ply) && ply or v)
 						v:EmitSound("cpthazama/persona5/skills/0014.wav",70)
 					end
 				end
@@ -2152,10 +2168,11 @@ function ENT:ZioEffect(ent,dmg,eff) -- att,dist,eff,target
 	end
 	timer.Simple(timeDMG,function()
 		if IsValid(ent) && IsValid(self) then
+			local ply = self.User
 			if math.random(1,4) == 1 then
 				-- ent:SetShock(20) -- No code for this yet!
-				if IsValid(self.User) && self.User:IsPlayer() then
-					self.User:ChatPrint("Inflicted Shock!")
+				if IsValid(ply) && ply:IsPlayer() then
+					ply:ChatPrint("Inflicted Shock!")
 				end
 			end
 			ent:EmitSound("cpthazama/persona5/skills/0040.wav",95)
@@ -2182,7 +2199,8 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:ZioEffect_P4AU(att,dist,eff,target)
 	local pos = self:GetAttachment(att).Pos
-	local ent = self.User:IsNPC() && IsValid(self.User:GetEnemy()) && self.User:GetEnemy() or self.User:IsPlayer() && IsValid(self.User.Persona_EyeTarget) && self.User.Persona_EyeTarget or NULL
+	local ply = self.User
+	local ent = ply:IsNPC() && IsValid(ply:GetEnemy()) && ply:GetEnemy() or ply:IsPlayer() && IsValid(ply.Persona_EyeTarget) && ply.Persona_EyeTarget or NULL
 	if IsValid(target) then
 		ent = target
 	end
@@ -2213,7 +2231,8 @@ function ENT:Confuse(ent,t)
 	ent.Persona_ConfuseT = ent.Persona_ConfuseT or 0
 	if ent.Persona_ConfuseT < CurTime() then
 		ent.Persona_ConfuseT = CurTime() +t
-		if self.User:IsPlayer() then self.User:ChatPrint("Inflicted Confusion!") end
+		local ply = self.User
+		if ply:IsPlayer() then ply:ChatPrint("Inflicted Confusion!") end
 		ParticleEffectAttach("persona_fx_dmg_death",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 		local hookName = "Persona_ConfuseThink_" .. ent:EntIndex()
 		hook.Add("Think",hookName,function()
@@ -2239,7 +2258,8 @@ function ENT:Curse(ent,t,dmg)
 	if ent.Persona_CurseT < CurTime() then
 		ent.Persona_CurseT = CurTime() +t
 		ent.Persona_CurseDMGT = CurTime() +(t < 1 && 0 or 1)
-		if self.User:IsPlayer() then self.User:ChatPrint("Inflicted Curse!") end
+		local ply = self.User
+		if ply:IsPlayer() then ply:ChatPrint("Inflicted Curse!") end
 		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 		local hookName = "Persona_CurseThink_" .. ent:EntIndex()
 		hook.Add("Think",hookName,function()
@@ -2254,12 +2274,13 @@ function ENT:Curse(ent,t,dmg)
 			end
 			if CurTime() > ent.Persona_CurseDMGT then
 				local dmginfo = DamageInfo()
+				local ply = self.User
 				dmginfo:SetDamage(dmg)
 				dmginfo:SetDamageType(DMG_P_CURSE)
 				dmginfo:SetDamagePosition(ent:GetPos() +ent:OBBCenter())
 				dmginfo:SetInflictor(IsValid(self) && self or ent)
-				dmginfo:SetAttacker(IsValid(self) && IsValid(self.User) && self.User or ent)
-				ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(self.User) && self.User or ent)
+				dmginfo:SetAttacker(IsValid(self) && IsValid(ply) && ply or ent)
+				ent:TakeDamageInfo(dmginfo,IsValid(self) && IsValid(ply) && ply or ent)
 				ent.Persona_CurseDMGT = CurTime() +1
 			end
 		end)
@@ -2270,11 +2291,12 @@ function ENT:Fear(ent,t)
 	ent.Persona_FearT = ent.Persona_FearT or 0
 	if ent.Persona_FearT < CurTime() then
 		ent.Persona_FearT = CurTime() +t
-		if self.User:IsPlayer() then self.User:ChatPrint("Inflicted Fear!") end
+		local ply = self.User
+		if ply:IsPlayer() then ply:ChatPrint("Inflicted Fear!") end
 		-- ent:EmitSound("cpthazama/vo/adachi/curse.wav",80)
 		ParticleEffectAttach("persona_fx_dmg_fear",PATTACH_POINT_FOLLOW,ent,ent:LookupAttachment("origin"))
 		local hookName = "Persona_FearThink_" .. ent:EntIndex()
-		local user = self.User
+		local user = ply
 		local prevDisp = (ent:IsNPC() && IsValid(user) && ent:Disposition(user) != D_FR && ent:Disposition(user) or D_NU) or false
 		hook.Add("Think",hookName,function()
 			if !IsValid(ent) then
@@ -2323,25 +2345,27 @@ hook.Add("PlayerDeath","Persona_PlayerKilled",function(ent,killer,weapon)
 end)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:UpdateStats()
-	local add = PXP.IsLegendary(self.User) && 2 or 1
+	local ply = self.User
+	local add = PXP.IsLegendary(ply) && 2 or 1
 	self.Stats.STR = self.Stats.STR +add
 	self.Stats.MAG = self.Stats.MAG +add
 	self.Stats.END = self.Stats.END +add
 	self.Stats.AGI = self.Stats.AGI +add
 	self.Stats.LUC = self.Stats.LUC +add
-	PXP.SavePersonaStats(self.User)
+	PXP.SavePersonaStats(ply)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:WhenRemoved() end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnRemove()
-	if IsValid(self.User) then
-		self.User:SetNW2Bool("Persona_SkillMenu",false)
-		self.User:SetNW2Vector("Persona_CustomPos",Vector(0,0,0))
-		self.User:StopParticles()
+	local ply = self.User
+	if IsValid(ply) then
+		ply:SetNW2Bool("Persona_SkillMenu",false)
+		ply:SetNW2Vector("Persona_CustomPos",Vector(0,0,0))
+		ply:StopParticles()
 
-		local exp = PXP.GetPersonaData(self.User,1)
-		local lvl = PXP.GetPersonaData(self.User,2)
+		local exp = PXP.GetPersonaData(ply,1)
+		local lvl = PXP.GetPersonaData(ply,2)
 		self.EXP = exp != nil && exp or 0
 		self.Level = lvl != nil && lvl or self.Stats.LVL
 		-- if self.EXP < (self.Stats.LVL *1500) then
@@ -2350,14 +2374,14 @@ function ENT:OnRemove()
 		if self.Level < self.Stats.LVL then
 			self.Level = self.Stats.LVL
 		end
-		PXP.SavePersonaData(self.User,self.EXP,self.Level,self.CardTable)
+		PXP.SavePersonaData(ply,self.EXP,self.Level,self.CardTable)
 	end
 	if self.OverdriveAura then self.OverdriveAura:Stop() end
 	self:StopParticles()
-	if IsValid(self.User) && self.User:IsNPC() && self.User.OnDisablePersona then
-		self.User:OnDisablePersona(self)
-		if self.User.UpdateCamera then
-			self.User:UpdateCamera(1)
+	if IsValid(ply) && ply:IsNPC() && ply.OnDisablePersona then
+		ply:OnDisablePersona(self)
+		if ply.UpdateCamera then
+			ply:UpdateCamera(1)
 		end
 	end
 	self:WhenRemoved()

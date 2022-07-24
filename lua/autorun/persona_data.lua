@@ -1,189 +1,288 @@
-PERSONA = {}
+PERSONA = PERSONA or {}
+PERSONA_DANCERS = PERSONA_DANCERS or {}
+PERSONA_ITEMS = {}
 
-PERSONA["izanagi"] = {}
-PERSONA["izanagi"].Model = "models/cpthazama/persona5/persona/izanagi.mdl"
-PERSONA["izanagi"].Aura = "persona_aura_blue"
-PERSONA["izanagi"].Name = "Izanagi"
+local string_find = string.find
 
-PERSONA["izanagi_picaro"] = {}
-PERSONA["izanagi_picaro"].Model = "models/cpthazama/persona5/persona/izanagi.mdl"
-PERSONA["izanagi_picaro"].Aura = "persona_aura_blue"
-PERSONA["izanagi_picaro"].Name = "Izanagi Picaro"
+function P_AddItem(name,class,category)
+	if !PERSONA_ITEMS[class] then
+		PERSONA_ITEMS[class] = {
+			Name = name,
+			Class = class,
+			Category = category or "Misc."
+		}
+		list.Set("PERSONA_DATA_ITEMS", class, PERSONA_ITEMS[class])
+	end
+end
 
-PERSONA["izanagi_velvet"] = {}
-PERSONA["izanagi_velvet"].Model = "models/cpthazama/persona5/persona/izanagi_velvet.mdl"
-PERSONA["izanagi_velvet"].Aura = "persona_aura_velvet"
-PERSONA["izanagi_velvet"].Name = "Izanagi (Velvet)"
+P_AddItem("Recov-R: 100mg","item_persona_hp","Battle Items")
+P_AddItem("Medicine","item_persona_hp_small","Battle Items")
+P_AddItem("Chewing Soul","item_persona_sp","Battle Items")
+P_AddItem("Snuff Soul","item_persona_sp_small","Battle Items")
+P_AddItem("Velvet Key","item_persona_velvetkey","Key Items")
 
-PERSONA["magatsu_izanagi"] = {}
-PERSONA["magatsu_izanagi"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi.mdl"
-PERSONA["magatsu_izanagi"].Aura = "persona_aura_red"
-PERSONA["magatsu_izanagi"].Name = "Magatsu-Izanagi"
+function P_AddDancer(name,class,category)
+	if !PERSONA_DANCERS[class] then
+		PERSONA_DANCERS[class] = {
+			Name = name,
+			Category = category,
+			Class = class
+		}
+		list.Set("PERSONA_DATA_DANCERS", class, PERSONA_DANCERS[class])
+	end
+end
 
-PERSONA["magatsu_izanagi_picaro"] = {}
-PERSONA["magatsu_izanagi_picaro"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi_picaro.mdl"
-PERSONA["magatsu_izanagi_picaro"].Aura = "persona_aura_blue"
-PERSONA["magatsu_izanagi_picaro"].Name = "Magatsu-Izanagi Picaro"
+P_AddDancer("Tohru Adachi","sent_dance_adachi","Persona 4")
+P_AddDancer("Goro Akechi","sent_dance_akechi","Persona 5")
+P_AddDancer("Futaba Sakura","sent_dance_futaba","Persona 5")
+P_AddDancer("Fuuka Yamagishi","sent_dance_fuuka","Persona 3")
+P_AddDancer("Marie","sent_dance_marie","Persona 4")
+P_AddDancer("Naoto Shirogane","sent_dance_naoto","Persona 4")
+P_AddDancer("Yu Narukami","sent_dance_yu","Persona 4")
 
-PERSONA["magatsu_izanagi_p4"] = {}
-PERSONA["magatsu_izanagi_p4"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi.mdl"
-PERSONA["magatsu_izanagi_p4"].Aura = "persona_aura_red"
-PERSONA["magatsu_izanagi_p4"].Name = "Magatsu-Izanagi (Classic)"
+function P_AddPersona(name,class,model,aura,category)
+	if !PERSONA[class] then
+		PERSONA[class] = {
+			Name = name,
+			Model = model,
+			Aura = aura,
+			Category = category or (string_find(model, "persona5") && "Persona 5" or string_find(model, "persona4") && "Persona 4" or "Persona 3"),
+			Class = "sent_persona_" .. class
+		}
+		list.Set("PERSONA_DATA_PERSONAS", "sent_persona_" .. class, PERSONA[class])
+	end
+end
 
-PERSONA["magatsu_izanagi_velvet"] = {}
-PERSONA["magatsu_izanagi_velvet"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi_velvet.mdl"
-PERSONA["magatsu_izanagi_velvet"].Aura = "persona_aura_velvet"
-PERSONA["magatsu_izanagi_velvet"].Name = "Magatsu-Izanagi (Velvet)"
+P_AddPersona(
+	"Izanagi",
+	"izanagi",
+	"models/cpthazama/persona5/persona/izanagi.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["magatsu_izanagi_okami"] = {}
-PERSONA["magatsu_izanagi_okami"].Model = "models/cpthazama/persona5/persona/magatsu_izanagi_no_okami.mdl"
-PERSONA["magatsu_izanagi_okami"].Aura = "persona_aura_red"
-PERSONA["magatsu_izanagi_okami"].Name = "Magatsu-Izanagi-no-Okami"
+P_AddPersona(
+	"Izanagi Picaro",
+	"izanagi_picaro",
+	"models/cpthazama/persona5/persona/izanagi.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["izanagi_okami"] = {}
-PERSONA["izanagi_okami"].Model = "models/cpthazama/persona5/persona/izanagi_no_okami.mdl"
-PERSONA["izanagi_okami"].Aura = "persona_aura_yellow"
-PERSONA["izanagi_okami"].Name = "Izanagi-no-Okami"
+P_AddPersona(
+	"Izanagi (Velvet)",
+	"izanagi_velvet",
+	"models/cpthazama/persona5/persona/izanagi_velvet.mdl",
+	"persona_aura_velvet"
+)
 
-PERSONA["thanatos"] = {}
-PERSONA["thanatos"].Model = "models/cpthazama/persona5/persona/thanatos.mdl"
-PERSONA["thanatos"].Aura = "persona_aura_blue"
-PERSONA["thanatos"].Name = "Thanatos"
+P_AddPersona(
+	"Magatsu-Izanagi",
+	"magatsu_izanagi",
+	"models/cpthazama/persona5/persona/magatsu_izanagi.mdl",
+	"persona_aura_red"
+)
 
-PERSONA["tsukiyomi"] = {}
-PERSONA["tsukiyomi"].Model = "models/cpthazama/persona5/persona/tsukiyomi.mdl"
-PERSONA["tsukiyomi"].Aura = "persona_aura_red"
-PERSONA["tsukiyomi"].Name = "Tsukiyomi"
+P_AddPersona(
+	"Magatsu-Izanagi Picaro",
+	"magatsu_izanagi_picaro",
+	"models/cpthazama/persona5/persona/magatsu_izanagi_picaro.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["satanael"] = {}
-PERSONA["satanael"].Model = "models/cpthazama/persona5/persona/satanael.mdl"
-PERSONA["satanael"].Aura = "persona_aura_blue"
-PERSONA["satanael"].Name = "Satanael"
+P_AddPersona(
+	"Magatsu-Izanagi (Classic)",
+	"magatsu_izanagi_p4",
+	"models/cpthazama/persona5/persona/magatsu_izanagi.mdl",
+	"persona_aura_red"
+)
 
-PERSONA["satanael_small"] = {}
-PERSONA["satanael_small"].Model = "models/cpthazama/persona5/persona/satanael.mdl"
-PERSONA["satanael_small"].Aura = "persona_aura_blue"
-PERSONA["satanael_small"].Name = "Satanael"
+P_AddPersona(
+	"Magatsu-Izanagi (Velvet)",
+	"magatsu_izanagi_velvet",
+	"models/cpthazama/persona5/persona/magatsu_izanagi_velvet.mdl",
+	"persona_aura_velvet"
+)
 
-PERSONA["loki"] = {}
-PERSONA["loki"].Model = "models/cpthazama/persona5/persona/loki.mdl"
-PERSONA["loki"].Aura = "persona_aura_red"
-PERSONA["loki"].Name = "Loki"
+P_AddPersona(
+	"Magatsu-Izanagi-no-Okami",
+	"magatsu_izanagi_okami",
+	"models/cpthazama/persona5/persona/magatsu_izanagi_no_okami.mdl",
+	"persona_aura_red"
+)
 
--- PERSONA["cendrillon"] = {}
--- PERSONA["cendrillon"].Model = "models/cpthazama/persona5/persona/cendrillon.mdl"
--- PERSONA["cendrillon"].Aura = "persona_aura_blue"
--- PERSONA["cendrillon"].Name = "Cendrillon"
+P_AddPersona(
+	"Izanagi-no-Okami",
+	"izanagi_okami",
+	"models/cpthazama/persona5/persona/izanagi_no_okami.mdl",
+	"persona_aura_yellow"
+)
 
-PERSONA["alice"] = {}
-PERSONA["alice"].Model = "models/cpthazama/persona5/persona/alice.mdl"
-PERSONA["alice"].Aura = "persona_aura_purple"
-PERSONA["alice"].Name = "Alice"
+P_AddPersona(
+	"Thanatos",
+	"thanatos",
+	"models/cpthazama/persona5/persona/thanatos.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["ariadne"] = {}
-PERSONA["ariadne"].Model = "models/cpthazama/persona5/persona/ariadne.mdl"
-PERSONA["ariadne"].Aura = "persona_aura_blue"
-PERSONA["ariadne"].Name = "Ariadne"
+P_AddPersona(
+	"Tsukiyomi",
+	"tsukiyomi",
+	"models/cpthazama/persona5/persona/tsukiyomi.mdl",
+	"persona_aura_red"
+)
 
-PERSONA["ariadne_picaro"] = {}
-PERSONA["ariadne_picaro"].Model = "models/cpthazama/persona5/persona/ariadne_picaro.mdl"
-PERSONA["ariadne_picaro"].Aura = "persona_aura_blue"
-PERSONA["ariadne_picaro"].Name = "Ariadne Picaro"
+P_AddPersona(
+	"Satanael",
+	"satanael",
+	"models/cpthazama/persona5/persona/satanael.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["yoshitsune"] = {}
-PERSONA["yoshitsune"].Model = "models/cpthazama/persona5/persona/yoshitsune.mdl"
-PERSONA["yoshitsune"].Aura = "persona_aura_blue"
-PERSONA["yoshitsune"].Name = "Yoshitsune"
+P_AddPersona(
+	"Satanael (Small)",
+	"satanael_small",
+	"models/cpthazama/persona5/persona/satanael.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["hypnos"] = {}
-PERSONA["hypnos"].Model = "models/cpthazama/persona3/persona/hypnos.mdl"
-PERSONA["hypnos"].Aura = "persona_aura_red"
-PERSONA["hypnos"].Name = "Hypnos"
+P_AddPersona(
+	"Loki",
+	"loki",
+	"models/cpthazama/persona5/persona/loki.mdl",
+	"persona_aura_red"
+)
 
-PERSONA["medea"] = {}
-PERSONA["medea"].Model = "models/cpthazama/persona3/persona/medea.mdl"
-PERSONA["medea"].Aura = "persona_aura_red"
-PERSONA["medea"].Name = "Medea"
+P_AddPersona(
+	"Alice",
+	"alice",
+	"models/cpthazama/persona5/persona/alice.mdl",
+	"persona_aura_purple"
+)
 
--- PERSONA["hastur"] = {}
--- PERSONA["hastur"].Model = "models/cpthazama/persona5/persona/hastur.mdl"
--- PERSONA["hastur"].Aura = "persona_aura_red"
--- PERSONA["hastur"].Name = "Hastur"
+P_AddPersona(
+	"Ariadne",
+	"ariadne",
+	"models/cpthazama/persona5/persona/ariadne.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["azathoth"] = {}
-PERSONA["azathoth"].Model = "models/cpthazama/persona5/persona/azathoth.mdl"
-PERSONA["azathoth"].Aura = "persona_aura_red"
-PERSONA["azathoth"].Name = "Azathoth"
+P_AddPersona(
+	"Ariadne Picaro",
+	"ariadne_picaro",
+	"models/cpthazama/persona5/persona/ariadne_picaro.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["orpheus"] = {}
-PERSONA["orpheus"].Model = "models/cpthazama/persona3/persona/orpheus.mdl"
-PERSONA["orpheus"].Aura = "persona_aura_blue"
-PERSONA["orpheus"].Name = "Orpheus"
+P_AddPersona(
+	"Yoshitsune",
+	"yoshitsune",
+	"models/cpthazama/persona5/persona/yoshitsune.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["messiah"] = {}
-PERSONA["messiah"].Model = "models/cpthazama/persona3/persona/messiah.mdl"
-PERSONA["messiah"].Aura = "persona_aura_blue"
-PERSONA["messiah"].Name = "Messiah"
+P_AddPersona(
+	"Hypnos",
+	"hypnos",
+	"models/cpthazama/persona3/persona/hypnos.mdl",
+	"persona_aura_red"
+)
 
-PERSONA["robinhood"] = {}
-PERSONA["robinhood"].Model = "models/cpthazama/persona5/persona/robinhood.mdl"
-PERSONA["robinhood"].Aura = "persona_aura_blue"
-PERSONA["robinhood"].Name = "Robin-Hood"
+P_AddPersona(
+	"Medea",
+	"medea",
+	"models/cpthazama/persona3/persona/medea.mdl",
+	"persona_aura_red"
+)
 
-PERSONA["arsene"] = {}
-PERSONA["arsene"].Model = "models/cpthazama/persona5/persona/arsene.mdl"
-PERSONA["arsene"].Aura = "persona_aura_blue"
-PERSONA["arsene"].Name = "Arsene"
+P_AddPersona(
+	"Azathoth",
+	"azathoth",
+	"models/cpthazama/persona5/persona/azathoth.mdl",
+	"persona_aura_red"
+)
 
-PERSONA["asterius"] = {}
-PERSONA["asterius"].Model = "models/cpthazama/persona4/persona/asterius.mdl"
-PERSONA["asterius"].Aura = "persona_aura_red"
-PERSONA["asterius"].Name = "Asterius"
+P_AddPersona(
+	"Orpheus",
+	"orpheus",
+	"models/cpthazama/persona3/persona/orpheus.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["carmen"] = {}
-PERSONA["carmen"].Model = "models/cpthazama/persona5/persona/carmen.mdl"
-PERSONA["carmen"].Aura = "persona_aura_blue"
-PERSONA["carmen"].Name = "Carmen"
+P_AddPersona(
+	"Messiah",
+	"messiah",
+	"models/cpthazama/persona3/persona/messiah.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["tomoe"] = {}
-PERSONA["tomoe"].Model = "models/cpthazama/persona4/persona/tomoe.mdl"
-PERSONA["tomoe"].Aura = "persona_aura_blue"
-PERSONA["tomoe"].Name = "Tomoe"
+P_AddPersona(
+	"Robin-Hood",
+	"robinhood",
+	"models/cpthazama/persona5/persona/robinhood.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["sakuya"] = {}
-PERSONA["sakuya"].Model = "models/cpthazama/persona4/persona/sakuya.mdl"
-PERSONA["sakuya"].Aura = "persona_aura_blue"
-PERSONA["sakuya"].Name = "Konohana Sakuya"
+P_AddPersona(
+	"Arsene",
+	"arsene",
+	"models/cpthazama/persona5/persona/arsene.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["necronomicon"] = {}
-PERSONA["necronomicon"].Model = "models/cpthazama/persona5/persona/necronomicon.mdl"
-PERSONA["necronomicon"].Aura = "persona_aura_blue"
-PERSONA["necronomicon"].Name = "Necronomicon"
+P_AddPersona(
+	"Asterius",
+	"asterius",
+	"models/cpthazama/persona4/persona/asterius.mdl",
+	"persona_aura_red"
+)
 
-PERSONA["jack"] = {}
-PERSONA["jack"].Model = "models/cpthazama/persona5/persona/jack-o-lantern.mdl"
-PERSONA["jack"].Aura = "persona_aura_red"
-PERSONA["jack"].Name = "Jack-o-Lantern"
+P_AddPersona(
+	"Carmen",
+	"carmen",
+	"models/cpthazama/persona5/persona/carmen.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["loki_shadow"] = {}
-PERSONA["loki_shadow"].Model = "models/cpthazama/persona5/persona/loki.mdl"
-PERSONA["loki_shadow"].Aura = "persona_aura_red"
-PERSONA["loki_shadow"].Name = "Loki (Shadow)"
+P_AddPersona(
+	"Tomoe",
+	"tomoe",
+	"models/cpthazama/persona4/persona/tomoe.mdl",
+	"persona_aura_blue"
+)
 
-PERSONA["pandora"] = {}
-PERSONA["pandora"].Model = "models/cpthazama/persona5_strikers/persona/pandora.mdl"
-PERSONA["pandora"].Aura = "persona_aura_blue"
-PERSONA["pandora"].Name = "Pandora"
+P_AddPersona(
+	"Konohana Sakuya",
+	"sakuya",
+	"models/cpthazama/persona4/persona/sakuya.mdl",
+	"persona_aura_blue"
+)
 
--- PERSONA["hereward"] = {}
--- PERSONA["hereward"].Model = "models/cpthazama/persona5/persona/hereward.mdl"
--- PERSONA["hereward"].Aura = "persona_aura_red"
--- PERSONA["hereward"].Name = "Hereward"
+P_AddPersona(
+	"Necronomicon",
+	"necronomicon",
+	"models/cpthazama/persona5/persona/necronomicon.mdl",
+	"persona_aura_blue"
+)
 
--- PERSONA["reaper"] = {}
--- PERSONA["reaper"].Model = "models/cpthazama/persona5/persona/reaper.mdl"
--- PERSONA["reaper"].Aura = "persona_aura_red"
--- PERSONA["reaper"].Name = "The Reaper"
+P_AddPersona(
+	"Jack-o-Lantern",
+	"jack",
+	"models/cpthazama/persona5/persona/jack-o-lantern.mdl",
+	"persona_aura_red"
+)
+
+P_AddPersona(
+	"Loki (Shadow)",
+	"loki_shadow",
+	"models/cpthazama/persona5/persona/loki.mdl",
+	"persona_aura_red"
+)
+
+P_AddPersona(
+	"Pandora",
+	"pandora",
+	"models/cpthazama/persona5_strikers/persona/pandora.mdl",
+	"persona_aura_blue"
+)
 
 local ENT = FindMetaTable("Entity")
 

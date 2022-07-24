@@ -66,6 +66,140 @@ end
 concommand.Add("persona_updateskilltable",UpdateTable)
 
 if CLIENT then
+	-------------------------------------------------------------------------------
+	--								Spawn-Menu									 --
+	-------------------------------------------------------------------------------
+
+	local function Persona_PopulateTrees(pnlContent, tree, node, vjTreeName, vjIcon, vjList) -- Credits to Vrej for this custom menu
+		local roottree = tree:AddNode(vjTreeName, vjIcon)
+		if vjTreeName == "NPCs" then
+			roottree:MoveToFront()
+		end
+
+		roottree.PropPanel = vgui.Create("ContentContainer", pnlContent)
+		roottree.PropPanel:SetVisible(false)
+		roottree.PropPanel:SetTriggerSpawnlistChange(false)
+		
+		function roottree:DoClick()
+			pnlContent:SwitchPanel(self.PropPanel)
+		end
+		
+		local EntList = list.Get(vjList)
+		local CatInfoList = list.Get("VJBASE_CATEGORY_INFO")
+		
+		local Categories = {}
+		for k, v in pairs(EntList) do
+			if vjTreeName == "NPCs" then
+				local Category = v.Category
+				if Category == "Persona" or Category == "Persona - Villains" then
+					local Tab = Categories[Category] or {}
+					Tab[k] = v
+					Categories[Category] = Tab
+				end
+			elseif vjTreeName == "Personas" or vjTreeName == "Dancers" or vjTreeName == "Items" then
+				local Category = v.Category
+				local Tab = Categories[Category] or {}
+				Tab[k] = v
+				Categories[Category] = Tab
+			end
+		end
+		
+		for CategoryName, v in SortedPairs(Categories) do
+			local icon = vjIcon
+			if list.HasEntry("VJBASE_CATEGORY_INFO", CategoryName) then
+				icon = CatInfoList[CategoryName].icon
+			end
+
+			if vjTreeName == "Personas" then
+				icon = CategoryName == "Persona 3" && "vj_icons/p3.png" or CategoryName == "Persona 4" && "vj_icons/p4.png" or CategoryName == "Persona 5" && "vj_icons/p5.png" or icon
+			elseif vjTreeName == "Dancers" then
+				icon = CategoryName == "Persona 3" && "persona/icons/games/p3d.png" or CategoryName == "Persona 4" && "persona/icons/games/p4d.png" or CategoryName == "Persona 5" && "persona/icons/games/p5d.png" or icon
+			elseif vjTreeName == "Items" then
+				icon = CategoryName == "Battle Items" && "persona/icons/items.png" or CategoryName == "Key Items" && "persona/icons/key_items.png" or CategoryName == "Skills" && "persona/icons/skills.png" or icon
+			end
+
+			if vjTreeName == "Dancers" then
+				CategoryName = CategoryName .. " Dancing"
+			elseif vjTreeName == "NPCs" then
+				CategoryName = CategoryName == "Persona - Villains" && "Antagonists" or CategoryName == "Persona" and "Protagonists" or CategoryName
+			end
+
+			local node = roottree:AddNode(CategoryName, icon)
+			local CatPropPanel = vgui.Create("ContentContainer", pnlContent)
+			CatPropPanel:SetVisible(false)
+			
+			local generalHeader = vgui.Create("ContentHeader", roottree.PropPanel)
+			generalHeader:SetText(CategoryName)
+			roottree.PropPanel:Add(generalHeader)
+			local catHeader = vgui.Create("ContentHeader", CatPropPanel)
+			catHeader:SetText(CategoryName)
+			CatPropPanel:Add(catHeader)
+			
+			if vjTreeName == "NPCs" then
+				for name, ent in SortedPairsByMemberValue(v,"Name") do
+					local t = {
+						nicename	= ent.Name or name,
+						spawnname	= name,
+						material	= "entities/" .. name .. ".png",
+						weapon		= ent.Weapons,
+						admin		= ent.AdminOnly
+					}
+					spawnmenu.CreateContentIcon("npc",CatPropPanel,t)
+					spawnmenu.CreateContentIcon("npc",roottree.PropPanel,t)
+				end
+			else
+				for _, ent in SortedPairs(v) do
+					local t = { 
+						nicename	= ent.Name,
+						spawnname	= ent.Class,
+						material	= "entities/" .. ent.Class .. ".png",
+						admin		= ent.AdminOnly or false
+					}
+					spawnmenu.CreateContentIcon(ent.ScriptedEntityType or "entity", CatPropPanel, t)
+					spawnmenu.CreateContentIcon(ent.ScriptedEntityType or "entity", roottree.PropPanel, t)
+				end
+			end
+			function node:DoClick()
+				pnlContent:SwitchPanel(CatPropPanel)
+			end
+		end
+
+		roottree:SetExpanded(true)
+		if vjTreeName == "NPCs" then
+			roottree:InternalDoClick()
+		end
+	end
+
+	hook.Add("PopulatePersona_NPCs", "PopulatePersona_NPCs", function(pnlContent, tree, node)
+		Persona_PopulateTrees(pnlContent, tree, node, "NPCs", "vj_icons/persona16.png", "VJBASE_SPAWNABLE_NPC")
+	end)
+
+	hook.Add("PopulatePersona_Personas", "PopulatePersona_Personas", function(pnlContent, tree, node)
+		Persona_PopulateTrees(pnlContent, tree, node, "Personas", "vj_hud/persona16.png", "PERSONA_DATA_PERSONAS")
+	end)
+
+	hook.Add("PopulatePersona_Dancers", "PopulatePersona_Dancers", function(pnlContent, tree, node)
+		Persona_PopulateTrees(pnlContent, tree, node, "Dancers", "persona/icons/music.png", "PERSONA_DATA_DANCERS")
+	end)
+
+	hook.Add("PopulatePersona_Items", "PopulatePersona_Items", function(pnlContent, tree, node)
+		Persona_PopulateTrees(pnlContent, tree, node, "Items", "persona/icons/items.png", "PERSONA_DATA_ITEMS")
+	end)
+
+	spawnmenu.AddCreationTab("Persona", function()
+		local ctrl = vgui.Create("SpawnmenuContentPanel")
+		ctrl:CallPopulateHook("PopulatePersona_NPCs")
+		ctrl:CallPopulateHook("PopulatePersona_Personas")
+		ctrl:CallPopulateHook("PopulatePersona_Dancers")
+		ctrl:CallPopulateHook("PopulatePersona_Items")
+	
+		return ctrl
+	end, "vj_icons/persona16.png", 60, "Persona Mod")
+
+	-------------------------------------------------------------------------------
+	--								Spawn-Menu									 --
+	-------------------------------------------------------------------------------
+
 	net.Receive("Persona_UpdateSkillMenu",function(len,ply)
 		local p = net.ReadEntity()
 		local pSkills = net.ReadTable()
@@ -588,6 +722,7 @@ if CLIENT then
 				Panel:AddControl("Label",{Text = "Developer Settings"})
 				Panel:AddControl("CheckBox",{Label = "Enable Developer Tools",Command = "persona_dance_dev"})
 				Panel:AddControl("Slider",{Label = "FFT Channel To Check",Command = "persona_dance_dev_fftpos",Min = 0,Max = 256})
+				Panel:AddControl("CheckBox",{Label = "Use Space Bar to Generate Notes?",Command = "persona_dance_dev_manual"})
 				Panel:AddControl("CheckBox",{Label = "Check All FFT Channels?",Command = "persona_dance_dev_fftall"})
 				Panel:AddControl("Slider",{Label = "FFT Channel Check Strength",Command = "persona_dance_dev_fftstr",Min = 0,Max = 3000})
 			end

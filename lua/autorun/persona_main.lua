@@ -6,6 +6,51 @@ local debug = 0
 local pC = util.Compress
 local pD = util.Decompress
 
+local table_insert = table.insert
+local table_remove = table.remove
+
+local string_gsub = string.gsub
+local string_lower = string.lower
+local string_Split = string.Split
+
+local math_Round = math.Round
+local math_floor = math.floor
+local math_abs = math.abs
+local math_Rand = math.Rand
+local math_Clamp = math.Clamp
+local math_random = math.random
+local math_ceil = math.ceil
+local math_sin = math.sin
+local math_max = math.max
+
+local hook_Add = hook.Add
+
+local draw_SimpleText = nil
+local draw_RoundedBox = nil
+local surface_SetDrawColor = nil
+local surface_DrawRect = nil
+local surface_DrawTexturedRect = nil
+local surface_DrawTexturedRectRotated = nil
+local surface_DrawText = nil
+local surface_SetFont = nil
+local surface_SetTextPos = nil
+local surface_GetTextSize = nil
+local surface_SetMaterial = nil
+
+if CLIENT then
+	draw_SimpleText = draw.SimpleText
+	draw_RoundedBox = draw.RoundedBox
+	surface_SetDrawColor = surface.SetDrawColor
+	surface_DrawRect = surface.DrawRect
+	surface_DrawTexturedRect = surface.DrawTexturedRect
+	surface_DrawTexturedRectRotated = surface.DrawTexturedRectRotated
+	surface_DrawText = surface.DrawText
+	surface_SetFont = surface.SetFont
+	surface_SetTextPos = surface.SetTextPos
+	surface_GetTextSize = surface.GetTextSize
+	surface_SetMaterial = surface.SetMaterial
+end
+
 local function compress(d)
 	return pC(d)
 end
@@ -20,6 +65,7 @@ CreateConVar("persona_dmg_scaling","1",128,"Toggles the damage scaling feature o
 CreateConVar("persona_meter_enabled","1",128,"Toggles the Persona Summon meter. Note that with sv_cheats set to 1, the meter will always be full!",0,1)
 CreateConVar("persona_meter_mul","1",128,"Multiplies the max value of your Persona Summon meter by X amount, allowing you to have your Persona out for longer!",1,20)
 CreateConVar("persona_dance_dev","0",128,"Enables development tools for Dance! Dance! mode.",0,1)
+CreateConVar("persona_dance_dev_manual","0",128,"Use Space Bar to Generate Notes?",0,1)
 CreateConVar("persona_dance_dev_fftall","0",128,"Grab all FFT values?",0,1)
 CreateConVar("persona_dance_dev_fftpos","128",128,"Any number between 1 and 256. 1 is the highest frequency and 256 is the lowest frequency.",0,256)
 CreateConVar("persona_dance_dev_fftstr","800",128,"The frequency strength difference between the last sample and the current sample must be higher than this to be added to our data file.",0,3000)
@@ -28,7 +74,7 @@ if CLIENT then
 		-- HUD Scaling --
 	P_ScrW = ScrW() /2560
 	P_ScrH = ScrH() /1440
-	hook.Add("Think","Persona_UpdateCSData",function()
+	hook_Add("Think","Persona_UpdateCSData",function()
 		P_ScrW = ScrW() /2560
 		P_ScrH = ScrH() /1440
 	end)
@@ -69,7 +115,7 @@ function P_GetTableData(filename)
 	local tbData = {}
 	if json && json.Name && json.Set then
 		for _,v in pairs(json.Set) do
-			table.insert(tbData,v)
+			table_insert(tbData,v)
 		end
 	end
 	return tbData
@@ -91,9 +137,9 @@ function P_SaveHighScoreData(tbl,song,ply)
 		-- ["4"] = 75494,
 		-- ["5"] = 108396,
 	-- }
-	local id = string.gsub(ply:SteamID(),":","_")
+	local id = string_gsub(ply:SteamID(),":","_")
 	local name = song
-	song = string.lower(song)
+	song = string_lower(song)
 	local dir = "persona/dance/"
 	file.CreateDir(dir)
 	P_WriteDat(dir .. id .. "_" .. song .. ".dat",{Song = name,Player = ply:Nick(),Scores = tbl},true)
@@ -101,9 +147,9 @@ end
 
 function P_GetHighScoreData(song,ply,it) -- local highscore = P_GetHighScoreData("Break Out Of -Remix-",ply)[tostring(self.Difficulty)]
 	it = it or 0
-	local id = string.gsub(ply:SteamID(),":","_")
+	local id = string_gsub(ply:SteamID(),":","_")
 	local name = song
-	song = string.lower(song)
+	song = string_lower(song)
 	local dir = "persona/dance/" .. id .. "_" .. song .. ".dat"
 	local data = P_ReadDat(dir)
 	if data == nil then
@@ -128,7 +174,7 @@ function P_GetFFTTableData(filename)
 	local tbData = {}
 	if json && json.Name && json.Set then
 		for _,v in pairs(json.Set) do
-			table.insert(tbData,v)
+			table_insert(tbData,v)
 		end
 	end
 	return tbData
@@ -146,7 +192,7 @@ function P_GetAverageFFTData(filename,reTblID)
 		if reTblID then
 			if _ == reTblID then
 				for __,time in SortedPairs(v) do
-					table.insert(r,time)
+					table_insert(r,time)
 					print(time)
 				end
 			end
@@ -215,9 +261,9 @@ function PGM_D()
 	if tostring(ang[1]) == "1.3911635221575e-07" then
 		ang[1] = 0
 	end
-	ang[1] = math.Round(ang[1],3)
-	ang[2] = math.Round(ang[2],3)
-	ang[3] = math.Round(ang[3],3)
+	ang[1] = math_Round(ang[1],3)
+	ang[2] = math_Round(ang[2],3)
+	ang[3] = math_Round(ang[3],3)
 	tbl.Ang = "Angle(" .. ang[1] .."," .. ang[2] .."," .. ang[3] .. ")"
 	tbl.Scale = ent:GetModelScale()
 	PrintTable(tbl)
@@ -299,7 +345,7 @@ if CLIENT then
 	local function SpawnMarker(text,col,pos,vel,dmg,bonus)
 		if !useMarkers() then return end
 		
-		local split = string.Split(text,"")
+		local split = string_Split(text,"")
 		local marker = {}
 		marker.initialized = false
 		marker.text = text
@@ -313,20 +359,20 @@ if CLIENT then
 		marker.spawntime = CurTime()
 		marker.deathtime = CurTime() +marker.duration
 
-		surface.SetFont("Persona")
-		local w,h = surface.GetTextSize(text)
+		surface_SetFont("Persona")
+		local w,h = surface_GetTextSize(text)
 
 		marker.widthH = w /2
 		marker.heightH = h /2
 
-		table.insert(Persona_DMGMarkers,marker)
+		table_insert(Persona_DMGMarkers,marker)
 	end
 
 	net.Receive("persona_spawndmg",function()
 		if !useMarkers() then return end
 
 		local dmg = net.ReadFloat()
-		dmg = dmg < 1 && math.Round(dmg,3) or math.floor(dmg)
+		dmg = dmg < 1 && math_Round(dmg,3) or math_floor(dmg)
 		local dmgtype = net.ReadUInt(32)
 		local crit = (net.ReadBit() ~= 0)
 		local pos = net.ReadVector()
@@ -337,10 +383,10 @@ if CLIENT then
 			bonus = 6
 		end
 
-		SpawnMarker(tostring(math.abs(math.Round(dmg))),col,pos,force +Vector(math.Rand(-1,1),math.Rand(-1,1),math.Rand(0,1) *1.5),dmg,bonus)
+		SpawnMarker(tostring(math_abs(math_Round(dmg))),col,pos,force +Vector(math_Rand(-1,1),math_Rand(-1,1),math_Rand(0,1) *1.5),dmg,bonus)
 	end)
 	
-	hook.Add("RenderScreenspaceEffects","Persona_ScreenFX",function()
+	hook_Add("RenderScreenspaceEffects","Persona_ScreenFX",function()
 		local CM_DreamFog = {
 			["$pp_colour_addr"] = 0,
 			["$pp_colour_addg"] = 0,
@@ -359,7 +405,7 @@ if CLIENT then
 		end
 	end)
 
-	hook.Add("Tick","Persona_CleanMarkers",function()		
+	hook_Add("Tick","Persona_CleanMarkers",function()		
 		local Cur = CurTime()
 		if #Persona_DMGMarkers == 0 then return end
 
@@ -379,7 +425,7 @@ if CLIENT then
 		end
 	end)
 
-	hook.Add("PostDrawTranslucentRenderables","Persona_DrawMarkers",function()
+	hook_Add("PostDrawTranslucentRenderables","Persona_DrawMarkers",function()
 		if #Persona_DMGMarkers == 0 then return end
 
 		local ply = (LocalPlayer():GetViewEntity() or LocalPlayer())
@@ -394,7 +440,7 @@ if CLIENT then
 		for i=1,#Persona_DMGMarkers do
 		-- for _,marker in  pairs(Persona_DMGMarkers) do
 			marker = Persona_DMGMarkers[i]
-			scale = math.Clamp(scale *marker.dmg,5,12)
+			scale = math_Clamp(scale *marker.dmg,5,12)
 			local pos = (marker.pos):ToScreen()
 			local offsetX = 0
 			cam.Start3D2D(marker.pos,ang,3)
@@ -403,18 +449,18 @@ if CLIENT then
 					marker.initialized = true
 				end
 				if marker.dmg > 999999999 then
-					draw.SimpleText("PLUS ULTRA!","PXP_EXP",0,-scale *2,Color(marker.col.r,marker.col.g,marker.col.b,((CurTime() -marker.spawntime /marker.duration) *alphamul)))
+					draw_SimpleText("PLUS ULTRA!","PXP_EXP",0,-scale *2,Color(marker.col.r,marker.col.g,marker.col.b,((CurTime() -marker.spawntime /marker.duration) *alphamul)))
 				end
 				for _,num in pairs(marker.numbers) do
 					offsetX = offsetX +scale -(scale /4.25)
-					surface.SetMaterial(Material("hud/persona/dmg/".. num .. ".png"))
-					surface.SetDrawColor(marker.col.r,marker.col.g,marker.col.b,((CurTime() -marker.spawntime /marker.duration) *alphamul))
-					surface.DrawTexturedRect(offsetX,0,scale,scale)
+					surface_SetMaterial(Material("hud/persona/dmg/".. num .. ".png"))
+					surface_SetDrawColor(marker.col.r,marker.col.g,marker.col.b,((CurTime() -marker.spawntime /marker.duration) *alphamul))
+					surface_DrawTexturedRect(offsetX,0,scale,scale)
 				end
 				if marker.effects && Persona_HUDEffects[marker.effects] then
-					surface.SetMaterial(Material(Persona_HUDEffects[marker.effects]))
-					surface.SetDrawColor(255,255,255,((CurTime() -marker.spawntime /marker.duration) *alphamul))
-					surface.DrawTexturedRect(scale,scale,offsetX,scale)
+					surface_SetMaterial(Material(Persona_HUDEffects[marker.effects]))
+					surface_SetDrawColor(255,255,255,((CurTime() -marker.spawntime /marker.duration) *alphamul))
+					surface_DrawTexturedRect(scale,scale,offsetX,scale)
 				end
 			cam.End3D2D()
 		end
@@ -422,7 +468,7 @@ if CLIENT then
 end
 
 function Persona_Pick(tbl)
-	return tbl[math.random(1,#tbl)]
+	return tbl[math_random(1,#tbl)]
 end
 
 local ENT = FindMetaTable("Entity")
@@ -460,8 +506,8 @@ function PLY:GetPersonaMeter()
 end
 
 function PLY:GetMaxPersonaMeter()
-	local calc = math.Round(self:GetMaxSP() /2 *(PXP.IsLegendary(self) && 2 or 1)) *GetConVarNumber("persona_meter_mul")
-	return math.Clamp(calc,35,999999999)
+	local calc = math_Round(self:GetMaxSP() /2 *(PXP.IsLegendary(self) && 2 or 1)) *GetConVarNumber("persona_meter_mul")
+	return math_Clamp(calc,35,999999999)
 end
 
 function PLY:HasPersona()
@@ -563,7 +609,7 @@ function NPC:GetPersonaMeter()
 end
 
 function NPC:GetMaxPersonaMeter()
-	return math.Round(self:GetMaxSP() /5) *GetConVarNumber("persona_meter_mul")
+	return math_Round(self:GetMaxSP() /5) *GetConVarNumber("persona_meter_mul")
 end
 
 function NPC:GetPersona()
@@ -638,7 +684,7 @@ function NPC:SummonPersona(persona)
 	end
 end
 
-hook.Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
+hook_Add("PlayerInitialSpawn","Persona_InitialSpawn",function(ply)
 	ply:SetPersona(PXP.GetPersonaData(ply,5) or "izanagi")
 	local exp = PXP.GetPersonaData(ply,1)
 	local lvl = PXP.GetPersonaData(ply,2)
@@ -693,13 +739,13 @@ if SERVER then
 		return ent.Persona_TarundaT > t || ent.Persona_RakundaT > t || ent.Persona_SukundaT > t || ent.Persona_DebilitateT > t
 	end
 	
-	hook.Add("PlayerSpawn","Persona_Spawn",function(ply)
+	hook_Add("PlayerSpawn","Persona_Spawn",function(ply)
 		ply:SetNW2Bool("Persona_BattleMode",false)
 		ply:SetNW2Bool("Persona_SkillMenu",false)
 		ply:SetNW2Int("Persona_VoiceT",0)
 		local lvl = PXP.GetPlayerLevel(ply)
-		local shouldBe = math.Clamp(math.Round(lvl *10.09),100,654698468)
-		local shouldBeSP = math.Clamp(math.Round(lvl *8),25,654698468)
+		local shouldBe = math_Clamp(math_Round(lvl *10.09),100,654698468)
+		local shouldBeSP = math_Clamp(math_Round(lvl *8),25,654698468)
 		ply:SetNW2Int("PXP_Player_Level",lvl)
 		timer.Simple(0,function()
 			ply:SetHealth(shouldBe)
@@ -781,7 +827,7 @@ if SERVER then
 		end
 	end)
 
-	hook.Add("OnEntityCreated","Persona_EntitySpawn",function(ent)
+	hook_Add("OnEntityCreated","Persona_EntitySpawn",function(ent)
 		if ent:IsNPC() then
 			timer.Simple(0,function()
 				if IsValid(ent) then
@@ -807,11 +853,11 @@ if SERVER then
 						if IsValid(ply) then
 							pLevel = PXP.GetPlayerLevel(ply)
 						end
-						local gLevel = math.Round(((ent:GetMaxHealth() /800) *pLevel))
-						local level = math.Clamp(math.random(math.Clamp(gLevel -10,1,99),math.Clamp(gLevel +10,1,99)),1,99)
-						local exp = math.Round(((ent:GetMaxHealth() /50) *level))
+						local gLevel = math_Round(((ent:GetMaxHealth() /800) *pLevel))
+						local level = math_Clamp(math_random(math_Clamp(gLevel -10,1,99),math_Clamp(gLevel +10,1,99)),1,99)
+						local exp = math_Round(((ent:GetMaxHealth() /50) *level))
 						ent:SetNW2Int("PXP_Level",level)
-						ent:SetNW2Int("PXP_EXP",exp *math.random(2,20))
+						ent:SetNW2Int("PXP_EXP",exp *math_random(2,20))
 					end
 				end
 			end)
@@ -819,15 +865,15 @@ if SERVER then
 	end)
 
 	local wep = "weapon_persona_nothing"
-	hook.Add("Think","Persona_Think",function()
+	hook_Add("Think","Persona_Think",function()
 		local cheats = GetConVarNumber("persona_meter_enabled") == 0 or GetConVarNumber("sv_cheats") == 1
 		for _,v in pairs(player.GetAll()) do
 			local meter = v:GetPersonaMeter()
 			local maxMeter = v:GetMaxPersonaMeter()
 			local persona = v:GetPersona()
 			local lvl = PXP.GetPlayerLevel(v)
-			local shouldBe = math.Clamp(math.Round(lvl *10.09),100,654698468)
-			local shouldBeSP = math.Clamp(math.Round(lvl *8),25,654698468)
+			local shouldBe = math_Clamp(math_Round(lvl *10.09),100,654698468)
+			local shouldBeSP = math_Clamp(math_Round(lvl *8),25,654698468)
 			if shouldBe > v:GetMaxHealth() then
 				v:SetMaxHealth(shouldBe)
 				v.Persona_MaxHealth = shouldBe
@@ -840,7 +886,7 @@ if SERVER then
 					v:Give(wep)
 				end
 				v:SelectWeapon(wep)
-				v:SetPersonaMeter(cheats && maxMeter or math.Clamp(meter -0.1,0,maxMeter))
+				v:SetPersonaMeter(cheats && maxMeter or math_Clamp(meter -0.1,0,maxMeter))
 				v.Persona_NextRegenMeterT = CurTime() +5
 				if meter <= 0 && persona:GetTask() != "TASK_RETURN" then
 					persona:SetTask("TASK_RETURN")
@@ -862,7 +908,7 @@ if SERVER then
 				end
 			else
 				if CurTime() > v.Persona_NextRegenMeterT && meter < maxMeter then
-					v:SetPersonaMeter(cheats && maxMeter or math.Clamp(meter +1,0,maxMeter))
+					v:SetPersonaMeter(cheats && maxMeter or math_Clamp(meter +1,0,maxMeter))
 					if v:GetPersonaMeter() >= maxMeter && CurTime() > v.Persona_NextRegenMeterSoundT then
 						local snd = "cpthazama/persona5/misc/00084.wav"
 						Persona_CSound(v,snd,65)
@@ -895,7 +941,7 @@ if SERVER then
 		net.Broadcast()
 	end
 
-	hook.Add("EntityTakeDamage","Persona_ModifyPlayerDMG",function(ent,dmginfo)
+	hook_Add("EntityTakeDamage","Persona_ModifyPlayerDMG",function(ent,dmginfo)
 		if dmginfo:GetDamage() > 0 && ent.Persona_Tetrakarn && !dmginfo:IsDamageType(DMG_P_ALMIGHTY) && (dmginfo:IsDamageType(DMG_P_PHYS) || dmginfo:IsDamageType(DMG_P_GUN) || dmginfo:IsDamageType(DMG_SLASH) || dmginfo:IsDamageType(DMG_AIRBOAT) || dmginfo:IsDamageType(DMG_BUCKSHOT) || dmginfo:IsDamageType(DMG_SNIPER) || dmginfo:IsDamageType(DMG_BULLET) || dmginfo:IsDamageType(DMG_CLUB) || dmginfo:IsDamageType(DMG_GENERIC)) then
 			local attacker = (IsValid(dmginfo:GetAttacker()) && dmginfo:GetAttacker() or dmginfo:GetInflictor())
 			dmginfo:SetAttacker(ent)
@@ -936,10 +982,10 @@ if SERVER then
 				local aLvl = ((attacker:IsPlayer()) && ((aPLvl +PXP.GetPlayerLevel(attacker)) /2 or 1)) or ((attacker:IsNPC()) && (/*aPLvl or */attacker:GetNW2Int("PXP_Level"))) or 1
 				local PLvl = ((ent:IsPlayer() && PXP.GetLevel(ent)) or (ent:IsNPC() && IsValid(persona) && persona:GetLVL())) or 1
 				local lvl = ((ent:IsPlayer()) && ((PLvl +PXP.GetPlayerLevel(ent)) /2 or 1)) or ((ent:IsNPC()) && (/*PLvl or */ent:GetNW2Int("PXP_Level"))) or 1
-				aLvl = math.Round(aLvl)
-				lvl = math.Round(lvl)
+				aLvl = math_Round(aLvl)
+				lvl = math_Round(lvl)
 				local lvlDif = aLvl -lvl
-				local lvlDifAbs = math.abs(lvlDif)
+				local lvlDifAbs = math_abs(lvlDif)
 				
 				local modDMG = dmg
 				if lvlDifAbs > 5 then
@@ -970,7 +1016,7 @@ if SERVER then
 					end
 					if stats.ABS && VJ_HasValue(stats.ABS,dmgtype) then
 						dmginfo:SetDamage(0)
-						ent:SetHealth(math.Clamp(ent:Health() +dmg,1,ent:GetMaxHealth()))
+						ent:SetHealth(math_Clamp(ent:Health() +dmg,1,ent:GetMaxHealth()))
 						ent:EmitSound("cpthazama/persona5/skills/0679.wav",80)
 					end
 					if stats.REF && VJ_HasValue(stats.REF,dmgtype) then
@@ -1126,7 +1172,6 @@ if SERVER then
 end
 
 if CLIENT then
-
 	local pFont = ScreenScale(8.5)
 	local pFontBig = ScreenScale(25)
 	local pFont_EXP = ScreenScale(6.5)
@@ -1210,8 +1255,8 @@ if CLIENT then
 			return Color(l,l,l)
 		end
 		h, s, l = h /256 *6, s /255, l /255
-		local c = (1 -math.abs(2 *l -1)) *s
-		local x = (1 - math.abs(h %2 -1)) *c
+		local c = (1 -math_abs(2 *l -1)) *s
+		local x = (1 - math_abs(h %2 -1)) *c
 		local m, r, g, b = (l -0.5 *c),0,0,0
 		if h < 1 then 
 			r,g,b = c,x,0
@@ -1226,7 +1271,7 @@ if CLIENT then
 		else
 			r,g,b = c,0,x
 		end
-		return Color(math.ceil((r +m) *256),math.ceil((g +m) *256),math.ceil((b +m) *256))
+		return Color(math_ceil((r +m) *256),math_ceil((g +m) *256),math_ceil((b +m) *256))
 	end
 
 	local lerp_hp = 0
@@ -1298,7 +1343,7 @@ if CLIENT then
 		["hud_unknown"] = "Unknown"
 	}
 	local color = Color
-	hook.Add("HUDPaint","Persona_HUD",function()
+	hook_Add("HUDPaint","Persona_HUD",function()
 		local ply = LocalPlayer()
 		local persona = ply:GetNW2Entity("PersonaEntity")
 
@@ -1314,13 +1359,13 @@ if CLIENT then
 
 		local function DrawTexture(texture,col,posX,posY,scaleX,scaleY,rot)
 			local mat = Material(texture)
-			surface.SetMaterial(mat)
-			surface.SetDrawColor(col.r,col.g,col.b,col.a)
+			surface_SetMaterial(mat)
+			surface_SetDrawColor(col.r,col.g,col.b,col.a)
 			if rot then
-				surface.DrawTexturedRectRotated(posX,posY,scaleX,scaleY,rot)
+				surface_DrawTexturedRectRotated(posX,posY,scaleX,scaleY,rot)
 				return
 			end
-			surface.DrawTexturedRect(posX,posY,scaleX,scaleY)
+			surface_DrawTexturedRect(posX,posY,scaleX,scaleY)
 		end
 
 		local hp = ply:Health()
@@ -1331,14 +1376,14 @@ if CLIENT then
 			local BGTexture = "hud/persona/dance/bg.png"
 			local HUDColor = color(rgb.r,rgb.g,rgb.b)
 			local danceMat = "hud/persona/dance/bg_stars"
-			local blink = math.Clamp(math.abs(math.sin(CurTime() *0.25) *255),50,100)
+			local blink = math_Clamp(math_abs(math_sin(CurTime() *0.25) *255),50,100)
 			local BGA = 255
 			
 			if hp <= hpMax *0.25 then
 				HUDColor = color(230,5,5)
 				BGTexture = "hud/persona/lowhealth.png"
-				blink = math.Clamp(math.abs(math.sin(CurTime() *1) *255),150,200)
-				BGA = math.Clamp(math.abs(math.sin(CurTime() *5) *255),100,176)
+				blink = math_Clamp(math_abs(math_sin(CurTime() *1) *255),150,200)
+				BGA = math_Clamp(math_abs(math_sin(CurTime() *5) *255),100,176)
 			end
 			
 			DrawTexture(BGTexture,color(255,255,255,BGA),0,0,ScrW(),ScrH())
@@ -1370,7 +1415,7 @@ if CLIENT then
 		local bColor = color(colM,colM,colM,255)
 		local boxX = posX
 		local boxHeight = posY
-		draw.RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,bColor)
+		draw_RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,bColor)
 
 		local perHP = (hp -cost) /hpMax
 		local perSP = (sp -cost) /spMax
@@ -1396,12 +1441,12 @@ if CLIENT then
 		local height = 20
 
 		// SP Bar
-		draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, len, height, color(0, 0, 0, 150))
-		draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, math.Clamp((usesHP && perHPB or perSPB) *0.01 *len,0,len), height, color(r, g, b, 255))
+		draw_RoundedBox(corners, ScrW() -posX, ScrH() -posY, len, height, color(0, 0, 0, 150))
+		draw_RoundedBox(corners, ScrW() -posX, ScrH() -posY, math_Clamp((usesHP && perHPB or perSPB) *0.01 *len,0,len), height, color(r, g, b, 255))
 
 		// SP Requirement Bar
 		r,g,b = 255, 0, 0
-		draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, math.Clamp(len *(usesHP && calc_hp or calc_sp),0,999999999), height, color(r, g, b, math.abs(math.sin(CurTime() *2.25) *255)))
+		draw_RoundedBox(corners, ScrW() -posX, ScrH() -posY, math_Clamp(len *(usesHP && calc_hp or calc_sp),0,999999999), height, color(r, g, b, math_abs(math_sin(CurTime() *2.25) *255)))
 
 		r,g,b = 255, 101, 239
 		if usesHP then
@@ -1413,41 +1458,41 @@ if CLIENT then
 		local text = (usesHP && "HP: " or "SP: ") .. min .. "/" .. max
 		local posX = boxX -10
 		local posY = boxHeight -10
-		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
+		draw_SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 
 		// HP/SP Cost Text
 		local text = "Cost: " .. cost
 		local posX = boxX -10
 		local posY = boxHeight -40
-		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
+		draw_SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 
 		// Skill Card Text
 		local text = skillName
 		if text == nil or text == "" then text = "BLANK" end
 		local posX = boxX -10
 		local posY = boxHeight -112
-		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
+		draw_SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 
 		// Skill Card Icon Text
 		local text = types["hud_" .. skillIcon]
 		local posX = boxX -10
 		local posY = boxHeight -150
-		-- draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
+		-- draw_SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 		surface.SetTextColor(r, g, b)
-		surface.SetTextPos(ScrW() -posX,ScrH() -posY)
-		surface.SetFont("Persona")
-		surface.DrawText(text)
+		surface_SetTextPos(ScrW() -posX,ScrH() -posY)
+		surface_SetFont("Persona")
+		surface_DrawText(text)
 
 		// Skill Card Icon
 		local icon = skillIcon
 		local matIcon = Material("hud/persona/png/hud_" .. icon .. ".png")
-		local posX = boxX -15 -surface.GetTextSize(text)
+		local posX = boxX -15 -surface_GetTextSize(text)
 		local posY = boxHeight -148
 		local len = 100
 		local height = 35
-		surface.SetMaterial(matIcon)
-		surface.SetDrawColor(Color(255,255,255,255))
-		surface.DrawTexturedRect(ScrW() -posX,ScrH() -posY,len,height)
+		surface_SetMaterial(matIcon)
+		surface_SetDrawColor(Color(255,255,255,255))
+		surface_DrawTexturedRect(ScrW() -posX,ScrH() -posY,len,height)
 
 		// Level Text
 		r,g,b = 200, 0, 0
@@ -1462,7 +1507,7 @@ if CLIENT then
 			posX = boxX -110
 			canShowXP = false
 		end
-		draw.SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
+		draw_SimpleText(text,"Persona",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 
 		// Meter
 		local r,g,b = 255, 255, 0
@@ -1480,9 +1525,9 @@ if CLIENT then
 		if meter <= maxMeter *0.15 then
 			r,g,b = 220, 0, 0
 		end
-		draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY -bHeight, len, bDrop, bColor)
-		draw.RoundedBox(corners, ScrW() -posX +10, ScrH() -posY -5, lenBar, height, color(0,0,0,150))
-		draw.RoundedBox(corners, ScrW() -posX +10, ScrH() -posY -5, math.Clamp(lenBar *((perMTB /100) /(persona:GetNW2Bool("Legendary") && 2 or 1)),0,lenBar), height, color(r, g, b, 255))
+		draw_RoundedBox(corners, ScrW() -posX, ScrH() -posY -bHeight, len, bDrop, bColor)
+		draw_RoundedBox(corners, ScrW() -posX +10, ScrH() -posY -5, lenBar, height, color(0,0,0,150))
+		draw_RoundedBox(corners, ScrW() -posX +10, ScrH() -posY -5, math_Clamp(lenBar *((perMTB /100) /(persona:GetNW2Bool("Legendary") && 2 or 1)),0,lenBar), height, color(r, g, b, 255))
 		local push = 0
 		local spacing = 50
 		for i = 1,12 do
@@ -1512,11 +1557,11 @@ if CLIENT then
 		local text = canShowXP && "Req: " .. xp .. "/" .. req_xp or "Req: N/A"
 		local posX = canShowXP && boxX -37.5 or boxX -95
 		local posY = boxHeight -250
-		draw.SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
+		draw_SimpleText(text,"PXP_EXP",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 		
 		// EXP Bar
 		local r,g,b = 200, 0, 0
-		if math.Round(lerp_xp) != xp then
+		if math_Round(lerp_xp) != xp then
 			local rgb = HSL((RealTime() *200 -(0 *15)),128,128)
 			r,g,b = rgb.r, rgb.g, rgb.b
 		end
@@ -1525,8 +1570,8 @@ if CLIENT then
 		local posY = boxHeight -290
 		local len = boxX -45
 		local height = 30
-		draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, len, height, color(0, 0, 0, 150))
-		draw.RoundedBox(corners, ScrW() -posX, ScrH() -posY, math.Clamp(len -(calc_xp *len),0,len), height, color(r, g, b, 255))
+		draw_RoundedBox(corners, ScrW() -posX, ScrH() -posY, len, height, color(0, 0, 0, 150))
+		draw_RoundedBox(corners, ScrW() -posX, ScrH() -posY, math_Clamp(len -(calc_xp *len),0,len), height, color(r, g, b, 255))
 
 		local function DrawTargetHealth(ent)
 			if IsValid(ent) then
@@ -1545,30 +1590,30 @@ if CLIENT then
 				local matIcon = Material("hud/persona/crosshair")
 				local offset = 225
 				local entPos = (ent:GetPos() +ent:OBBCenter()):ToScreen()
-				surface.SetMaterial(matIcon)
-				surface.SetDrawColor(color(255,255,255,255))
-				surface.DrawTexturedRect(entPos.x -offset,entPos.y -offset,450,450)
+				surface_SetMaterial(matIcon)
+				surface_SetDrawColor(color(255,255,255,255))
+				surface_DrawTexturedRect(entPos.x -offset,entPos.y -offset,450,450)
 
 				local boxX = entPos.x -offset -35
 				local boxY = entPos.y -offset -35
-				draw.RoundedBox(corners,boxX,boxY,len,height,bColor)
+				draw_RoundedBox(corners,boxX,boxY,len,height,bColor)
 
 				local r,g,b = 107, 255, 222
 				local posX = boxX +5
 				local posY = boxY +5
 				local nlen = len -10
 				local height = 20
-				local f = math.Clamp(perHPB *0.01 *nlen,0,nlen)
+				local f = math_Clamp(perHPB *0.01 *nlen,0,nlen)
 				local alpha = 255
 
-				draw.RoundedBox(corners, posX, posY, nlen, height, color(0, 0, 0, 150))
-				draw.RoundedBox(corners, posX, posY, f, height, color(r, g, b, alpha))
+				draw_RoundedBox(corners, posX, posY, nlen, height, color(0, 0, 0, 150))
+				draw_RoundedBox(corners, posX, posY, f, height, color(r, g, b, alpha))
 
 				local text = "Level " .. (tostring(ent:GetNW2Int("PXP_Level")) or "0")
-				draw.SimpleText(text,"Persona",boxX +5,boxY +30,color(248,60,64,255))
+				draw_SimpleText(text,"Persona",boxX +5,boxY +30,color(248,60,64,255))
 
 				local text = (tostring(ent:GetNW2Int("PXP_EXP")) or "0") .. " EXP"
-				draw.SimpleText(text,"PXP_EXP",boxX +5,boxY +70,color(248,60,64,255))
+				draw_SimpleText(text,"PXP_EXP",boxX +5,boxY +70,color(248,60,64,255))
 			end
 		end
 
@@ -1582,13 +1627,13 @@ if CLIENT then
 				local entPos = (ent:GetPos() +ent:OBBCenter()):ToScreen()
 				local boxX = entPos.x -offset -35
 				local boxY = entPos.y -offset -35
-				draw.RoundedBox(corners,boxX,boxY +20,len,height,bColor)
+				draw_RoundedBox(corners,boxX,boxY +20,len,height,bColor)
 
 				local text = "Level " .. (tostring(ent:GetNW2Int("PXP_Level")) or "0")
-				draw.SimpleText(text,"Persona",boxX +5,boxY +30,color(248,60,64,255))
+				draw_SimpleText(text,"Persona",boxX +5,boxY +30,color(248,60,64,255))
 
 				local text = (tostring(ent:GetNW2Int("PXP_EXP")) or "0") .. " EXP"
-				draw.SimpleText(text,"PXP_EXP",boxX +5,boxY +70,color(248,60,64,255))
+				draw_SimpleText(text,"PXP_EXP",boxX +5,boxY +70,color(248,60,64,255))
 			end
 		end
 		
@@ -1619,7 +1664,7 @@ if CLIENT then
 		local bColor = color(colM,colM,colM,255)
 		local boxX = posX
 		local boxHeight = posY
-		draw.RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,bColor)
+		draw_RoundedBox(corners,ScrW() -posX,ScrH() -posY,len,height,bColor)
 
 		posX = boxX -10
 		posY = boxHeight -10
@@ -1635,15 +1680,15 @@ if CLIENT then
 				if doHP then r,g,b = 107, 255, 222 else r,g,b = 255, 101, 239 end
 				local strCost = doHP && " HP)" or " SP)" -- Okay GMod, this exact code causes an error if its not a local variable. Dumbest shit I've ever seen Morty
 				if skillName == name then
-					draw.RoundedBox(corners,ScrW() -posX -10,ScrH() -posY -5,len,height,bColor)
+					draw_RoundedBox(corners,ScrW() -posX -10,ScrH() -posY -5,len,height,bColor)
 				end
-				draw.SimpleText(name .. " (" .. cost .. strCost,"PXP_EXP",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
+				draw_SimpleText(name .. " (" .. cost .. strCost,"PXP_EXP",ScrW() -posX,ScrH() -posY,color(r, g, b, 255))
 				posY = posY -25
 			end
 		end
 	end)
 
-	hook.Add("ShouldDrawLocalPlayer","Persona_DrawPlayer",function(ply)
+	hook_Add("ShouldDrawLocalPlayer","Persona_DrawPlayer",function(ply)
 		if IsPersonaGamemode() then return end
 		local battleEnt = ply:GetNW2Entity("BattleEnt")
 		local camEnt = IsValid(battleEnt) && battleEnt:GetNW2Entity("CurrentTurnEntity") && battleEnt:GetNW2Entity("CurrentTurnEntity") != ply
@@ -1655,7 +1700,7 @@ if CLIENT then
 
 	local P_LerpVec = Vector(0,0,0)
 	local P_LerpAng = Angle(0,0,0)
-	hook.Add("CalcView","Persona_ThirdPerson",function(ply,pos,angles,fov)
+	hook_Add("CalcView","Persona_ThirdPerson",function(ply,pos,angles,fov)
 		local persona = ply:GetNW2Entity("PersonaEntity")
 		local cPos = ply:GetNW2Vector("Persona_CustomPos")
 		local enabled = IsValid(persona)
@@ -1677,7 +1722,7 @@ if CLIENT then
 				end
 				local tr = util.TraceHull({
 					start = origin,
-					endpos = origin +angles:Forward() *-math.max(dist,ply:BoundingRadius()) +ePos,
+					endpos = origin +angles:Forward() *-math_max(dist,ply:BoundingRadius()) +ePos,
 					mask = MASK_SHOT,
 					filter = allplayers,
 					mins = Vector(-8,-8,-8),
@@ -1703,7 +1748,7 @@ function VJ_PlaySound(argent,sound,soundlevel,soundpitch,stoplatestsound,soundds
 	if not sound then return end
 	if istable(sound) then
 		if #sound < 1 then return end -- If the table is empty then end it
-		sound = sound[math.random(1,#sound)]
+		sound = sound[math_random(1,#sound)]
 	end
 	/*if stoplatestsound == true then -- If stopsounds is true, then the current sound
 		//if argent.CurrentSound then argent.CurrentSound:Stop() end
