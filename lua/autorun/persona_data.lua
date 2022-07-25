@@ -40,14 +40,15 @@ P_AddDancer("Marie","sent_dance_marie","Persona 4")
 P_AddDancer("Naoto Shirogane","sent_dance_naoto","Persona 4")
 P_AddDancer("Yu Narukami","sent_dance_yu","Persona 4")
 
-function P_AddPersona(name,class,model,aura,category)
+function P_AddPersona(name,class,model,aura,category,menuOptions)
 	if !PERSONA[class] then
 		PERSONA[class] = {
 			Name = name,
 			Model = model,
 			Aura = aura,
 			Category = category or (string_find(model, "persona5") && "Persona 5" or string_find(model, "persona4") && "Persona 4" or "Persona 3"),
-			Class = "sent_persona_" .. class
+			Class = "sent_persona_" .. class,
+			MenuOptions = menuOptions or {}
 		}
 		list.Set("PERSONA_DATA_PERSONAS", "sent_persona_" .. class, PERSONA[class])
 	end
@@ -64,7 +65,11 @@ P_AddPersona(
 	"Izanagi Picaro",
 	"izanagi_picaro",
 	"models/cpthazama/persona5/persona/izanagi.mdl",
-	"persona_aura_blue"
+	"persona_aura_blue",
+	nil,
+	{
+		Skin = 1
+	}
 )
 
 P_AddPersona(
@@ -78,28 +83,46 @@ P_AddPersona(
 	"Magatsu-Izanagi",
 	"magatsu_izanagi",
 	"models/cpthazama/persona5/persona/magatsu_izanagi.mdl",
-	"persona_aura_red"
+	"persona_aura_red",
+	nil,
+	{
+		Anim_Attack = "ghostly_wail_noXY"
+	}
 )
 
 P_AddPersona(
 	"Magatsu-Izanagi Picaro",
 	"magatsu_izanagi_picaro",
 	"models/cpthazama/persona5/persona/magatsu_izanagi_picaro.mdl",
-	"persona_aura_blue"
+	"persona_aura_blue",
+	nil,
+	{
+		Skin = 1,
+		Anim_Attack = "ghostly_wail_noXY"
+	}
 )
 
 P_AddPersona(
 	"Magatsu-Izanagi (Classic)",
 	"magatsu_izanagi_p4",
 	"models/cpthazama/persona5/persona/magatsu_izanagi.mdl",
-	"persona_aura_red"
+	"persona_aura_red",
+	nil,
+	{
+		Skin = 1,
+		Anim_Attack = "ghostly_wail_noXY"
+	}
 )
 
 P_AddPersona(
 	"Magatsu-Izanagi (Velvet)",
 	"magatsu_izanagi_velvet",
 	"models/cpthazama/persona5/persona/magatsu_izanagi_velvet.mdl",
-	"persona_aura_velvet"
+	"persona_aura_velvet",
+	nil,
+	{
+		Anim_Attack = "ghostly_wail_noXY"
+	}
 )
 
 P_AddPersona(
@@ -274,7 +297,13 @@ P_AddPersona(
 	"Loki (Shadow)",
 	"loki_shadow",
 	"models/cpthazama/persona5/persona/loki.mdl",
-	"persona_aura_red"
+	"persona_aura_red",
+	nil,
+	{
+		Custom = function(self)
+			self:SetSubMaterial(0,"models/cpthazama/persona5/loki/loki_shadow")
+		end
+	}
 )
 
 P_AddPersona(
