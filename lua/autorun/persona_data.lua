@@ -39,6 +39,7 @@ P_AddDancer("Fuuka Yamagishi","sent_dance_fuuka","Persona 3")
 P_AddDancer("Marie","sent_dance_marie","Persona 4")
 P_AddDancer("Naoto Shirogane","sent_dance_naoto","Persona 4")
 P_AddDancer("Yu Narukami","sent_dance_yu","Persona 4")
+P_AddDancer("Yukari Takeba","sent_dance_yukari","Persona 3")
 
 function P_AddPersona(name,class,model,aura,category,menuOptions)
 	if !PERSONA[class] then

@@ -473,12 +473,22 @@ end
 
 local ENT = FindMetaTable("Entity")
 
-function ENT:SetPlayerColor(vec)
-	self.PlayerColor = vec
-	self:SetNW2Vector("PlayerColor",vec)
+local oldFunc = ENT.SetPlayerColor
+function ENT:SetPlayerColor(...)
+	if self:IsPlayer() then
+		oldFunc(...)
+		return
+	end
+	self.PlayerColor = ...
+	self:SetNW2Vector("PlayerColor",...)
 end
 
+local oldFunc = ENT.GetPlayerColor
 function ENT:GetPlayerColor()
+	if self:IsPlayer() then
+		return oldFunc()
+	end
+
 	local vec = self.PlayerColor or self:GetNW2Vector("PlayerColor") or Vector(1,1,1)
 	return Vector((vec.x /255),(vec.y /255),(vec.z /255))
 end

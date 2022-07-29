@@ -1,6 +1,13 @@
 if CLIENT then
     PERSONA_MENU = {}
 
+	local randomLines = {
+		"cpthazama/persona4/margaret/chrna_ma_004.ogg",
+		"cpthazama/persona4/margaret/chrna_ma_015.ogg",
+		"cpthazama/persona4/margaret/chrna_ma_016.ogg",
+		"cpthazama/persona4/margaret/chrna_ma_017.ogg",
+	}
+	local curLine = 0
     local matBackground = Material("persona/bg_placeholder.png")
     function PERSONA_MENU:Open(ply)
         if ply.Persona_Menu_Open == true then
@@ -27,6 +34,15 @@ if CLIENT then
 			return station
 		end)
 
+		ply.Persona_Menu_RandomLineTime = CurTime() +math.random(30,40)
+		ply.Persona_Menu_CurrentSound = ply.Persona_Menu_CurrentSound or nil
+		if math.random(1,6) == 1 then
+			ply.Persona_Menu_CurrentSound = CreateSound(ply,"cpthazama/persona4/igor/intro.ogg")
+			ply.Persona_Menu_CurrentSound:SetSoundLevel(0)
+			ply.Persona_Menu_CurrentSound:Play()
+			ply.Persona_Menu_RandomLineTime = CurTime() +math.random(30,40)
+		end
+
         local scrW = ScrW()
         local scrH = ScrH()
         local colorMain = Color(GetConVarNumber("persona_dance_hud_r"),GetConVarNumber("persona_dance_hud_g"),GetConVarNumber("persona_dance_hud_b"))
@@ -50,7 +66,7 @@ if CLIENT then
 
 		menuBackground.OnKeyCodePressed = function(...)
             local panel,code = ...
-            if code == KEY_BACKSPACE or code == KEY_SPACE then
+            if code == KEY_BACKSPACE or code == KEY_SPACE or code == KEY_ESCAPE then
                 self:Close(ply)
 			    panel:Delete()
                 ply.Persona_Menu_MainBG = nil
@@ -182,8 +198,22 @@ if CLIENT then
 			if !IsValid(personaEnt) then
                 return
             end
+
 			local x,y = self:LocalToScreen(0,0)
 			self:LayoutEntity(personaEnt)
+
+			if CurTime() > ply.Persona_Menu_RandomLineTime then
+				ply.Persona_Menu_CurrentSound:Stop()
+				ply.Persona_Menu_CurrentSound = nil
+				curLine = curLine +1
+				if curLine >= #randomLines then
+					curLine = 1
+				end
+				ply.Persona_Menu_CurrentSound = CreateSound(ply,randomLines[curLine])
+				ply.Persona_Menu_CurrentSound:SetSoundLevel(0)
+				ply.Persona_Menu_CurrentSound:Play()
+				ply.Persona_Menu_RandomLineTime = CurTime() +math.random(25,60)
+			end
 
 			if !IsValid(self.Room) then
 				self.Room = ClientsideModel("models/cpthazama/persona5/maps/velvetroom_battle.mdl",RENDER_GROUP_OPAQUE_ENTITY)
@@ -486,6 +516,10 @@ if CLIENT then
         if IsValid(ply.Persona_Menu_VelvetTheme) && ply.Persona_Menu_VelvetTheme:GetState() == 1 then
             ply.Persona_Menu_VelvetTheme:Stop()
         end
+		if ply.Persona_Menu_CurrentSound then
+			ply.Persona_Menu_CurrentSound:Stop()
+			ply.Persona_Menu_CurrentSound = nil
+		end
     end
 
 	net.Receive("Persona_ShowStatsMenu",function(len,ply)

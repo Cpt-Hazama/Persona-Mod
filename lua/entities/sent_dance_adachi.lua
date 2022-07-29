@@ -33,6 +33,7 @@ ENT.PreviewThemes = {"cpthazama/persona4_dance/music/preview.wav"}
 
 ENT.Outfits = {}
 ENT.Outfits[1] = {Name = "Detective Uniform", Model = "", Offset = 0.1, ReqSong = nil, ReqScore = 0}
+ENT.Outfits[2] = {Name = "Detective Uniform (Shadow)", Model = "", Offset = 0.1, ReqSong = "The Fog", ReqScore = 15000}
 
 ENT.SongLength = {}
 ENT.SongLength["dance_thefog"] = 249
@@ -45,6 +46,17 @@ F_TF = 4999
 F_TF_B = 2400
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
+	function ENT:OnChangedOutfit(old,new,outfit)
+		if outfit == "Detective Uniform" then
+			self:SetSkin(0)
+			return
+		end
+		if outfit == "Detective Uniform (Shadow)" then
+			self:SetSkin(1)
+			return
+		end
+	end
+
 	function ENT:OnInit()
 		local function Cinematic(frame,data,seq,maxFrames)
 			self:AddCinematicEvent(seq,frame,data,maxFrames)
