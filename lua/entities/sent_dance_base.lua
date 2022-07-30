@@ -155,6 +155,7 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Float",1,"ViewMode")
 	self:NetworkVar("Bool",0,"ShowSongMenu")
 	self:NetworkVar("Bool",1,"ShowCostumeMenu")
+	self:NetworkVar("Bool",2,"ShouldDelete")
 
 	if CLIENT then
 		self.ViewMode = GetConVarNumber("vj_persona_dancemode")
@@ -164,6 +165,39 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetAnimation()
 	return self:GetSequenceName(self:GetSequence())
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:GetHighScores(ply,song,highest)
+	local scores = P_GetHighScoreData(song,ply)
+	if highest then
+		local hScore = 0
+		for dif,v in SortedPairs(scores) do
+			if v > hScore then
+				hScore = v
+			end
+		end
+		return hScore
+	end
+	return scores
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OutfitUnlocked(outfit,ply)
+	if PERSONA_UNLOCKALL then return true end
+	if GetConVarNumber("sv_cheats") == 1 then return true end
+	if type(outfit) == "number" && self.Outfits[outfit] then
+		if self.Outfits[outfit].ReqSong == nil then return true end
+		local highscore = self:GetHighScores(ply,self.Outfits[outfit].ReqSong,true)
+		-- local highscore = PXP.GetDanceData(ply,self.Outfits[outfit].ReqSong)
+		return highscore >= self.Outfits[outfit].ReqScore
+	end
+	for _,v in pairs(self.Outfits) do
+		if v.Name == outfit then
+			if v.ReqSong == nil then return true end
+			-- local highscore = PXP.GetDanceData(ply,v.ReqSong)
+			local highscore = self:GetHighScores(ply,v.ReqSong,true)
+			return highscore >= v.ReqScore
+		end
+	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if (CLIENT) then
@@ -994,21 +1028,21 @@ if (CLIENT) then
 		
 		if dancer:GetShowSongMenu() then
 			// Outfits
-			dancer.OutfitIndex = dancer.OutfitIndex or 1
-			if ply:KeyReleased(IN_MOVERIGHT) then
-				dancer.OutfitIndex = dancer.OutfitIndex +1
-				if dancer.OutfitIndex > #dancer.Outfits then
-					dancer.OutfitIndex = 1
-				end
-				surface.PlaySound("cpthazama/persona4/ui_hover.wav")
-			end
-			if ply:KeyReleased(IN_MOVELEFT) then
-				dancer.OutfitIndex = dancer.OutfitIndex -1
-				if dancer.OutfitIndex < 1 then
-					dancer.OutfitIndex = #dancer.Outfits
-				end
-				surface.PlaySound("cpthazama/persona4/ui_hover.wav")
-			end
+			-- dancer.OutfitIndex = dancer.OutfitIndex or 1
+			-- if ply:KeyReleased(IN_MOVERIGHT) then
+			-- 	dancer.OutfitIndex = dancer.OutfitIndex +1
+			-- 	if dancer.OutfitIndex > #dancer.Outfits then
+			-- 		dancer.OutfitIndex = 1
+			-- 	end
+			-- 	surface.PlaySound("cpthazama/persona4/ui_hover.wav")
+			-- end
+			-- if ply:KeyReleased(IN_MOVELEFT) then
+			-- 	dancer.OutfitIndex = dancer.OutfitIndex -1
+			-- 	if dancer.OutfitIndex < 1 then
+			-- 		dancer.OutfitIndex = #dancer.Outfits
+			-- 	end
+			-- 	surface.PlaySound("cpthazama/persona4/ui_hover.wav")
+			-- end
 			if ply:KeyReleased(IN_USE) then
 				if GetConVarNumber("persona_dance_dev") == 1 then
 					print("Saved " .. #saveData .. " FFT entries to '/data/persona/fft/" .. dancer.LastDanceSequence .. ".dat'")
@@ -1017,72 +1051,71 @@ if (CLIENT) then
 					P_SaveFFTData(dancer.LastDanceSequence,saveData,dancer.DEV_FFTCheckPosition,dancer.DEV_FFTCheckStrength)
 					table.Empty(saveData)
 				end
-				net.Start("Persona_Dance_UpdateOutfit")
-					net.WriteString(dancer.Outfits[dancer.OutfitIndex].Name)
-					net.WriteEntity(dancer)
-					net.WriteEntity(ply)
-				net.SendToServer()
-				surface.PlaySound("cpthazama/persona5/misc/00031.wav")
+				-- net.Start("Persona_Dance_UpdateOutfit")
+				-- 	net.WriteString(dancer.Outfits[dancer.OutfitIndex].Name)
+				-- 	net.WriteEntity(dancer)
+				-- 	net.WriteEntity(ply)
+				-- net.SendToServer()
+				-- surface.PlaySound("cpthazama/persona5/misc/00031.wav")
 			end
 
-			boxX, boxY = ScrW() /1.53, mode == 2 && ScrH() /4 or ScrH() /12
-			boxW, boxH = ScrW() /4.6, 165
-			-- boxW, boxH = ScrW() /4.6, #dancer.Outfits *95
-			for i = 1,#dancer.Outfits do
-				boxH = boxH +(i *10)
-			end
-			draw.RoundedBox(8,boxX, boxY,boxW,boxH,Color(0,0,0,245))
-			draw.SimpleText("SELECT AN OUTFIT","Persona",boxX *1.065,boxY +10,HUDColor)
-			draw.SimpleText("(A - Up, D - Down, E - Equip)","Persona",boxX *1.03,boxY +50,HUDColor)
-			local stPos = boxY +70
-			for i = 1,#dancer.Outfits do
-				stPos = stPos +40
-				local name = dancer.Outfits[i].Name
-				local unlocked = 
-				draw.SimpleText(name,"Persona",boxX +10,stPos,i == dancer.OutfitIndex && boostColor or HUDColor)
-			end
+			-- boxX, boxY = ScrW() /1.53, mode == 2 && ScrH() /4 or ScrH() /12
+			-- boxW, boxH = ScrW() /4.6, 165
+			-- -- boxW, boxH = ScrW() /4.6, #dancer.Outfits *95
+			-- for i = 1,#dancer.Outfits do
+			-- 	boxH = boxH +(i *10)
+			-- end
+			-- draw.RoundedBox(8,boxX, boxY,boxW,boxH,Color(0,0,0,245))
+			-- draw.SimpleText("SELECT AN OUTFIT","Persona",boxX *1.065,boxY +10,HUDColor)
+			-- draw.SimpleText("(A - Up, D - Down, E - Equip)","Persona",boxX *1.03,boxY +50,HUDColor)
+			-- local stPos = boxY +70
+			-- for i = 1,#dancer.Outfits do
+			-- 	stPos = stPos +40
+			-- 	local name = dancer.Outfits[i].Name
+			-- 	-- local unlocked = 
+			-- 	draw.SimpleText(name,"Persona",boxX +10,stPos,i == dancer.OutfitIndex && boostColor or HUDColor)
+			-- end
 
-			// Songs
-			dancer.SelectedIndex = dancer.SelectedIndex or 1
-			if ply:KeyReleased(IN_BACK) then
-				dancer.SelectedIndex = dancer.SelectedIndex +1
-				if dancer.SelectedIndex > #dancer.SoundTracks then
-					dancer.SelectedIndex = 1
-				end
-				surface.PlaySound("cpthazama/persona4/ui_hover.wav")
-			end
-			if ply:KeyReleased(IN_FORWARD) then
-				dancer.SelectedIndex = dancer.SelectedIndex -1
-				if dancer.SelectedIndex < 1 then
-					dancer.SelectedIndex = #dancer.SoundTracks
-				end
-				surface.PlaySound("cpthazama/persona4/ui_hover.wav")
-			end
-			if ply:KeyReleased(IN_JUMP) then
-				net.Start("Persona_Dance_UpdateSong")
-					net.WriteString(dancer.SoundTracks[dancer.SelectedIndex].name)
-					net.WriteEntity(dancer)
-					net.WriteEntity(ply)
-				net.SendToServer()
-				surface.PlaySound("cpthazama/persona5/misc/00031.wav")
-				if ply.VJ_Persona_DancePreview_Theme:IsPlaying() then ply.VJ_Persona_DancePreview_Theme:Stop() end
-			end
-			boxX, boxY = ScrW() /7, mode == 2 && ScrH() /4 or ScrH() /12
-			-- boxW, boxH = ScrW() /2, ScrH() /(9.65 -#dancer.SoundTracks)
-			boxW, boxH = ScrW() /2, 145
-			for i = 1,#dancer.SoundTracks do
-				boxH = boxH +(i *13)
-			end
-			draw.RoundedBox(8,boxX, boxY,boxW,boxH,Color(0,0,0,245))
-			draw.SimpleText("SELECT A SONG","Persona",boxX *2.3,boxY +10,HUDColor)
-			draw.SimpleText("(W - Up, S - Down, Space - Start Song)","Persona",boxX *1.875,boxY +50,HUDColor)
-			local stPos = boxY +70
-			for i = 1,#dancer.SoundTracks do
-				stPos = stPos +40
-				local name = dancer.SoundTracks[i].name
-				local score = dancer:GetNW2Int("HS_" .. name)
-				draw.SimpleText(name .. " : High Score - " .. tostring(score) .. " / " .. dif,"Persona",boxX +10,stPos,i == dancer.SelectedIndex && boostColor or HUDColor)
-			end
+			-- // Songs
+			-- dancer.SelectedIndex = dancer.SelectedIndex or 1
+			-- if ply:KeyReleased(IN_BACK) then
+			-- 	dancer.SelectedIndex = dancer.SelectedIndex +1
+			-- 	if dancer.SelectedIndex > #dancer.SoundTracks then
+			-- 		dancer.SelectedIndex = 1
+			-- 	end
+			-- 	surface.PlaySound("cpthazama/persona4/ui_hover.wav")
+			-- end
+			-- if ply:KeyReleased(IN_FORWARD) then
+			-- 	dancer.SelectedIndex = dancer.SelectedIndex -1
+			-- 	if dancer.SelectedIndex < 1 then
+			-- 		dancer.SelectedIndex = #dancer.SoundTracks
+			-- 	end
+			-- 	surface.PlaySound("cpthazama/persona4/ui_hover.wav")
+			-- end
+			-- if ply:KeyReleased(IN_JUMP) then
+			-- 	net.Start("Persona_Dance_UpdateSong")
+			-- 		net.WriteString(dancer.SoundTracks[dancer.SelectedIndex].name)
+			-- 		net.WriteEntity(dancer)
+			-- 		net.WriteEntity(ply)
+			-- 	net.SendToServer()
+			-- 	surface.PlaySound("cpthazama/persona5/misc/00031.wav")
+			-- 	if ply.VJ_Persona_DancePreview_Theme:IsPlaying() then ply.VJ_Persona_DancePreview_Theme:Stop() end
+			-- end
+			-- boxX, boxY = ScrW() /7, mode == 2 && ScrH() /4 or ScrH() /12
+			-- boxW, boxH = ScrW() /2, 145
+			-- for i = 1,#dancer.SoundTracks do
+			-- 	boxH = boxH +(i *13)
+			-- end
+			-- draw.RoundedBox(8,boxX, boxY,boxW,boxH,Color(0,0,0,245))
+			-- draw.SimpleText("SELECT A SONG","Persona",boxX *2.3,boxY +10,HUDColor)
+			-- draw.SimpleText("(W - Up, S - Down, Space - Start Song)","Persona",boxX *1.875,boxY +50,HUDColor)
+			-- local stPos = boxY +70
+			-- for i = 1,#dancer.SoundTracks do
+			-- 	stPos = stPos +40
+			-- 	local name = dancer.SoundTracks[i].name
+			-- 	local score = dancer:GetNW2Int("HS_" .. name)
+			-- 	draw.SimpleText(name .. " : High Score - " .. tostring(score) .. " / " .. dif,"Persona",boxX +10,stPos,i == dancer.SelectedIndex && boostColor or HUDColor)
+			-- end
 		else
 			if mode == 2 && IsValid(ply.VJ_Persona_Dance_Theme_Audio) then
 				// Hit Count
@@ -1233,7 +1266,7 @@ if (CLIENT) then
 			if dancer:GetNW2Bool("CustomView") == true && dancer.CustomCalcView then
 				return dancer:CustomCalcView(ply,pos,angles,fov,danceBone)
 			end
-			local doingPreview = dancer:GetSequenceName(dancer:GetSequence()) == (dancer.PreviewAnimation or "preview")
+			local doingPreview = dancer.GetShowSongMenu && dancer:GetShowSongMenu() or false
 			if cCinematic && !doingPreview then
 				local pos = dancer:GetNW2Vector("LastCinematicPos")
 				local dist = dancer:GetNW2Int("LastCinematicDist")
@@ -1261,7 +1294,11 @@ if (CLIENT) then
 			end
 			local sPos,sAng = dancer:GetBonePosition(dancer:LookupBone(danceBone))
 			sPos = sPos +(dancer.ViewBoneOffset or Vector(0,0,0))
-			local dist = ply.Persona_DanceZoom or 90
+			dancer.PreviewDist = dancer.PreviewDist or doingPreview && (sPos:Distance(dancer:GetPos()) *1.5) *(dancer.ModelScale or 1) or 80
+			local dist = doingPreview && dancer.PreviewDist or ply.Persona_DanceZoom or 90
+			if doingPreview then
+				sPos = sPos +angles:Up() *-(dist *0.15)
+			end
 			local tr = util.TraceHull({
 				start = sPos,
 				endpos = sPos +angles:Forward() *-math.max(dist,dancer.MinCameraZoom or 35),
@@ -1576,39 +1613,6 @@ function ENT:SetAnimationRate(rate)
 	self.DefaultPlaybackRate = rate
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:GetHighScores(ply,song,highest)
-	local scores = P_GetHighScoreData(song,ply)
-	if highest then
-		local hScore = 0
-		for dif,v in SortedPairs(scores) do
-			if v > hScore then
-				hScore = v
-			end
-		end
-		return hScore
-	end
-	return scores
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OutfitUnlocked(outfit,ply)
-	if PERSONA_UNLOCKALL then return true end
-	if GetConVarNumber("sv_cheats") == 1 then return true end
-	if type(outfit) == "number" && self.Outfits[outfit] then
-		if self.Outfits[outfit].ReqSong == nil then return true end
-		local highscore = self:GetHighScores(ply,self.Outfits[outfit].ReqSong,true)
-		-- local highscore = PXP.GetDanceData(ply,self.Outfits[outfit].ReqSong)
-		return highscore >= self.Outfits[outfit].ReqScore
-	end
-	for _,v in pairs(self.Outfits) do
-		if v.Name == outfit then
-			if v.ReqSong == nil then return true end
-			-- local highscore = PXP.GetDanceData(ply,v.ReqSong)
-			local highscore = self:GetHighScores(ply,v.ReqSong,true)
-			return highscore >= v.ReqScore
-		end
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:ChangeOutfit(outfit)
 	local mdl = string.Replace(self.Model,".mdl","")
 	local pos = self:GetPos() +Vector(0,0,-self.HeightOffset)
@@ -1657,11 +1661,18 @@ function ENT:PlayPreview(ply)
 		self:SetPlaybackRate(1)
 		-- self:SetCycle(1)
 		self:OnPlayPreview(ply)
+		if !self.HasOpenedMenu then
+			net.Start("Persona_Dance_Menu")
+				net.WriteEntity(ply)
+				net.WriteEntity(self)
+			net.Send(ply)
+			self.HasOpenedMenu = true
+		end
 	end
-	net.Start("Persona_Dance_PreviewSong")
-		net.WriteEntity(self)
-		net.WriteEntity(ply)
-	net.Send(ply)
+	-- net.Start("Persona_Dance_PreviewSong")
+	-- 	net.WriteEntity(self)
+	-- 	net.WriteEntity(ply)
+	-- net.Send(ply)
 
 	return self:GetSequenceDuration(self,previewAnim)
 end
@@ -2136,6 +2147,7 @@ function ENT:Think()
 		SafeRemoveEntity(self.Lamp)
 	end
 	if self:GetSelectedSong() != "false" && !self.StartedSong then
+		self.HasOpenedMenu = false
 		self.StartedSong = true
 		lastCheckDif = -2
 		local anim = "preview"

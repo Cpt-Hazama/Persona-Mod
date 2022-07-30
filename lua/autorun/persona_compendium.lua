@@ -203,7 +203,9 @@ if CLIENT then
 			self:LayoutEntity(personaEnt)
 
 			if CurTime() > ply.Persona_Menu_RandomLineTime then
-				ply.Persona_Menu_CurrentSound:Stop()
+				if ply.Persona_Menu_CurrentSound then
+					ply.Persona_Menu_CurrentSound:Stop()
+				end
 				ply.Persona_Menu_CurrentSound = nil
 				curLine = curLine +1
 				if curLine >= #randomLines then
