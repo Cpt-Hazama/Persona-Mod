@@ -92,6 +92,7 @@ function ENT:Initialize()
 	self.HasChaosParticle = false
 	self.HasOverdrive = false
 
+	self.CardTable = {}
 	self.Loops = {}
 	self.Flexes = {}
 	self.AnimationEvents = {}
@@ -132,7 +133,7 @@ function ENT:Initialize()
 			PXP.SetPersonaData(ply,5,ply:GetNW2String("PersonaName"))
 
 			self:CheckSkillLevel(true)
-			PXP.ManagePersonaStats(ply)
+			PXP.ManagePersonaStats(ply,self)
 		else
 			self:UnlockAllSkills()
 		end
@@ -171,7 +172,7 @@ function ENT:MakeLegendary()
 
 	local ply = self.User
 	
-	PXP.ManagePersonaStats(ply)
+	PXP.ManagePersonaStats(ply,self)
 
 	for index,mat in pairs(self.LegendaryMaterials) do
 		self:SetSubMaterial(index -1,mat)
@@ -1127,6 +1128,7 @@ function ENT:Think()
 			end
 		end
 		if user:IsPlayer() then
+			P_UpdateCardData(user)
 			self:PersonaCards(user:KeyDown(IN_ATTACK),user:KeyDown(IN_ATTACK2),user:KeyDown(IN_RELOAD))
 			self:PersonaControls(user,self)
 		elseif user:IsNPC() then
@@ -1213,17 +1215,18 @@ function ENT:CheckCards()
 	end
 	local tbl = PXP.GetPersonaData(ply,3)
 	local newSkills = {}
+
 	if tbl == nil then return end
 	for index,skill in pairs(tbl) do
-		-- print("Checking " .. skill.Name)
+		print("Checking " .. skill.Name)
 		if !VJ_HasValue(oldSkills,skill.Name) then
 			tbl_insert(newSkills,skill)
-			-- print("Added " .. skill.Name .. " to new skills")
+			print("Added " .. skill.Name .. " to new skills")
 		end
 	end
 	for _,skill in pairs(newSkills) do
 		self:AddCard(skill.Name,skill.Cost,skill.UsesHP,skill.Icon)
-		-- print("Implemented " .. skill.Name)
+		print("Implemented " .. skill.Name)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -2374,7 +2377,7 @@ function ENT:OnRemove()
 		if self.Level < self.Stats.LVL then
 			self.Level = self.Stats.LVL
 		end
-		PXP.SavePersonaData(ply,self.EXP,self.Level,self.CardTable)
+		-- PXP.SavePersonaData(ply,self.EXP,self.Level,self.CardTable)
 	end
 	if self.OverdriveAura then self.OverdriveAura:Stop() end
 	self:StopParticles()

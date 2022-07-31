@@ -23,6 +23,18 @@ function GetDancerFlexData(seqID,ent) -- Get a really good randomly generated fa
 	end
 end
 
+function P_UpdateCardData(ply)
+	local persona = ply:GetPersona()
+	if !IsValid(persona) then
+		return
+	end
+
+	net.Start("Persona_UpdateSkillMenu")
+		net.WriteEntity(ply)
+		net.WriteTable(persona.CardTable)
+	net.Send(ply)
+end
+
 function P_AddVoice(name,vType,vSound)
 	local canAdd = true
 	if !PERSONA_VOICES then

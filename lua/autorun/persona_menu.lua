@@ -203,7 +203,11 @@ if CLIENT then
 	net.Receive("Persona_UpdateSkillMenu",function(len,ply)
 		local p = net.ReadEntity()
 		local pSkills = net.ReadTable()
+		
+		p.Persona_CSSkills = {}
 		p.Persona_CSSkills = pSkills
+		-- print("------------------------------------------------------")
+		-- PrintTable(pSkills)
 	end)
 end
 

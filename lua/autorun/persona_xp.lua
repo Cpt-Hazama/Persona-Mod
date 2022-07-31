@@ -228,20 +228,96 @@ PXP.FindRemainingXP = function(ply)
 	return PXP.GetRequiredXP(ply) -PXP.GetEXP(ply)
 end
 
-PXP.ManagePersonaStats = function(ply,chat)
-	if !ply:IsPlayer() then return end
-	local persona = ply:GetPersona()
-	if IsValid(persona) then
-		local add = PXP.GetLevel(ply) -persona.BaseLevel
-		if PXP.IsLegendary(ply) then add = add *2 end
-		persona.Stats.STR = math.Clamp(persona.BaseSTR +add,1,99)
-		persona.Stats.MAG = math.Clamp(persona.BaseMAG +add,1,99)
-		persona.Stats.END = math.Clamp(persona.BaseEND +add,1,99)
-		persona.Stats.AGI = math.Clamp(persona.BaseAGI +add,1,99)
-		persona.Stats.LUC = math.Clamp(persona.BaseLUC +add,1,99)
+local string_match = string.match
+local string_Explode = string.Explode
+local string_Replace = string.Replace
+local to_number = tonumber
+PXP.GetPersonaBaseStats = function(ply,persona)
+	local stats = {
+		LVL = 0,
+		STR = 1,
+		MAG = 1,
+		END = 1,
+		AGI = 1,
+		LUC = 1,
+		WK = {},
+		RES = {},
+		NUL = {},
+		REF = {},
+		ABS = {},
+	}
 
-		PXP.SavePersonaStats(ply)
+	local name = persona or ply:GetPersonaName()
+	for i,v in pairs(baseclass.Get("prop_persona_" .. name)) do
+		if i == "Base" && (v != "prop_persona" && v != "prop_persona_rmd") then
+			name = string_Replace(v,"prop_persona_","")
+			break
+		end
 	end
+
+	local f = file.Open("entities/prop_persona_" .. name .. "/init.lua","r","LUA")
+		local fileData = f:Read(f:Size())
+		stats.LVL = to_number(string_match(fileData, "LVL = (%d+)"))
+		stats.STR = to_number(string_match(fileData, "STR = (%d+)"))
+		stats.MAG = to_number(string_match(fileData, "MAG = (%d+)"))
+		stats.END = to_number(string_match(fileData, "END = (%d+)"))
+		stats.AGI = to_number(string_match(fileData, "AGI = (%d+)"))
+		stats.LUC = to_number(string_match(fileData, "LUC = (%d+)"))
+
+		-- stats.WK = string_Explode(",",string_match(fileData, "WK = {(.+)}")) -- It grabs everything in the string after the table, we only want the table contents
+		-- stats.RES = string_Explode(",",string_match(fileData, "RES = {(.+)}"))
+		-- stats.NUL = string_Explode(",",string_match(fileData, "NUL = {(.+)}"))
+		-- stats.REF = string_Explode(",",string_match(fileData, "REF = {(.+)}"))
+		-- stats.ABS = string_Explode(",",string_match(fileData, "ABS = {(.+)}"))
+	f:Close()
+
+	if PXP.IsLegendary(ply) then
+		stats.LVL = 1
+	end
+
+	return stats
+end
+
+PXP.GetUpdatedPersonaStats = function(ply,persona)
+	local persona = persona or ply:GetPersonaName()
+	local baseStats = PXP.GetPersonaBaseStats(ply,persona)
+	local currentLevel = PXP.GetLevel(ply)
+	local add = currentLevel -baseStats.LVL
+	if PXP.IsLegendary(ply) then
+		add = add *2
+	end
+
+	local stats = {
+		LVL = currentLevel,
+		STR = baseStats.STR +add,
+		MAG = baseStats.MAG +add,
+		END = baseStats.END +add,
+		AGI = baseStats.AGI +add,
+		LUC = baseStats.LUC +add,
+	}
+
+	return stats
+end
+
+PXP.ManagePersonaStats = function(ply,persona)
+	if !ply:IsPlayer() then return end
+
+	local baseStats = PXP.GetPersonaBaseStats(ply)
+	local currentLevel = PXP.GetLevel(ply)
+	local add = currentLevel -baseStats.LVL
+	if PXP.IsLegendary(ply) then
+		add = add *2
+	end
+
+	if IsValid(persona) then
+		persona.Stats.STR = math.Clamp(baseStats.STR +add,1,99)
+		persona.Stats.MAG = math.Clamp(baseStats.MAG +add,1,99)
+		persona.Stats.END = math.Clamp(baseStats.END +add,1,99)
+		persona.Stats.AGI = math.Clamp(baseStats.AGI +add,1,99)
+		persona.Stats.LUC = math.Clamp(baseStats.LUC +add,1,99)
+	end
+
+	PXP.SavePersonaStats(ply)
 end
 
 PXP.GetPersonaStats = function(ply)
@@ -249,19 +325,10 @@ PXP.GetPersonaStats = function(ply)
 	return PXP.GetPersonaData(ply,7)
 end
 
-PXP.SavePersonaStats = function(ply)
+PXP.SavePersonaStats = function(ply,persona)
 	if !ply:IsPlayer() then return end
-	local persona = ply:GetPersona()
-	if IsValid(persona) then
-		local tbl = persona.Stats
-		local save = {}
-		save.STR = tbl.STR
-		save.MAG = tbl.MAG
-		save.END = tbl.END
-		save.AGI = tbl.AGI
-		save.LUC = tbl.LUC
-		PXP.SetPersonaData(ply,7,save)
-	end
+	local stats = PXP.GetUpdatedPersonaStats(ply,persona)
+	PXP.SetPersonaData(ply,7,stats)
 end
 
 PXP.LevelUp = function(ply)
@@ -371,42 +438,6 @@ PXP.GetSocialLinkData = function(ply,char)
 	return tonumber(file.Read(dir .. "_SOCIAL_" .. char .. ".txt","DATA") or 0) or 0
 end
 
-PXP.GetPersonaData_Legacy = function(ply,type)
-	if !ply:IsPlayer() then return end
-	local name = type <= 8 && ply:GetPersonaName() or PXP.GetPersonaData(ply,5)
-	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
-	if type == 5 then -- Last Persona
-		local persona = file.Read(dir .. "_PERSONA.txt","DATA")
-		if persona == nil then
-			PXP.WriteFile(dir .. "_PERSONA.txt","izanagi")
-			persona = "izanagi"
-		end
-		return persona
-	end
-	if type == 9 then -- Player LEVEL
-		return tonumber(file.Read(dir .. "_LEVEL.txt","DATA") or 0) or 0
-	elseif type == 10 then -- Player EXP
-		return tonumber(file.Read(dir .. "_EXP.txt","DATA") or 0) or 0
-	end
-	if name && type <= 8 then
-		if type == 1 then -- EXP
-			return tonumber(file.Read(dir .. "_" .. name .. "_EXP.txt","DATA") or 0) or 0
-		elseif type == 2 then -- Level
-			return tonumber(file.Read(dir .. "_" .. name .. "_LEVEL.txt","DATA") or 0) or 0
-		elseif type == 3 then -- Skills
-			return PXP.ReadDataTable(dir .. "_" .. name .. "_SKILLS.txt","DATA") or {}
-		elseif type == 4 then -- Compendium
-			return PXP.ReadDataTable(dir .. "_COMPENDIUM.txt","DATA") or {}
-		elseif type == 6 then -- Req
-			return tonumber(file.Read(dir .. "_" .. name .. "_REQ.txt","DATA") or 0) or 0
-		elseif type == 7 then -- Stats
-			return PXP.ReadDataTable(dir .. "_" .. name .. "_STATS.txt","DATA") or {}
-		elseif type == 8 then -- Legendary/Velvet
-			return tonumber(file.Read(dir .. "_" .. name .. "_ENHANCEMENT.txt","DATA") or 0) or 0
-		end
-	end
-end
-
 PXP.GetPersonaData = function(ply,type,sName,it)
 	if !ply:IsPlayer() then return end
 	it = it or 0
@@ -423,7 +454,7 @@ PXP.GetPersonaData = function(ply,type,sName,it)
 		if it == 0 then
 			return PXP.GetPersonaData(ply,type,sName,1)
 		end
-		-- PXP.CreateSaveData(ply)
+		PXP.CreateSaveData(ply)
 		return
 	end
 	if type == 5 then -- Last Persona
@@ -493,41 +524,6 @@ PXP.SetPersonaData = function(ply,type,val,sName)
 	PXP.SaveTable(dir,isPersona && tbl or tblPly,true)
 end
 
-PXP.SetPersonaData_Legacy = function(ply,type,val)
-	if !ply:IsPlayer() then return end
-	local name = type <= 8 && ply:GetPersonaName() or PXP.GetPersonaData(ply,5) or nil
-	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
-	if type == 5 then -- Last Persona
-		PXP.WriteFile(dir .. "_PERSONA.txt",val)
-		return
-	end
-	if type == 9 then -- Player Level
-		PXP.WriteFile(dir .. "_LEVEL.txt",val)
-	elseif type == 10 then -- Player EXP
-		PXP.WriteFile(dir .. "_EXP.txt",val)
-	end
-	if name && type <= 8 then
-		if type == 1 then -- EXP
-			PXP.WriteFile(dir .. "_" .. ply:GetPersonaName() .. "_EXP.txt",val)
-			ply:SetNW2Int("PXP_EXP",val)
-		elseif type == 2 then -- Level
-			PXP.WriteFile(dir .. "_" .. ply:GetPersonaName() .. "_LEVEL.txt",val)
-			ply:SetNW2Int("PXP_Level",val)
-		elseif type == 3 then -- Skills
-			PXP.WriteTable(dir .. "_" .. ply:GetPersonaName() .. "_SKILLS.txt","Skills",val,true)
-		elseif type == 4 then -- Compendium
-			PXP.WriteTable(dir .. "_COMPENDIUM.txt","Compendium",val,true)
-		elseif type == 6 then -- Req
-			PXP.WriteFile(dir .. "_" .. ply:GetPersonaName() .. "_REQ.txt",val)
-			ply:SetNW2Int("PXP_RequiredEXP",val)
-		elseif type == 7 then -- Stats
-			PXP.WriteTable(dir .. "_" .. ply:GetPersonaName() .. "_STATS.txt","Stats",val,true)
-		elseif type == 8 then -- Legendary/Velvet
-			PXP.WriteFile(dir .. "_" .. ply:GetPersonaName() .. "_ENHANCEMENT.txt",val)
-		end
-	end
-end
-
 PXP.SavePersonaData = function(ply,exp,level,cards)
 	if !ply:IsPlayer() then return end
 	local dir = PXP.GetDataStorage() .. string.gsub(ply:SteamID(),":","_")
@@ -537,7 +533,6 @@ PXP.SavePersonaData = function(ply,exp,level,cards)
 	PXP.SetPersonaData(ply,2,level)
 	PXP.SetLevel(ply,level)
 	PXP.SetPersonaData(ply,3,cards)
-	-- PrintTable(cards)
 	PXP.SetPersonaData(ply,4,ply.PXP_Compendium)
 	PXP.CalculateRequiredXP(ply)
 	PXP.ManagePersonaStats(ply)

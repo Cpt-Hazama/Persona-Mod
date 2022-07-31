@@ -818,8 +818,9 @@ if SERVER then
 						if ent.Level < ent.Stats.LVL then
 							ent.Level = ent.Stats.LVL
 						end
+						print(ply:GetPersonaName())
 						PXP.AddToCompendium(ply,ply:GetPersonaName())
-						ent:CheckCards()
+						-- ent:CheckCards()
 						PXP.SavePersonaData(ply,ent.EXP,ent.Level,ent.CardTable)
 					else
 						if persona:GetTask() == "TASK_IDLE" then

@@ -1,12 +1,5 @@
 AddCSLuaFile()
 if (!file.Exists("autorun/vj_base_autorun.lua","LUA")) then return end
-/*--------------------------------------------------
-	=============== Battle Mode Logic Entity ===============
-	*** Copyright (c) 2012-2021 by Cpt. Hazama, All rights reserved. ***
-	No parts of this code or any of its contents may be reproduced, copied, modified or adapted,
-	without the prior written consent of the author, unless otherwise indicated for stand-alone materials.
-INFO: Used to make simple props and animate them, since prop_dynamic doesn't work properly in Garry's Mod...
---------------------------------------------------*/
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.Base 			= "base_gmodentity"
 ENT.Type 			= "anim"
@@ -24,25 +17,19 @@ ENT.AutomaticFrameAdvance = true
 ENT.BattleActive = false
 ENT.BattleEntitiesTable = {}
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:SetupDataTables()
+	self:NetworkVar("Entity",0,"Starter")
+	self:NetworkVar("Int",0,"TurnTime")
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 if SERVER then
 	util.AddNetworkString("Persona_StartBattle")
 	util.AddNetworkString("Persona_SetTurn")
+	util.AddNetworkString("Persona_SkipTurn")
 	util.AddNetworkString("Persona_EndBattle")
 	util.AddNetworkString("Persona_UpdateBattleData")
 	util.AddNetworkString("Persona_UpdateCSBattleData")
 	util.AddNetworkString("Persona_UpdateCSFriendData")
----------------------------------------------------------------------------------------------------------------------------------------------
-	function ENT:SetupDataTables()
-		self:AddVar("Entity","Starter")
-	end
----------------------------------------------------------------------------------------------------------------------------------------------
-	function ENT:AddVar(type,name)
-		self.Vars = self.Vars or {}
-		self.Vars[type] = self.Vars[type] or {}
-		local count = #self.Vars[type]
-
-		self:NetworkVar(type,count,name)
-	end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 	net.Receive("Persona_UpdateBattleData",function(len,ply)
 		local self = net.ReadEntity()
@@ -69,6 +56,12 @@ if SERVER then
 			ply:SetNW2Bool("Persona_BattleMode",false)
 			SafeRemoveEntity(ent)
 		-- end
+
+		if ply then
+			net.Start("Persona_Battle_DoClose")
+				net.WriteEntity(ply)
+			net.Send(ply)
+		end
 	end)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,8 +77,14 @@ if (CLIENT) then
 		if self.BattleEntitiesTable != nil then
 			for _,v in SortedPairs(self.BattleEntitiesTable) do
 				if IsValid(v) && v:IsPlayer() then
+					if v.Persona_BattleMenu_Open then
+						PERSONA_BATTLE_MENU:Close(v)
+					end
 					v:ChatPrint("It is now " .. (tEnt:IsPlayer() && tEnt:Nick() or language.GetPhrase(self.CurrentTurnEntity:GetClass())) .. "'s turn!")
 				end
+			end
+			if self.CurrentTurnEntity:IsPlayer() then
+				PERSONA_BATTLE_MENU:Open(self.CurrentTurnEntity,self.BattleEntitiesTable,self)
 			end
 		end
 	end)
@@ -126,6 +125,8 @@ if (CLIENT) then
 				break
 			end
 		end
+
+		PERSONA_BATTLE_MENU:Open(ply,ent.BattleEntitiesTable,ent)
 
 		local tracks = P_FindBattleTracks(boss,boss && bossEnt:GetClass())
 		local name, snd, len = tracks.Name, tracks.Song, tracks.Length
@@ -387,233 +388,231 @@ function ENT:StartBattle(ply,ent)
 	end
 end
 if SERVER then
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:UpdateParty()
-	local tbl = {}
-	for _,v in SortedPairs(self.Starter:GetFullParty()) do
-		if VJ_HasValue(self.Party) then continue end
-		if VJ_HasValue(self.BattleEntitiesTable) then continue end
-		table.insert(tbl,v)
-		table.insert(self.Party,v)
-		table.insert(self.BattleEntitiesTable,v)
+	---------------------------------------------------------------------------------------------------------------------------------------------
+	net.Receive("Persona_SkipTurn",function(len,ply)
+		local ent = net.ReadEntity()
+		ent:SetTurnTime(0)
+	end)
+	---------------------------------------------------------------------------------------------------------------------------------------------
+	function ENT:UpdateParty()
+		local tbl = {}
+		for _,v in SortedPairs(self.Starter:GetFullParty()) do
+			if VJ_HasValue(self.Party) then continue end
+			if VJ_HasValue(self.BattleEntitiesTable) then continue end
+			table.insert(tbl,v)
+			table.insert(self.Party,v)
+			table.insert(self.BattleEntitiesTable,v)
+		end
+		net.Start("Persona_UpdateCSFriendData")
+			net.WriteEntity(self)
+			net.WriteEntity(self.Starter)
+			net.WriteTable(tbl)
+		net.Send(self.Starter)
 	end
-	net.Start("Persona_UpdateCSFriendData")
-		net.WriteEntity(self)
-		net.WriteEntity(self.Starter)
-		net.WriteTable(tbl)
-	net.Send(self.Starter)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Initialize()
-	self:SetSolid(SOLID_NONE)
-	self:SetModel("models/props_borealis/bluebarrel001.mdl")
-	self:SetNoDraw(true)
-	self:DrawShadow(false)
-	self.UsePositions = tobool(GetConVarNumber("vj_persona_battle_positions"))
-	self.Sets = {}
-	self.Sets[1] = {f=300,r=0}
-	self.Sets[2] = {f=400,r=200}
-	self.Sets[3] = {f=400,r=-200}
-	self.Sets[4] = {f=400,r=400}
-	self.Sets[5] = {f=400,r=-400}
-	self.Sets[6] = {f=500,r=0}
-	self.Sets[7] = {f=650,r=0} -- Some fallback shit, idk how this even happens
-	
-	self.CurrentTurn = 0
-	self.CurrentTurnEntity = NULL
-	
-	self:SetNW2Bool("UsePositions",self.UsePositions)
-	self:SetNW2Bool("TakeTurns",tobool(GetConVarNumber("vj_persona_battle_turns")))
-	self:SetNW2Int("TurnTime",CurTime() +GetConVarNumber("vj_persona_battle_turntime"))
-	if IsValid(self.Starter) then self.Starter:SetNW2Entity("BattleEnt",self) end
-	
-	self.Party = {}
-	self:UpdateParty()
-	
-	if GetConVarNumber("vj_persona_battle_newcomers") == 0 then
-		local hookName = "Persona_LogicBattle_Think_" .. self:EntIndex()
-		hook.Add("Think",hookName,function()
-			if !IsValid(self) then
-				hook.Remove("Think",hookName)
-				return
-			end
-			if !IsValid(self.Starter) then
-				hook.Remove("Think",hookName)
-				return
-			end
-			local tbl = self.Starter.BattleEntitiesTable
-			if tbl != nil && table.Count(tbl) > 0 then
-				for _,v in SortedPairs(ents.GetAll()) do
-					if VJ_HasValue(tbl,v) then -- Ignore entities in battle mode
-						continue
-					end
-					if v.GetEnemy then -- Has the GetEnemy() function, must be a NPC or nextbot
-						if IsValid(v:GetEnemy()) && VJ_HasValue(tbl,v:GetEnemy()) then
-							if v.SetEnemy then
-								v:SetEnemy(NULL)
+	---------------------------------------------------------------------------------------------------------------------------------------------
+	function ENT:Initialize()
+		self:SetSolid(SOLID_NONE)
+		self:SetModel("models/props_borealis/bluebarrel001.mdl")
+		self:SetNoDraw(true)
+		self:DrawShadow(false)
+		self.UsePositions = tobool(GetConVarNumber("vj_persona_battle_positions"))
+		self.Sets = {}
+		self.Sets[1] = {f=300,r=0}
+		self.Sets[2] = {f=400,r=200}
+		self.Sets[3] = {f=400,r=-200}
+		self.Sets[4] = {f=400,r=400}
+		self.Sets[5] = {f=400,r=-400}
+		self.Sets[6] = {f=500,r=0}
+		self.Sets[7] = {f=650,r=0} -- Some fallback shit, idk how this even happens
+		
+		self.CurrentTurn = 0
+		self.CurrentTurnEntity = NULL
+		
+		self:SetNW2Bool("UsePositions",self.UsePositions)
+		self:SetNW2Bool("TakeTurns",tobool(GetConVarNumber("vj_persona_battle_turns")))
+		self:SetTurnTime(CurTime() +GetConVarNumber("vj_persona_battle_turntime"))
+		if IsValid(self.Starter) then self.Starter:SetNW2Entity("BattleEnt",self) end
+		
+		self.Party = {}
+		self:UpdateParty()
+		
+		if GetConVarNumber("vj_persona_battle_newcomers") == 0 then
+			local hookName = "Persona_LogicBattle_Think_" .. self:EntIndex()
+			hook.Add("Think",hookName,function()
+				if !IsValid(self) then
+					hook.Remove("Think",hookName)
+					return
+				end
+				if !IsValid(self.Starter) then
+					hook.Remove("Think",hookName)
+					return
+				end
+				local tbl = self.Starter.BattleEntitiesTable
+				if tbl != nil && table.Count(tbl) > 0 then
+					for _,v in SortedPairs(ents.GetAll()) do
+						if VJ_HasValue(tbl,v) then -- Ignore entities in battle mode
+							continue
+						end
+						if v.GetEnemy then -- Has the GetEnemy() function, must be a NPC or nextbot
+							if IsValid(v:GetEnemy()) && VJ_HasValue(tbl,v:GetEnemy()) then
+								if v.SetEnemy then
+									v:SetEnemy(NULL)
+								end
 							end
 						end
 					end
 				end
-			end
-		end)
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:GetSetPos(i,rev)
-	local rowMax = #self.Sets -1
-	local row = math.Clamp(math.Round(i /rowMax),1,50)
-	local targetI = i
-	if targetI > rowMax then
-		for x = 1,99 do
-			if targetI <= rowMax then
-				break
-			end
-			targetI = targetI -rowMax
+			end)
 		end
 	end
-	if targetI == nil or targetI == 0 then
-		targetI = #self.Sets
-	end
-	local set = self.Sets[targetI]
-	return self:GetPos() +self:GetForward() *(((rev && set.f *-1) or set.f) *row) +self:GetRight() *(((rev && set.r *-1) or set.r) /**row */) +Vector(0,0,10)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:GetCurrentTurn()
-	return self.CurrentTurn
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:NextCurrentTurn(didChange)
-	if !self:GetNW2Bool("TakeTurns") then return end
-	self:SetNW2Int("TurnTime",CurTime() +GetConVarNumber("vj_persona_battle_turntime"))
-	for i,v in SortedPairs(self.Starter.BattleEntitiesTable) do
-		if IsValid(v) then
-			if v:IsNPC() && v.IsVJBaseSNPC then
-				-- v.DisableChasingEnemy = self.UsePositions
-				-- v.HasMeleeAttack = false
-				-- v.HasRangeAttack = false
-				-- v.HasLeapAttack = false
-				-- v.HasGrenadeAttack = false
-				-- v.CanUseSecondaryOnWeaponAttack = false
-				-- v.NextWeaponAttackT = 999999999
-				-- v:SetState(self.UsePositions && VJ_STATE_ONLY_ANIMATION or nil)
-				v:SetState(self.UsePositions && VJ_STATE_FREEZE or nil)
-				-- print("Set values to false",v)
-				-- Entity(1):ChatPrint(v:GetState() == VJ_STATE_FREEZE && "Set " .. tostring(v) .. "'s state to FREEZE!" or "Unable to set " .. tostring(v) .. "'s state to FREEZE!")
+	---------------------------------------------------------------------------------------------------------------------------------------------
+	function ENT:GetSetPos(i,rev)
+		local rowMax = #self.Sets -1
+		local row = math.Clamp(math.Round(i /rowMax),1,50)
+		local targetI = i
+		if targetI > rowMax then
+			for x = 1,99 do
+				if targetI <= rowMax then
+					break
+				end
+				targetI = targetI -rowMax
 			end
-			self:SetCombatPos(i,v)
+		end
+		if targetI == nil or targetI == 0 then
+			targetI = #self.Sets
+		end
+		local set = self.Sets[targetI]
+		return self:GetPos() +self:GetForward() *(((rev && set.f *-1) or set.f) *row) +self:GetRight() *(((rev && set.r *-1) or set.r) /**row */) +Vector(0,0,10)
+	end
+	---------------------------------------------------------------------------------------------------------------------------------------------
+	function ENT:GetCurrentTurn()
+		return self.CurrentTurn
+	end
+	---------------------------------------------------------------------------------------------------------------------------------------------
+	function ENT:NextCurrentTurn(didChange)
+		if !self:GetNW2Bool("TakeTurns") then return end
+		self:SetTurnTime(CurTime() +GetConVarNumber("vj_persona_battle_turntime"))
+		for i,v in SortedPairs(self.Starter.BattleEntitiesTable) do
+			if IsValid(v) then
+				if v:IsNPC() && v.IsVJBaseSNPC then
+					-- v.DisableChasingEnemy = self.UsePositions
+					-- v.HasMeleeAttack = false
+					-- v.HasRangeAttack = false
+					-- v.HasLeapAttack = false
+					-- v.HasGrenadeAttack = false
+					-- v.CanUseSecondaryOnWeaponAttack = false
+					-- v.NextWeaponAttackT = 999999999
+					-- v:SetState(self.UsePositions && VJ_STATE_ONLY_ANIMATION or nil)
+					v:SetState(self.UsePositions && VJ_STATE_FREEZE or nil)
+					-- print("Set values to false",v)
+					-- Entity(1):ChatPrint(v:GetState() == VJ_STATE_FREEZE && "Set " .. tostring(v) .. "'s state to FREEZE!" or "Unable to set " .. tostring(v) .. "'s state to FREEZE!")
+				end
+				self:SetCombatPos(i,v)
+			end
+		end
+		self.CurrentTurn = didChange && self.CurrentTurn or self.CurrentTurn +1
+		if self.CurrentTurn > #self.Starter.BattleEntitiesTable then
+			self.CurrentTurn = 1
+		end
+		self.CurrentTurnEntity = self.Starter.BattleEntitiesTable[self.CurrentTurn]
+		local newEnt = self.CurrentTurnEntity -- newEnt
+		self:SetNW2Entity("CurrentTurnEntity",newEnt)
+		self:SetNW2Vector("CurrentTurnEntity_Cam",Vector(math.random(-200,200),math.random(50,200),math.random(10,50)))
+		if IsValid(newEnt) && newEnt:IsNPC() && newEnt.IsVJBaseSNPC then
+			-- newEnt.DisableChasingEnemy = newEnt:GetNW2Bool("VJ_P_DisableChasingEnemy")
+			-- newEnt.HasMeleeAttack = newEnt:GetNW2Bool("VJ_P_HasMeleeAttack")
+			-- newEnt.HasRangeAttack = newEnt:GetNW2Bool("VJ_P_HasRangeAttack")
+			-- newEnt.HasLeapAttack = newEnt:GetNW2Bool("VJ_P_HasLeapAttack")
+			-- newEnt.HasGrenadeAttack = newEnt:GetNW2Bool("VJ_P_HasGrenadeAttack")
+			-- newEnt.CanUseSecondaryOnWeaponAttack = newEnt:GetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack")
+			-- if CurTime() > newEnt:GetNW2Int("VJ_P_NextWeaponAttackT") then
+				-- newEnt.NextWeaponAttackT = 0
+			-- end
+			if newEnt.IsVJBaseSNPC && self.UsePositions then newEnt:SetState() end
+			-- print("Set values to their originals",newEnt.DisableChasingEnemy,newEnt.HasMeleeAttack,newEnt.HasRangeAttack,newEnt.HasLeapAttack)
+		end
+		net.Start("Persona_SetTurn")
+			net.WriteEntity(self)
+			net.WriteEntity(self.Starter)
+			net.WriteFloat(self.CurrentTurn,24)
+			net.WriteEntity(self.CurrentTurnEntity)
+		net.Send(self.Starter)
+	end
+	---------------------------------------------------------------------------------------------------------------------------------------------
+	function ENT:SetCombatPos(i,v)
+		local pos = self:GetSetPos(i,v == self.Starter or VJ_HasValue(self.Party,v))
+		if v:GetPos() != pos then
+			v:SetPos(pos)
 		end
 	end
-	self.CurrentTurn = didChange && self.CurrentTurn or self.CurrentTurn +1
-	if self.CurrentTurn > #self.Starter.BattleEntitiesTable then
-		self.CurrentTurn = 1
-	end
-	self.CurrentTurnEntity = self.Starter.BattleEntitiesTable[self.CurrentTurn]
-	local newEnt = self.CurrentTurnEntity -- newEnt
-	self:SetNW2Entity("CurrentTurnEntity",newEnt)
-	self:SetNW2Vector("CurrentTurnEntity_Cam",Vector(math.random(-200,200),math.random(50,200),math.random(10,50)))
-	if IsValid(newEnt) && newEnt:IsNPC() && newEnt.IsVJBaseSNPC then
-		-- newEnt.DisableChasingEnemy = newEnt:GetNW2Bool("VJ_P_DisableChasingEnemy")
-		-- newEnt.HasMeleeAttack = newEnt:GetNW2Bool("VJ_P_HasMeleeAttack")
-		-- newEnt.HasRangeAttack = newEnt:GetNW2Bool("VJ_P_HasRangeAttack")
-		-- newEnt.HasLeapAttack = newEnt:GetNW2Bool("VJ_P_HasLeapAttack")
-		-- newEnt.HasGrenadeAttack = newEnt:GetNW2Bool("VJ_P_HasGrenadeAttack")
-		-- newEnt.CanUseSecondaryOnWeaponAttack = newEnt:GetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack")
-		-- if CurTime() > newEnt:GetNW2Int("VJ_P_NextWeaponAttackT") then
-			-- newEnt.NextWeaponAttackT = 0
-		-- end
-		if newEnt.IsVJBaseSNPC && self.UsePositions then newEnt:SetState() end
-		-- print("Set values to their originals",newEnt.DisableChasingEnemy,newEnt.HasMeleeAttack,newEnt.HasRangeAttack,newEnt.HasLeapAttack)
-	end
-	net.Start("Persona_SetTurn")
-		net.WriteEntity(self)
-		net.WriteEntity(self.Starter)
-		net.WriteFloat(self.CurrentTurn,24)
-		net.WriteEntity(self.CurrentTurnEntity)
-	net.Send(self.Starter)
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:SetCombatPos(i,v)
-	local pos = self:GetSetPos(i,v == self.Starter or VJ_HasValue(self.Party,v))
-	if v:GetPos() != pos then
-		v:SetPos(pos)
-	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:Think()
-	local usePos = self.UsePositions
-	local useTurns = self:GetNW2Bool("TakeTurns")
-	local currentEnt = self.CurrentTurnEntity
-	
-	self.BattleEntitiesTable = self.Starter.BattleEntitiesTable
+	---------------------------------------------------------------------------------------------------------------------------------------------
+	function ENT:Think()
+		local usePos = self.UsePositions
+		local useTurns = self:GetNW2Bool("TakeTurns")
+		local currentEnt = self.CurrentTurnEntity
+		
+		self.BattleEntitiesTable = self.Starter.BattleEntitiesTable
 
-	for i,v in SortedPairs(self.Starter.BattleEntitiesTable) do
-		if v == self.Starter then continue end
-		if !IsValid(v) or IsValid(v) && v:Health() <= 0 then
-			table.remove(self.Starter.BattleEntitiesTable,i)
-			if v == self.CurrentTurnEntity then -- Current combatant died/got removed, change turns
-				self:NextCurrentTurn(true)
+		for i,v in SortedPairs(self.Starter.BattleEntitiesTable) do
+			if v == self.Starter then continue end
+			if !IsValid(v) or IsValid(v) && v:Health() <= 0 then
+				table.remove(self.Starter.BattleEntitiesTable,i)
+				if v == self.CurrentTurnEntity then -- Current combatant died/got removed, change turns
+					self:NextCurrentTurn(true)
+				end
 			end
 		end
-	end
-	
-	if useTurns then
-		if self:GetNW2Int("TurnTime") < CurTime() then
-			self:NextCurrentTurn()
+		
+		if useTurns then
+			if self:GetTurnTime() < CurTime() then
+				self:NextCurrentTurn()
+			end
 		end
-	end
-	for i,v in SortedPairs(self.Starter.BattleEntitiesTable) do
-		if IsValid(v) && v:Health() > 0 /*&& self.Starter != v*/ then
-			-- print(i,v)
-			if usePos then
-				if useTurns && currentEnt == v then
-					if v.IsVJBaseSNPC then
-						if v:GetState() == VJ_STATE_FREEZE then
-							v:SetState()
+		for i,v in SortedPairs(self.Starter.BattleEntitiesTable) do
+			if IsValid(v) && v:Health() > 0 /*&& self.Starter != v*/ then
+				-- print(i,v)
+				if usePos then
+					if useTurns && currentEnt == v then
+						if v.IsVJBaseSNPC then
+							if v:GetState() == VJ_STATE_FREEZE then
+								v:SetState()
+							end
 						end
+						continue
 					end
-					continue
-				end
-				-- local pos = self:GetSetPos(i,v == self.Starter or VJ_HasValue(self.Party,v))
-				-- print(v,i,pos)
-				-- if v:GetPos() != pos then
-					-- v:SetPos(pos)
-				-- end
-				if v:IsNPC() && v:IsMoving() then
-					v:StopMoving()
-					v:ClearSchedule()
-					v:ClearGoal()
-				end
-				if v.IsVJBaseSNPC then
-					-- v.DisableChasingEnemy = true
-					-- v:SetState(VJ_STATE_ONLY_ANIMATION)
-					v:SetState(VJ_STATE_FREEZE)
+					-- local pos = self:GetSetPos(i,v == self.Starter or VJ_HasValue(self.Party,v))
+					-- print(v,i,pos)
+					-- if v:GetPos() != pos then
+						-- v:SetPos(pos)
+					-- end
+					if v:IsNPC() && v:IsMoving() then
+						v:StopMoving()
+						v:ClearSchedule()
+						v:ClearGoal()
+					end
+					if v.IsVJBaseSNPC then
+						-- v.DisableChasingEnemy = true
+						-- v:SetState(VJ_STATE_ONLY_ANIMATION)
+						v:SetState(VJ_STATE_FREEZE)
+					end
 				end
 			end
 		end
 	end
-end
----------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:OnRemove()
-	local usePos = self.UsePositions
-	for i,v in pairs(self.Starter.BattleEntitiesTable) do
-		if IsValid(v) && v:Health() > 0 && self.Starter != v then
-			-- if usePos then v.DisableChasingEnemy = v:GetNW2Bool("VJ_P_DisableChasingEnemy") end
-			-- v.HasMeleeAttack = v:GetNW2Bool("VJ_P_HasMeleeAttack")
-			-- v.HasRangeAttack = v:GetNW2Bool("VJ_P_HasRangeAttack")
-			-- v.HasLeapAttack = v:GetNW2Bool("VJ_P_HasLeapAttack")
-			-- v.HasGrenadeAttack = v:GetNW2Bool("VJ_P_HasGrenadeAttack")
-			-- v.CanUseSecondaryOnWeaponAttack = v:GetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack")
-			-- v.NextWeaponAttackT = 0
-			v:SetState()
+	---------------------------------------------------------------------------------------------------------------------------------------------
+	function ENT:OnRemove()
+		local usePos = self.UsePositions
+		for i,v in pairs(self.Starter.BattleEntitiesTable) do
+			if IsValid(v) && v:Health() > 0 && self.Starter != v then
+				-- if usePos then v.DisableChasingEnemy = v:GetNW2Bool("VJ_P_DisableChasingEnemy") end
+				-- v.HasMeleeAttack = v:GetNW2Bool("VJ_P_HasMeleeAttack")
+				-- v.HasRangeAttack = v:GetNW2Bool("VJ_P_HasRangeAttack")
+				-- v.HasLeapAttack = v:GetNW2Bool("VJ_P_HasLeapAttack")
+				-- v.HasGrenadeAttack = v:GetNW2Bool("VJ_P_HasGrenadeAttack")
+				-- v.CanUseSecondaryOnWeaponAttack = v:GetNW2Bool("VJ_P_CanUseSecondaryOnWeaponAttack")
+				-- v.NextWeaponAttackT = 0
+				v:SetState()
+			end
 		end
 	end
 end
-end
-/*--------------------------------------------------
-	=============== VJ Prop Animatable Entity ===============
-	*** Copyright (c) 2012-2021 by Cpt. Hazama, All rights reserved. ***
-	No parts of this code or any of its contents may be reproduced, copied, modified or adapted,
-	without the prior written consent of the author, unless otherwise indicated for stand-alone materials.
-INFO: Used to make simple props and animate them, since prop_dynamic doesn't work properly in Garry's Mod...
---------------------------------------------------*/

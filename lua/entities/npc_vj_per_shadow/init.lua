@@ -35,9 +35,9 @@ ENT.Animations["idle"] = ACT_HL2MP_IDLE
 ENT.Animations["idle_combat"] = ACT_HL2MP_IDLE_KNIFE
 ENT.Animations["idle_low"] = ACT_HL2MP_IDLE_CROUCH_KNIFE
 ENT.Animations["walk"] = ACT_HL2MP_WALK
-ENT.Animations["walk_combat"] = ACT_HL2MP_WALK_KNIFE
+ENT.Animations["walk_combat"] = ACT_HL2MP_WALK
 ENT.Animations["run"] = ACT_HL2MP_RUN
-ENT.Animations["run_combat"] = ACT_HL2MP_RUN_KNIFE
+ENT.Animations["run_combat"] = ACT_HL2MP_RUN
 ENT.Animations["melee"] = "vjseq_taunt_laugh_base"
 ENT.Animations["range_start"] = "vjseq_gesture_disagree_original"
 ENT.Animations["range_start_idle"] = -1
@@ -67,6 +67,7 @@ function ENT:BeforeInit()
 	end
 	self.Persona = VJ_PICK(self.AvailablePersonae)
 	
+	self.Animations["idle"] = VJ_SequenceToActivity(self,"pose_standing_01")
 	self.Animations["idle_combat"] = VJ_SequenceToActivity(self,"pose_standing_01")
 	self.Animations["range_start_idle"] = VJ_SequenceToActivity(self,"pose_standing_01")
 

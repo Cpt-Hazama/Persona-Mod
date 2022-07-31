@@ -12,7 +12,6 @@ ENT.AdminOnly = false
 ENT.AutomaticFrameAdvance = true
 
 ENT.IsPersona = true
-ENT.CardTable = {}
 
 ENT.AllowFading = false
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -252,9 +251,22 @@ function ENT:OnFinishedAttack(skill)
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
+local string_find = string.find
+--
 function ENT:PlaySet(skill,name,rate,cycle)
+	local ply = self.User
+	local battleEnt = ply:GetBattleEntity()
 	local seq = self.Animations[name]
+
 	self:SetLastSet(name)
+	if IsValid(ply) && ply:IsPlayer() && IsValid(battleEnt) then
+		if string_find(name,"range") or name == "melee" then
+			net.Start("Persona_Battle_DoClose")
+				net.WriteEntity(ply)
+			net.Send(ply)
+		end
+	end
+
 	if name == "melee" then
 		-- timer.Simple(self:GetSequenceDuration(self,self.Animations["melee"]) *0.5,function()
 			-- if IsValid(self) && IsValid(self.User) then

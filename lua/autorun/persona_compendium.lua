@@ -21,7 +21,11 @@ if CLIENT then
 
         ply.Persona_Menu_Open = true
 	
-		sound.PlayFile("sound/cpthazama/persona_shared/velvet.mp3","noplay noblock",function(station,errCode,errStr)
+		local song = VJ_PICK({
+			"sound/cpthazama/persona_shared/velvet.mp3",
+			"sound/cpthazama/persona_shared/velvet_electronica.mp3",
+		})
+		sound.PlayFile(song,"noplay noblock",function(station,errCode,errStr)
 			if IsValid(station) then
 				station:EnableLooping(true)
 				station:Play()
@@ -109,7 +113,7 @@ if CLIENT then
             --     self.Aura:StopEmission()
             --     self.Aura = nil
             -- end
-			self:SetAmbientLight(Color(255,255,255,255))
+			self:SetAmbientLight(Color(50,50,50))
 			self:SetModel(modelname)
             self:SetFOV(60)
 
@@ -305,9 +309,9 @@ if CLIENT then
                 net.SendToServer()
                 surface.PlaySound("cpthazama/persona5/misc/00086.wav")
 
-                timer.Simple(0.1,function()
+                -- timer.Simple(0.1,function()
                     personaRender:UpdateCharacter(idName)
-                end)
+                -- end)
                 local cvar = GetConVar("persona_comp_name")
                 cvar:SetString(idName)
 			end
@@ -522,6 +526,11 @@ if CLIENT then
 			ply.Persona_Menu_CurrentSound:Stop()
 			ply.Persona_Menu_CurrentSound = nil
 		end
+		if ply.Persona_BattleMenu_Open then
+			net.Start("Persona_RespawnPersona")
+				net.WriteEntity(ply)
+			net.SendToServer()
+		end
     end
 
 	net.Receive("Persona_ShowStatsMenu",function(len,ply)
@@ -530,4 +539,17 @@ if CLIENT then
 
 		PERSONA_MENU:Open(ply)
     end)
+else
+	util.AddNetworkString("Persona_RespawnPersona")
+
+	net.Receive("Persona_RespawnPersona",function(len,ply)
+		local ply = net.ReadEntity()
+		local persona = ply:GetPersona()
+		if !IsValid(persona) then
+			return
+		end
+
+		persona:Remove()
+		ply:ConCommand("summon_persona")
+	end)
 end
