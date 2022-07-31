@@ -201,12 +201,12 @@ function ENT:CustomOnThink()
 				local jump = self.VJ_TheController:KeyDown(IN_JUMP)
 				if jump then
 					-- self:SummonPersona("isis")
-					ParticleEffectAttach("jojo_aura_green",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+					ParticleEffectAttach("persona_aura_green",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 				end
 			end
 			if IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
 				-- self:SummonPersona("isis")
-				ParticleEffectAttach("jojo_aura_green",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
+				ParticleEffectAttach("persona_aura_green",PATTACH_POINT_FOLLOW,self,self:LookupAttachment("origin"))
 			end
 		elseif IsValid(self:GetPersona()) then
 			if self.VJ_IsBeingControlled then

@@ -12,7 +12,6 @@ ENT.AdminOnly = false
 ENT.AutomaticFrameAdvance = true
 ---------------------------------------------------------------------------------------------------------------------------------------------
 if CLIENT then
-
 	function ENT:SetActivities()
 		local tbl = {}
 		tbl[ACT_MP_STAND_IDLE]					= "pose_standing_01"

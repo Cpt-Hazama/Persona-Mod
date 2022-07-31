@@ -136,7 +136,7 @@ function ENT:CreateTarot()
 	self:DeleteOnRemove(tarot)
 	tarot:ResetSequence("idle")
 	tarot:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
-	ParticleEffectAttach("jojo_aura_blue",PATTACH_POINT_FOLLOW,tarot,tarot:LookupAttachment("origin"))
+	ParticleEffectAttach("persona_aura_blue",PATTACH_POINT_FOLLOW,tarot,tarot:LookupAttachment("origin"))
 	for i = 1,20 do
 		timer.Simple(0.1 *i,function()
 			if IsValid(tarot) then

@@ -13,7 +13,7 @@
 
 	"$envmap" "models/cpthazama/persona5/makoto/envmap"
 	"$envmaptint" "[0.005 0.005 0.005]"
-	"$envmapfresnel" "0.45"
+	"$envmapfresnel" "2.75"
 
 	"$lightwarptexture" "models/cpthazama/persona_shared/shaders/hard_black"
 }

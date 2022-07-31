@@ -1,0 +1,27 @@
+"UnlitGeneric"
+{
+	"$basetexture" "persona/particle/aura"
+
+	"$translucent" "1"
+	"$vertexcolor" "1"
+	"$vertexalpha" "1"
+	"$additive" "1"
+
+	"$surfaceprop" "default"
+
+	"Proxies"
+	{
+		"UniformNoise"
+		{
+			"minVal" "1"
+			"maxVal" "30"
+			"resultvar" "$frame"
+		}
+		"AnimatedTexture"
+		{
+			"animatedTextureVar" "$basetexture"
+			"animatedTextureFrameNumVar" "$frame"
+			"animatedTextureFrameRate" "30"
+		}
+	}
+}
